@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.27  2004/03/24 22:13:05  dgrisby
+// Support reinitialising when the Python interpreter isn't finalized.
+//
 // Revision 1.1.2.26  2004/02/16 09:55:09  dgrisby
 // Support reinitialising of Python interpreter.
 //
@@ -829,6 +832,33 @@ OMNIORB_FOR_EACH_SYS_EXCEPTION(DO_CALL_DESC_SYSTEM_EXCEPTON)
     }
   }
 
+  static PyObject*
+  omnipy_ensureInit(PyObject* self, PyObject* args)
+  {
+    PyObject* m = PyImport_ImportModule((char*)"_omnipy");
+    PyObject* o = PyObject_GetAttrString(m, (char*)"orb_func");
+    PyObject* f = 0;
+    
+    if (o && PyModule_Check(o))
+      f = PyObject_GetAttrString(o, (char*)"destroy");
+
+    if (!o || !PyModule_Check(o) || !f || f == Py_None) {
+      omniORB::logs(5, "Reinitialise omniORBpy sub-modules.");
+      PyObject* d = PyModule_GetDict(m);
+      omniPy::initORBFunc(d);
+      omniPy::initPOAFunc(d);
+      omniPy::initPOAManagerFunc(d);
+      omniPy::initPOACurrentFunc(d);
+      omniPy::initInterceptorFunc(d);
+      omniPy::initomniFunc(d);
+    }
+    Py_XDECREF(o);
+    Py_XDECREF(f);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
+
 
   ////////////////////////////////////////////////////////////////////////////
   // Python method table                                                    //
@@ -843,6 +873,7 @@ OMNIORB_FOR_EACH_SYS_EXCEPTION(DO_CALL_DESC_SYSTEM_EXCEPTON)
     {(char*)"cdrMarshal",        omnipy_cdrMarshal,              METH_VARARGS},
     {(char*)"cdrUnmarshal",      omnipy_cdrUnmarshal,            METH_VARARGS},
     {(char*)"need_ORB_init",     omnipy_need_ORB_init,           METH_VARARGS},
+    {(char*)"ensureInit",        omnipy_ensureInit,              METH_VARARGS},
 
     // Wrappers for functions in CORBA::
     {(char*)"ORB_init",          omnipy_ORB_init,                METH_VARARGS},

@@ -1,3 +1,12 @@
+Wed Mar 24 22:22:11 GMT 2004 dgrisby
+====================================
+
+- Support reinitialising when the Python interpreter isn't finalized.
+
+modules/omnipy.cc
+python/omniORB/__init__.py
+
+
 Tue Mar 16 15:54:20 GMT 2004 dgrisby
 ====================================
 

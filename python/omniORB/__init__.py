@@ -30,6 +30,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.26.2.22  2004/03/24 22:13:05  dgrisby
+# Support reinitialising when the Python interpreter isn't finalized.
+#
 # Revision 1.26.2.21  2004/02/16 09:55:09  dgrisby
 # Support reinitialising of Python interpreter.
 #
@@ -201,17 +204,23 @@ import _omnipy
 
 _coreVersion = _omnipy.coreVersion()
 
-# Make sure _omnipy submodules are in sys.modules. They may not be if
-# someone has messed with sys.modules, or the interpreter has been
-# stopped and restarted.
 
+# Make sure _omnipy submodules are in sys.modules, and have not been
+# damaged. This can happen if someone has messed with sys.modules, or
+# the interpreter has been stopped and restarted.
+reinit = 0
 for k, v in _omnipy.__dict__.items():
     if k[-5:] == "_func" and isinstance(v, types.ModuleType):
         sub = "_omnipy." + k
         if not sys.modules.has_key(sub):
+            reinit = 1
             sys.modules[sub] = v
         del sub
 del k, v
+
+if reinit:
+    _omnipy.ensureInit()
+del reinit
 
 
 # Add path to COS stubs if need be
