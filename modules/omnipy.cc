@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.23  2003/07/29 14:49:28  dgrisby
+// Changes to compile with debug Python 2.3.
+//
 // Revision 1.1.2.22  2003/07/24 15:04:34  dgrisby
 // Python 2.3's threading.Thread is a new-style class.
 //
@@ -216,7 +219,7 @@ omniPy::newTwin(void* twin)
   omnipyTwin* ot = PyMem_NEW(omnipyTwin, 1);
   ot->ob_type = &omnipyTwinType;
   ot->ob_twin = (void*)twin;
-  _Py_NewReference(ot);
+  _Py_NewReference((PyObject*)ot);
   return (PyObject*)ot;
 }
 
