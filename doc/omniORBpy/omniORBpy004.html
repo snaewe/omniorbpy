@@ -2,388 +2,710 @@
             "http://www.w3.org/TR/REC-html40/loose.dtd">
 <HTML>
 <HEAD>
+
 <META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<META name="GENERATOR" content="hevea 1.05">
+<META name="GENERATOR" content="hevea 1.06">
 <TITLE>
- Interoperable Naming Service
+ omniORB configuration and API
 </TITLE>
 </HEAD>
 <BODY >
 <A HREF="omniORBpy003.html"><IMG SRC ="previous_motif.gif" ALT="Previous"></A>
-<A HREF="index.html"><IMG SRC ="contents_motif.gif" ALT="Contents"></A>
+<A HREF="index.html"><IMG SRC ="contents_motif.gif" ALT="Up"></A>
 <A HREF="omniORBpy005.html"><IMG SRC ="next_motif.gif" ALT="Next"></A>
 <HR>
 
-<H1>Chapter&nbsp;4&nbsp;&nbsp; Interoperable Naming Service</H1>
-<A NAME="chap:ins"></A>omniORB 3 supports the Interoperable Naming Service (INS), which will
-be part of CORBA 2.4. The following is a summary of the new facilities
-described in the INS edited chapters document&nbsp;[<A HREF="omniORBpy009.html#inschapters"><CITE>OMG00a</CITE></A>].
-These facilities are not available when using omniORBpy with omniORB
-2.8.<BR>
+<H1><A NAME="htoc37">Chapter&nbsp;4</A>&nbsp;&nbsp;omniORB configuration and API</H1>
+<A NAME="chap:config"></A>
+omniORB 4.0, and thus omniORBpy 2, has a wide range of parameters that
+can be configured. They can be set in the configuration file / Windows
+registry, as environment variables, or on the command line. A few
+parameters can be configured at run time. This chapter lists all the
+configuration parameters, and how they are used.<BR>
+<BR>
+<A NAME="toc13"></A>
+<H2><A NAME="htoc38">4.1</A>&nbsp;&nbsp;Setting parameters</H2>
+When <TT>CORBA::ORB_init()</TT> is called, the value for each configuration
+parameter is searched for in the following order:
+<OL type=1><LI>Command line arguments
+<LI>Environment variables
+<LI>Configuration file / Windows registry
+<LI>Built-in defaults</OL>
+
+<H3><A NAME="htoc39">4.1.1</A>&nbsp;&nbsp;Command line arguments</H3>
+<A NAME="sec:ORBargs"></A>
+Command line arguments take the form
+`<TT>-ORB</TT><I>parameter</I>', and usually expect another
+argument. An example is `<TT>-ORBtraceLevel 10</TT>'.<BR>
+<BR>
+
+<H3><A NAME="htoc40">4.1.2</A>&nbsp;&nbsp;Environment variables</H3>
+Environment variables consist of the parameter name prefixed with
+`<TT>ORB</TT>'. Using bash, for example
+<PRE>
+export ORBtraceLevel=10
+</PRE>
+
+<H3><A NAME="htoc41">4.1.3</A>&nbsp;&nbsp;Configuration file</H3>
+The best way to understand the format of the configuration file is to
+look at the <TT>sample.cfg</TT> file in the omniORB distribution. Each
+parameter is set on a single line like
+<PRE>
+traceLevel = 10
+</PRE>
+Some parameters can have more than one value, in which case the
+parameter name may be specified more than once, or you can leave it
+out:
+<PRE>
+InitRef = NameService=corbaname::host1.example.com
+        = InterfaceRepository=corbaloc::host2.example.com:1234/IfR
+</PRE>
+<HR SIZE=2><DL COMPACT=compact><DT><DD>
+Note how command line arguments and environment variables prefix
+parameter names with `-ORB' and `ORB' respectively, but the
+configuration file and the extra argument to <TT>ORB_init()</TT> do not use
+a prefix.
+</DL><HR SIZE=2><BR>
+<BR>
+
+<H3><A NAME="htoc42">4.1.4</A>&nbsp;&nbsp;Windows registry</H3>
+On Windows, configuration parameters can be stored in the registry,
+under the key
+<CODE>HKEY_LOCAL_MACHINE\SOFTWARE\omniORB</CODE>.<BR>
+<BR>
+The file <TT>sample.reg</TT> shows the settings that can be made. It can
+be edited and then imported into regedit.<BR>
 <BR>
 <A NAME="toc14"></A>
-<H2>4.1&nbsp;&nbsp; Object URIs</H2>As well as accepting IOR-format strings, <TT>ORB::string_to_object()</TT>
-now also supports two new Uniform Resource Identifier
-(URI)&nbsp;[<A HREF="omniORBpy009.html#rfc2396"><CITE>BLFIM98</CITE></A>] formats, which can be used to specify objects in
-a convenient human-readable form. The existing IOR-format strings are
-now also considered URIs.<BR>
+<H2><A NAME="htoc43">4.2</A>&nbsp;&nbsp;Tracing options</H2>
+The following options control debugging trace output.<BR>
+<BR>
+<TT>traceLevel</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT>1</TT><BR>
+<BR>
+<BR>
+omniORB can output tracing and diagnostic messages to the standard
+error stream. The following levels are defined:<BR>
+<TABLE CELLSPACING=2 CELLPADDING=0>
+<TR><TD VALIGN=top ALIGN=left NOWRAP>&nbsp;</TD>
+</TR>
+<TR><TD VALIGN=top ALIGN=left NOWRAP>level 0</TD>
+<TD VALIGN=top ALIGN=left>critical errors only</TD>
+</TR>
+<TR><TD VALIGN=top ALIGN=left NOWRAP>level 1</TD>
+<TD VALIGN=top ALIGN=left>informational messages only</TD>
+</TR>
+<TR><TD VALIGN=top ALIGN=left NOWRAP>level 2</TD>
+<TD VALIGN=top ALIGN=left>configuration information and warnings</TD>
+</TR>
+<TR><TD VALIGN=top ALIGN=left NOWRAP>level 5</TD>
+<TD VALIGN=top ALIGN=left>notifications when server threads are
+ created and communication endpoints are shutdown</TD>
+</TR>
+<TR><TD VALIGN=top ALIGN=left NOWRAP>level 10</TD>
+<TD VALIGN=top ALIGN=left>execution and exception traces</TD>
+</TR>
+<TR><TD VALIGN=top ALIGN=left NOWRAP>level 25</TD>
+<TD VALIGN=top ALIGN=left>trace each send or receive of a giop message</TD>
+</TR>
+<TR><TD VALIGN=top ALIGN=left NOWRAP>level 30</TD>
+<TD VALIGN=top ALIGN=left>dump up to 128 bytes of each giop message</TD>
+</TR>
+<TR><TD VALIGN=top ALIGN=left NOWRAP>level 40</TD>
+<TD VALIGN=top ALIGN=left>dump complete contents of each giop message</TD>
+</TR></TABLE><BR>
+The trace level is cumulative, so at level 40, all trace
+messages are output.<BR>
+<BR>
+<TT>traceInvocations</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT>0</TT><BR>
+<BR>
+<BR>
+If the <TT>traceInvocations</TT> parameter is set true, all local and
+remote invocations are logged, in addition to any logging that may
+have been selected with <TT>traceLevel</TT>.<BR>
+<BR>
+<TT>traceThreadId</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT>0</TT><BR>
+<BR>
+<BR>
+If <TT>traceThreadId</TT> is set true, all trace messages are prefixed
+with the id of the thread outputting the message. This can be handy
+for tracking down race conditions, but it adds significant overhead to
+the logging function so it is turned off by default.<BR>
 <BR>
 
-<H3>4.1.1&nbsp;&nbsp; corbaloc</H3><TT>corbaloc</TT> URIs allow you to specify object references which
-can be contacted by IIOP, or found through
-<TT>ORB::resolve_initial_references()</TT>. To specify an IIOP object
-reference, you use a URI of the form:<BR>
-<BR>
-<BLOCKQUOTE>
-<TT>corbaloc:iiop:</TT>&lt;<I>host</I>&gt;<TT>:</TT>&lt;<I>port</I>&gt;<TT>/</TT>&lt;<I>object key</I>&gt;
-</BLOCKQUOTE>for example:<BR>
-<BR>
-<BLOCKQUOTE>
-<TT>corbaloc:iiop:myhost.example.com:1234/MyObjectKey</TT>
-</BLOCKQUOTE>which specifies an object with key `MyObjectKey' within a
-process running on myhost.example.com listening on port 1234. Object
-keys containing non-ASCII characters can use the standard URI %
-escapes:<BR>
-<BR>
-<BLOCKQUOTE>
-<TT>corbaloc:iiop:myhost.example.com:1234/My</TT><TT>%</TT><TT>efObjectKey</TT>
-</BLOCKQUOTE>denotes an object key with the value 239 (hex ef) in the
-third octet.<BR>
-<BR>
-The protocol name `<TT>iiop</TT>' can be abbreviated to the empty
-string, so the original URI can be written:<BR>
-<BR>
-<BLOCKQUOTE>
-<TT>corbaloc::myhost.example.com:1234/MyObjectKey</TT>
-</BLOCKQUOTE>The IANA has assigned port number 2809<A NAME="text13" HREF="#note13"><SUP><FONT SIZE=2>1</FONT></SUP></A> for use by <TT>corbaloc</TT>, so if
-the server is listening on that port, you can leave the port number
-out. The following two URIs refer to the same object:<BR>
-<BR>
-<BLOCKQUOTE>
-<TT>corbaloc::myhost.example.com:2809/MyObjectKey</TT><BR><TT>corbaloc::myhost.example.com/MyObjectKey</TT>
-</BLOCKQUOTE>You can specify an object which is available at more than
-one location by separating the locations with commas:<BR>
-<BR>
-<BLOCKQUOTE>
-<TT>corbaloc::myhost.example.com,:localhost:1234/MyObjectKey</TT>
-</BLOCKQUOTE>Note that you must restate the protocol for each address,
-hence the `<TT>:</TT>' before `<TT>localhost</TT>'. It could
-equally have been written `<TT>iiop:localhost</TT>'.<BR>
-<BR>
-You can also specify an IIOP version number, although omniORB only
-supports IIOP 1.0 at present:<BR>
-<BR>
-<BLOCKQUOTE>
-<TT>corbaloc::1.2@myhost.example.com/MyObjectKey</TT>
-</BLOCKQUOTE>Alternatively, to use <TT>resolve_initial_references()</TT>, you
-use a URI of the form:<BR>
-<BR>
-<BLOCKQUOTE>
-<TT>corbaloc:rir:/NameService</TT>
-</BLOCKQUOTE>
-<H3>4.1.2&nbsp;&nbsp; corbaname</H3>
-<A NAME="sec:corbaname"></A><TT>corbaname</TT> URIs cause <TT>string_to_object()</TT> to look-up a
-name in a CORBA Naming service. They are an extension of the
-<TT>corbaloc</TT> syntax:<BR>
-<BR>
-<BLOCKQUOTE>
-<TT>corbaname:</TT>&lt;<I>corbaloc location</I>&gt;<TT>/</TT>&lt;<I>object key</I>&gt;<TT>#</TT>&lt;<I>stringified name</I>&gt;
-</BLOCKQUOTE>for example:<BR>
-<BR>
-<BLOCKQUOTE>
-<TT>corbaname::myhost/NameService#project/example/echo.obj</TT><BR><TT>corbaname:rir:/NameService#project/example/echo.obj</TT>
-</BLOCKQUOTE>Note that the object found with the
-<TT>corbaloc</TT>-style portion must be of type
-<TT>CosNaming::NamingContext</TT>, or something derived from it. If the
-object key (or <TT>rir</TT> name) is `<TT>NameService</TT>', it
-can be left out:<BR>
-<BR>
-<BLOCKQUOTE>
-<TT>corbaname::myhost#project/example/echo.obj</TT><BR><TT>corbaname:rir:#project/example/echo.obj</TT>
-</BLOCKQUOTE>The stringified name portion can also be left out, in which
-case the URI denotes the <TT>CosNaming::NamingContext</TT> which would
-have been used for a look-up:<BR>
-<BR>
-<BLOCKQUOTE>
-<TT>corbaname::myhost.example.com</TT><BR><TT>corbaname:rir:</TT>
-</BLOCKQUOTE>The first of these examples is the easiest way of specifying
-the location of a naming service.<BR>
+<H3><A NAME="htoc44">4.2.1</A>&nbsp;&nbsp;Tracing API</H3>
+The three tracing parameters can be inspected or modified at runtime
+with the <TT>traceLevel()</TT>, <TT>traceInvocations()</TT> and <TT>traceThreadId()</TT>
+functions in the <TT>omniORB</TT> module. Calling one of the functions
+with no arguments returns the current value; calling it with a single
+integer argument sets the value.<BR>
 <BR>
 <A NAME="toc15"></A>
-<H2>4.2&nbsp;&nbsp; Configuring resolve_initial_references</H2>
-<A NAME="sec:insargs"></A>The INS adds two new command line arguments which provide a portable
-way of configuring <TT>ORB::resolve_initial_references()</TT>:<BR>
+<H2><A NAME="htoc45">4.3</A>&nbsp;&nbsp;Miscellaneous global options</H2>
+These options control miscellaneous features that affect the whole ORB
+runtime.<BR>
 <BR>
-
-<H3>4.2.1&nbsp;&nbsp; ORBInitRef</H3><TT>-ORBInitRef</TT> takes an argument of the form
-&lt;<I>ObjectId</I>&gt;<TT>=</TT>&lt;<I>ObjectURI</I>&gt;. So, for example,
-with command line arguments of:<BR>
+<TT>dumpConfiguration</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT>0</TT><BR>
 <BR>
-<BLOCKQUOTE>
-<TT>-ORBInitRef NameService=corbaname::myhost.example.com</TT>
-</BLOCKQUOTE><TT>resolve_initial_references("NameService")</TT> will
-return a reference to the object with key `NameService' available on
-myhost.example.com, port 2809. Since IOR-format strings are considered
-URIs, you can also say things like:<BR>
 <BR>
-<BLOCKQUOTE>
-<TT>-ORBInitRef NameService=IOR:00ff...</TT>
-</BLOCKQUOTE>
-<H3>4.2.2&nbsp;&nbsp; ORBDefaultInitRef</H3><TT>-ORBDefaultInitRef</TT> provides a prefix string which is used to
-resolve otherwise unknown names. When
-<TT>resolve_initial_references()</TT> is unable to resolve a name which
-has been specifically configured (with <TT>-ORBInitRef</TT>), it
-constructs a string consisting of the default prefix, a `<TT>/</TT>'
-character, and the name requested. The string is then fed to
-<TT>string_to_object()</TT>. So, for example, with a command line of:<BR>
+If set true, the ORB dumps the values of all configuration parameters
+at start-up.<BR>
 <BR>
-<BLOCKQUOTE>
-<TT>-ORBDefaultInitRef corbaloc::myhost.example.com</TT>
-</BLOCKQUOTE>a call to <TT>resolve_initial_references("MyService")</TT>
-will return the object reference denoted by
-`<TT>corbaloc::myhost.example.com/MyService</TT>'.<BR>
+<TT>scanGranularity</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT>5</TT><BR>
 <BR>
-Similarly, a <TT>corbaname</TT> prefix can be used to cause
-look-ups in the naming service. Note, however, that since a
-`<TT>/</TT>' character is always added to the prefix, it is
-impossible to specify a look-up in the root context of the naming
-service---you have to use a sub-context, like:<BR>
 <BR>
-<BLOCKQUOTE>
-<TT>-ORBDefaultInitRef corbaname::myhost.example.com#services</TT>
-</BLOCKQUOTE>
-<H3>4.2.3&nbsp;&nbsp; omniORB configuration file</H3>As an extension to the standard facilities of the INS, omniORB
-supports configuration file entries named <TT>ORBInitRef</TT> and
-<TT>ORBDefaultInitRef</TT>. The syntax is identical to the command
-line arguments. <TT>omniORB.cfg</TT> might contain:<BR>
+As explained in chapter&nbsp;<A HREF="omniORBpy007.html#chap:connections">747Connection and Thread Managementchapter.7</A>, omniORB regularly
+scans incoming and outgoing connections, so it can close unused
+ones. This value is the granularity in seconds at which the ORB
+performs its scans. A value of zero turns off the scanning altogether.<BR>
 <BR>
-<BLOCKQUOTE>
-<PRE>
-ORBInitRef NameService=corbaname::myhost.example.com
-ORBDefaultInitRef corbaname:rir:#services
-</PRE></BLOCKQUOTE>
-<H3>4.2.4&nbsp;&nbsp; Resolution order</H3>With all these options for specifying object references to be returned
-by <TT>resolve_initial_references()</TT>, it is important to
-understand the order in which the options are tried. The resolution
-order, as required by the CORBA specification, is:<BR>
+<TT>nativeCharCodeSet</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT>ISO-8859-1</TT><BR>
 <BR>
-<OL type=1>
-<LI> Check for special names such as `<TT>RootPOA</TT>'<A NAME="text14" HREF="#note14"><SUP><FONT SIZE=2>2</FONT></SUP></A>.<BR>
 <BR>
-
-<LI> Resolve with an <TT>-ORBInitRef</TT> argument.<BR>
+The native code set the application is using for <TT>char</TT> and
+<TT>string</TT>. See chapter&nbsp;<A HREF="omniORBpy008.html#chap:codesets">857Code set conversionchapter.8</A>.<BR>
 <BR>
-
-<LI> <A NAME="itm:defaultgotcha"></A> Resolve with the
-<TT>-ORBDefaultInitRef</TT> prefix, if present.<BR>
+<TT>omniORB_27_CompatibleAnyExtraction</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT>0</TT><BR>
 <BR>
-
-<LI> Resolve with an <TT>ORBInitRef</TT>
-(or old-style <TT>NAMESERVICE</TT>) entry in the configuration file.<BR>
 <BR>
-
-<LI> Resolve with the <TT>ORBDefaultInitRef</TT> entry in the
-configuration file, if present.<BR>
+In omniORB 2.7 and earlier, the Any extraction operators for strings
+and object references returned a copy/duplicate of the value stored in
+the Any, meaning the caller had to release the extracted value. The
+C++ mapping was clarified to state that the Any retains ownership of
+the returned value, so the caller does not need to release it. To aid
+the transition for ancient programs from omniORB 2.7 or earlier,
+setting this flag to true selects the old copying behaviour.<BR>
 <BR>
-
-<LI> Resolve with the deprecated <TT>ORBInitialHost</TT> boot agent.</OL>This order mostly has the expected consequences---in
-particular that command line arguments override entries in the
-configuration file. However, you must be careful with the default
-prefixes. Suppose you have configured a `<TT>NameService</TT>' entry
-in the configuration file, and you specify a default prefix on the
-command line with:<BR>
+<TT>abortOnInternalError</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT>0</TT><BR>
 <BR>
-<BLOCKQUOTE>
-<TT>-ORBDefaultInitRef corbaname:rir:#services</TT>
-</BLOCKQUOTE>expecting unknown services to be looked up in the configured
-naming service. Now, step&nbsp;<A HREF="#itm:defaultgotcha">3</A> above means that
-<TT>resolve_initial_references("MyService")</TT> should be processed
-with the steps:<BR>
 <BR>
-<OL type=1>
-<LI> Construct the URI `<TT>corbaname:rir:#services/MyService</TT>'
-and give it to <TT>string_to_object()</TT>.<BR>
-<BR>
-
-<LI> Resolve the first part of the <TT>corbaname</TT> URI by
-calling<BR><TT>resolve_initial_references("NameService")</TT>.<BR>
-<BR>
-
-<LI> Construct the URI
-`<TT>corbaname:rir:#services/NameService</TT>' and give it to
-<TT>string_to_object()</TT>.<BR>
-<BR>
-
-<LI> Resolve the first part of the <TT>corbaname</TT> URI by
-calling<BR><TT>resolve_initial_references("NameService")</TT>.<BR>
-<BR>
-
-<LI> ... and so on for ever...</OL>omniORB detects loops like this and throws either
-<TT>CORBA.ORB.InvalidName</TT> if the loop started with a call to
-<TT>resolve_initial_references()</TT>, or <TT>CORBA.BAD_PARAM</TT>
-if it started with a call to <TT>string_to_object()</TT>. To avoid the
-problem you must either specify the <TT>NameService</TT> reference on
-the command line, or put the <TT>DefaultInitRef</TT> in the
-configuration file.<BR>
+If this is set true, internal fatal errors will abort immediately,
+rather than throwing the <TT>omniORB::fatalException</TT> exception.
+This can be helpful for tracking down bugs, since it leaves the call
+stack intact.<BR>
 <BR>
 <A NAME="toc16"></A>
-<H2>4.3&nbsp;&nbsp; omniNames</H2>
-<H3>4.3.1&nbsp;&nbsp; NamingContextExt</H3>omniNames now supports the <TT>CosNaming::NamingContextExt</TT>
-interface:<BR>
+<H2><A NAME="htoc46">4.4</A>&nbsp;&nbsp;Client side options</H2>
+These options control aspects of client-side behaviour.<BR>
 <BR>
-<PRE>
-module CosNaming {
-  interface NamingContextExt : NamingContext {
-    typedef string StringName;
-    typedef string Address;
-    typedef string URLString;
-
-    StringName  to_string(in Name n)        raises(InvalidName);
-    Name        to_name  (in StringName sn) raises(InvalidName);
-
-    exception InvalidAddress {};
-
-    URLString   to_url(in Address addr, in StringName sn)
-      raises(InvalidAddress, InvalidName);
-
-    Object      resolve_str(in StringName n)
-      raises(NotFound, CannotProceed, InvalidName, AlreadyBound);
-  };
-};
-</PRE><TT>to_string()</TT> and <TT>to_name()</TT> convert from <TT>CosNaming::Name</TT>
-sequences to flattened strings and vice-versa. Note that calling
-these operations involves remote calls to the naming service, so they
-are not particularly efficient. The <TT>omniORB.URI</TT> module
-contains equivalent <TT>nameToString()</TT> and <TT>stringToName()</TT> functions,
-which do not involve remote calls.<BR>
+<TT>InitRef</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT><I>none</I></TT><BR>
 <BR>
-A <TT>CosNaming::Name</TT> is stringified by separating name components
-with `<TT>/</TT>' characters. The <TT>kind</TT> and <TT>id</TT> fields of
-each component are separated by `<TT>.</TT>' characters. If the
-<TT>kind</TT> field is empty, the representation has no trailing
-`<TT>.</TT>'; if the <TT>id</TT> is empty, the representation starts
-with a `<TT>.</TT>' character; if both <TT>id</TT> and <TT>kind</TT>
-are empty, the representation is just a `<TT>.</TT>'. The backslash
-`<TT>\</TT>' is used to escape the meaning of
-`<TT>/</TT>', `<TT>.</TT>' and `<TT>\</TT>' itself.<BR>
 <BR>
-<TT>to_url()</TT> takes a <TT>corbaloc</TT> style address and key string
-(but without the <TT>corbaloc:</TT> part), and a stringified name,
-and returns a <TT>corbaname</TT> URI (incorrectly called a URL)
-string, having properly escaped any invalid characters. The
-specification does not make it clear whether or not the address string
-should also be escaped by the operation; omniORB does not escape
-it. For this reason, it is best to avoid calling <TT>to_url()</TT> if the
-address part contains escapable characters. The local function
-<TT>omniORB.URI.addrAndNameToURI()</TT> is equivalent.<BR>
+Specify the objects available from
+<TT>ORB::resolve_initial_references()</TT>. The arguments take the form
+&lt;<I>key</I>&gt;=&lt;<I>uri</I>&gt;, where the <I>key</I> is the name
+given to <TT>resolve_initial_references()</TT> and
+<I>uri</I> is a valid CORBA object reference URI, as detailed in
+chapter&nbsp;<A HREF="omniORBpy006.html#chap:ins">639Interoperable Naming Servicechapter.6</A>.<BR>
 <BR>
-<TT>resolve_str()</TT> is equivalent to calling <TT>to_name()</TT> followed by
-the inherited <TT>resolve()</TT> operation. There are no string-based
-equivalents of the various bind operations.<BR>
+<TT>DefaultInitRef</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT><I>none</I></TT><BR>
 <BR>
-
-<H3>4.3.2&nbsp;&nbsp; Use with corbaname</H3>To make it easy to use omniNames with <TT>corbaname</TT> URIs, it
-now starts with the default port of 2809, and an object key of
-`<TT>NameService</TT>' for the root naming context. This is only
-possible when it is started `fresh', rather than with a log file from
-an older omniNames version.<BR>
 <BR>
-If you have a previous omniNames log, configured to run on a different
-port, and with a different object key for its root context, all is not
-lost. If the root context's object key is not `<TT>NameService</TT>',
-omniNames creates a forwarding agent with that key. Effectively, this
-means that there are two object keys which refer to the root
-context---`<TT>NameService</TT>' and whatever the original key was.<BR>
+Specify the default URI prefix for
+<TT>resolve_initial_references()</TT>, as explained in
+chapter&nbsp;<A HREF="omniORBpy006.html#chap:ins">639Interoperable Naming Servicechapter.6</A>.<BR>
 <BR>
-For the port number, there are two options. The first is to run
-omniNames with a command line argument like:<BR>
+<TT>clientTransportRule</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT>* unix,tcp,ssl</TT><BR>
 <BR>
-<BLOCKQUOTE>
-<TT>omniNames -logdir /the/log/dir -ORBpoa_iiop_port 2809</TT>
-</BLOCKQUOTE>This causes it to listen on both port 2809 <EM>and</EM>
-whatever port it listened on before. The disadvantage with this is
-that the IORs to all naming contexts now contain two IIOP profiles,
-one for each port, which, amongst other things, increases the size of
-the omniNames log.<BR>
 <BR>
-The second option is to use omniMapper, as described below.<BR>
+Used to specify the way the client contacts a server, depending on the
+server's address. See section&nbsp;<A HREF="omniORBpy007.html#sec:clientRule">7.7.153Client transport rulessubsection.7.7.1</A> for details.<BR>
+<BR>
+<TT>clientCallTimeOutPeriod</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT>0</TT><BR>
+<BR>
+<BR>
+Call timeout in milliseconds for the client side. If a call takes
+longer than the specified number of milliseconds, the ORB closes the
+connection and raises a <TT>COMM_FAILURE</TT> exception. A value
+of zero means no timeout; calls can block for ever.<BR>
+<BR>
+<B>Note</B>: omniORB 3 had timeouts specified in seconds; omniORB
+4.0 uses milliseconds for timeouts.<BR>
+<BR>
+<TT>outConScanPeriod</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT>120</TT><BR>
+<BR>
+<BR>
+Idle timeout in seconds for outgoing (i.e. client initiated)
+connections. If a connection has been idle for this amount of time,
+the ORB closes it. See section&nbsp;<A HREF="omniORBpy007.html#sec:connShutdown">7.550Idle connection shutdownsection.7.5</A>.<BR>
+<BR>
+<TT>maxGIOPConnectionPerServer</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT>5</TT><BR>
+<BR>
+<BR>
+The maximum number of concurrent connections the ORB will open to a
+<EM>single</EM> server. If multiple threads on the client call the same
+server, the ORB opens additional connections to the server, up to the
+maximum specified by this parameter. If the maximum is reached,
+threads are blocked until a connection becomes free for them to use.<BR>
+<BR>
+<TT>oneCallPerConnection</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT>1</TT><BR>
+<BR>
+<BR>
+When this parameter is set to true (the default), the ORB will only
+send a single call on a connection at a time. If multiple client
+threads invoke on the same server, multiple connections are opened, up
+to the limit specified by
+<TT>maxGIOPConnectionPerServer</TT>. With this parameter set to
+false, the ORB will allow concurrent calls on a single
+connection. This saves connection resources, but requires slightly
+more management work for both client and server. Some server-side ORBs
+(including omniORB versions before 4.0) serialise all calls on a
+single connection.<BR>
+<BR>
+<TT>offerBiDirectionalGIOP</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT>0</TT><BR>
+<BR>
+<BR>
+If set true, the client will indicate to servers that it is willing to
+accept callbacks on client-initiated connections using bidirectional
+GIOP, provided the relevant POA policies are set. See
+section&nbsp;<A HREF="omniORBpy007.html#sec:bidir">7.854Bidirectional GIOPsection.7.8</A>.<BR>
+<BR>
+<TT>diiThrowsSysExceptions</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT>0</TT><BR>
+<BR>
+<BR>
+If this is true, DII functions throw system exceptions; if it is
+false, system exceptions that occur are passed through the
+<TT>Environment</TT> object.<BR>
+<BR>
+<TT>verifyObjectExistsAndType</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT>1</TT><BR>
+<BR>
+<BR>
+By default, omniORB uses the GIOP <TT>LOCATE_REQUEST</TT> message to
+verify the existence of an object prior to the first invocation. In
+the case that the full type of the object is not known, it instead
+calls the <TT>_is_a()</TT> operation to check the object's type. Some ORBs
+have bugs that mean one or other of these operations fail. Setting
+this parameter false prevents omniORB from making these calls.<BR>
+<BR>
+<TT>giopTargetAddressMode</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT>0</TT><BR>
+<BR>
+<BR>
+GIOP 1.2 supports three addressing modes for contacting objects. This
+parameter selects the mode that omniORB uses. A value of 0 means
+<TT>GIOP::KeyAddr</TT>; 1 means <TT>GIOP::ProfileAddr</TT>; 2 means
+<TT>GIOP::ReferenceAddr</TT>.<BR>
+<BR>
+<TT>bootstrapAgentHostname</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT><I>none</I></TT><BR>
+<BR>
+<BR>
+If set, this parameter indicates the hostname to use for look-ups
+using the obsolete Sun bootstrap agent. This mechanism is superseded
+by the interoperable naming service.<BR>
+<BR>
+<TT>bootstrapAgentPort</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT>900</TT><BR>
+<BR>
+<BR>
+The port number for the obsolete Sun bootstrap agent.<BR>
+<BR>
+<TT>principal</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT><I>none</I></TT><BR>
+<BR>
+<BR>
+GIOP 1.0 and 1.1 have a request header field named `principal', which
+contains a sequence of octets. It was never defined what it should
+mean, and its use is now deprecated; GIOP 1.2 has no such field. Some
+systems (e.g. Gnome) use the principal field as a primitive
+authentication scheme. This parameter sets the data omniORB uses in
+the principal field. The default is an empty sequence.<BR>
 <BR>
 <A NAME="toc17"></A>
-<H2>4.4&nbsp;&nbsp; omniMapper</H2>
-omniMapper is a simple daemon which listens on port 2809 (or any other
-port), and redirects IIOP requests for configured object keys to
-associated persistent IORs. It can be used to make a naming service
-(even an old non-INS aware version of omniNames or other ORB's naming
-service) appear on port 2809 with the object key
-`<TT>NameService</TT>'. The same goes for any other service you may
-wish to specify, such as an interface repository. omniMapper is
-started with a command line of:<BR>
+<H2><A NAME="htoc47">4.5</A>&nbsp;&nbsp;Server side options</H2>
+These parameters affect server-side operations.<BR>
 <BR>
-<BLOCKQUOTE>
-<TT>omniMapper [-port </TT>&lt;<I>port</I>&gt;<TT>] [-config </TT>&lt;<I>config file</I>&gt;<TT>] [-v]</TT>
-</BLOCKQUOTE>The <TT>-port</TT> option allows you to choose a port other
-than 2809 to listen on<A NAME="text15" HREF="#note15"><SUP><FONT SIZE=2>3</FONT></SUP></A>. The <TT>-config</TT> option specifies a location for the
-configuration file. The default name is <TT>/etc/omniMapper.cfg</TT>, or
-<CODE>C:\omniMapper.cfg</CODE>
-on Windows. omniMapper does not normally print anything; the
-<TT>-v</TT> option makes it verbose so it prints configuration
-information and a record of the redirections it makes, to standard
-output.<BR>
+<TT>endPoint&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT> &nbsp;&nbsp; <I>default</I> = <TT>giop:tcp::</TT><BR>
+<TT>endPointNoListen</TT><BR>
+<TT>endPointNoPublish</TT><BR>
+<TT>endPointPublishAllIFs</TT><BR>
+These options determine the end-points the ORB should listen on, and
+the details that should be published in IORs. See
+chapter&nbsp;<A HREF="omniORBpy007.html#chap:connections">747Connection and Thread Managementchapter.7</A> for details.<BR>
 <BR>
-The configuration file is very simple. Each line contains a string to
-be used as an object key, some white space, and an IOR (or any valid
-URI) that it will redirect that object key to. Comments should be
-prefixed with a `<TT>#</TT>' character. For example:<BR>
+<TT>serverTransportRule</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT>* unix,tcp,ssl</TT><BR>
 <BR>
-<BLOCKQUOTE>
-<PRE>
-# Example omniMapper.cfg
-NameService         IOR:000f...
-InterfaceRepository IOR:0100...
-</PRE></BLOCKQUOTE>omniMapper can either be run on a single machine, in much the same way
-as omniNames, or it can be run on <EM>every</EM> machine, with a common
-configuration file. That way, each machine's omniORB configuration
-file could contain the line:<BR>
 <BR>
-<BLOCKQUOTE>
-<PRE>
-ORBDefaultInitRef corbaloc::localhost
-</PRE></BLOCKQUOTE><A NAME="toc18"></A>
-<H2>4.5&nbsp;&nbsp; Creating objects with simple object keys</H2>In normal use, omniORB creates object keys containing various
-information including POA names and various non-ASCII characters.
-Since object keys are supposed to be opaque, this is not usually a
-problem. The INS breaks this opacity and requires servers to create
-objects with human-friendly keys.<BR>
+Configure the rules about whether a server should accept an incoming
+connection from a client. See section&nbsp;<A HREF="omniORBpy007.html#sec:serverRule">??</A> for
+details.<BR>
 <BR>
-If you wish to make your objects available with human-friendly URIs,
-there are two options. The first is to use omniMapper as described
-above, in conjunction with a <TT>PERSISTENT</TT> POA. The second is to
-create objects with the required keys yourself. You do this with a
-special POA with the name `<TT>omniINSPOA</TT>', acquired from
-<TT>resolve_initial_references()</TT>. This POA has the <TT>USER_ID</TT>
-and <TT>PERSISTENT</TT> policies, and the special property that the
-object keys it creates contain only the object ids given to the POA,
-and no other data. It is a normal POA in all other respects, so you
-can activate/deactivate it, create children, and so on, in the usual
-way.<BR>
+<TT>serverCallTimeOutPeriod</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT>0</TT><BR>
 <BR>
-<HR WIDTH="50%" SIZE=1><DL>
-<DT><A NAME="note13" HREF="#text13"><FONT SIZE=5>1</FONT></A><DD> Not 2089 as
-printed in [<A HREF="omniORBpy009.html#inschapters"><CITE>OMG00a</CITE></A>]!
+<BR>
+This timeout is used to catch the situation that the server starts
+receiving a request, but the end of the request never comes. If a
+calls takes longer than the specified number of milliseconds to
+arrive, the ORB shuts the connection. A value of zero means never
+timeout.<BR>
+<BR>
+<TT>inConScanPeriod</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT>180</TT><BR>
+<BR>
+<BR>
+Idle timeout in seconds for incoming. If a connection has been idle
+for this amount of time, the ORB closes it. See
+section&nbsp;<A HREF="omniORBpy007.html#sec:connShutdown">7.550Idle connection shutdownsection.7.5</A>.<BR>
+<BR>
+<TT>threadPerConnectionPolicy</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT>1</TT><BR>
+<BR>
+<BR>
+If true (the default), the ORB dedicates one server thread to each
+incoming connection. Setting it false means the server should use a
+thread pool.<BR>
+<BR>
+<TT>maxServerThreadPerConnection</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT>100</TT><BR>
+<BR>
+<BR>
+If the client multiplexes several concurrent requests on a single
+connection, omniORB uses extra threads to service them. This parameter
+specifies the maximum number of threads that are allowed to service a
+single connection at any one time.<BR>
+<BR>
+<TT>maxServerThreadPoolSize</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT>100</TT><BR>
+<BR>
+<BR>
+The maximum number of threads the server will allocate to do various
+tasks, including dispatching calls in the thread pool mode. This
+number does not include threads dispatched under the thread per
+connection server mode.<BR>
+<BR>
+<TT>threadPerConnectionUpperLimit</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT>10000</TT><BR>
+<BR>
+<BR>
+If the <TT>threadPerConnectionPolicy</TT> parameter is true, the ORB can
+automatically transition to thread pool mode if too many connections
+arrive. This parameter sets the number of connections at which thread
+pooling is started. The default of 10000 is designed to mean that it
+never happens.<BR>
+<BR>
+<TT>threadPerConnectionLowerLimit</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT>9000</TT><BR>
+<BR>
+<BR>
+If thread pooling was started because the number of connections hit
+the upper limit, this parameter determines when thread per connection
+should start again.<BR>
+<BR>
+<TT>threadPoolWatchConnection</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT>1</TT><BR>
+<BR>
+<BR>
+If true, threads from the pool temporarily behave a bit like thread
+per connection after dispatching a call. See
+section&nbsp;<A HREF="omniORBpy007.html#sec:watchConn">7.4.249Thread pool modesubsection.7.4.2</A> for details.<BR>
+<BR>
+<TT>acceptBiDirectionalGIOP</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT>0</TT><BR>
+<BR>
+<BR>
+Determines whether a server will ever accept clients' offers of
+bidirectional GIOP connections. See section&nbsp;<A HREF="omniORBpy007.html#sec:bidir">7.854Bidirectional GIOPsection.7.8</A>.<BR>
+<BR>
+<TT>unixTransportDirectory</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT>/tmp/omni-%u</TT><BR>
+<BR>
+<BR>
+(Unix platforms only). Selects the location used to store Unix domain
+sockets. The `<TT>%u</TT>' is expanded to the user name.<BR>
+<BR>
+<TT>unixTransportPermission</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT>0777</TT><BR>
+<BR>
+<BR>
+(Unix platforms only). Determines the octal permission bits for Unix
+domain sockets. By default, all users can connect to a server, just as
+with TCP.<BR>
+<BR>
+<TT>supportCurrent</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT>1</TT><BR>
+<BR>
+<BR>
+omniORB 4.0 supports the <TT>PortableServer::Current</TT> interface that
+provides thread context information to a servant. Supporting current
+has a small but noticeable run-time overhead due to accessing thread
+specific storage, so this option allows it to be turned off.<BR>
+<BR>
+<TT>objectTableSize</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT>0</TT><BR>
+<BR>
+<BR>
+Hash table size of the Active Object Map. If this is zero, the ORB
+uses a dynamically resized open hash table. This is normally the best
+option, but it leads to less predictable performance since any
+operation which adds or removes a table entry may trigger a resize. If
+set to a non-zero value, the hash table has the specified number of
+entries, and is never resized. Note that the hash table is open, so
+this does not limit the number of active objects, just how efficiently
+they can be located.<BR>
+<BR>
+<TT>poaHoldRequestTimeout</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT>0</TT><BR>
+<BR>
+<BR>
+If a POA is put in the <TT>HOLDING</TT> state, calls to it will be timed
+out after the specified number of milliseconds, by raising a
+<TT>TRANSIENT</TT> exception. Zero means no timeout.<BR>
+<BR>
+<TT>supportBootstrapAgent</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT>0</TT><BR>
+<BR>
+<BR>
+If set true, servers support the Sun bootstrap agent protocol.<BR>
+<BR>
+<A NAME="toc18"></A>
+<H2><A NAME="htoc48">4.6</A>&nbsp;&nbsp;GIOP and interoperability options</H2>
+These options control omniORB's use of GIOP, and cover some areas
+where omniORB can work around buggy behaviour by other ORBs.<BR>
+<BR>
+<TT>maxGIOPVerson</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT>1.2</TT><BR>
+<BR>
+<BR>
+Choose the maximum GIOP version the ORB should support. Valid values
+are 1.0, 1.1 and 1.2.<BR>
+<BR>
+<TT>giopMaxMsgSize</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT>2097152</TT><BR>
+<BR>
+<BR>
+The largest message, in bytes, that the ORB will send or receive, to
+avoid resource starvation. If the limit is exceeded, a <TT>MARSHAL</TT>
+exception is thrown. The size must be &gt;= 8192.<BR>
+<BR>
+<TT>strictIIOP</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT>1</TT><BR>
+<BR>
+<BR>
+If true, be strict about interpretation of the IIOP specification; if
+false, permit some buggy behaviour to pass.<BR>
+<BR>
+<TT>lcdMode</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT>0</TT><BR>
+<BR>
+<BR>
+If true, select `Lowest Common Denominator' mode. This disables
+various IIOP and GIOP features that are known to cause problems with
+some ORBs.<BR>
+<BR>
+<TT>tcAliasExpand</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT>0</TT><BR>
+<BR>
+<BR>
+This flag is used to indicate whether TypeCodes associated with Anys
+should have aliases removed. This functionality is included because
+some ORBs will not recognise an Any containing a TypeCode with aliases
+to be the same as the actual type contained in the Any. Note that
+omniORB will always remove top-level aliases, but will not remove
+aliases from TypeCodes that are members of other TypeCodes (e.g.
+TypeCodes for members of structs etc.), unless <TT>tcAliasExpand</TT> is
+set to 1. There is a performance penalty when inserting into an Any if
+<TT>tcAliasExpand</TT> is set to 1.<BR>
+<BR>
+<TT>useTypeCodeIndirections</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT>1</TT><BR>
+<BR>
+<BR>
+TypeCode Indirections reduce the size of marshalled TypeCodes, and are
+essential for recursive types, but some ORBs do not support them.
+Setting this flag to false prevents the use of indirections (and,
+therefore, recursive TypeCodes).<BR>
+<BR>
+<TT>acceptMisalignedTcIndirections</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT>0</TT><BR>
+<BR>
+<BR>
+If true, try to fix a mis-aligned indirection in a typecode. This is
+used to work around a bug in some versions of Visibroker's Java ORB.<BR>
+<BR>
+<A NAME="toc19"></A>
+<H2><A NAME="htoc49">4.7</A>&nbsp;&nbsp;System Exception Handlers</H2>
+<A NAME="sec:exHandlers"></A>
+By default, all system exceptions that are raised during an operation
+invocation, with the exception of some cases of
+<TT>CORBA.TRANSIENT</TT>, are propagated to the application code. Some
+applications may prefer to trap these exceptions within the proxy
+objects so that the application logic does not have to deal with the
+error condition. For example, when a <TT>CORBA.COMM_FAILURE</TT> is
+received, an application may just want to retry the invocation until
+it finally succeeds. This approach is useful for objects that are
+persistent and have idempotent operations.<BR>
+<BR>
+omniORBpy provides a set of functions to install exception handlers.
+Once they are installed, proxy objects will call these handlers when
+the associated system exceptions are raised by the ORB runtime.
+Handlers can be installed for <TT>CORBA.TRANSIENT</TT>,
+<TT>CORBA.COMM_FAILURE</TT> and <TT>CORBA.SystemException</TT>. This
+last handler covers all system exceptions other than the two covered
+by the first two handlers. An exception handler can be installed for
+individual proxy objects, or it can be installed for all proxy objects
+in the address space.<BR>
+<BR>
 
-<DT><A NAME="note14" HREF="#text14"><FONT SIZE=5>2</FONT></A><DD> In
-fact, a strict reading of the specification says that it should be
-possible to override `<TT>RootPOA</TT>' etc. with
-<TT>-ORBInitRef</TT>, but since POAs are locality constrained that is
-ridiculous.
+<H3><A NAME="htoc50">4.7.1</A>&nbsp;&nbsp;Minor codes</H3>
+A new feature in omniORB 4.0 is extensive use of exception minor codes
+to indicate the specific circumstances surrounding a system exception.
+The C++ file <TT>include/omniORB4/minorCode.h</TT> contains definitions
+of all the minor codes used in omniORB, covering codes allocated in
+the CORBA specification, and ones specific to omniORB. In compilers
+with namespace support, the minor code constants appear in namespace
+<TT>omni</TT>; otherwise they are in the global scope.<BR>
+<BR>
+Applications can use minor codes to adjust their behaviour according
+to the condition. You can receive a string format of a minor code by
+calling the <TT>omniORB.minorCodeToString()</TT> function, passing an
+exception object as its argument.<BR>
+<BR>
 
-<DT><A NAME="note15" HREF="#text15"><FONT SIZE=5>3</FONT></A><DD> You can also play the
-<TT>-ORBpoa_iiop_port</TT> trick to make it listen on more than one
-port.
-</DL>
+<H3><A NAME="htoc51">4.7.2</A>&nbsp;&nbsp;CORBA::TRANSIENT handlers</H3>
+<TT>TRANSIENT</TT> exceptions can occur in many circumstances. One
+circumstance is as follows:
+<OL type=1><LI>The client invokes on an object reference.
+<LI>The object replies with a <TT>LOCATION_FORWARD</TT> message.
+<LI>The client caches the new location and retries to the new location.
+<LI>Time passes...
+<LI>The client tries to invoke on the object again, using the
+ cached, forwarded location. 
+<LI>The attempt to contact the object fails.
+<LI>The ORB runtime resets the location cache and throws a
+ <TT>TRANSIENT</TT> exception with minor code
+ <TT>TRANSIENT_FailedOnForwarded</TT>.</OL>
+In this situation, the default <TT>TRANSIENT</TT> exception handler
+retries the call, using the object's original location. If the retry
+results in another <TT>LOCATION_FORWARD</TT>, to the same or a
+different location, and <EM>that</EM> forwarded location fails
+immediately, the <TT>TRANSIENT</TT> exception will occur again, and the
+pattern will repeat. With repeated exceptions, the handler starts
+adding delays before retries, with exponential back-off.<BR>
+<BR>
+In all other circumstances, the default <TT>TRANSIENT</TT> handler just
+passes the exception on to the caller.<BR>
+<BR>
+You can override the default behaviour by installing your own
+exception handler. The function to call has signature:
+<PRE>
+omniORB.installTransientExceptionHandler(cookie, function [, object])
+</PRE>
+The arguments are a cookie, which is any Python object, a call-back
+function, and optionally an object reference. If the object reference
+is present, the exception handler is installed for just that object;
+otherwise the handler is installed for all objects with no handler of
+their own.<BR>
+<BR>
+The call-back function must have the signature
+<PRE>
+function(cookie, retries, exc) -&gt; boolean
+</PRE>
+When a <TT>TRANSIENT</TT> exception occurs, the function is called,
+passing the cookie object, a count of how many times the operation has
+been retried, and the TRANSIENT exception object itself. If the
+function returns true, the operation is retried; if it returns false,
+the TRANSIENT exception is raised in the application.<BR>
+<BR>
+
+<H3><A NAME="htoc52">4.7.3</A>&nbsp;&nbsp;CORBA.COMM_FAILURE and CORBA.SystemException</H3>
+There are two other functions for registering exception handlers: one
+for <TT>CORBA.COMM_FAILURE</TT>, and one for all other
+exceptions. For both these cases, the default is for there to be no
+handler, so exceptions are propagated to the application.
+<PRE>
+omniORB.installCommFailureExceptionHandler(cookie, function [, object])
+omniORB.installSystemExceptionHandler(cookie, function [, object])
+</PRE>
+In both cases, the call-back function has the same signature
+as for <TT>TRANSIENT</TT> handlers.<BR>
+<BR>
+<A NAME="toc20"></A>
+<H2><A NAME="htoc53">4.8</A>&nbsp;&nbsp;Location forwarding</H2>
+<A NAME="sec:locationForward"></A>
+Any CORBA operation invocation can return a <TT>LOCATION_FORWARD</TT>
+message to the caller, indicating that it should retry the invocation
+on a new object reference. The standard allows ServantManagers to
+trigger <TT>LOCATION_FORWARD</TT>s by raising the
+<TT>PortableServer.ForwardRequest</TT> exception, but it does not
+provide a similar mechanism for normal servants. omniORB provides the
+<TT>omniORB.LOCATION_FORWARD</TT> exception for this purpose. It
+can be thrown by any operation implementation.<BR>
+<BR>
+<A NAME="toc21"></A>
+<H2><A NAME="htoc54">4.9</A>&nbsp;&nbsp;Dynamic importing of IDL</H2>
+<A NAME="sec:importIDL"></A>
+omniORBpy is usually used with pre-generated stubs. Since Python is a
+dynamic language, however, it is possible to compile and import new
+stubs at run-time.<BR>
+<BR>
+Dynamic importing is achieved with <TT>omniORB.importIDL()</TT> and
+<TT>omniORB.importIDLString()</TT>. Their signatures are:
+<PRE>
+importIDL(filename [, args ]) -&gt; tuple
+importIDLString(string [, args ]) -&gt; tuple
+</PRE>
+The first function compiles and imports the specified file; the second
+takes a string containing the IDL definitions. The functions work by
+forking omniidl and importing its output; they both take an optional
+argument containing a list of strings which are used as arguments for
+omniidl. For example, the following command runs omniidl with an
+include path set:
+<PRE>
+m = omniORB.importIDL("test.idl", ["-I/my/include/path"])
+</PRE>
+Instead of specifying omniidl arguments on each import, you
+can set the arguments to be used for all calls using the
+<TT>omniORB.omniidlArguments()</TT> function.<BR>
+<BR>
+Both import functions return a tuple containing the names of the
+Python modules which have been imported. The modules themselves can be
+accessed through <TT>sys.modules</TT>. For example:
+<PRE>
+// test.idl
+const string s = "Hello";
+module M1 {
+  module M2 {
+    const long l = 42;
+  };
+};
+module M3 {
+  const short s = 5;
+};
+</PRE>
+From Python:
+<PRE>
+&gt;&gt;&gt; import sys, omniORB
+&gt;&gt;&gt; omniORB.importIDL("test.idl")
+('M1', 'M1.M2', 'M3', '_GlobalIDL')
+&gt;&gt;&gt; sys.modules["M1.M2"].l
+42
+&gt;&gt;&gt; sys.modules["M3"].s
+5
+&gt;&gt;&gt; sys.modules["_GlobalIDL"].s
+'Hello'
+</PRE>
 <HR>
 <A HREF="omniORBpy003.html"><IMG SRC ="previous_motif.gif" ALT="Previous"></A>
-<A HREF="index.html"><IMG SRC ="contents_motif.gif" ALT="Contents"></A>
+<A HREF="index.html"><IMG SRC ="contents_motif.gif" ALT="Up"></A>
 <A HREF="omniORBpy005.html"><IMG SRC ="next_motif.gif" ALT="Next"></A>
 </BODY>
 </HTML>

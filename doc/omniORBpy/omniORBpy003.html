@@ -2,27 +2,30 @@
             "http://www.w3.org/TR/REC-html40/loose.dtd">
 <HTML>
 <HEAD>
+
 <META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<META name="GENERATOR" content="hevea 1.05">
+<META name="GENERATOR" content="hevea 1.06">
 <TITLE>
  Python language mapping issues
 </TITLE>
 </HEAD>
 <BODY >
 <A HREF="omniORBpy002.html"><IMG SRC ="previous_motif.gif" ALT="Previous"></A>
-<A HREF="index.html"><IMG SRC ="contents_motif.gif" ALT="Contents"></A>
+<A HREF="index.html"><IMG SRC ="contents_motif.gif" ALT="Up"></A>
 <A HREF="omniORBpy004.html"><IMG SRC ="next_motif.gif" ALT="Next"></A>
 <HR>
 
-<H1>Chapter&nbsp;3&nbsp;&nbsp; Python language mapping issues</H1>
-omniORBpy adheres to the standard Python mapping&nbsp;[<A HREF="omniORBpy009.html#pythonmapping"><CITE>OMG00b</CITE></A>],
+<H1><A NAME="htoc32">Chapter&nbsp;3</A>&nbsp;&nbsp;Python language mapping issues</H1>
+
+omniORBpy adheres to the standard Python mapping&nbsp;[<A HREF="omniORBpy009.html#pythonmapping"><CITE>OMG01b</CITE></A>],
 so there is no need to describe the mapping here. This chapter
 outlines a number of issues which are not addressed by the standard
 (or are optional), and how they are resolved in omniORBpy.<BR>
 <BR>
 <A NAME="toc10"></A>
-<H2>3.1&nbsp;&nbsp; Narrowing object references</H2>
-<A NAME="sec:narrowing"></A>As explained in chapter&nbsp;<A HREF="omniORBpy002.html#chap:basics">2</A>, whenever you receive an
+<H2><A NAME="htoc33">3.1</A>&nbsp;&nbsp;Narrowing object references</H2>
+<A NAME="sec:narrowing"></A>
+As explained in chapter&nbsp;<A HREF="omniORBpy002.html#chap:basics">25The Basicschapter.2</A>, whenever you receive an
 object reference declared to be base <TT>CORBA::Object</TT>, such as
 from <TT>NamingContext::resolve()</TT> or
 <TT>ORB::string_to_object()</TT>, you should narrow the reference to
@@ -42,14 +45,14 @@ necessary. If you understand the situations in which narrowing
 <EM>is</EM> necessary, you can avoid spurious narrowing.<BR>
 <BR>
 
-<H3>3.1.1&nbsp;&nbsp; The gory details</H3>When object references are transmitted (or stored in stringified
+<H3><A NAME="htoc34">3.1.1</A>&nbsp;&nbsp;The gory details</H3>
+When object references are transmitted (or stored in stringified
 IORs), they contain a single type identifier string, termed the
 <I>repository id</I>. Normally, the repository id represents the most
 derived interface of the object. However, it is also permitted to be
 the empty string, or to refer to an interface higher up the
 inheritance hierarchy. To give a concrete example, suppose there are
-two IDL files:<BR>
-<BR>
+two IDL files:
 <PRE>
 // a.idl
 module M1 {
@@ -57,7 +60,8 @@ module M1 {
     void opA();
   };
 };
-</PRE><PRE>
+</PRE>
+<PRE>
 // b.idl
 #include "a.idl"
 module M2 {
@@ -65,8 +69,9 @@ module M2 {
     void opB();
   };
 };
-</PRE>A reference to an object with interface <TT>B</TT> will
-normally contain the repository id `<TT>IDL:M2/B:1.0</TT>'<A NAME="text9" HREF="#note9"><SUP><FONT SIZE=2>1</FONT></SUP></A>. It is also permitted to have an empty
+</PRE>
+A reference to an object with interface <TT>B</TT> will
+normally contain the repository id `<TT>IDL:M2/B:1.0</TT>'<SUP><A NAME="text6" HREF="#note6"><FONT SIZE=2>1</FONT></A></SUP>. It is also permitted to have an empty
 repository id, or the id `<TT>IDL:M1/A:1.0</TT>'.
 `<TT>IDL:M1/A:1.0</TT>' is unlikely unless the server is being
 deliberately obtuse.<BR>
@@ -76,8 +81,7 @@ somewhere---either as a return value or as an operation argument---it
 has a particular <I>target</I> interface in mind, which it compares
 with the repository id it has received. A target of base
 <TT>CORBA::Object</TT> is just one (common) case. For example, in the
-following IDL:<BR>
-<BR>
+following IDL:
 <PRE>
 // c.idl
 #include "a.idl"
@@ -87,7 +91,8 @@ module M3 {
     M1::A  getA();
   };
 };
-</PRE>the target interface for <TT>getObj</TT>'s return value is
+</PRE>
+the target interface for <TT>getObj</TT>'s return value is
 <TT>CORBA::Object</TT>; the target interface for <TT>getA</TT>'s return
 value is <TT>M1::A</TT>.<BR>
 <BR>
@@ -95,11 +100,9 @@ omniORBpy uses the result of comparing the received and target
 repository ids to determine the type of the object reference it
 creates. The object reference has either the type of the received
 reference, or the target type, according to this table:<BR>
-<BR>
 <DIV ALIGN=center>
 <TABLE BORDER=1 CELLSPACING=0 CELLPADDING=1>
-<TR><BR>
-<TD ALIGN=left NOWRAP COLSPAN=2><B>Case</B></TD>
+<TR><TD ALIGN=left NOWRAP COLSPAN=2><B>Case</B></TD>
 <TD VALIGN=top ALIGN=left NOWRAP><B>Objref Type</B></TD>
 </TR>
 <TR><TD VALIGN=top ALIGN=left NOWRAP>1.</TD>
@@ -161,7 +164,7 @@ should bear in mind what omniORBpy's idea of the target type is. You
 must not assume that the ORB will always correctly figure out a more
 derived type than the target. One consequence of this is that you must
 always narrow a plain <TT>CORBA::Object</TT> to a more specific type
-before invoking on it<A NAME="text10" HREF="#note10"><SUP><FONT SIZE=2>2</FONT></SUP></A>. You
+before invoking on it<SUP><A NAME="text7" HREF="#note7"><FONT SIZE=2>2</FONT></A></SUP>. You
 <EM>can</EM> assume that the object reference you receive is of the
 target type, or something derived from it, although the object it
 refers to may turn out to be invalid. The fact that omniORBpy often
@@ -169,7 +172,8 @@ refers to may turn out to be invalid. The fact that omniORBpy often
 useful when using the Python interactive command line.<BR>
 <BR>
 <A NAME="toc11"></A>
-<H2>3.2&nbsp;&nbsp; Support for Any values</H2>In statically typed languages, such as C++, Anys can only be used with
+<H2><A NAME="htoc35">3.2</A>&nbsp;&nbsp;Support for Any values</H2>
+In statically typed languages, such as C++, Anys can only be used with
 built-in types and IDL-declared types for which stubs have been
 generated. If, for example, a C++ program receives an Any containing a
 struct for which it does not have static knowledge, it cannot easily
@@ -185,7 +189,7 @@ other Python ORBs may not be so accommodating.<BR>
 <BR>
 The equivalent of DynAny creation can be achieved by dynamically
 writing and importing new IDL, as described in
-section&nbsp;<A HREF="omniORBpy006.html#sec:importIDL">6.12</A>.<BR>
+section&nbsp;<A HREF="omniORBpy004.html#sec:importIDL">??</A>.<BR>
 <BR>
 There is, however, a minor fly in the ointment when it comes to
 receiving Anys. When an Any is transmitted, it is sent as a TypeCode
@@ -193,8 +197,7 @@ followed by the actual value. Normally, the TypeCodes for entities
 with names---members of structs, for example---contain those names as
 strings. That permits omniORBpy to create types with the corresponding
 names. Unfortunately, the GIOP specification permits TypeCodes to be
-sent with empty strings where the names would normally
-be<A NAME="text11" HREF="#note11"><SUP><FONT SIZE=2>3</FONT></SUP></A>. In this
+sent with empty strings where the names would normally be. In this
 situation, the types which omniORBpy creates cannot be given the
 correct names. The contents of all types except structs and exceptions
 can be accessed without having to know their names, through the
@@ -206,10 +209,10 @@ Similarly, TypeCodes for constructed types such as structs and unions
 normally contain the repository ids of those types. This means that
 omniORBpy can use types statically declared in the stubs when they are
 available. Once again, the specification permits the repository id
-strings to be empty<A NAME="text12" HREF="#note12"><SUP><FONT SIZE=2>4</FONT></SUP></A>. This means that even if stubs for a type received in an
-Any are available, it may not be able to create a Python value with
-the right type. For example, with a struct definition such as:<BR>
-<BR>
+strings to be empty<SUP><A NAME="text8" HREF="#note8"><FONT SIZE=2>3</FONT></A></SUP>. This means that even if stubs for a type
+received in an Any are available, it may not be able to create a
+Python value with the right type. For example, with a struct
+definition such as:
 <PRE>
 module M {
   struct S {
@@ -217,7 +220,8 @@ module M {
     long   l;
   };
 };
-</PRE>The transmitted TypeCode for <TT>M::S</TT> may contain only
+</PRE>
+The transmitted TypeCode for <TT>M::S</TT> may contain only
 the information that it is a structure containing a string followed by
 a long, not that it is type <TT>M::S</TT>, or what the member names are.<BR>
 <BR>
@@ -227,8 +231,7 @@ known type. Calling an Any's <TT>value()</TT> method with a TypeCode
 argument returns either a value of the requested type, or <TT>None</TT>
 if the requested TypeCode is not <I>equivalent</I> to the Any's
 TypeCode. The following code is guaranteed to be safe, but is not
-standard:<BR>
-<BR>
+standard:
 <PRE>
 a = # Acquire an Any from somewhere
 v = a.value(CORBA.TypeCode(CORBA.id(M.S)))
@@ -236,9 +239,11 @@ if v is not None:
     print v.str
 else:
     print "The Any does not contain a value compatible with M::S."
-</PRE><A NAME="toc12"></A>
-<H2>3.3&nbsp;&nbsp; Interface Repository stubs</H2>
-<A NAME="sec:ifrstubs"></A>The Interface Repository interfaces are declared in IDL module
+</PRE>
+<A NAME="toc12"></A>
+<H2><A NAME="htoc36">3.3</A>&nbsp;&nbsp;Interface Repository stubs</H2>
+<A NAME="sec:ifrstubs"></A>
+The Interface Repository interfaces are declared in IDL module
 <TT>CORBA</TT> so, according to the Python mapping, the stubs for them
 should appear in the Python <TT>CORBA</TT> module, along with all the
 other CORBA definitions. However, since the stubs are extremely large,
@@ -251,106 +256,18 @@ Alternatively, you can import the stubs at run-time by calling the
 <TT>omniORB.importIRStubs()</TT> function. In both cases, the stubs become
 available in the Python <TT>CORBA</TT> module.<BR>
 <BR>
-<A NAME="toc13"></A>
-<H2>3.4&nbsp;&nbsp; Using omniORBpy with omniORB 2.8</H2>omniORBpy is designed to work with omniORB 3. When it is used with
-omniORB 2.8, many facilities are not available. This section describes
-the limitations.<BR>
-<BR>
-If you require facilities which are not available with omniORB 2.8,
-you can cause your program to bail-out gracefully by detecting the
-omniORB version at start-up. The <TT>omniORB.coreVersion()</TT> function
-returns a string of the form <I>major.minor.micro</I> which
-indicates what version of omniORB is in use. The two possible values
-are currently `<TT>2.8.0</TT>' and `<TT>3.0.0</TT>'. Versions which
-differ only in micro version number are guaranteed to be compatible
-with each other.<BR>
-<BR>
-
-<H3>3.4.1&nbsp;&nbsp; POA functions</H3>Under 2.8, only the root POA is available. It supports only the
-following functions:<BR>
-<BR>
-<UL>
-<LI>
- <TT>destroy()</TT>
-
-<LI> <TT>_get_the_name()</TT>
-
-<LI> <TT>_get_the_POAManager()</TT>
-
-<LI> <TT>activate_object()</TT>
-
-<LI> <TT>deactivate_object()</TT>
-
-<LI> <TT>servant_to_id()</TT>
-
-<LI> <TT>servant_to_reference()</TT>
-
-<LI> <TT>reference_to_servant()</TT>
-
-<LI> <TT>reference_to_id()</TT>
-
-<LI> <TT>id_to_servant()</TT>
-
-<LI> <TT>id_to_reference()</TT>
-</UL>The <TT>POAManager</TT> interface only supports:<BR>
-<BR>
-<UL>
-<LI>
- <TT>activate()</TT>
-
-<LI> <TT>get_state()</TT>
-</UL>For both interfaces, all other operations fail, raising the
-<TT>CORBA.NO_IMPLEMENT</TT> exception.<BR>
-<BR>
-
-<H3>3.4.2&nbsp;&nbsp; Local / remote transparency</H3>omniORB 3 goes to great lengths to make sure that the semantics of
-local objects are identical to those for remote objects. omniORB 2.8
-does not. omniORBpy also tries very hard to keep local and remote
-semantics identical, but on the foundation of omniORB 2.8 it is not
-always possible.<BR>
-<BR>
-In most cases, you will not notice a difference between local and
-remote operations. The cases where local/remote transparency is broken
-under omniORB 2.8 are:<BR>
-<BR>
-<UL>
-<LI> An object is not deactivated until all local references to it
-have been released.<BR>
-<BR>
-
-<LI> When invoking on an object reference to a local object of the
-wrong type, as described in section&nbsp;<A HREF="#sec:narrowing">3.1</A>,
-<TT>CORBA.INV_OBJREF</TT> is not raised. Instead, if the operation name
-does not exist on the object, <TT>CORBA.NO_IMPLEMENT</TT> is raised; if
-the operation name <EM>does</EM> exist but the argument types are wrong,
-<TT>CORBA.BAD_PARAM</TT> is raised; if the operation exists and the
-argument types are correct, the operation is executed.<BR>
-<BR>
-
-<LI> Exception handlers (described later in
-section&nbsp;<A HREF="omniORBpy006.html#sec:exHandlers">6.10</A>) are not executed when local objects
-raise system exceptions. Exceptions are always propagated to the
-caller.</UL>In all of these cases, omniORB 3 properly preserves local/remote
-transparency.<BR>
-<BR>
-<HR WIDTH="50%" SIZE=1><DL>
-<DT><A NAME="note9" HREF="#text9"><FONT SIZE=5>1</FONT></A><DD> It
+<HR WIDTH="50%" SIZE=1><DL><DT><A NAME="note6" HREF="#text6"><FONT SIZE=5>1</FONT></A><DD>It
 is possible to change the repository id strings associated with
 particular interfaces using the <TT>ID</TT>, <TT>version</TT> and
 <TT>prefix</TT> pragmas.
-
-<DT><A NAME="note10" HREF="#text10"><FONT SIZE=5>2</FONT></A><DD> Unless you are invoking pseudo
+<DT><A NAME="note7" HREF="#text7"><FONT SIZE=5>2</FONT></A><DD>Unless you are invoking pseudo
 operations like <TT>_is_a()</TT> and <TT>_non_existent()</TT>.
-
-<DT><A NAME="note11" HREF="#text11"><FONT SIZE=5>3</FONT></A><DD> This is now deprecated, but some ORBs may still send empty
-strings. No version of omniORB has ever sent empty strings.
-
-<DT><A NAME="note12" HREF="#text12"><FONT SIZE=5>4</FONT></A><DD> And once again, this practice is
-deprecated.
+<DT><A NAME="note8" HREF="#text8"><FONT SIZE=5>3</FONT></A><DD>The use of empty repository id strings is
+deprecated as of GIOP 1.2.
 </DL>
 <HR>
 <A HREF="omniORBpy002.html"><IMG SRC ="previous_motif.gif" ALT="Previous"></A>
-<A HREF="index.html"><IMG SRC ="contents_motif.gif" ALT="Contents"></A>
+<A HREF="index.html"><IMG SRC ="contents_motif.gif" ALT="Up"></A>
 <A HREF="omniORBpy004.html"><IMG SRC ="next_motif.gif" ALT="Next"></A>
 </BODY>
 </HTML>

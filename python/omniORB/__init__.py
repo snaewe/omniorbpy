@@ -30,6 +30,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.26.2.12  2002/08/16 19:27:36  dgrisby
+# Documentation update. Minor ORB updates to match docs.
+#
 # Revision 1.26.2.11  2002/05/27 01:02:37  dgrisby
 # Fix bug with scope lookup in generated code. Fix TypeCode clean-up bug.
 #
@@ -337,6 +340,8 @@ Make stubs for the Interface Repository appear in the CORBA module"""
 #   installCommFailureExceptionHandler()
 #   installSystemExceptionHandler()
 #   traceLevel
+#   traceInvocations
+#   traceThreadId
 #   nativeCharCodeSet
 #   fixed
 #   minorCodeToString

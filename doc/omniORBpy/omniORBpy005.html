@@ -2,33 +2,37 @@
             "http://www.w3.org/TR/REC-html40/loose.dtd">
 <HTML>
 <HEAD>
+
 <META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<META name="GENERATOR" content="hevea 1.05">
+<META name="GENERATOR" content="hevea 1.06">
 <TITLE>
  The IDL compiler
 </TITLE>
 </HEAD>
 <BODY >
 <A HREF="omniORBpy004.html"><IMG SRC ="previous_motif.gif" ALT="Previous"></A>
-<A HREF="index.html"><IMG SRC ="contents_motif.gif" ALT="Contents"></A>
+<A HREF="index.html"><IMG SRC ="contents_motif.gif" ALT="Up"></A>
 <A HREF="omniORBpy006.html"><IMG SRC ="next_motif.gif" ALT="Next"></A>
 <HR>
 
-<H1>Chapter&nbsp;5&nbsp;&nbsp; The IDL compiler</H1>
-<A NAME="chap:omniidl"></A>omniORBpy uses a new IDL compiler, named omniidl, which is also used
-by omniORB 3. It consists of a generic front-end parser written in
-C++, and a number of back-ends written in Python. omniidl is very
-strict about IDL validity, so you may find that it reports errors in
-IDL which compiles fine with earlier versions of omniORB, and with
-other ORBs.<BR>
+<H1><A NAME="htoc55">Chapter&nbsp;5</A>&nbsp;&nbsp;The IDL compiler</H1>
+<A NAME="chap:omniidl"></A>
+omniORBpy's IDL compiler is called omniidl. It consists of a generic
+front-end parser written in C++, and a number of back-ends written in
+Python. omniidl is very strict about IDL validity, so you may find
+that it reports errors in IDL which compiles fine with other IDL
+compilers.<BR>
 <BR>
-The general form of an omniidl command line is:<BR>
-<BR>
-<BLOCKQUOTE> <TT>omniidl </TT>[<I>options</I>]<TT> -b</TT>&lt;<I>back-end</I>&gt;<TT> </TT>[<I>back-end options</I>]<TT> </TT>&lt;<I>file 1</I>&gt;<TT> </TT>&lt;<I>file 2</I>&gt;<TT> </TT>...</BLOCKQUOTE><A NAME="toc19"></A>
-<H2>5.1&nbsp;&nbsp; Common options</H2>The following options are common to all back-ends:<BR>
-<BR>
-<TABLE CELLSPACING=2 CELLPADDING=0>
+The general form of an omniidl command line is:
+<BLOCKQUOTE> <TT>omniidl </TT>[<I>options</I>]<TT> -b</TT>&lt;<I>back-end</I>&gt;<TT> </TT>[<I>back-end options</I>]<TT> </TT>&lt;<I>file 1</I>&gt;<TT> </TT>&lt;<I>file 2</I>&gt;<TT> </TT>...</BLOCKQUOTE>
+<A NAME="toc22"></A>
+<H2><A NAME="htoc56">5.1</A>&nbsp;&nbsp;Common options</H2>
+The following options are common to all back-ends:<BR>
+<TABLE border=0 cellspacing=0 cellpadding=0>
 <TR><TD ALIGN=left NOWRAP></TD>
+</TR>
+<TR><TD ALIGN=left NOWRAP><TT>-b</TT><I>back-end</I></TD>
+<TD ALIGN=left NOWRAP>Run the specified back-end. For omniORBpy, use <TT>-bpython</TT>.</TD>
 </TR>
 <TR><TD ALIGN=left NOWRAP><TT>-D</TT><I>name</I>[<TT>=</TT><I>value</I>]</TD>
 <TD ALIGN=left NOWRAP>Define <I>name</I> for the preprocessor.</TD>
@@ -54,9 +58,6 @@ The general form of an omniidl command line is:<BR>
 </TR>
 <TR><TD ALIGN=left NOWRAP><TT>-Wp</TT><I>arg</I>[,<I>arg</I>...]</TD>
 <TD ALIGN=left NOWRAP>Send arguments to the preprocessor.</TD>
-</TR>
-<TR><TD ALIGN=left NOWRAP><TT>-b</TT><I>back-end</I></TD>
-<TD ALIGN=left NOWRAP>Run the specified back-end. For omniORBpy, use <TT>-bpython</TT>.</TD>
 </TR>
 <TR><TD ALIGN=left NOWRAP><TT>-Wb</TT><I>arg</I>[,<I>arg</I>...]</TD>
 <TD ALIGN=left NOWRAP>Send arguments to the back-end.</TD>
@@ -92,7 +93,8 @@ Most of these options are self explanatory, but some are not
 so obvious.<BR>
 <BR>
 
-<H3>5.1.1&nbsp;&nbsp; Preprocessor interactions</H3>IDL is processed by the C preprocessor before omniidl parses it.
+<H3><A NAME="htoc57">5.1.1</A>&nbsp;&nbsp;Preprocessor interactions</H3>
+IDL is processed by the C preprocessor before omniidl parses it.
 Unlike the old IDL compiler, which used different C preprocessors on
 different platforms, omniidl always uses the GNU C preprocessor (which
 it builds with the name omnicpp). The <TT>-D</TT>, <TT>-U</TT>, and
@@ -104,7 +106,8 @@ directives inserted by other preprocessors are likely to confuse
 omniidl.<BR>
 <BR>
 
-<H4> Windows 9x</H4>The output from the C preprocessor is normally fed to the omniidl
+<H4>Windows 9x</H4>
+The output from the C preprocessor is normally fed to the omniidl
 parser through a pipe. On some Windows 98 machines (but not all!) the
 pipe does not work, and the preprocessor output is echoed to the
 screen. When this happens, the omniidl parser sees an empty file, and
@@ -113,52 +116,54 @@ problem, use the `<TT>-T</TT>' option to create a temporary file
 between the two stages.<BR>
 <BR>
 
-<H3>5.1.2&nbsp;&nbsp; Forward-declared interfaces</H3>If you have an IDL file like:<BR>
-<BR>
+<H3><A NAME="htoc58">5.1.2</A>&nbsp;&nbsp;Forward-declared interfaces</H3>
+If you have an IDL file like:
 <PRE>
 interface I;
 interface J {
   attribute I the_I;
 };
-</PRE>then omniidl will normally issue a warning:<BR>
-<BR>
+</PRE>
+then omniidl will normally issue a warning:
 <PRE>
   test.idl:1: Warning: Forward declared interface `::I' was never
   fully defined
-</PRE>It is illegal to declare such IDL in isolation, but it
+</PRE>
+It is illegal to declare such IDL in isolation, but it
 <EM>is</EM> valid to define interface <TT>I</TT> in a separate file. If
 you have a lot of IDL with this sort of construct, you will drown
 under the warning messages. Use the <TT>-nf</TT> option to suppress
 them.<BR>
 <BR>
 
-<H3>5.1.3&nbsp;&nbsp; Comments</H3>By default, omniidl discards comments in the input IDL. However, with
+<H3><A NAME="htoc59">5.1.3</A>&nbsp;&nbsp;Comments</H3>
+By default, omniidl discards comments in the input IDL. However, with
 the <TT>-k</TT> and <TT>-K</TT> options, it preserves the comments
 for use by the back-ends. The C++ back-end ignores this information,
 but it is relatively easy to write new back-ends which <EM>do</EM> make
 use of comments.<BR>
 <BR>
 The two different options relate to how comments are attached to
-declarations within the IDL. Given IDL like:<BR>
-<BR>
+declarations within the IDL. Given IDL like:
 <PRE>
 interface I {
   void op1();
   // A comment
   void op2();
 };
-</PRE>the <TT>-k</TT> flag will attach the comment to <TT>op1()</TT>;
+</PRE>
+the <TT>-k</TT> flag will attach the comment to <TT>op1()</TT>;
 the <TT>-K</TT> flag will attach it to <TT>op2()</TT>.<BR>
 <BR>
-<A NAME="toc20"></A>
-<H2>5.2&nbsp;&nbsp; Python back-end options</H2>
-<A NAME="sec:Wbglobal"></A>When you specify the Python back-end (with <TT>-bpython</TT>), the
+<A NAME="toc23"></A>
+<H2><A NAME="htoc60">5.2</A>&nbsp;&nbsp;Python back-end options</H2>
+<A NAME="sec:Wbglobal"></A>
+When you specify the Python back-end (with <TT>-bpython</TT>), the
 following <TT>-Wb</TT> options are available. Note that the
 <TT>-Wb</TT> options must be specified <EM>after</EM> the
 <TT>-bpython</TT> option, so omniidl knows which back-end to give the
 arguments to.<BR>
-<BR>
-<TABLE CELLSPACING=2 CELLPADDING=0>
+<TABLE border=0 cellspacing=0 cellpadding=0>
 <TR><TD ALIGN=left NOWRAP></TD>
 </TR>
 <TR><TD ALIGN=left NOWRAP><TT>-Wbstdout</TT></TD>
@@ -185,7 +190,7 @@ arguments to.<BR>
 </TR></TABLE><BR>
 The <TT>-Wbstdout</TT> option is not really useful if you are
 invoking omniidl yourself. It is used by <TT>omniORB.importIDL()</TT>,
-described in section&nbsp;<A HREF="omniORBpy006.html#sec:importIDL">6.12</A>.<BR>
+described in section&nbsp;<A HREF="omniORBpy004.html#sec:importIDL">??</A>.<BR>
 <BR>
 When you compile an IDL file which #includes other IDL files, omniidl
 normally only generates code for the main file, assuming that code for
@@ -197,17 +202,17 @@ Definitions declared at IDL global scope are normally placed in a
 Python module named `<TT>_GlobalIDL</TT>'. The <TT>-Wbglobal</TT>
 allows you to change that.<BR>
 <BR>
-As explained in section&nbsp;<A HREF="omniORBpy002.html#sec:generatingStubs">2.2</A>, when you compile an
-IDL file like:<BR>
-<BR>
+As explained in section&nbsp;<A HREF="omniORBpy002.html#sec:generatingStubs">2.26Generating the Python stubssection.2.2</A>, when you compile an
+IDL file like:
 <PRE>
-// echo_example.idl
+// example_echo.idl
 module Example {
   interface Echo {
     string echoString(in string mesg);
   };
 };
-</PRE>omniidl generates directories named <TT>Example</TT> and
+</PRE>
+omniidl generates directories named <TT>Example</TT> and
 <TT>Example__POA</TT>, which provide the standard Python mapping
 modules, and also the file <TT>example_echo_idl.py</TT> which contains
 the actual definitions. The latter file contains code which inserts
@@ -218,11 +223,11 @@ You may wish to do this to avoid clashes with names in use elsewhere
 in your software.<BR>
 <BR>
 You can place all generated code in a package using the
-<TT>-Wbpackage</TT> command line option. For example,<BR>
-<BR>
+<TT>-Wbpackage</TT> command line option. For example,
 <BLOCKQUOTE>
 <TT>omniidl -bpython -Wbpackage=generated echo_example.idl</TT>
-</BLOCKQUOTE>creates a directory named `<TT>generated</TT>', containing the
+</BLOCKQUOTE>
+creates a directory named `<TT>generated</TT>', containing the
 generated code. The stub module is now called
 `<TT>generated.Example</TT>', and the actual stub definitions are in
 `<TT>generated.example_echo_idl</TT>'. If you wish to split the
@@ -234,28 +239,28 @@ interface to the generated code is not strictly-speaking CORBA
 compliant. You may have to change your code if you ever use a Python
 ORB other than omniORBpy.<BR>
 <BR>
-<A NAME="toc21"></A>
-<H2>5.3&nbsp;&nbsp; Examples</H2>Generate the Python stubs for a file <TT>a.idl</TT>:<BR>
-<BR>
+<A NAME="toc24"></A>
+<H2><A NAME="htoc61">5.3</A>&nbsp;&nbsp;Examples</H2>
+Generate the Python stubs for a file <TT>a.idl</TT>:
 <BLOCKQUOTE>
 <TT>omniidl -bpython a.idl</TT>
-</BLOCKQUOTE>As above, but put the stubs in a package called
-`<TT>stubs</TT>':<BR>
-<BR>
+</BLOCKQUOTE>
+As above, but put the stubs in a package called
+`<TT>stubs</TT>':
 <BLOCKQUOTE>
 <TT>omniidl -bpython -Wbstubs=stubs a.idl</TT>
-</BLOCKQUOTE>Generate both Python and C++ stubs for two IDL files
-(requires omniORB 3):<BR>
-<BR>
+</BLOCKQUOTE>
+Generate both Python and C++ stubs for two IDL files:
 <BLOCKQUOTE>
 <TT>omniidl -bpython -bcxx a.idl b.idl</TT>
-</BLOCKQUOTE>Just check the IDL files for validity, generating no output:<BR>
-<BR>
+</BLOCKQUOTE>
+Just check the IDL files for validity, generating no output:
 <BLOCKQUOTE>
 <TT>omniidl a.idl b.idl</TT>
-</BLOCKQUOTE><HR>
+</BLOCKQUOTE>
+<HR>
 <A HREF="omniORBpy004.html"><IMG SRC ="previous_motif.gif" ALT="Previous"></A>
-<A HREF="index.html"><IMG SRC ="contents_motif.gif" ALT="Contents"></A>
+<A HREF="index.html"><IMG SRC ="contents_motif.gif" ALT="Up"></A>
 <A HREF="omniORBpy006.html"><IMG SRC ="next_motif.gif" ALT="Next"></A>
 </BODY>
 </HTML>
