@@ -31,6 +31,10 @@
 # $Id$
 
 # $Log$
+# Revision 1.28.2.2  2000/11/01 15:29:01  dpg1
+# Support for forward-declared structs and unions
+# RepoIds in indirections are now resolved at the time of use
+#
 # Revision 1.28.2.1  2000/10/13 13:55:30  dpg1
 # Initial support for omniORB 4.
 #
@@ -327,6 +331,7 @@ tk_value              = omniORB.EnumItem("CORBA.tk_value",              29)
 tk_value_box          = omniORB.EnumItem("CORBA.tk_value_box",          30)
 tk_native             = omniORB.EnumItem("CORBA.tk_native",             31)
 tk_abstract_interface = omniORB.EnumItem("CORBA.tk_abstract_interface", 32)
+tk_local_interface    = omniORB.EnumItem("CORBA.tk_local_interface",    33)
 
 TCKind = omniORB.Enum("IDL:omg.org/CORBA/TCKind:1.0",
                       (tk_null, tk_void, tk_short, tk_long, tk_ushort,
@@ -337,7 +342,7 @@ TCKind = omniORB.Enum("IDL:omg.org/CORBA/TCKind:1.0",
                        tk_alias, tk_except, tk_longlong, tk_ulonglong,
                        tk_longdouble, tk_wchar, tk_wstring, tk_fixed,
                        tk_value, tk_value_box, tk_native,
-                       tk_abstract_interface))
+                       tk_abstract_interface, tk_local_interface))
 
 class TypeCode:
     class Bounds (UserException):

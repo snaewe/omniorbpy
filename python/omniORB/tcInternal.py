@@ -31,6 +31,10 @@
 # $Id$
 
 # $Log$
+# Revision 1.10.2.1  2000/11/01 15:29:01  dpg1
+# Support for forward-declared structs and unions
+# RepoIds in indirections are now resolved at the time of use
+#
 # Revision 1.10  2000/08/21 10:20:19  dpg1
 # Merge from omnipy1_develop for 1.1 release
 #
@@ -124,6 +128,7 @@ tv_value              = 29
 tv_value_box          = 30
 tv_native             = 31
 tv_abstract_interface = 32
+tv_local_interface    = 33
 tv__indirect          = 0xffffffff
 
 
@@ -158,7 +163,6 @@ def createStructTC(id, name, members):
     str = omniORB.createUnknownStruct(id, mnames)
     dlist[1] = str
     d = tuple(dlist)
-    insertIndirections(d)
     return createTypeCode(d)
 
 def createUnionTC(id, name, discriminator_type, members):
@@ -186,7 +190,6 @@ def createUnionTC(id, name, discriminator_type, members):
 
     d = (tv_union, union, id, name, discriminator_type._k._v,
          defused, tuple(mlist), default, mmap)
-    insertIndirections(d)
     return createTypeCode(d)
 
 def createEnumTC(id, name, members):
@@ -198,12 +201,10 @@ def createEnumTC(id, name, members):
         count = count + 1
 
     d = (tv_enum, id, name, tuple(mlist))
-    insertIndirections(d)
     return createTypeCode(d)
 
 def createAliasTC(id, name, original_type):
     d = (tv_alias, id, name, original_type._d)
-    insertIndirections(d)
     return createTypeCode(d)
 
 def createExceptionTC(id, name, members):
@@ -216,27 +217,22 @@ def createExceptionTC(id, name, members):
     exc = omniORB.createUnknownException(id, mnames)
     dlist[1] = exc
     d = tuple(dlist)
-    insertIndirections(d)
     return createTypeCode(d)
 
 def createInterfaceTC(id, name):
     d = (tv_objref, id, name)
-    insertIndirections(d)
     return createTypeCode(d)
 
 def createStringTC(bound):
     d = (tv_string, bound)
-    insertIndirections(d)
     return createTypeCode(d)
 
 def createSequenceTC(bound, element_type):
     d = (tv_sequence, element_type._d, bound)
-    insertIndirections(d)
     return createTypeCode(d)
 
 def createArrayTC(length, element_type):
     d = (tv_array, element_type._d, length)
-    insertIndirections(d)
     return createTypeCode(d)
 
 def createRecursiveTC(id):
@@ -313,7 +309,13 @@ def createTypeCode(d, parent=None):
             tc = TypeCode_except(d, parent)
         return tc
 
-    elif k == tv__indirect: return createTypeCode(d[1][0], parent)
+    elif k == tv__indirect:
+        if type(d[1][0]) == types.StringType:
+            nd = omniORB.findType(d[1][0])
+            if nd is None:
+                raise CORBA.BAD_TYPECODE()
+            d[1][0] = nd
+        return createTypeCode(d[1][0], parent)
 
     raise CORBA.INTERNAL()
 
@@ -897,57 +899,3 @@ def removeIndirections(desc):
 
     elif k == tv__indirect:
         del(desc[1][0])
-
-
-# Function to insert indirections into a descriptor, replacing repoIds
-# with references
-
-def insertIndirections(d):
-    seen = {}
-    ind  = []
-    r_insertIndirections(d, seen, ind)
-
-    # Fix up indirections:
-    for i in ind:
-        try:
-            i[0] = seen[i[0]]
-        except KeyError:
-            pass
-
-def r_insertIndirections(d, seen, ind):
-    if type(d) is not types.TupleType: return
-    k = d[0]
-
-    if k == tv_struct:
-        if not seen.has_key(d[2]):
-            seen[d[2]] = d
-            for i in range(4, len(d), 2):
-                r_insertIndirections(d[i+1], seen, ind)
-    
-    elif k == tv_union:
-        if not seen.has_key(d[2]):
-            seen[d[2]] = d
-            for u in d[6]:
-                r_insertIndirections(u[2], seen, ind)
-        
-    elif k == tv_sequence:
-        r_insertIndirections(d[1], seen, ind)
-        
-    elif k == tv_array:
-        r_insertIndirections(d[1], seen, ind)
-
-    elif k == tv_alias:
-        if not seen.has_key(d[1]):
-            seen[d[1]] = d
-            r_insertIndirections(d[3], seen, ind)
-
-    elif k == tv_except:
-        if not seen.has_key(d[2]):
-            seen[d[2]] = d
-            for i in range(4, len(d), 2):
-                r_insertIndirections(d[i+1], seen, ind)
-
-    elif k == tv__indirect:
-        if type(d[1][0]) == types.StringType:
-            if d[1] not in ind:
-                ind.append(d[1])

@@ -257,20 +257,20 @@ public:
 
   static const ValidateTypeFn validateTypeFns[];
 
+  static void validateTypeIndirect(PyObject* d_o, PyObject* a_o,
+				   CORBA::CompletionStatus compstatus);
+
   static inline
-  void validateType(PyObject*               d_o,
-		    PyObject*               a_o,
+  void validateType(PyObject* d_o, PyObject* a_o,
 		    CORBA::CompletionStatus compstatus)
   {
     CORBA::ULong tk = descriptorToTK(d_o);
 
-    if (tk <= 32) { // tk_abstract_interface
+    if (tk <= 33) { // tk_local_interface
       validateTypeFns[tk](d_o, a_o, compstatus);
     }
     else if (tk == 0xffffffff) { // Indirection
-      PyObject* t_o = PyTuple_GET_ITEM(d_o, 1);
-      OMNIORB_ASSERT(PyList_Check(t_o));
-      validateType(PyList_GET_ITEM(t_o, 0), a_o, compstatus);
+      validateTypeIndirect(d_o, a_o, compstatus);
     }
     else OMNIORB_THROW(BAD_TYPECODE, 0, compstatus);
   }
@@ -284,20 +284,19 @@ public:
 
   static const MarshalPyObjectFn marshalPyObjectFns[];
 
+  static void marshalPyObjectIndirect(cdrStream& stream,
+				      PyObject* d_o, PyObject* a_o);
+
   static inline
-  void marshalPyObject(cdrStream& stream,
-		       PyObject*  d_o,
-		       PyObject*  a_o)
+  void marshalPyObject(cdrStream& stream, PyObject* d_o, PyObject* a_o)
   {
     CORBA::ULong tk = descriptorToTK(d_o);
 
-    if (tk <= 32) { // tk_abstract_interface
+    if (tk <= 33) { // tk_local_interface
       marshalPyObjectFns[tk](stream, d_o, a_o);
     }
     else if (tk == 0xffffffff) { // Indirection
-      PyObject* t_o = PyTuple_GET_ITEM(d_o, 1);
-      OMNIORB_ASSERT(PyList_Check(t_o));
-      marshalPyObject(stream, PyList_GET_ITEM(t_o, 0), a_o);
+      marshalPyObjectIndirect(stream, d_o, a_o);
     }
     else OMNIORB_ASSERT(0);
   }
@@ -308,19 +307,18 @@ public:
 
   static const UnmarshalPyObjectFn unmarshalPyObjectFns[];
 
+  static PyObject* unmarshalPyObjectIndirect(cdrStream& stream, PyObject* d_o);
+
   static inline
-  PyObject* unmarshalPyObject(cdrStream& stream,
-			      PyObject*  d_o)
+  PyObject* unmarshalPyObject(cdrStream& stream, PyObject* d_o)
   {
     CORBA::ULong tk = descriptorToTK(d_o);
 
-    if (tk <= 32) { // tk_abstract_interface
+    if (tk <= 33) { // tk_local_interface
       return unmarshalPyObjectFns[tk](stream, d_o);
     }
     else if (tk == 0xffffffff) { // Indirection
-      PyObject* t_o = PyTuple_GET_ITEM(d_o, 1);
-      OMNIORB_ASSERT(PyList_Check(t_o));
-      return unmarshalPyObject(stream, PyList_GET_ITEM(t_o, 0));
+      return unmarshalPyObjectIndirect(stream, d_o);
     }
     else OMNIORB_THROW(BAD_TYPECODE, 0, CORBA::COMPLETED_NO);
     return 0;
@@ -336,30 +334,25 @@ public:
 
   static const CopyArgumentFn copyArgumentFns[];
 
+  static PyObject* copyArgumentIndirect(PyObject* d_o, PyObject* a_o,
+					CORBA::CompletionStatus compstatus);
+
   static inline
   PyObject* copyArgument(PyObject* d_o, PyObject* a_o,
 			 CORBA::CompletionStatus compstatus)
   {
     CORBA::ULong tk = descriptorToTK(d_o);
 
-    if (tk <= 32) { // tk_abstract_interface
+    if (tk <= 33) { // tk_local_interface
       return copyArgumentFns[tk](d_o, a_o, compstatus);
     }
     else if (tk == 0xffffffff) { // Indirection
-      PyObject* t_o = PyTuple_GET_ITEM(d_o, 1);
-      OMNIORB_ASSERT(PyList_Check(t_o));
-      return copyArgument(PyList_GET_ITEM(t_o, 0), a_o, compstatus);
+      return copyArgumentIndirect(d_o, a_o, compstatus);
     }
     else OMNIORB_THROW(BAD_TYPECODE, 0, CORBA::COMPLETED_NO);
     return 0;
   }
 
-#if 0
-  static
-  PyObject* copyArgument(PyObject*               d_o,
-			 PyObject*               a_o,
-			 CORBA::CompletionStatus compstatus);
-#endif
 
   ////////////////////////////////////////////////////////////////////////////
   // TypeCode and Any support functions                                     //

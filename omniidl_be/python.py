@@ -28,6 +28,10 @@
 
 # $Id$
 # $Log$
+# Revision 1.29.2.2  2000/11/01 15:29:01  dpg1
+# Support for forward-declared structs and unions
+# RepoIds in indirections are now resolved at the time of use
+#
 # Revision 1.29.2.1  2000/10/13 13:55:30  dpg1
 # Initial support for omniORB 4.
 #
@@ -339,9 +343,21 @@ _ad_@tdname@ = (omniORB.tcInternal.tv_alias, @tdname@._NP_RepositoryId, "@tdname
 _tc_@tdname@ = omniORB.tcInternal.createTypeCode(_ad_@tdname@)
 omniORB.registerType(@tdname@._NP_RepositoryId, _ad_@tdname@, _tc_@tdname@)"""
 
-recursive_struct_descr = """
+forward_struct_descr_at_module_scope = """
+# Forward struct @sname@
+_0_@modname@._d_@sname@ = (omniORB.tcInternal.tv__indirect, ["@repoId@"])"""
+
+forward_struct_descr = """
+# Forward struct @sname@
+_d_@sname@ = (omniORB.tcInternal.tv__indirect, ["@repoId@"])"""
+
+recursive_struct_descr_at_module_scope = """
 # Recursive struct @sname@
 _0_@modname@._d_@sname@ = (omniORB.tcInternal.tv__indirect, ["@repoId@"])"""
+
+recursive_struct_descr = """
+# Recursive struct @sname@
+_d_@sname@ = (omniORB.tcInternal.tv__indirect, ["@repoId@"])"""
 
 struct_class = """
 # struct @sname@
@@ -360,9 +376,6 @@ struct_descriptor_at_module_scope = """\
 _0_@modname@.@sname@ = @sname@
 _0_@modname@._d_@sname@  = (omniORB.tcInternal.tv_struct, @sname@, @sname@._NP_RepositoryId, "@sname@"@mdescs@)"""
 
-struct_indirect_at_module_scope = """\
-omniORB.tcInternal.insertIndirections(_0_@modname@._d_@sname@)"""
-
 struct_register_at_module_scope = """\
 _0_@modname@._tc_@sname@ = omniORB.tcInternal.createTypeCode(_0_@modname@._d_@sname@)
 omniORB.registerType(@sname@._NP_RepositoryId, _0_@modname@._d_@sname@, _0_@modname@._tc_@sname@)
@@ -371,9 +384,6 @@ del @sname@"""
 struct_descriptor = """\
 
 _d_@sname@  = (omniORB.tcInternal.tv_struct, @sname@, @sname@._NP_RepositoryId, "@sname@"@mdescs@)"""
-
-struct_indirect = """\
-omniORB.tcInternal.insertIndirections(_d_@sname@)"""
 
 struct_register = """\
 _tc_@sname@ = omniORB.tcInternal.createTypeCode(_d_@sname@)
@@ -412,7 +422,6 @@ _d_@sname@  = (omniORB.tcInternal.tv_except, @sname@, @sname@._NP_RepositoryId, 
 _tc_@sname@ = omniORB.tcInternal.createTypeCode(_d_@sname@)
 omniORB.registerType(@sname@._NP_RepositoryId, _d_@sname@, _tc_@sname@)"""
 
-
 recursive_union_descr_at_module_scope = """
 # Recursive union @uname@
 _0_@modname@._d_@uname@ = (omniORB.tcInternal.tv__indirect, ["@repoId@"])"""
@@ -438,9 +447,6 @@ _0_@modname@.@uname@ = @uname@
 _0_@modname@._m_@uname@  = (@m_un@,)
 _0_@modname@._d_@uname@  = (omniORB.tcInternal.tv_union, @uname@, @uname@._NP_RepositoryId, "@uname@", @stype@, @defpos@, _0_@modname@._m_@uname@, @m_def@, {@d_map@})"""
 
-union_indirect_at_module_scope = """\
-omniORB.tcInternal.insertIndirections(_0_@modname@._d_@uname@)"""
-
 union_register_at_module_scope = """\
 _0_@modname@._tc_@uname@ = omniORB.tcInternal.createTypeCode(_0_@modname@._d_@uname@)
 omniORB.registerType(@uname@._NP_RepositoryId, _0_@modname@._d_@uname@, _0_@modname@._tc_@uname@)
@@ -454,9 +460,6 @@ union_descriptor = """
 
 _m_@uname@  = (@m_un@,)
 _d_@uname@  = (omniORB.tcInternal.tv_union, @uname@, @uname@._NP_RepositoryId, "@uname@", @stype@, @defpos@, _m_@uname@, @m_def@, {@d_map@})"""
-
-union_indirect = """\
-omniORB.tcInternal.insertIndirections(_d_@uname@)"""
 
 union_register = """\
 _tc_@uname@ = omniORB.tcInternal.createTypeCode(_d_@uname@)
@@ -486,6 +489,7 @@ enum_object_and_descriptor = """\
 _d_@ename@  = (omniORB.tcInternal.tv_enum, @ename@._NP_RepositoryId, "@ename@", @ename@._items)
 _tc_@ename@ = omniORB.tcInternal.createTypeCode(_d_@ename@)
 omniORB.registerType(@ename@._NP_RepositoryId, _d_@ename@, _tc_@ename@)"""
+
 
 
 # Global state
@@ -1018,10 +1022,16 @@ class PythonVisitor:
         sname = mangle(node.identifier())
 
         if node.recursive():
-            self.st.out(recursive_struct_descr,
-                        sname   = sname,
-                        repoId  = node.repoId(),
-                        modname = self.modname)
+            if self.at_module_scope:
+                self.st.out(recursive_struct_descr_at_module_scope,
+                            sname   = sname,
+                            repoId  = node.repoId(),
+                            modname = self.modname)
+            else:
+                self.st.out(recursive_struct_descr,
+                            sname   = sname,
+                            repoId  = node.repoId(),
+                            modname = self.modname)
 
         self.st.out(struct_class, sname = sname, repoId = node.repoId())
 
@@ -1076,19 +1086,31 @@ class PythonVisitor:
                         mdescs  = mdescs,
                         modname = self.modname)
             
-            if node.recursive():
-                self.st.out(struct_indirect_at_module_scope,
-                            sname   = sname,
-                            modname = self.modname)
-                
             self.st.out(struct_register_at_module_scope,
                         sname   = sname,
                         modname = self.modname)
         else:
             self.st.out(struct_descriptor, sname = sname, mdescs = mdescs)
-            if node.recursive():
-                self.st.out(struct_indirect, sname = sname)
             self.st.out(struct_register, sname = sname)
+
+    #
+    # Forward struct
+
+    def visitStructForward(self, node):
+        if self.handleImported(node): return
+
+        sname = mangle(node.identifier())
+
+        if self.at_module_scope:
+            self.st.out(forward_struct_descr_at_module_scope,
+                        sname   = sname,
+                        repoId  = node.repoId(),
+                        modname = self.modname)
+        else:
+            self.st.out(forward_struct_descr,
+                        sname   = sname,
+                        repoId  = node.repoId(),
+                        modname = self.modname)
 
     #
     # Exception
@@ -1284,11 +1306,6 @@ class PythonVisitor:
                         d_map   = d_map,
                         modname = self.modname)
             
-            if node.recursive():
-                self.st.out(union_indirect_at_module_scope,
-                            uname   = uname,
-                            modname = self.modname)
-                
             self.st.out(union_register_at_module_scope,
                         uname   = uname,
                         modname = self.modname)
@@ -1305,9 +1322,6 @@ class PythonVisitor:
                         m_def   = m_def,
                         d_map   = d_map)
             
-            if node.recursive():
-                self.st.out(union_indirect, uname = uname)
-                
             self.st.out(union_register, uname = uname)
 
     #
@@ -1500,16 +1514,6 @@ def typeToDescriptor(tspec, from_scope=[], is_typedef=0):
         return ret
 
     else:
-        # ***
-#          if type(tspec.decl()) is types.TupleType:
-#              # No Decl object for type -- it must be a recursive type
-#              markRecursive(tspec)
-#              rscope, rname    = tspec.decl()
-#              rdesc            = ast.findDecl(rscope, rname)
-
-#              return '(omniORB.tcInternal.tv__indirect, ["' + \
-#                     rdesc.repoId() + '"])'
-            
         sn  = fixupScopedName(tspec.scopedName())
         ret = dotName(sn[:-1] + ["_d_" + sn[-1]], from_scope)
         return ret

@@ -28,8 +28,11 @@
 //    Marshalling / unmarshalling of Python objects
 
 // $Id$
-
 // $Log$
+// Revision 1.1.2.2  2000/11/01 15:29:00  dpg1
+// Support for forward-declared structs and unions
+// RepoIds in indirections are now resolved at the time of use
+//
 // Revision 1.1.2.1  2000/10/13 13:55:25  dpg1
 // Initial support for omniORB 4.
 //
@@ -1098,6 +1101,32 @@ validateTypeAbstractInterface(PyObject* d_o, PyObject* a_o,
   OMNIORB_THROW(NO_IMPLEMENT, 0, compstatus);
 }
 
+static void
+validateTypeLocalInterface(PyObject* d_o, PyObject* a_o,
+			   CORBA::CompletionStatus compstatus)
+{
+  OMNIORB_THROW(NO_IMPLEMENT, 0, compstatus);
+}
+
+void
+omniPy::
+validateTypeIndirect(PyObject* d_o, PyObject* a_o,
+		     CORBA::CompletionStatus compstatus)
+{
+  PyObject* l = PyTuple_GET_ITEM(d_o, 1); OMNIORB_ASSERT(PyList_Check(l));
+  PyObject* d = PyList_GET_ITEM(l, 0);
+
+  if (PyString_Check(d)) {
+    // Indirection to a repoId -- find the corresponding descriptor
+    d = PyDict_GetItem(pyomniORBtypeMap, d);
+    if (!d) OMNIORB_THROW(BAD_TYPECODE, 0, compstatus);
+
+    Py_INCREF(d);
+    PyList_SetItem(l, 0, d);
+  }
+  validateType(d, a_o, compstatus);
+}
+
 
 const omniPy::ValidateTypeFn omniPy::validateTypeFns[] = {
   validateTypeNull,
@@ -1132,7 +1161,8 @@ const omniPy::ValidateTypeFn omniPy::validateTypeFns[] = {
   validateTypeValue,
   validateTypeValueBox,
   validateTypeNative,
-  validateTypeAbstractInterface
+  validateTypeAbstractInterface,
+  validateTypeLocalInterface
 };
 
 
@@ -2064,6 +2094,23 @@ marshalPyObjectAbstractInterface(cdrStream& stream, PyObject* d_o, PyObject* a_o
   OMNIORB_ASSERT(0);
 }
 
+static void
+marshalPyObjectLocalInterface(cdrStream& stream, PyObject* d_o, PyObject* a_o)
+{
+  OMNIORB_ASSERT(0);
+}
+
+void
+omniPy::
+marshalPyObjectIndirect(cdrStream& stream, PyObject* d_o, PyObject* a_o)
+{
+  PyObject* l = PyTuple_GET_ITEM(d_o, 1); OMNIORB_ASSERT(PyList_Check(l));
+  PyObject* d = PyList_GET_ITEM(l, 0);
+
+  OMNIORB_ASSERT(!PyString_Check(d));
+  marshalPyObject(stream, d, a_o);
+}
+
 
 const omniPy::MarshalPyObjectFn omniPy::marshalPyObjectFns[] = {
   marshalPyObjectNull,
@@ -2098,7 +2145,8 @@ const omniPy::MarshalPyObjectFn omniPy::marshalPyObjectFns[] = {
   marshalPyObjectValue,
   marshalPyObjectValueBox,
   marshalPyObjectNative,
-  marshalPyObjectAbstractInterface
+  marshalPyObjectAbstractInterface,
+  marshalPyObjectLocalInterface
 };
 
 
@@ -2384,7 +2432,7 @@ unmarshalPyObjectString(cdrStream& stream, PyObject* d_o)
   CORBA::Char* c   = (CORBA::Char*)PyString_AS_STRING(r_o);
   stream.get_char_array(c, len);
 
-  if (c[len] != '\0')
+  if (c[len - 1] != '\0')
     OMNIORB_THROW(MARSHAL, 0, CORBA::COMPLETED_NO);
 
   return r_o;
@@ -2916,6 +2964,31 @@ unmarshalPyObjectAbstractInterface(cdrStream& stream, PyObject* d_o)
   return 0;
 }
 
+static PyObject*
+unmarshalPyObjectLocalInterface(cdrStream& stream, PyObject* d_o)
+{
+  OMNIORB_THROW(NO_IMPLEMENT, 0, CORBA::COMPLETED_NO);
+  return 0;
+}
+
+PyObject*
+omniPy::
+unmarshalPyObjectIndirect(cdrStream& stream, PyObject* d_o)
+{
+  PyObject* l = PyTuple_GET_ITEM(d_o, 1); OMNIORB_ASSERT(PyList_Check(l));
+  PyObject* d = PyList_GET_ITEM(l, 0);
+
+  if (PyString_Check(d)) {
+    // Indirection to a repoId -- find the corresponding descriptor
+    d = PyDict_GetItem(pyomniORBtypeMap, d);
+    if (!d) OMNIORB_THROW(BAD_TYPECODE, 0, CORBA::COMPLETED_NO);
+
+    Py_INCREF(d);
+    PyList_SetItem(l, 0, d);
+  }
+  return unmarshalPyObject(stream, d);
+}
+
 
 const omniPy::UnmarshalPyObjectFn omniPy::unmarshalPyObjectFns[] = {
   unmarshalPyObjectNull,
@@ -2950,7 +3023,8 @@ const omniPy::UnmarshalPyObjectFn omniPy::unmarshalPyObjectFns[] = {
   unmarshalPyObjectValue,
   unmarshalPyObjectValueBox,
   unmarshalPyObjectNative,
-  unmarshalPyObjectAbstractInterface
+  unmarshalPyObjectAbstractInterface,
+  unmarshalPyObjectLocalInterface
 };
 
 
@@ -4426,6 +4500,32 @@ copyArgumentAbstractInterface(PyObject* d_o, PyObject* a_o,
   return setPyNoImplement(compstatus);
 }
 
+static PyObject*
+copyArgumentLocalInterface(PyObject* d_o, PyObject* a_o,
+			   CORBA::CompletionStatus compstatus)
+{
+  return setPyNoImplement(compstatus);
+}
+
+PyObject*
+omniPy::
+copyArgumentIndirect(PyObject* d_o, PyObject* a_o,
+		     CORBA::CompletionStatus compstatus)
+{
+  PyObject* l = PyTuple_GET_ITEM(d_o, 1); OMNIORB_ASSERT(PyList_Check(l));
+  PyObject* d = PyList_GET_ITEM(l, 0);
+
+  if (PyString_Check(d)) {
+    // Indirection to a repoId -- find the corresponding descriptor
+    d = PyDict_GetItem(pyomniORBtypeMap, d);
+    if (!d) OMNIORB_THROW(BAD_TYPECODE, 0, compstatus);
+
+    Py_INCREF(d);
+    PyList_SetItem(l, 0, d);
+  }
+  return copyArgument(d, a_o, compstatus);
+}
+
 
 const omniPy::CopyArgumentFn omniPy::copyArgumentFns[] = {
   copyArgumentNull,
@@ -4460,1486 +4560,6 @@ const omniPy::CopyArgumentFn omniPy::copyArgumentFns[] = {
   copyArgumentValue,
   copyArgumentValueBox,
   copyArgumentNative,
-  copyArgumentAbstractInterface
+  copyArgumentAbstractInterface,
+  copyArgumentLocalInterface
 };
-
-
-
-
-
-
-#if 0
-
-PyObject*
-omniPy::copyArgument(PyObject*               d_o,
-		     PyObject*               a_o,
-		     CORBA::CompletionStatus compstatus)
-{
-  CORBA::ULong   tk;
-  CORBA::Boolean tup;
-  PyObject*      t_o;     // Temporary object
-  PyObject*      r_o = 0; // Result object
-
-  if (PyTuple_Check(d_o)) {
-    t_o = PyTuple_GET_ITEM(d_o, 0);
-    OMNIORB_ASSERT(PyInt_Check(t_o));
-    tk  = PyInt_AS_LONG(t_o);
-    tup = 1;
-  }
-  else {
-    OMNIORB_ASSERT(PyInt_Check(d_o));
-    tk  = PyInt_AS_LONG(d_o);
-    tup = 0;
-  }
-
-  switch (tk) {
-
-    // Simple types
-
-  case CORBA::tk_null:
-  case CORBA::tk_void:
-    {
-      Py_INCREF(Py_None);
-      return Py_None;
-    }
-    break;
-
-  case CORBA::tk_short:
-    {
-      if (PyInt_Check(a_o)) {
-	long l = PyInt_AS_LONG(a_o);
-	if (l < -0x8000 || l > 0x7fff) return setPyBadParam(compstatus);
-	Py_INCREF(a_o); return a_o;
-      }
-      else return setPyBadParam(compstatus);
-    }
-    break;
-
-  case CORBA::tk_long:
-    {
-      if (PyInt_Check(a_o)) {
-#if SIZEOF_LONG > 4
-	long l = PyInt_AS_LONG(a_o);
-	if (l < -0x80000000L || l > 0x7fffffffL)
-	  return setPyBadParam(compstatus);
-#endif
-	Py_INCREF(a_o); return a_o;
-      }
-      else return setPyBadParam(compstatus);
-    }
-    break;
-
-  case CORBA::tk_ushort:
-    {
-      if (PyInt_Check(a_o)) {
-	long l = PyInt_AS_LONG(a_o);
-	if (l < 0 || l > 0xffff) return setPyBadParam(compstatus);
-	Py_INCREF(a_o); return a_o;
-      }
-      else return setPyBadParam(compstatus);
-    }
-    break;
-
-  case CORBA::tk_ulong:
-    {
-      if (PyLong_Check(a_o)) {
-	unsigned long ul = PyLong_AsUnsignedLong(a_o);
-	if (ul == (unsigned long)-1 && PyErr_Occurred())
-	  return setPyBadParam(compstatus);
-#if SIZEOF_LONG > 4
-	if (ul > 0xffffffffL) return setPyBadParam(compstatus);
-#endif
-	Py_INCREF(a_o); return a_o;
-      }
-      else if (PyInt_Check(a_o)) {
-	long l = PyInt_AS_LONG(a_o);
-#if SIZEOF_LONG > 4
-	if (l < 0 || l > 0xffffffffL) return setPyBadParam(compstatus);
-#else
-	if (l < 0) return setPyBadParam(compstatus);
-#endif
-	return PyLong_FromLong(l);
-      }
-      else
-	return setPyBadParam(compstatus);
-    }
-    break;
-
-  case CORBA::tk_float:
-    {
-      if (PyFloat_Check(a_o)) {
-	Py_INCREF(a_o); return a_o;
-      }
-      else if (PyInt_Check(a_o)) {
-	return PyFloat_FromDouble((double)(PyInt_AS_LONG(a_o)));
-      }
-      else
-	return setPyBadParam(compstatus);
-    }
-    break;
-
-  case CORBA::tk_double:
-    {
-      if (PyFloat_Check(a_o)) {
-	Py_INCREF(a_o); return a_o;
-      }
-      else if (PyInt_Check(a_o)) {
-	return PyFloat_FromDouble((double)(PyInt_AS_LONG(a_o)));
-      }
-      else
-	return setPyBadParam(compstatus);
-    }
-    break;
-
-  case CORBA::tk_boolean:
-    {
-      if (PyInt_Check(a_o)) {
-	long l = PyInt_AS_LONG(a_o);
-	if (l == 0 || l == 1) {
-	  Py_INCREF(a_o); return a_o;
-	}
-	else {
-	  return PyInt_FromLong(1); // Normalise true value to 1
-	}
-      }
-      else
-	return setPyBadParam(compstatus);
-    }
-    break;
-
-  case CORBA::tk_char:
-    {
-      if ((PyString_Check(a_o) && (PyString_GET_SIZE(a_o) == 1))) {
-	Py_INCREF(a_o); return a_o;
-      }
-      else
-	return setPyBadParam(compstatus);
-    }
-    break;
-
-  case CORBA::tk_octet:
-    {
-      if (PyInt_Check(a_o)) {
-	long l = PyInt_AS_LONG(a_o);
-	if (l < 0 || l > 0xff) return setPyBadParam(compstatus);
-	Py_INCREF(a_o); return a_o;
-      }
-      else
-	return setPyBadParam(compstatus);
-    }
-    break;
-
-#ifdef HAS_LongLong
-
-  case CORBA::tk_longlong:
-    {
-      if (PyLong_Check(a_o)) {
-	CORBA::LongLong ll = PyLong_AsLongLong(a_o);
-	if (ll == -1 && PyErr_Occurred())
-	  return setPyBadParam(compstatus);
-	Py_INCREF(a_o); return a_o;
-      }
-      else if (PyInt_Check(a_o)) {
-	long l = PyInt_AS_LONG(a_o);
-	return PyLong_FromLong(l);
-      }
-      else
-	return setPyBadParam(compstatus);
-    }
-    break;
-
-  case CORBA::tk_ulonglong:
-    {
-      if (PyLong_Check(a_o)) {
-	CORBA::ULongLong ll = PyLong_AsUnsignedLongLong(a_o);
-	if (ll == (CORBA::ULongLong)-1 && PyErr_Occurred())
-	  return setPyBadParam(compstatus);
-	Py_INCREF(a_o); return a_o;
-      }
-      else if (PyInt_Check(a_o)) {
-	long l = PyInt_AS_LONG(a_o);
-	if (l < 0) return setPyBadParam(compstatus);
-	return PyLong_FromLong(l);
-      }
-      else
-	return setPyBadParam(compstatus);
-    }
-    break;
-
-#else
-
-  case 23:
-  case 24:
-    {
-      return setPyNoImplement(compstatus);
-    }
-    break;
-
-#endif
-
-  case CORBA::tk_any:
-    {
-      if (!PyInstance_Check(a_o)) return setPyBadParam(compstatus);
-
-      PyObject* adict = ((PyInstanceObject*)a_o)->in_dict;
-
-      // TypeCode
-      PyObject* tc = PyDict_GetItemString(adict, (char*)"_t");
-
-      if (!(tc && PyInstance_Check(tc))) return setPyBadParam(compstatus);
-
-      PyObject* tdict = ((PyInstanceObject*)tc)->in_dict;
-      PyObject* desc  = PyDict_GetItemString(tdict, (char*)"_d");
-      if (!desc) return setPyBadParam(compstatus);
-
-      // Any's contents
-      PyObject* val = PyDict_GetItemString(adict, (char*)"_v");
-      if (!val) return setPyBadParam(compstatus);
-
-      // Copy contents
-      PyObject* cval = copyArgument(desc, val, compstatus);
-
-      if (!cval) return setPyBadParam(compstatus);
-
-      // Construct new Any
-      t_o = PyTuple_New(2);
-      Py_INCREF(tc);
-      PyTuple_SET_ITEM(t_o, 0, tc);
-      PyTuple_SET_ITEM(t_o, 1, cval);
-      r_o = PyEval_CallObject(pyCORBAAnyClass, t_o);
-      Py_DECREF(t_o);
-
-      return r_o;
-    }
-    break;
-
-  case CORBA::tk_TypeCode:
-    {
-      if (!PyInstance_Check(a_o)) return setPyBadParam(compstatus);
-
-      PyObject* tdict = ((PyInstanceObject*)a_o)->in_dict;
-      PyObject* desc  = PyDict_GetItemString(tdict, (char*)"_d");
-      if (!desc) return setPyBadParam(compstatus);
-
-      Py_INCREF(a_o); return a_o;
-    }
-    break;
-
-    // Complex types
-
-  case CORBA::tk_objref: // repoId, name
-    {
-      OMNIORB_ASSERT(tup);
-
-      return omniPy::copyObjRefArgument(PyTuple_GET_ITEM(d_o, 1),
-					a_o, compstatus);
-    }
-    break;
-
-  case CORBA::tk_struct: // class, repoId, struct name, name, descriptor, ...
-    {
-      OMNIORB_ASSERT(tup);
-
-      // The descriptor tuple has twice the number of struct members,
-      // plus 4 -- the typecode kind, the Python class, the repoId,
-      // and the struct name
-      int       cnt   = (PyTuple_GET_SIZE(d_o) - 4) / 2;
-
-      PyObject* name;
-      PyObject* value;
-      PyObject* argtuple = PyTuple_New(cnt);
-
-      int i, j;
-
-      // Optimise for the fast case, where the object is a class
-      // instance with all attributes in its own dictionary
-      if (PyInstance_Check(a_o)) {
-
-	PyObject* sdict = ((PyInstanceObject*)a_o)->in_dict;
-
-	for (i=0,j=4; i < cnt; i++) {
-	  name  = PyTuple_GET_ITEM(d_o, j++);
-	  OMNIORB_ASSERT(PyString_Check(name));
-	  value = PyDict_GetItem(sdict, name);
-
-	  if (value) {
-	    t_o = copyArgument(PyTuple_GET_ITEM(d_o, j++), value, compstatus);
-	  }
-	  else {
-	    // Not such a fast case after all
-	    value = PyObject_GetAttr(a_o, name);
-	    if (value) {
-	      t_o = copyArgument(PyTuple_GET_ITEM(d_o, j++),
-				 value, compstatus);
-	      Py_DECREF(value);
-	    }
-	  }
-	  if (value && t_o) {
-	    PyTuple_SET_ITEM(argtuple, i, t_o);
-	  }
-	  else {
-	    // Fill in the remainder of the argtuple with Py_Nones
-	    // then destroy it
-	    for (; i < cnt; i++) {
-	      Py_INCREF(Py_None);
-	      PyTuple_SET_ITEM(argtuple, i, Py_None);
-	    }
-	    Py_DECREF(argtuple);
-	    return setPyBadParam(compstatus);
-	  }
-	}
-      }
-      else {
-	for (i=0,j=4; i < cnt; i++) {
-	  name  = PyTuple_GET_ITEM(d_o, j++);
-	  OMNIORB_ASSERT(PyString_Check(name));
-	  value = PyObject_GetAttr(a_o, name);
-
-	  if (value) {
-	    t_o = copyArgument(PyTuple_GET_ITEM(d_o, j++), value, compstatus);
-	    if (t_o)
-	      PyTuple_SET_ITEM(argtuple, i, t_o);
-	    Py_DECREF(value);
-	  }
-	  if (!(value && t_o)) {
-	    // Fill in the remainder of the argtuple with Py_Nones
-	    // then destroy it
-	    for (; i < cnt; i++) {
-	      Py_INCREF(Py_None);
-	      PyTuple_SET_ITEM(argtuple, i, Py_None);
-	    }
-	    Py_DECREF(argtuple);
-	    return setPyBadParam(compstatus);
-	  }
-	}
-      }
-      r_o = PyEval_CallObject(PyTuple_GET_ITEM(d_o, 1), argtuple);
-      OMNIORB_ASSERT(r_o);
-      Py_DECREF(argtuple);
-      return r_o;
-    }
-    break;
-
-  case CORBA::tk_union: // class,
-			// repoId,
-			// name,
-			// discriminant descr,
-			// default used,
-			// ((label value, member name, member descr), ...),
-			// default (label, name, descr) or None,
-			// {label: (label, name, descr), ...}
-    {
-      OMNIORB_ASSERT(tup);
-      if (!PyInstance_Check(a_o)) return setPyBadParam(compstatus);
-
-      PyObject* udict  = ((PyInstanceObject*)a_o)->in_dict;
-      PyObject* discr  = PyDict_GetItemString(udict, (char*)"_d");
-      PyObject* value  = PyDict_GetItemString(udict, (char*)"_v");
-
-      if (!(discr && value)) return setPyBadParam(compstatus);
-
-      t_o              = PyTuple_GET_ITEM(d_o, 4);
-      PyObject* cdiscr = copyArgument(t_o, discr, compstatus);
-
-      if (!cdiscr) return setPyBadParam(compstatus);
-
-      PyObject* cvalue = 0;
-      PyObject* cdict  = PyTuple_GET_ITEM(d_o, 8);
-      t_o              = PyDict_GetItem(cdict, discr);
-      if (t_o) {
-	// Discriminant found in case dictionary
-	OMNIORB_ASSERT(PyTuple_Check(t_o));
-	cvalue = copyArgument(PyTuple_GET_ITEM(t_o, 2), value, compstatus);
-      }
-      else {
-	// Is there a default case?
-	t_o = PyTuple_GET_ITEM(d_o, 7);
-	if (t_o == Py_None) {
-	  // No default
-	  Py_INCREF(Py_None);
-	  cvalue = Py_None;
-	}
-	else {
-	  OMNIORB_ASSERT(PyTuple_Check(t_o));
-	  cvalue = copyArgument(PyTuple_GET_ITEM(t_o, 2), value, compstatus);
-	}
-      }
-      if (cvalue) {
-	t_o = PyTuple_New(2);
-	PyTuple_SET_ITEM(t_o, 0, cdiscr);
-	PyTuple_SET_ITEM(t_o, 1, cvalue);
-	r_o = PyEval_CallObject(PyTuple_GET_ITEM(d_o, 1), t_o);
-	OMNIORB_ASSERT(r_o);
-	Py_DECREF(t_o);
-	return r_o;
-      }
-      else {
-	Py_DECREF(cdiscr);
-	return setPyBadParam(compstatus);
-      }
-    }
-    break;
-
-  case CORBA::tk_enum: // repoId, name, item list
-    {
-      if (!PyInstance_Check(a_o)) return setPyBadParam(compstatus);
-
-      PyObject* ev = PyDict_GetItemString(((PyInstanceObject*)a_o)->in_dict,
-					  (char*)"_v");
-
-      if (!(ev && PyInt_Check(ev))) return setPyBadParam(compstatus);
-
-      t_o    = PyTuple_GET_ITEM(d_o, 3);
-      long e = PyInt_AS_LONG(ev);
-
-      if (e >= PyTuple_GET_SIZE(t_o))      return setPyBadParam(compstatus);
-      if (PyTuple_GET_ITEM(t_o, e) != a_o) return setPyBadParam(compstatus);
-
-      Py_INCREF(a_o); return a_o;
-    }
-    break;
-
-  case CORBA::tk_string: // max_length
-    {
-      OMNIORB_ASSERT(tup);
-      t_o = PyTuple_GET_ITEM(d_o, 1);
-      OMNIORB_ASSERT(PyInt_Check(t_o));
-
-      CORBA::ULong max_len = PyInt_AS_LONG(t_o);
-
-      if (!PyString_Check(a_o)) return setPyBadParam(compstatus);
-
-      CORBA::ULong len = PyString_GET_SIZE(a_o);
-
-      if (max_len > 0 && len > max_len) return setPyBadParam(compstatus);
-
-      // Annoyingly, we have to scan the string to check there are no
-      // nulls
-      char* str = PyString_AS_STRING(a_o);
-      for (CORBA::ULong i=0; i<len; i++)
-	if (str[i] == '\0') return setPyBadParam(compstatus);
-
-      // After all that, we don't actually have to copy the string,
-      // since they're immutable
-      Py_INCREF(a_o);
-      return a_o;
-    }
-    break;
-
-  case CORBA::tk_sequence: // element_desc, max_length
-    {
-      OMNIORB_ASSERT(tup);
-
-      t_o                   = PyTuple_GET_ITEM(d_o, 2);
-      OMNIORB_ASSERT(PyInt_Check(t_o));
-      CORBA::ULong max_len  = PyInt_AS_LONG(t_o);
-      PyObject*    elm_desc = PyTuple_GET_ITEM(d_o, 1);
-
-      CORBA::ULong len, i;
-
-      if (sequenceOptimisedType(elm_desc)) { // Simple type
-	CORBA::ULong etk = PyInt_AS_LONG(elm_desc);
-
-	if (etk == CORBA::tk_octet || etk == CORBA::tk_char) {
-	  // Mapping says octet and char use a string
-	  if (!PyString_Check(a_o)) return setPyBadParam(compstatus);
-	  len = PyString_GET_SIZE(a_o);
-	  if (max_len > 0 && len > max_len) return setPyBadParam(compstatus);
-	  Py_INCREF(a_o);
-	  return a_o;
-	}
-	else if (PyList_Check(a_o)) {
-	  len = PyList_GET_SIZE(a_o);
-	  if (max_len > 0 && len > max_len) return setPyBadParam(compstatus);
-
-	  r_o = PyList_New(len);
-
-	  int              valid = 1;
-	  long             long_val;
-	  unsigned long    ulong_val;
-#ifdef HAS_LongLong
-	  CORBA::LongLong  llong_val;
-	  CORBA::ULongLong ullong_val;
-#endif
-
-	  switch (etk) {
-	  case CORBA::tk_short:
-	    for (i=0; i<len; i++) {
-	      t_o = PyList_GET_ITEM(a_o, i);
-	      if (PyInt_Check(t_o)) {
-		long_val = PyInt_AS_LONG(t_o);
-		if (long_val >= -0x8000 && long_val <= 0x7fff) {
-		  Py_INCREF(t_o); PyList_SET_ITEM(r_o, i, t_o); continue;
-		}
-	      }
-	      Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None); valid = 0;
-	    }
-	    break;
-
-	  case CORBA::tk_long:
-	    for (i=0; i<len; i++) {
-	      t_o = PyList_GET_ITEM(a_o, i);
-	      if (PyInt_Check(t_o)) {
-#if SIZEOF_LONG > 4
-		long_val = PyInt_AS_LONG(t_o);
-		if (long_val >= -0x80000000L && long_val <= 0x7fffffffL) {
-#endif
-		  Py_INCREF(t_o); PyList_SET_ITEM(r_o, i, t_o); continue;
-#if SIZEOF_LONG > 4
-		}
-#endif
-	      }
-	      Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None); valid = 0;
-	    }
-	    break;
-
-	  case CORBA::tk_ushort:
-	    for (i=0; i<len; i++) {
-	      t_o = PyList_GET_ITEM(a_o, i);
-	      if (PyInt_Check(t_o)) {
-		long_val = PyInt_AS_LONG(t_o);
-		if (long_val >= 0 && long_val <= 0xffff) {
-		  Py_INCREF(t_o); PyList_SET_ITEM(r_o, i, t_o); continue;
-		}
-	      }
-	      Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None); valid = 0;
-	    }
-	    break;
-
-	  case CORBA::tk_ulong:
-	    for (i=0; i<len; i++) {
-	      t_o = PyList_GET_ITEM(a_o, i);
-	      if (PyLong_Check(t_o)) {
-		ulong_val = PyLong_AsUnsignedLong(t_o);
-		if (ulong_val == (unsigned long)-1 && PyErr_Occurred()) {
-		  Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-		  valid = 0; continue;
-		}
-#if SIZEOF_LONG > 4
-		if (ulong_val > 0xffffffffL) {
-		  Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-		  valid = 0; continue;
-		}
-#endif
-		Py_INCREF(t_o); PyList_SET_ITEM(r_o, i, t_o); continue;
-	      }
-	      else if (PyInt_Check(t_o)) {
-		long_val = PyInt_AS_LONG(t_o);
-#if SIZEOF_LONG > 4
-		if (long_val >= 0 && long_val <= 0xffffffffL) {
-		  PyList_SET_ITEM(r_o, i, PyLong_FromLong(long_val));
-		  continue;
-		}
-#else
-		if (long_val >= 0) {
-		  PyList_SET_ITEM(r_o, i, PyLong_FromLong(long_val));
-		  continue;
-		}
-#endif
-	      }
-	      Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-	      valid = 0;
-	    }
-	    break;
-
-	  case CORBA::tk_float:
-	  case CORBA::tk_double:
-	    for (i=0; i<len; i++) {
-	      t_o = PyList_GET_ITEM(a_o, i);
-	      if (PyFloat_Check(t_o)) {
-		Py_INCREF(t_o); PyList_SET_ITEM(r_o, i, t_o);
-	      }
-	      else if (PyInt_Check(t_o)) {
-		PyList_SET_ITEM(r_o, i,
-				PyFloat_FromDouble((double)
-						   PyInt_AS_LONG(t_o)));
-	      }
-	      else {
-		Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-		valid = 0;
-	      }
-	    }
-	    break;
-
-	  case CORBA::tk_boolean:
-	    for (i=0; i<len; i++) {
-	      t_o = PyList_GET_ITEM(a_o, i);
-	      if (PyInt_Check(t_o)) {
-		long_val = PyInt_AS_LONG(t_o);
-		if (long_val == 0 || long_val == 1) {
-		  Py_INCREF(t_o); PyList_SET_ITEM(r_o, i, t_o);
-		}
-		else {
-		  PyList_SET_ITEM(r_o, i, PyInt_FromLong(1));
-		}
-	      }
-	      else {
-		Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-		valid = 0;
-	      }
-	    }
-	    break;
-
-#ifdef HAS_LongLong
-
-	  case CORBA::tk_longlong:
-	    for (i=0; i<len; i++) {
-	      t_o = PyList_GET_ITEM(a_o, i);
-	      if (PyLong_Check(t_o)) {
-		llong_val = PyLong_AsLongLong(t_o);
-		if (llong_val == -1 && PyErr_Occurred()) {
-		  Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-		  valid = 0; continue;
-		}
-		Py_INCREF(t_o); PyList_SET_ITEM(r_o, i, t_o); continue;
-	      }
-	      else if (PyInt_Check(t_o)) {
-		long_val = PyInt_AS_LONG(t_o);
-		PyList_SET_ITEM(r_o, i, PyLong_FromLong(long_val));
-	      }
-	      else {
-		Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-		valid = 0;
-	      }
-	    }
-	    break;
-
-	  case CORBA::tk_ulonglong:
-	    for (i=0; i<len; i++) {
-	      t_o = PyList_GET_ITEM(a_o, i);
-	      if (PyLong_Check(t_o)) {
-		ullong_val = PyLong_AsUnsignedLongLong(t_o);
-		if (ullong_val == (CORBA::ULongLong)-1 && PyErr_Occurred()) {
-		  Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-		  valid = 0; continue;
-		}
-		Py_INCREF(t_o); PyList_SET_ITEM(r_o, i, t_o); continue;
-	      }
-	      else if (PyInt_Check(t_o)) {
-		long_val = PyInt_AS_LONG(t_o);
-		if (long_val >= 0) {
-		  PyList_SET_ITEM(r_o, i, PyLong_FromLong(long_val));
-		  continue;
-		}
-	      }
-	      Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-	      valid = 0;
-	    }
-	    break;
-#else
-	  case 23:
-	  case 24:
-	    {
-	      for (i=0; i<len; i++)
-		Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-	      Py_DECREF(r_o);
-	      return setPyNoImplement(compstatus);
-	    }
-#endif
-	  default:
-	    OMNIORB_ASSERT(0);
-	  }
-	  if (valid)
-	    return r_o;
-	  else {
-	    Py_DECREF(r_o);
-	    return setPyBadParam(compstatus);
-	  }
-	}
-	else if (PyTuple_Check(a_o)) {
-	  len = PyTuple_GET_SIZE(a_o);
-	  if (max_len > 0 && len > max_len) return setPyBadParam(compstatus);
-
-	  r_o = PyList_New(len);
-
-	  int              valid = 1;
-	  long             long_val;
-	  unsigned long    ulong_val;
-#ifdef HAS_LongLong
-	  CORBA::LongLong  llong_val;
-	  CORBA::ULongLong ullong_val;
-#endif
-
-	  switch (etk) {
-
-	  case CORBA::tk_short:
-	    for (i=0; i<len; i++) {
-	      t_o = PyTuple_GET_ITEM(a_o, i);
-	      if (PyInt_Check(t_o)) {
-		long_val = PyInt_AS_LONG(t_o);
-		if (long_val >= -0x8000 && long_val <= 0x7fff) {
-		  Py_INCREF(t_o); PyList_SET_ITEM(r_o, i, t_o); continue;
-		}
-	      }
-	      Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None); valid = 0;
-	    }
-	    break;
-
-	  case CORBA::tk_long:
-	    for (i=0; i<len; i++) {
-	      t_o = PyTuple_GET_ITEM(a_o, i);
-	      if (PyInt_Check(t_o)) {
-#if SIZEOF_LONG > 4
-		long_val = PyInt_AS_LONG(t_o);
-		if (long_val >= -0x80000000L && long_val <= 0x7fffffffL) {
-#endif
-		  Py_INCREF(t_o); PyList_SET_ITEM(r_o, i, t_o); continue;
-#if SIZEOF_LONG > 4
-		}
-#endif
-	      }
-	      Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None); valid = 0;
-	    }
-	    break;
-
-	  case CORBA::tk_ushort:
-	    for (i=0; i<len; i++) {
-	      t_o = PyTuple_GET_ITEM(a_o, i);
-	      if (PyInt_Check(t_o)) {
-		long_val = PyInt_AS_LONG(t_o);
-		if (long_val >= 0 && long_val <= 0xffff) {
-		  Py_INCREF(t_o); PyList_SET_ITEM(r_o, i, t_o); continue;
-		}
-	      }
-	      Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None); valid = 0;
-	    }
-	    break;
-
-	  case CORBA::tk_ulong:
-	    for (i=0; i<len; i++) {
-	      t_o = PyTuple_GET_ITEM(a_o, i);
-	      if (PyLong_Check(t_o)) {
-		ulong_val = PyLong_AsUnsignedLong(t_o);
-		if (ulong_val == (unsigned long)-1 && PyErr_Occurred()) {
-		  Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-		  valid = 0; continue;
-		}
-#if SIZEOF_LONG > 4
-		if (ulong_val > 0xffffffffL) {
-		  Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-		  valid = 0; continue;
-		}
-#endif
-		Py_INCREF(t_o); PyList_SET_ITEM(r_o, i, t_o); continue;
-	      }
-	      else if (PyInt_Check(t_o)) {
-		long_val = PyInt_AS_LONG(t_o);
-#if SIZEOF_LONG > 4
-		if (long_val >= 0 && long_val <= 0xffffffffL) {
-		  PyList_SET_ITEM(r_o, i, PyLong_FromLong(long_val));
-		  continue;
-		}
-#else
-		if (long_val >= 0) {
-		  PyList_SET_ITEM(r_o, i, PyLong_FromLong(long_val));
-		  continue;
-		}
-#endif
-	      }
-	      Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-	      valid = 0;
-	    }
-	    break;
-
-	  case CORBA::tk_float:
-	  case CORBA::tk_double:
-	    for (i=0; i<len; i++) {
-	      t_o = PyTuple_GET_ITEM(a_o, i);
-	      if (PyFloat_Check(t_o)) {
-		Py_INCREF(t_o); PyList_SET_ITEM(r_o, i, t_o);
-	      }
-	      else if (PyInt_Check(t_o)) {
-		PyList_SET_ITEM(r_o, i,
-				PyFloat_FromDouble((double)
-						   PyInt_AS_LONG(t_o)));
-	      }
-	      else {
-		Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-		valid = 0;
-	      }
-	    }
-	    break;
-
-	  case CORBA::tk_boolean:
-	    for (i=0; i<len; i++) {
-	      t_o = PyTuple_GET_ITEM(a_o, i);
-	      if (PyInt_Check(t_o)) {
-		long_val = PyInt_AS_LONG(t_o);
-		if (long_val == 0 || long_val == 1) {
-		  Py_INCREF(t_o); PyList_SET_ITEM(r_o, i, t_o);
-		}
-		else {
-		  PyList_SET_ITEM(r_o, i, PyInt_FromLong(1));
-		}
-	      }
-	      else {
-		Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-		valid = 0;
-	      }
-	    }
-	    break;
-
-#ifdef HAS_LongLong
-
-	  case CORBA::tk_longlong:
-	    for (i=0; i<len; i++) {
-	      t_o = PyTuple_GET_ITEM(a_o, i);
-	      if (PyLong_Check(t_o)) {
-		llong_val = PyLong_AsLongLong(t_o);
-		if (llong_val == -1 && PyErr_Occurred()) {
-		  Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-		  valid = 0; continue;
-		}
-		Py_INCREF(t_o); PyList_SET_ITEM(r_o, i, t_o); continue;
-	      }
-	      else if (PyInt_Check(t_o)) {
-		long_val = PyInt_AS_LONG(t_o);
-		PyList_SET_ITEM(r_o, i, PyLong_FromLong(long_val));
-	      }
-	      else {
-		Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-		valid = 0;
-	      }
-	    }
-	    break;
-
-	  case CORBA::tk_ulonglong:
-	    for (i=0; i<len; i++) {
-	      t_o = PyTuple_GET_ITEM(a_o, i);
-	      if (PyLong_Check(t_o)) {
-		ullong_val = PyLong_AsUnsignedLongLong(t_o);
-		if (ullong_val == (CORBA::ULongLong)-1 && PyErr_Occurred()) {
-		  Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-		  valid = 0; continue;
-		}
-		Py_INCREF(t_o); PyList_SET_ITEM(r_o, i, t_o); continue;
-	      }
-	      else if (PyInt_Check(t_o)) {
-		long_val = PyInt_AS_LONG(t_o);
-		if (long_val >= 0) {
-		  PyList_SET_ITEM(r_o, i, PyLong_FromLong(long_val));
-		  continue;
-		}
-	      }
-	      Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-	      valid = 0;
-	    }
-	    break;
-#else
-	  case 23:
-	  case 24:
-	    {
-	      for (i=0; i<len; i++)
-		Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-	      Py_DECREF(r_o);
-	      return setPyNoImplement(compstatus);
-	    }
-#endif
-	  default:
-	    OMNIORB_ASSERT(0);
-	  }
-	  if (valid)
-	    return r_o;
-	  else {
-	    Py_DECREF(r_o);
-	    return setPyBadParam(compstatus);
-	  }
-	}
-	else
-	  return setPyBadParam(compstatus);
-      }
-      else { // Complex type
-	int valid = 1;
-
-	if (PyList_Check(a_o)) {
-	  len = PyList_GET_SIZE(a_o);
-	  if (max_len > 0 && len > max_len) return setPyBadParam(compstatus);
-
-	  r_o = PyList_New(len);
-
-	  for (i=0; i < len; i++) {
-	    t_o = copyArgument(elm_desc, PyList_GET_ITEM(a_o, i), compstatus);
-	    if (t_o)
-	      PyList_SET_ITEM(r_o, i, t_o);
-	    else {
-	      Py_INCREF(Py_None);
-	      PyList_SET_ITEM(r_o, i, Py_None);
-	      valid = 0;
-	    }
-	  }
-	}
-	else if (PyTuple_Check(a_o)) {
-	  len = PyTuple_GET_SIZE(a_o);
-	  if (max_len > 0 && len > max_len) return setPyBadParam(compstatus);
-
-	  r_o = PyList_New(len);
-
-	  for (i=0; i < len; i++) {
-	    t_o = copyArgument(elm_desc, PyTuple_GET_ITEM(a_o, i), compstatus);
-	    if (t_o)
-	      PyList_SET_ITEM(r_o, i, t_o);
-	    else {
-	      Py_INCREF(Py_None);
-	      PyList_SET_ITEM(r_o, i, Py_None);
-	      valid = 0;
-	    }
-	  }
-	}
-	else
-	  return setPyBadParam(compstatus);
-
-	if (valid)
-	  return r_o;
-	else {
-	  Py_DECREF(r_o);
-	  return setPyBadParam(compstatus);
-	}
-      }
-    }
-    break;
-
-  case CORBA::tk_array: // element_desc, length
-    {
-      OMNIORB_ASSERT(tup);
-
-      t_o                   = PyTuple_GET_ITEM(d_o, 2);
-      OMNIORB_ASSERT(PyInt_Check(t_o));
-      CORBA::ULong arr_len  = PyInt_AS_LONG(t_o);
-      PyObject*    elm_desc = PyTuple_GET_ITEM(d_o, 1);
-
-      CORBA::ULong len, i;
-
-      if (sequenceOptimisedType(elm_desc)) { // Simple type
-	CORBA::ULong etk = PyInt_AS_LONG(elm_desc);
-
-	if (etk == CORBA::tk_octet || etk == CORBA::tk_char) {
-	  // Mapping says octet and char use a string
-	  if (!PyString_Check(a_o)) return setPyBadParam(compstatus);
-	  len = PyString_GET_SIZE(a_o);
-	  if (len != arr_len) return setPyBadParam(compstatus);
-	  Py_INCREF(a_o);
-	  return a_o;
-	}
-	else if (PyList_Check(a_o)) {
-	  len = PyList_GET_SIZE(a_o);
-	  if (len != arr_len) return setPyBadParam(compstatus);
-
-	  r_o = PyList_New(len);
-
-	  int              valid = 1;
-	  long             long_val;
-	  unsigned long    ulong_val;
-#ifdef HAS_LongLong
-	  CORBA::LongLong  llong_val;
-	  CORBA::ULongLong ullong_val;
-#endif
-
-	  switch (etk) {
-	  case CORBA::tk_short:
-	    for (i=0; i<len; i++) {
-	      t_o = PyList_GET_ITEM(a_o, i);
-	      if (PyInt_Check(t_o)) {
-		long_val = PyInt_AS_LONG(t_o);
-		if (long_val >= -0x8000 && long_val <= 0x7fff) {
-		  Py_INCREF(t_o); PyList_SET_ITEM(r_o, i, t_o); continue;
-		}
-	      }
-	      Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None); valid = 0;
-	    }
-	    break;
-
-	  case CORBA::tk_long:
-	    for (i=0; i<len; i++) {
-	      t_o = PyList_GET_ITEM(a_o, i);
-	      if (PyInt_Check(t_o)) {
-#if SIZEOF_LONG > 4
-		long_val = PyInt_AS_LONG(t_o);
-		if (long_val >= -0x80000000L && long_val <= 0x7fffffffL) {
-#endif
-		  Py_INCREF(t_o); PyList_SET_ITEM(r_o, i, t_o); continue;
-#if SIZEOF_LONG > 4
-		}
-#endif
-	      }
-	      Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None); valid = 0;
-	    }
-	    break;
-
-	  case CORBA::tk_ushort:
-	    for (i=0; i<len; i++) {
-	      t_o = PyList_GET_ITEM(a_o, i);
-	      if (PyInt_Check(t_o)) {
-		long_val = PyInt_AS_LONG(t_o);
-		if (long_val >= 0 && long_val <= 0xffff) {
-		  Py_INCREF(t_o); PyList_SET_ITEM(r_o, i, t_o); continue;
-		}
-	      }
-	      Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None); valid = 0;
-	    }
-	    break;
-
-	  case CORBA::tk_ulong:
-	    for (i=0; i<len; i++) {
-	      t_o = PyList_GET_ITEM(a_o, i);
-	      if (PyLong_Check(t_o)) {
-		ulong_val = PyLong_AsUnsignedLong(t_o);
-		if (ulong_val == (unsigned long)-1 && PyErr_Occurred()) {
-		  Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-		  valid = 0; continue;
-		}
-#if SIZEOF_LONG > 4
-		if (ulong_val > 0xffffffffL) {
-		  Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-		  valid = 0; continue;
-		}
-#endif
-		Py_INCREF(t_o); PyList_SET_ITEM(r_o, i, t_o); continue;
-	      }
-	      else if (PyInt_Check(t_o)) {
-		long_val = PyInt_AS_LONG(t_o);
-#if SIZEOF_LONG > 4
-		if (long_val >= 0 && long_val <= 0xffffffffL) {
-		  PyList_SET_ITEM(r_o, i, PyLong_FromLong(long_val));
-		  continue;
-		}
-#else
-		if (long_val >= 0) {
-		  PyList_SET_ITEM(r_o, i, PyLong_FromLong(long_val));
-		  continue;
-		}
-#endif
-	      }
-	      Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-	      valid = 0;
-	    }
-	    break;
-
-	  case CORBA::tk_float:
-	  case CORBA::tk_double:
-	    for (i=0; i<len; i++) {
-	      t_o = PyList_GET_ITEM(a_o, i);
-	      if (PyFloat_Check(t_o)) {
-		Py_INCREF(t_o); PyList_SET_ITEM(r_o, i, t_o);
-	      }
-	      else if (PyInt_Check(t_o)) {
-		PyList_SET_ITEM(r_o, i,
-				PyFloat_FromDouble((double)
-						   PyInt_AS_LONG(t_o)));
-	      }
-	      else {
-		Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-		valid = 0;
-	      }
-	    }
-	    break;
-
-	  case CORBA::tk_boolean:
-	    for (i=0; i<len; i++) {
-	      t_o = PyList_GET_ITEM(a_o, i);
-	      if (PyInt_Check(t_o)) {
-		long_val = PyInt_AS_LONG(t_o);
-		if (long_val == 0 || long_val == 1) {
-		  Py_INCREF(t_o); PyList_SET_ITEM(r_o, i, t_o);
-		}
-		else {
-		  PyList_SET_ITEM(r_o, i, PyInt_FromLong(1));
-		}
-	      }
-	      else {
-		Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-		valid = 0;
-	      }
-	    }
-	    break;
-
-#ifdef HAS_LongLong
-
-	  case CORBA::tk_longlong:
-	    for (i=0; i<len; i++) {
-	      t_o = PyList_GET_ITEM(a_o, i);
-	      if (PyLong_Check(t_o)) {
-		llong_val = PyLong_AsLongLong(t_o);
-		if (llong_val == -1 && PyErr_Occurred()) {
-		  Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-		  valid = 0; continue;
-		}
-		Py_INCREF(t_o); PyList_SET_ITEM(r_o, i, t_o); continue;
-	      }
-	      else if (PyInt_Check(t_o)) {
-		long_val = PyInt_AS_LONG(t_o);
-		PyList_SET_ITEM(r_o, i, PyLong_FromLong(long_val));
-	      }
-	      else {
-		Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-		valid = 0;
-	      }
-	    }
-	    break;
-
-	  case CORBA::tk_ulonglong:
-	    for (i=0; i<len; i++) {
-	      t_o = PyList_GET_ITEM(a_o, i);
-	      if (PyLong_Check(t_o)) {
-		ullong_val = PyLong_AsUnsignedLongLong(t_o);
-		if (ullong_val == (CORBA::ULongLong)-1 && PyErr_Occurred()) {
-		  Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-		  valid = 0; continue;
-		}
-		Py_INCREF(t_o); PyList_SET_ITEM(r_o, i, t_o); continue;
-	      }
-	      else if (PyInt_Check(t_o)) {
-		long_val = PyInt_AS_LONG(t_o);
-		if (long_val >= 0) {
-		  PyList_SET_ITEM(r_o, i, PyLong_FromLong(long_val));
-		  continue;
-		}
-	      }
-	      Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-	      valid = 0;
-	    }
-	    break;
-#else
-	  case 23:
-	  case 24:
-	    {
-	      for (i=0; i<len; i++)
-		Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-	      Py_DECREF(r_o);
-	      return setPyNoImplement(compstatus);
-	    }
-#endif
-	  default:
-	    OMNIORB_ASSERT(0);
-	  }
-	  if (valid)
-	    return r_o;
-	  else {
-	    Py_DECREF(r_o);
-	    return setPyBadParam(compstatus);
-	  }
-	}
-	else if (PyTuple_Check(a_o)) {
-	  len = PyTuple_GET_SIZE(a_o);
-	  if (len != arr_len) return setPyBadParam(compstatus);
-
-	  r_o = PyList_New(len);
-
-	  int              valid = 1;
-	  long             long_val;
-	  unsigned long    ulong_val;
-#ifdef HAS_LongLong
-	  CORBA::LongLong  llong_val;
-	  CORBA::ULongLong ullong_val;
-#endif
-
-	  switch (etk) {
-
-	  case CORBA::tk_short:
-	    for (i=0; i<len; i++) {
-	      t_o = PyTuple_GET_ITEM(a_o, i);
-	      if (PyInt_Check(t_o)) {
-		long_val = PyInt_AS_LONG(t_o);
-		if (long_val >= -0x8000 && long_val <= 0x7fff) {
-		  Py_INCREF(t_o); PyList_SET_ITEM(r_o, i, t_o); continue;
-		}
-	      }
-	      Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None); valid = 0;
-	    }
-	    break;
-
-	  case CORBA::tk_long:
-	    for (i=0; i<len; i++) {
-	      t_o = PyTuple_GET_ITEM(a_o, i);
-	      if (PyInt_Check(t_o)) {
-#if SIZEOF_LONG > 4
-		long_val = PyInt_AS_LONG(t_o);
-		if (long_val >= -0x80000000L && long_val <= 0x7fffffffL) {
-#endif
-		  Py_INCREF(t_o); PyList_SET_ITEM(r_o, i, t_o); continue;
-#if SIZEOF_LONG > 4
-		}
-#endif
-	      }
-	      Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None); valid = 0;
-	    }
-	    break;
-
-	  case CORBA::tk_ushort:
-	    for (i=0; i<len; i++) {
-	      t_o = PyTuple_GET_ITEM(a_o, i);
-	      if (PyInt_Check(t_o)) {
-		long_val = PyInt_AS_LONG(t_o);
-		if (long_val >= 0 && long_val <= 0xffff) {
-		  Py_INCREF(t_o); PyList_SET_ITEM(r_o, i, t_o); continue;
-		}
-	      }
-	      Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None); valid = 0;
-	    }
-	    break;
-
-	  case CORBA::tk_ulong:
-	    for (i=0; i<len; i++) {
-	      t_o = PyTuple_GET_ITEM(a_o, i);
-	      if (PyLong_Check(t_o)) {
-		ulong_val = PyLong_AsUnsignedLong(t_o);
-		if (ulong_val == (unsigned long)-1 && PyErr_Occurred()) {
-		  Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-		  valid = 0; continue;
-		}
-#if SIZEOF_LONG > 4
-		if (ulong_val > 0xffffffffL) {
-		  Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-		  valid = 0; continue;
-		}
-#endif
-		Py_INCREF(t_o); PyList_SET_ITEM(r_o, i, t_o); continue;
-	      }
-	      else if (PyInt_Check(t_o)) {
-		long_val = PyInt_AS_LONG(t_o);
-#if SIZEOF_LONG > 4
-		if (long_val >= 0 && long_val <= 0xffffffffL) {
-		  PyList_SET_ITEM(r_o, i, PyLong_FromLong(long_val));
-		  continue;
-		}
-#else
-		if (long_val >= 0) {
-		  PyList_SET_ITEM(r_o, i, PyLong_FromLong(long_val));
-		  continue;
-		}
-#endif
-	      }
-	      Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-	      valid = 0;
-	    }
-	    break;
-
-	  case CORBA::tk_float:
-	  case CORBA::tk_double:
-	    for (i=0; i<len; i++) {
-	      t_o = PyTuple_GET_ITEM(a_o, i);
-	      if (PyFloat_Check(t_o)) {
-		Py_INCREF(t_o); PyList_SET_ITEM(r_o, i, t_o);
-	      }
-	      else if (PyInt_Check(t_o)) {
-		PyList_SET_ITEM(r_o, i,
-				PyFloat_FromDouble((double)
-						   PyInt_AS_LONG(t_o)));
-	      }
-	      else {
-		Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-		valid = 0;
-	      }
-	    }
-	    break;
-
-	  case CORBA::tk_boolean:
-	    for (i=0; i<len; i++) {
-	      t_o = PyTuple_GET_ITEM(a_o, i);
-	      if (PyInt_Check(t_o)) {
-		long_val = PyInt_AS_LONG(t_o);
-		if (long_val == 0 || long_val == 1) {
-		  Py_INCREF(t_o); PyList_SET_ITEM(r_o, i, t_o);
-		}
-		else {
-		  PyList_SET_ITEM(r_o, i, PyInt_FromLong(1));
-		}
-	      }
-	      else {
-		Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-		valid = 0;
-	      }
-	    }
-	    break;
-
-#ifdef HAS_LongLong
-
-	  case CORBA::tk_longlong:
-	    for (i=0; i<len; i++) {
-	      t_o = PyTuple_GET_ITEM(a_o, i);
-	      if (PyLong_Check(t_o)) {
-		llong_val = PyLong_AsLongLong(t_o);
-		if (llong_val == -1 && PyErr_Occurred()) {
-		  Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-		  valid = 0; continue;
-		}
-		Py_INCREF(t_o); PyList_SET_ITEM(r_o, i, t_o); continue;
-	      }
-	      else if (PyInt_Check(t_o)) {
-		long_val = PyInt_AS_LONG(t_o);
-		PyList_SET_ITEM(r_o, i, PyLong_FromLong(long_val));
-	      }
-	      else {
-		Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-		valid = 0;
-	      }
-	    }
-	    break;
-
-	  case CORBA::tk_ulonglong:
-	    for (i=0; i<len; i++) {
-	      t_o = PyTuple_GET_ITEM(a_o, i);
-	      if (PyLong_Check(t_o)) {
-		ullong_val = PyLong_AsUnsignedLongLong(t_o);
-		if (ullong_val == (CORBA::ULongLong)-1 && PyErr_Occurred()) {
-		  Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-		  valid = 0; continue;
-		}
-		Py_INCREF(t_o); PyList_SET_ITEM(r_o, i, t_o); continue;
-	      }
-	      else if (PyInt_Check(t_o)) {
-		long_val = PyInt_AS_LONG(t_o);
-		if (long_val >= 0) {
-		  PyList_SET_ITEM(r_o, i, PyLong_FromLong(long_val));
-		  continue;
-		}
-	      }
-	      Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-	      valid = 0;
-	    }
-	    break;
-#else
-	  case 23:
-	  case 24:
-	    {
-	      for (i=0; i<len; i++)
-		Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-	      Py_DECREF(r_o);
-	      return setPyNoImplement(compstatus);
-	    }
-#endif
-	  default:
-	    OMNIORB_ASSERT(0);
-	  }
-	  if (valid)
-	    return r_o;
-	  else {
-	    Py_DECREF(r_o);
-	    return setPyBadParam(compstatus);
-	  }
-	}
-	else
-	  return setPyBadParam(compstatus);
-      }
-      else { // Complex type
-	int valid = 1;
-
-	if (PyList_Check(a_o)) {
-	  len = PyList_GET_SIZE(a_o);
-	  if (len != arr_len) return setPyBadParam(compstatus);
-
-	  r_o = PyList_New(len);
-
-	  for (i=0; i < len; i++) {
-	    t_o = copyArgument(elm_desc, PyList_GET_ITEM(a_o, i), compstatus);
-	    if (t_o)
-	      PyList_SET_ITEM(r_o, i, t_o);
-	    else {
-	      Py_INCREF(Py_None);
-	      PyList_SET_ITEM(r_o, i, Py_None);
-	      valid = 0;
-	    }
-	  }
-	}
-	else if (PyTuple_Check(a_o)) {
-	  len = PyTuple_GET_SIZE(a_o);
-	  if (len != arr_len) return setPyBadParam(compstatus);
-
-	  r_o = PyList_New(len);
-
-	  for (i=0; i < len; i++) {
-	    t_o = copyArgument(elm_desc, PyTuple_GET_ITEM(a_o, i), compstatus);
-	    if (t_o)
-	      PyList_SET_ITEM(r_o, i, t_o);
-	    else {
-	      Py_INCREF(Py_None);
-	      PyList_SET_ITEM(r_o, i, Py_None);
-	      valid = 0;
-	    }
-	  }
-	}
-	else
-	  return setPyBadParam(compstatus);
-
-	if (valid)
-	  return r_o;
-	else {
-	  Py_DECREF(r_o);
-	  return setPyBadParam(compstatus);
-	}
-      }
-    }
-    break;
-    
-  case CORBA::tk_alias: // repoId, name, descr
-    {
-      OMNIORB_ASSERT(tup);
-      return copyArgument(PyTuple_GET_ITEM(d_o, 3), a_o, compstatus);
-    }
-    break;
-
-  case CORBA::tk_except: // class, repoId, exc name, name, descriptor, ...
-    {
-      OMNIORB_ASSERT(tup);
-      if (!PyInstance_Check(a_o)) return setPyBadParam(compstatus);
-
-      PyObject* sdict = ((PyInstanceObject*)a_o)->in_dict;
-
-      // As with structs, the descriptor tuple has twice the number of
-      // struct members plus 4.
-      int       cnt   = (PyTuple_GET_SIZE(d_o) - 4) / 2;
-
-      PyObject* name;
-      PyObject* value;
-      PyObject* argtuple = PyTuple_New(cnt);
-
-      int i, j;
-      for (i=0,j=4; i < cnt; i++) {
-	name    = PyTuple_GET_ITEM(d_o, j++);
-	OMNIORB_ASSERT(PyString_Check(name));
-	value   = PyDict_GetItem(sdict, name);
-	if (!value) return setPyBadParam(compstatus);
-
-	t_o = copyArgument(PyTuple_GET_ITEM(d_o, j++), value, compstatus);
-
-	if (t_o) {
-	  PyTuple_SET_ITEM(argtuple, i, t_o);
-	}
-	else {
-	  // Fill in the remainder of the argtuple with Py_Nones
-	  // then destroy it
-	  for (; i < cnt; i++) {
-	    Py_INCREF(Py_None);
-	    PyTuple_SET_ITEM(argtuple, i, Py_None);
-	  }
-	  Py_DECREF(argtuple);
-	  return setPyBadParam(compstatus);
-	}
-      }
-      r_o = PyEval_CallObject(PyTuple_GET_ITEM(d_o, 1), argtuple);
-      OMNIORB_ASSERT(r_o);
-      Py_DECREF(argtuple);
-      return r_o;
-    }
-    break;
-
-  case 0xffffffff: // [indirect descriptor]
-    {
-      OMNIORB_ASSERT(tup);
-      t_o = PyTuple_GET_ITEM(d_o, 1);
-      OMNIORB_ASSERT(PyList_Check(t_o));
-      return copyArgument(PyList_GET_ITEM(t_o, 0), a_o, compstatus);
-    }
-    break;
-
-  default:
-    omniORB::log << "!!! copyArgument(): unsupported typecode: "
-		 << (CORBA::ULong)tk << "\n";
-    omniORB::log.flush();
-    OMNIORB_THROW(MARSHAL,0,CORBA::COMPLETED_NO);
-  }
-  // Never reach here
-  OMNIORB_ASSERT(0);
-  return 0;
-}
-
-#endif

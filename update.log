@@ -1,3 +1,17 @@
+Wed Nov  1 15:23:18 GMT 2000 dpg1
+=================================
+
+- Support for forward-declared structs and unions
+- RepoIds in indirections are now resolved at the time of use
+
+src/lib/omniORBpy/modules/omnipy.h
+src/lib/omniORBpy/modules/pyMarshal.cc
+src/lib/omniORBpy/modules/pyTypeCode.cc
+src/lib/omniORBpy/omniidl_be/python.py
+src/lib/omniORBpy/python/omniORB/CORBA.py
+src/lib/omniORBpy/python/omniORB/tcInternal.py
+
+
 Fri Oct 13 14:44:24 BST 2000 dpg1
 =================================
 
