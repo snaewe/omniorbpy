@@ -1,3 +1,16 @@
+Thu Jun 29 10:55:27 BST 2000 dpg1
+=================================
+
+- Remove -g compiler flag
+
+modules/dir.mk
+
+- New README file. Date changed in ReleaseNote.
+
+external_merge/README
+external_merge/ReleaseNote
+
+
 Wed Jun 28 13:46:42 BST 2000 dpg1
 =================================
 
