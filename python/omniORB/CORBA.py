@@ -1,8 +1,39 @@
-# CORBA module
+# -*- Mode: Python; -*-
+#                            Package   : omniORBpy
+# CORBA.py                   Created on: 1999/06/08
+#                            Author    : Duncan Grisby (dpg1)
+#
+#    Copyright (C) 1999 AT&T Laboratories Cambridge
+#
+#    This file is part of the omniORBpy library
+#
+#    The omniORBpy library is free software; you can redistribute it
+#    and/or modify it under the terms of the GNU Lesser General
+#    Public License as published by the Free Software Foundation;
+#    either version 2.1 of the License, or (at your option) any later
+#    version.
+#
+#    This library is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU Lesser General Public License for more details.
+#
+#    You should have received a copy of the GNU Lesser General Public
+#    License along with this library; if not, write to the Free
+#    Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
+#    MA 02111-1307, USA
+#
+#
+# Description:
+#    Definitions for CORBA module
+
 
 # $Id$
 
 # $Log$
+# Revision 1.7  1999/09/24 09:22:01  dpg1
+# Added copyright notices.
+#
 # Revision 1.6  1999/09/22 15:46:11  dpg1
 # Fake POA implemented.
 #
