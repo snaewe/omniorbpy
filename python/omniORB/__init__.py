@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.24.2.4  2001/06/12 10:56:02  dpg1
+# Scoping bug in stub code.
+#
 # Revision 1.24.2.3  2001/04/10 16:33:41  dpg1
 # Minor bugs in Any coercion.
 #
@@ -375,6 +378,11 @@ def newModule(mname):
         current = current + "."
 
     return mod
+
+# Function to create a new empty class as a scope place-holder
+def newEmptyClass():
+    class __dummy: pass
+    return __dummy
 
 
 # Classes to support IDL type mapping
