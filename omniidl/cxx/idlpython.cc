@@ -28,14 +28,11 @@
 
 // $Id$
 // $Log$
-// Revision 1.25  2000/10/02 17:35:00  dpg1
-// Merge for 1.2 release
+// Revision 1.26  2001/02/21 14:21:45  dpg1
+// Merge from omnipy1_develop for 1.3 release.
 //
 // Revision 1.23.2.6  2000/09/06 11:40:23  dpg1
 // Support for Python 1.6 and 2.0b1.
-//
-// Revision 1.23.2.2  2000/08/21 09:10:47  dpg1
-// Merge omniidl long long support from omniORB 3
 //
 // Revision 1.23.2.5  2000/08/30 18:12:45  dpg1
 // Register operation declarations so they can be found with findDecl().

@@ -30,8 +30,8 @@
 // $Id$
 
 // $Log$
-// Revision 1.25  2000/10/02 17:35:01  dpg1
-// Merge for 1.2 release
+// Revision 1.26  2001/02/21 14:21:47  dpg1
+// Merge from omnipy1_develop for 1.3 release.
 //
 // Revision 1.23.2.4  2000/09/21 13:20:15  dpg1
 // Silly bug marshalling sequences of anys and TypeCodes

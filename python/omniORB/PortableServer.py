@@ -31,6 +31,12 @@
 # $Id$
 
 # $Log$
+# Revision 1.8  2001/02/21 14:21:44  dpg1
+# Merge from omnipy1_develop for 1.3 release.
+#
+# Revision 1.7.2.1  2000/11/28 14:50:26  dpg1
+# Typo in method name.
+#
 # Revision 1.7  2000/05/25 16:07:44  dpg1
 # Servant._default_POA now caches the root POA.
 #
@@ -164,7 +170,7 @@ class POA (CORBA.Object) :
     def create_id_assignment_policy(self, value):
         return IdAssignmentPolicy(value)
 
-    def create_implict_activation_policy(self, value):
+    def create_implicit_activation_policy(self, value):
         return ImplicitActivationPolicy(value)
 
     def create_servant_retention_policy(self, value):
@@ -247,7 +253,7 @@ class POA (CORBA.Object) :
                    "create_lifespan_policy",
                    "create_id_uniqueness_policy",
                    "create_id_assignment_policy",
-                   "create_implict_activation_policy",
+                   "create_implicit_activation_policy",
                    "create_servant_retention_policy",
                    "create_request_processing_policy",
                    "_get_the_name",

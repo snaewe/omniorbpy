@@ -28,8 +28,8 @@
 
 // $Id$
 // $Log$
-// Revision 1.4  2000/08/21 10:20:21  dpg1
-// Merge from omnipy1_develop for 1.1 release
+// Revision 1.5  2001/02/21 14:21:45  dpg1
+// Merge from omnipy1_develop for 1.3 release.
 //
 // Revision 1.3.2.1  2000/08/14 14:39:10  dpg1
 // IDL dumping now properly escapes string and char constants

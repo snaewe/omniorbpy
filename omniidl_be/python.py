@@ -28,8 +28,11 @@
 
 # $Id$
 # $Log$
-# Revision 1.29  2000/10/02 17:34:58  dpg1
-# Merge for 1.2 release
+# Revision 1.30  2001/02/21 14:21:44  dpg1
+# Merge from omnipy1_develop for 1.3 release.
+#
+# Revision 1.27.2.4  2000/11/01 11:25:56  dpg1
+# Recursive structs inside interfaces were broken
 #
 # Revision 1.27.2.3  2000/08/22 11:52:28  dpg1
 # Generate inherited classes for typedef to struct/union.
@@ -336,9 +339,13 @@ _ad_@tdname@ = (omniORB.tcInternal.tv_alias, @tdname@._NP_RepositoryId, "@tdname
 _tc_@tdname@ = omniORB.tcInternal.createTypeCode(_ad_@tdname@)
 omniORB.registerType(@tdname@._NP_RepositoryId, _ad_@tdname@, _tc_@tdname@)"""
 
-recursive_struct_descr = """
+recursive_struct_descr_at_module_scope = """
 # Recursive struct @sname@
 _0_@modname@._d_@sname@ = (omniORB.tcInternal.tv__indirect, ["@repoId@"])"""
+
+recursive_struct_descr = """
+# Recursive struct @sname@
+_d_@sname@ = (omniORB.tcInternal.tv__indirect, ["@repoId@"])"""
 
 struct_class = """
 # struct @sname@
@@ -1015,10 +1022,16 @@ class PythonVisitor:
         sname = mangle(node.identifier())
 
         if node.recursive():
-            self.st.out(recursive_struct_descr,
-                        sname   = sname,
-                        repoId  = node.repoId(),
-                        modname = self.modname)
+            if self.at_module_scope:
+                self.st.out(recursive_struct_descr_at_module_scope,
+                            sname   = sname,
+                            repoId  = node.repoId(),
+                            modname = self.modname)
+            else:
+                self.st.out(recursive_struct_descr,
+                            sname   = sname,
+                            repoId  = node.repoId(),
+                            modname = self.modname)
 
         self.st.out(struct_class, sname = sname, repoId = node.repoId())
 

@@ -28,8 +28,8 @@
 
 // $Id$
 // $Log$
-// Revision 1.15  2000/10/02 17:35:00  dpg1
-// Merge for 1.2 release
+// Revision 1.16  2001/02/21 14:21:45  dpg1
+// Merge from omnipy1_develop for 1.3 release.
 //
 // Revision 1.13.2.6  2000/09/19 09:25:20  dpg1
 // Rename Scope::Entry::Kind to Scope::Entry::EntryKind to avoid compiler

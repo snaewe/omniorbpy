@@ -31,8 +31,11 @@
 // $Id$
 
 // $Log$
-// Revision 1.2  2000/10/02 17:35:01  dpg1
-// Merge for 1.2 release
+// Revision 1.3  2001/02/21 14:21:47  dpg1
+// Merge from omnipy1_develop for 1.3 release.
+//
+// Revision 1.1.2.2  2000/10/09 09:38:04  dpg1
+// pyThreadCache active flag is now a reference count
 //
 // Revision 1.1.2.1  2000/09/27 15:57:21  dpg1
 // #include<python1.5/pythread.h> generalised for other Python versions
@@ -63,7 +66,7 @@ public:
     PyObject*      workerThread;
 
     CORBA::Boolean used;
-    CORBA::Boolean active;
+    int            active;
 
     CacheNode*     next;
     CacheNode**    back;
@@ -108,16 +111,16 @@ public:
       while (cn && cn->id != id) cn = cn->next;
       if (!cn) cn = addNewNode(id, hash);
 
-      cn->used   = 1;
-      cn->active = 1;
+      cn->used = 1;
+      cn->active++;
     }
     return cn;
   }
 
   static inline void releaseNode(CacheNode* cn) {
     omni_mutex_lock _l(*guard);
-    cn->used   = 1;
-    cn->active = 0;
+    cn->used = 1;
+    cn->active--;
   }
 
   static CacheNode* addNewNode(long id, unsigned int hash);

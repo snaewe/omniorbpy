@@ -28,8 +28,8 @@
 
 // $Id$
 // $Log$
-// Revision 1.6  2000/10/02 17:35:00  dpg1
-// Merge for 1.2 release
+// Revision 1.7  2001/02/21 14:21:45  dpg1
+// Merge from omnipy1_develop for 1.3 release.
 //
 // Revision 1.5.2.1  2000/08/29 10:20:24  dpg1
 // Operations and attributes now have repository ids.

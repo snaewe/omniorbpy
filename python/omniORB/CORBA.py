@@ -31,8 +31,8 @@
 # $Id$
 
 # $Log$
-# Revision 1.28  2000/08/21 10:20:19  dpg1
-# Merge from omnipy1_develop for 1.1 release
+# Revision 1.29  2001/02/21 14:21:44  dpg1
+# Merge from omnipy1_develop for 1.3 release.
 #
 # Revision 1.27.2.2  2000/08/17 08:46:06  dpg1
 # Support for omniORB.LOCATION_FORWARD exception

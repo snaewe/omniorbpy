@@ -1,9 +1,129 @@
-Thu Nov 23 11:30:06 GMT 2000 sll
-================================
+Tue Feb 20 10:34:35 GMT 2001 dpg1
+=================================
 
-- Added shared library rule for DU/Tru64.
+- Updates for 1.3 release.
 
-modules/dir.mk
+src/lib/omniORBpy/bugfixes.xml
+src/lib/omniORBpy/bugfixes.xsl
+src/lib/omniORBpy/bugfixes12.xml                          -- new
+src/lib/omniORBpy/update.log
+src/lib/omniORBpy/doc/tex/omniORBpy.tex
+src/lib/omniORBpy/external_merge/ReleaseNote
+src/lib/omniORBpy/external_merge/THIS_IS_OMNIORBPY_1_2    -- deleted
+src/lib/omniORBpy/external_merge/THIS_IS_OMNIORBPY_1_3    -- new
+src/lib/omniORBpy/external_merge/doc/omniORBpy.pdf
+src/lib/omniORBpy/external_merge/doc/omniORBpy.ps
+src/lib/omniORBpy/external_merge/doc/omniORBpy/index.html
+src/lib/omniORBpy/external_merge/doc/omniORBpy/omniORBpy007.html
+src/lib/omniORBpy/modules/dir.mk
+
+
+Wed Feb 14 15:10:33 GMT 2001 dpg1
+=================================
+
+- Fix bug using repoId strings after deletion.
+
+modules/omni30/omnipy30.h
+modules/omni30/pyObjectRef.cc
+modules/omni30/pyPOAFunc.cc
+modules/omni30/pyServant.cc
+
+
+Thu Jan 18 11:45:43 GMT 2001 dpg1
+=================================
+
+- Silly bug with marshalling TypeCode for CORBA::Object.
+
+modules/common/pyTypeCode.cc
+
+
+Mon Dec  4 17:56:07 GMT 2000 dpg1
+=================================
+
+- Fix bug with TypeCode indirections.
+
+modules/common/pyTypeCode.cc
+
+
+Wed Nov 29 17:01:06 GMT 2000 dpg1
+=================================
+
+- Fix deadlock when trying to lock omniORB internal lock while holding
+  the Python interpreter lock. Must be allowed to lock Python lock
+  while holding omniORB lock to avoid the race condition with
+  _release_ref() on Python servants.
+
+modules/omni30/omnipy30.h
+modules/omni30/pyORBFunc.cc
+modules/omni30/pyObjectRef.cc
+modules/omni30/pyPOAFunc.cc
+modules/omni30/pyPOAManagerFunc.cc
+modules/omni30/pyServant.cc
+
+
+Tue Nov 28 14:48:48 GMT 2000 dpg1
+=================================
+
+- Typo in method name.
+
+python/omniORB/PortableServer.py
+
+
+Mon Nov 27 11:06:48 GMT 2000 dpg1
+=================================
+
+- Some references to python changed to $(PYTHON)
+
+src/lib/omniORBpy/modules/dir.mk
+
+
+Tue Nov 21 14:21:03 GMT 2000 dpg1
+=================================
+
+- resolve_initial_references has the same bug as string_to_object
+
+src/lib/omniORBpy/modules/omni30/pyORBFunc.cc
+
+
+Tue Nov 21 10:46:54 GMT 2000 dpg1
+=================================
+
+- Segfault when string_to_object returns a nil objref
+
+src/lib/omniORBpy/modules/omni30/pyObjectRef.cc
+
+
+Thu Nov  2 17:41:22 GMT 2000p dpg1
+=================================
+
+- Unnecessary extra call to _is_a() after narrow()
+
+modules/omni30/omnipy.cc
+
+
+Wed Nov  1 11:21:45 GMT 2000 dpg1
+=================================
+
+- Recursive structs inside interfaces were broken
+
+omniidl_be/python.py
+
+
+Mon Oct 30 14:24:17 GMT 2000 dpg1
+=================================
+
+- Add omniORB.maxTcpConnectionPerServer
+
+src/lib/omniORBpy/modules/common/pyomniFunc.cc
+
+
+Mon Oct  9 09:54:53 BST 2000 dpg1
+=================================
+
+- pyThreadCache active flag is now a reference count
+
+modules/common/pyThreadCache.h
+
 
 Mon Oct  2 17:35:57 BST 2000 dpg1
 =================================

@@ -78,7 +78,10 @@ only established when a remote invocation is about to be made.
 Therefore, there may be one or more object references in one address
 space that refer to objects in a different address space but unless
 the application invokes on these objects, no network connection is
-made.<BR>
+made. The maximum number of connections opened to another address
+space is 5 by default. This parameter can be changed by calling the
+<TT>omniORB.maxTcpConnectionPerServer</TT> function <EM>before</EM>
+calling <TT>ORB_init()</TT>.<BR>
 <BR>
 It is wasteful to leave a connection open when it has been left unused
 for a considerable time. Too many idle connections could block out new

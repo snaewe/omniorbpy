@@ -28,8 +28,8 @@
 
 // $Id$
 // $Log$
-// Revision 1.6  2000/08/21 10:20:20  dpg1
-// Merge from omnipy1_develop for 1.1 release
+// Revision 1.7  2001/02/21 14:21:44  dpg1
+// Merge from omnipy1_develop for 1.3 release.
 //
 // Revision 1.5.2.1  2000/08/21 09:10:48  dpg1
 // Merge omniidl long long support from omniORB 3

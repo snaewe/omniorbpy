@@ -81,7 +81,7 @@ DIR_CPPFLAGS += $(patsubst %,-I%/src/lib/omniORB2/orbcore,$(IMPORT_TREES))
 ifdef UnixPlatform
 #CXXDEBUGFLAGS = -g
 
-PYPREFIX  := $(shell python -c 'import sys; print sys.exec_prefix')
+PYPREFIX  := $(shell $(PYTHON) -c 'import sys; print sys.exec_prefix')
 PYVERSION := $(shell $(PYTHON) -c 'import sys; print sys.version[:3]')
 PYINCDIR  := $(PYPREFIX)/include
 PYINCFILE := "<python$(PYVERSION)/Python.h>"
@@ -192,7 +192,7 @@ endif
 
 ifdef Win32Platform
 
-PYPREFIX1 := "$(shell python -c 'import sys,string; sys.stdout.write(string.lower(sys.prefix))')"
+PYPREFIX1 := "$(shell $(PYTHON) -c 'import sys,string; sys.stdout.write(string.lower(sys.prefix))')"
 PYPREFIX  := $(subst program files,progra~1,$(subst \,/,$(PYPREFIX1)))
 PYVERSION := $(shell $(PYTHON) -c 'import sys; sys.stdout.write(sys.version[:3])')
 PYINCDIR  := $(PYPREFIX)/include
@@ -335,7 +335,7 @@ endif
 
 ifdef NextStep
 
-PYPREFIX = $(shell python -c "import sys;print sys.exec_prefix")
+PYPREFIX = $(shell $(PYTHON) -c "import sys;print sys.exec_prefix")
 CXXOPTIONS += -I$(PYPREFIX)/include
 CXXLINKOPTIONS += -nostdlib -r
 SO = .so
@@ -453,30 +453,27 @@ export:: $(lib)
 endif
 endif
 
+
 #############################################################################
-#   Make rules for Digital Unix 4/Tru64 5.0                                 #
+#   Make rules for Digital Unix                                             #
 #############################################################################
 
 ifdef OSF1
-
-CXXOPTIONS += 
+ifeq ($(notdir $(CXX)),cxx)
 
 libname = _omnipymodule.so
 soname  = $(libname).$(OMNIPY_MAJOR)
 lib     = $(soname).$(OMNIPY_MINOR)
 
+all:: $(lib)
+
 $(lib): $(OBJS)
 	(set -x; \
          $(RM) $@; \
-         $(LINK.cc) -shared \
-           -Wl,-set_version,$(soname) -Wl,-rpath,$(LIBDIR) \
-           -Wl,-expect_unresolved,"Py*",-expect_unresolved,"_Py*" \
-           -o $@ $(IMPORT_LIBRARY_FLAGS) \
-           $(filter-out $(LibSuffixPattern),$^) $(OMNIORB_LIB_NODYN)\
-           $(LDLIBS); \
+         ld -shared -soname $(soname) -set_version $(soname) -o $@ $(IMPORT_LIBRARY_FLAGS) \
+         $(filter-out $(LibSuffixPattern),$^) $(OMNIORB_LIB_NODYN) -lcxxstd -lcxx -lexc -lots -lc \
         )
 
-all:: $(lib)
 
 clean::
 	$(RM) $(lib)
@@ -491,4 +488,5 @@ export:: $(lib)
           ln -s $(soname) $(libname); \
          )
 
+endif
 endif
