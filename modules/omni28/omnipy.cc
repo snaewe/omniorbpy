@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.14  1999/09/28 16:19:41  dpg1
+// Small memory management issues fixed.
+//
 // Revision 1.13  1999/09/27 09:20:49  dpg1
 // Fixed bug in stringToObject() exception handling.
 //
@@ -475,7 +478,7 @@ extern "C" {
     Py_DECREF(repoId);
     Py_DECREF(opdict);
     //    Py_DECREF(pyboa);
-    //    Py_DECREF(pyservant);
+    Py_DECREF(pyservant);
 
     omniPy_objectIsReady(cxxservant);
 
@@ -484,6 +487,7 @@ extern "C" {
     PyObject* pyobjref = omniPy::createPyCorbaObjRef(0, objref);
 
     PyObject_SetAttrString(pyservant, "_objref", pyobjref);
+    Py_DECREF(pyobjref);
 
     Py_INCREF(Py_None);
     return Py_None;
