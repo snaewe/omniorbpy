@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.14  2000/01/04 15:29:40  dpg1
+# Fixes to modules generated within a package.
+#
 # Revision 1.13  1999/11/12 17:15:50  dpg1
 # Can now specify arguments for omniidl.
 #
@@ -131,7 +134,7 @@ sys.modules."""
 
     argstr  = string.join(args, " ")
     modname = string.replace(os.path.basename(idlname), ".", "_")
-    pipe    = os.popen("omniidl -q -bpython -Wbstdout " + \
+    pipe    = os.popen("omniidl -q -bpython -Wbstdout,inline " + \
                        argstr + " " + idlname)
     try:
         m = imp.load_module(modname, pipe, "", (".idl", "r", imp.PY_SOURCE))
@@ -215,13 +218,11 @@ def findTypeCode(repoId):
         return None
 
 # Function to return a Python module for the required IDL module name
-
 def openModule(mname, fname=None):
     if sys.modules.has_key(mname):
         mod = sys.modules[mname]
     else:
-        mod = imp.new_module(mname)
-        sys.modules[mname] = mod
+        mod = newModule(mname)
 
     if not hasattr(mod, "__doc__") or mod.__doc__ is None:
         mod.__doc__ = "omniORB IDL module " + mname + "\n\n" + \
@@ -229,6 +230,27 @@ def openModule(mname, fname=None):
 
     if fname is not None:
         mod.__doc__ = mod.__doc__ + "  " + fname + "\n"
+
+    return mod
+
+# Function to create a new module, and any parent modules which do not
+# already exist
+def newModule(mname):
+    mlist   = string.split(mname, ".")
+    current = ""
+    mod     = None
+
+    for name in mlist:
+        current = current + name
+
+        if sys.modules.has_key(current):
+            mod = sys.modules[current]
+        else:
+            newmod = imp.new_module(current)
+            if mod: setattr(mod, name, newmod)
+            sys.modules[current] = mod = newmod
+
+        current = current + "."
 
     return mod
 
