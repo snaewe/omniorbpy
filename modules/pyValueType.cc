@@ -28,6 +28,9 @@
 //    ValueType support
 
 // $Log$
+// Revision 1.1.2.2  2003/07/10 22:15:02  dgrisby
+// Fix locking issues (merge from omnipy2_develop).
+//
 // Revision 1.1.2.1  2003/05/20 17:10:24  dgrisby
 // Preliminary valuetype support.
 //
@@ -194,28 +197,6 @@ private:
 
 
 //
-// IsInstance function for all Python versions
-//
-
-static inline
-CORBA::Boolean
-MyIsInstance(PyObject* o, PyObject* c)
-{
-#if PY_VERSION_HEX >= 0x02010000
-  return PyObject_IsInstance(o,c);
-#else
-  if (!PyInstance_Check(a_o))
-    return 0;
-
-  PyObject* acls = (PyObject*)((PyInstanceObject*)o)->in_class;
-
-  return PyClass_IsSubclass(acls, c);
-#endif
-}
-
-
-
-//
 // Marshalling functions
 //
 
@@ -269,7 +250,7 @@ validateTypeValue(PyObject* d_o, PyObject* a_o,
       // is derived from it.
       PyObject* cls = PyTuple_GET_ITEM(d_o, 1);
 
-      if (!MyIsInstance(a_o, cls))
+      if (!omniPy::isInstance(a_o, cls))
 	OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
 
       d_o = PyDict_GetItem(omniPy::pyomniORBtypeMap, actualRepoId);
@@ -392,8 +373,8 @@ real_marshalPyObjectValue(cdrValueChunkStream& stream,
     tag |= REPOID_LIST;
   }
 
-  // Start the value
-  stream.startOutputValue(tag);
+  // Start the value header
+  stream.startOutputValueHeader(tag);
 
   // Marshal repoId(s) if necessary
   if ((tag & REPOID_MASK) == REPOID_LIST) {
@@ -427,6 +408,8 @@ real_marshalPyObjectValue(cdrValueChunkStream& stream,
   }
 
   // Finally, we marshal the members
+  stream.startOutputValueBody();
+
   int members = (PyTuple_GET_SIZE(d_o) - 7) / 3;
 
   PyObject* name;
@@ -491,7 +474,13 @@ marshalPyObjectValue(cdrStream& stream, PyObject* d_o, PyObject* a_o)
   }
   else {
     cdrValueChunkStream cstream(stream);
-    real_marshalPyObjectValue(cstream, d_o, a_o);
+    try {
+      real_marshalPyObjectValue(cstream, d_o, a_o);
+    }
+    catch (...) {
+      cstream.exceptionOccurred();
+      throw;
+    }
   }
 }
 
@@ -533,7 +522,7 @@ marshalPyObjectValueBox(cdrStream& stream, PyObject* d_o, PyObject* a_o)
     tag |= REPOID_SINGLE;
 
   if (cstreamp)
-    cstreamp->startOutputValue(tag);
+    cstreamp->startOutputValueHeader(tag);
   else
     tag >>= stream;
 
@@ -548,6 +537,9 @@ marshalPyObjectValueBox(cdrStream& stream, PyObject* d_o, PyObject* a_o)
   }
 
   // Marshal the boxed value
+  if (cstreamp)
+    cstreamp->startOutputValueBody();
+
   omniPy::marshalPyObject(stream, PyTuple_GET_ITEM(d_o, 4), a_o);
 
   if (cstreamp)
@@ -593,8 +585,8 @@ unmarshalValueRepoId(cdrStream& stream, pyInputValueTracker* tracker)
 
 
 static PyObject*
-real_unmarshalPyObjectValue(cdrStream& stream, PyObject* d_o, CORBA::ULong tag,
-			    CORBA::Long pos)
+real_unmarshalPyObjectValue(cdrStream& stream, cdrValueChunkStream* cstreamp,
+			    PyObject* d_o, CORBA::ULong tag, CORBA::Long pos)
 { // class, repoid, value name, valuemodifier, truncatable base repoids,
   // concrete base descr, [ member name, desc, visibility ] ...
   //or:
@@ -720,6 +712,11 @@ real_unmarshalPyObjectValue(cdrStream& stream, PyObject* d_o, CORBA::ULong tag,
     desc    = d_o;
   }
 
+  // If the value is chunked, tell the chunk stream we're about to
+  // unmarshal the value body.
+  if (cstreamp)
+    cstreamp->startInputValueBody();
+
   // Check there's a factory and a type descriptor for the chosen repoId.
 
   try {
@@ -743,7 +740,7 @@ real_unmarshalPyObjectValue(cdrStream& stream, PyObject* d_o, CORBA::ULong tag,
       if (!instance)
 	omniPy::handlePythonException();
 
-      if (!MyIsInstance(instance, target))
+      if (!omniPy::isInstance(instance, target))
 	OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType,
 		      (CORBA::CompletionStatus)stream.completion());
 
@@ -807,7 +804,7 @@ real_unmarshalPyObjectValue(cdrStream& stream, PyObject* d_o, CORBA::ULong tag,
 	  Py_DECREF(nested);
 	}
 	catch (CORBA::MARSHAL& ex) {
-	  omniORB::logs(25, "Ignore MARSHAL exception while truncating value");
+	  omniORB::logs(25,"Ignore MARSHAL exception while truncating value.");
 	}
       }
     }
@@ -869,13 +866,14 @@ unmarshalPyObjectValue(cdrStream& stream, PyObject* d_o)
   cdrValueChunkStream* cstreamp = cdrValueChunkStream::downcast(&stream);
   if (tag & CHUNKED) {
     if (cstreamp) {
-      result = real_unmarshalPyObjectValue(stream, d_o, tag, pos-4);
+      result = real_unmarshalPyObjectValue(stream, cstreamp, d_o, tag, pos-4);
     }
     else {
       cdrValueChunkStream cstream(stream);
       try {
 	cstream.initialiseInput();
-	result = real_unmarshalPyObjectValue(cstream, d_o, tag, pos-4);
+	result = real_unmarshalPyObjectValue(cstream, &cstream,
+					     d_o, tag, pos-4);
       }
       catch (...) {
 	cstream.exceptionOccurred();
@@ -890,7 +888,7 @@ unmarshalPyObjectValue(cdrStream& stream, PyObject* d_o)
 		    (CORBA::CompletionStatus)stream.completion());
     }
     else {
-      result = real_unmarshalPyObjectValue(stream, d_o, tag, pos-4);
+      result = real_unmarshalPyObjectValue(stream, 0, d_o, tag, pos-4);
     }
   }
   return result;
