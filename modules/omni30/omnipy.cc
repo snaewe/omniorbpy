@@ -31,6 +31,10 @@
 // $Id$
 
 // $Log$
+// Revision 1.16  1999/09/29 11:25:56  dpg1
+// Nil objects now map to None. They work too, which is more than can be
+// said for the old mapping...
+//
 // Revision 1.15  1999/09/29 09:05:03  dpg1
 // Now releases the Python interpreter lock before invoke's call to
 // _is_a().
@@ -100,7 +104,6 @@ omni_mutex          omniPy::pyInterpreterLock;
 
 PyObject* omniPy::pyCORBAmodule;	// The CORBA module
 PyObject* omniPy::pyCORBAsysExcMap;	//  The system exception map
-PyObject* omniPy::pyCORBAnilObject;	//  The nil object
 PyObject* omniPy::pyCORBAAnyClass;	//  Any class
 PyObject* omniPy::pyomniORBmodule;	// The omniORB module
 PyObject* omniPy::pyomniORBobjrefMap;	//  The objref class map
@@ -164,9 +167,6 @@ extern "C" {
     temp =
       PyObject_GetAttrString(omniPy::pyCORBAmodule, "Object");
 
-    omniPy::pyCORBAnilObject =
-      PyObject_GetAttrString(temp, "_nil");
-
     omniPy::pyCORBAAnyClass =
       PyObject_GetAttrString(omniPy::pyCORBAmodule, "Any");
 
@@ -187,8 +187,6 @@ extern "C" {
 
     assert(omniPy::pyCORBAsysExcMap);
     assert(PyDict_Check(omniPy::pyCORBAsysExcMap));
-    assert(omniPy::pyCORBAnilObject);
-    assert(PyInstance_Check(omniPy::pyCORBAnilObject));
     assert(omniPy::pyCORBAAnyClass);
     assert(PyClass_Check(omniPy::pyCORBAAnyClass));
     assert(omniPy::pyomniORBobjrefMap);
@@ -387,19 +385,23 @@ extern "C" {
     if (!PyArg_ParseTuple(args, "OO", &pyorb, &pyobjref))
       return NULL;
 
-    if (!PyInstance_Check(pyobjref)) {
-      PyErr_SetString(PyExc_TypeError,
-		      "Argument must be an object reference.");
-      return NULL;
-    }
-	
-
     CORBA::ORB_ptr orb = (CORBA::ORB_ptr)omniPy::getTwin(pyorb, ORB_TWIN);
 
     assert(orb);
 
-    CORBA::Object_ptr objref = (CORBA::Object_ptr)omniPy::getTwin(pyobjref,
-								  OBJREF_TWIN);
+    CORBA::Object_ptr objref;
+
+    if (pyobjref == Py_None) {
+      objref = CORBA::Object::_nil();
+    }
+    else {
+      if (!PyInstance_Check(pyobjref)) {
+	PyErr_SetString(PyExc_TypeError,
+			"Argument must be an object reference.");
+	return NULL;
+      }	
+      objref = (CORBA::Object_ptr)omniPy::getTwin(pyobjref, OBJREF_TWIN);
+    }
 
     assert(objref);
 

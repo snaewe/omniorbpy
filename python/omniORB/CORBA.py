@@ -31,6 +31,10 @@
 # $Id$
 
 # $Log$
+# Revision 1.10  1999/09/29 11:25:55  dpg1
+# Nil objects now map to None. They work too, which is more than can be
+# said for the old mapping...
+#
 # Revision 1.9  1999/09/27 09:06:37  dpg1
 # Friendly error message if there is no thread support.
 #
@@ -590,36 +594,6 @@ _d_Object  = (omniORB.tcInternal.tv_objref, Object._NP_RepositoryId, "Object")
 _tc_Object = omniORB.tcInternal.createTypeCode(_d_Object)
 
 
-class _nil_Object (Object):
-    """ Class for all nil objects """
-
-    _NP_RepositoryId = ""
-
-    def __nonzero__(self):
-        return 0
-
-    def _is_a(self, repoId):
-        if repoId == "": return TRUE
-        return FALSE
-
-    def _non_existent(self):
-        return TRUE
-
-    def _is_equivalent(self, other_object):
-        if is_nil(other_object): return TRUE
-        return FALSE
-
-    def _hash(self, maximum):
-        return 0
-
-    def _narrow(self, dest):
-        return self
-
-    __methods__ = Object.__methods__
-
-Object._nil = _nil_Object()
-
-
 
 #############################################################################
 #                                                                           #
@@ -628,8 +602,12 @@ Object._nil = _nil_Object()
 #############################################################################
 
 def is_nil(obj):
-    if isinstance(obj, _nil_Object): return TRUE
-    return FALSE
+    if obj is None:
+        return 1
+    if isinstance(obj, Object):
+        return 0
+    raise BAD_PARAM()
+
 
 
 #############################################################################

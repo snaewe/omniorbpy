@@ -31,6 +31,10 @@
 // $Id$
 
 // $Log$
+// Revision 1.9  1999/09/29 11:25:56  dpg1
+// Nil objects now map to None. They work too, which is more than can be
+// said for the old mapping...
+//
 // Revision 1.8  1999/09/29 09:05:03  dpg1
 // Now releases the Python interpreter lock before invoke's call to
 // _is_a().
@@ -193,7 +197,6 @@ _CORBA_MODULE_VAR omni_mutex          pyInterpreterLock;
 
 _CORBA_MODULE_VAR PyObject* pyCORBAmodule;	// The CORBA module
 _CORBA_MODULE_VAR PyObject* pyCORBAsysExcMap;	//  The system exception map
-_CORBA_MODULE_VAR PyObject* pyCORBAnilObject;	//  The nil object
 _CORBA_MODULE_VAR PyObject* pyCORBAAnyClass;    //  Any class
 _CORBA_MODULE_VAR PyObject* pyomniORBmodule;	// The omniORB module
 _CORBA_MODULE_VAR PyObject* pyomniORBobjrefMap;	//  The objref class map

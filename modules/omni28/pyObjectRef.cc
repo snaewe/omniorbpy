@@ -32,6 +32,10 @@
 // $Id$
 
 // $Log$
+// Revision 1.6  1999/09/29 11:25:55  dpg1
+// Nil objects now map to None. They work too, which is more than can be
+// said for the old mapping...
+//
 // Revision 1.5  1999/09/24 09:22:03  dpg1
 // Added copyright notices.
 //
@@ -66,19 +70,12 @@ omniPy::createPyCorbaObjRef(const char*             targetRepoId,
 			    const CORBA::Object_ptr objref)
 {
   if (CORBA::is_nil(objref)) {
-    Py_INCREF(pyCORBAnilObject);
-    return pyCORBAnilObject;
+    Py_INCREF(Py_None);
+    return Py_None;
   }
-  omniObject* oobj = objref->PR_getobj();
+  omniObject*    oobj = objref->PR_getobj();
 
-  /*
-  if (!oobj->is_proxy()) {
-    cerr << "Received a non-proxy object. Not yet implemented!" << endl;
-    abort();
-  }
-  */
   const char*    actualRepoId = oobj->NP_IRRepositoryId();
-
   PyObject*      objrefClass;
   CORBA::Boolean fullTypeUnknown = 0;
 
