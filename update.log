@@ -1,3 +1,11 @@
+Fri Mar  7 13:52:43 GMT 2003 dgrisby
+====================================
+
+- Digits and scale wrong way around in to_any with fixed.
+
+python/omniORB/any.py
+
+
 Fri Mar  7 11:54:03 GMT 2003 dgrisby
 ====================================
 

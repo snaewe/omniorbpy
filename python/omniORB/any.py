@@ -215,7 +215,7 @@ def _to_tc_value(data):
 
     elif isinstance(data, FixedType):
         tc = tcInternal.createTypeCode((tcInternal.tv_fixed,
-                                        data.decimals(), data.precision()))
+                                        data.precision(), data.decimals()))
         return tc, data
 
     elif isinstance(data, CORBA.Any):
