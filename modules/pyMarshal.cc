@@ -29,6 +29,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.2.11  2001/09/20 14:51:24  dpg1
+// Allow ORB reinitialisation after destroy(). Clean up use of omni namespace.
+//
 // Revision 1.1.2.10  2001/08/21 10:52:41  dpg1
 // Update to new ORB core APIs.
 //
@@ -69,6 +72,8 @@
 #  include <codeSetUtil.h>
 #  define PY_HAS_UNICODE
 #endif
+
+OMNI_USING_NAMESPACE(omni)
 
 
 #if defined(__DECCXX)
@@ -1488,10 +1493,9 @@ marshalPyObjectEnum(cdrStream& stream, PyObject* d_o, PyObject* a_o)
 static void
 marshalPyObjectString(cdrStream& stream, PyObject* d_o, PyObject* a_o)
 { // max_length
-  _OMNI_NS(orbParameters)::
-    nativeCharCodeSet->marshalString(stream, stream.TCS_C(), 0,
-				     PyString_GET_SIZE(a_o),
-				     PyString_AS_STRING(a_o));
+  orbParameters::nativeCharCodeSet->marshalString(stream, stream.TCS_C(), 0,
+						  PyString_GET_SIZE(a_o),
+						  PyString_AS_STRING(a_o));
 }
 
 static void
@@ -2158,7 +2162,7 @@ marshalPyObjectWString(cdrStream& stream, PyObject* d_o, PyObject* a_o)
   Py_UNICODE* str = PyUnicode_AS_UNICODE(a_o);
   stream.TCS_W()->marshalWString(stream,
 				 PyUnicode_GET_SIZE(a_o),
-				 (const _OMNI_NS(omniCodeSet::UniChar)*)str);
+				 (const omniCodeSet::UniChar*)str);
 #else
   OMNIORB_ASSERT(0);
 #endif
@@ -2515,8 +2519,8 @@ unmarshalPyObjectString(cdrStream& stream, PyObject* d_o)
 
   char* s;
   CORBA::ULong len =
-    _OMNI_NS(orbParameters)::
-    nativeCharCodeSet->unmarshalString(stream, stream.TCS_C(), max_len, s);
+    orbParameters::nativeCharCodeSet->unmarshalString(stream, stream.TCS_C(),
+						      max_len, s);
 
   PyObject* r_o = PyString_FromStringAndSize(s, len);
   _CORBA_String_helper::free(s);
@@ -2942,11 +2946,11 @@ unmarshalPyObjectWString(cdrStream& stream, PyObject* d_o)
 
   CORBA::ULong max_len = PyInt_AS_LONG(t_o);
 
-  _OMNI_NS(omniCodeSet::UniChar)* us;
+  omniCodeSet::UniChar* us;
   CORBA::ULong len = stream.TCS_W()->unmarshalWString(stream, max_len, us);
 
   PyObject* r_o = PyUnicode_FromUnicode((Py_UNICODE*)us, len);
-  _OMNI_NS(omniCodeSetUtil)::freeU(us);
+  omniCodeSetUtil::freeU(us);
   return r_o;
 #else
   OMNIORB_THROW(NO_IMPLEMENT, 0, CORBA::COMPLETED_NO);

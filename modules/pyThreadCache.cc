@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.4  2001/09/20 14:51:25  dpg1
+// Allow ORB reinitialisation after destroy(). Clean up use of omni namespace.
+//
 // Revision 1.1.2.3  2001/09/20 10:13:03  dpg1
 // Avoid deadlock on exit due to new ORB core cleanup.
 //
@@ -111,7 +114,7 @@ shutdown()
   the_scavenger = 0;
 
   if (table) delete[] table;
-  delete guard;
+  if (guard) delete guard;
   table = 0;
   guard = 0;
 }

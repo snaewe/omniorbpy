@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.13  2001/09/20 14:51:25  dpg1
+// Allow ORB reinitialisation after destroy(). Clean up use of omni namespace.
+//
 // Revision 1.1.2.12  2001/08/15 10:37:14  dpg1
 // Track ORB core object table changes.
 //
@@ -80,6 +83,7 @@
 #include <objectAdapter.h>
 #include <omniORB4/omniURI.h>
 
+OMNI_USING_NAMESPACE(omni)
 
 #if defined(HAS_Cplusplus_Namespace)
 using omniORB::operator==;
@@ -479,7 +483,7 @@ omniPy::stringToObject(const char* uri)
 {
   CORBA::Object_ptr cxxobj;
 
-  cxxobj = _OMNI_NS(omniURI)::stringToObject(uri);
+  cxxobj = omniURI::stringToObject(uri);
 
   if (CORBA::is_nil(cxxobj) || cxxobj->_NP_is_pseudo()) {
     return cxxobj;

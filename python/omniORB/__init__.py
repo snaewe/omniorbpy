@@ -30,6 +30,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.26.2.7  2001/09/20 14:51:26  dpg1
+# Allow ORB reinitialisation after destroy(). Clean up use of omni namespace.
+#
 # Revision 1.26.2.6  2001/08/01 10:12:37  dpg1
 # Main thread policy.
 #
@@ -320,8 +323,8 @@ from _omnipy.omni_func import *
 # Private things
 
 # ORB:
-orb_lock = threading.Lock()
-orb      = None
+orb     = None
+rootPOA = None
 
 # Maps for object reference classes and IDL-defined types:
 map_lock = threading.Lock()

@@ -29,6 +29,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.2.10  2001/09/20 14:51:25  dpg1
+// Allow ORB reinitialisation after destroy(). Clean up use of omni namespace.
+//
 // Revision 1.1.2.9  2001/08/21 10:52:41  dpg1
 // Update to new ORB core APIs.
 //
@@ -61,6 +64,7 @@
 
 #include <omnipy.h>
 
+OMNI_USING_NAMESPACE(omni)
 
 // Objects to map descriptors to typecode offsets and vice-versa:
 
@@ -176,8 +180,7 @@ r_marshalTypeCode(cdrStream&           stream,
   CORBA::Long tc_offset;
 
   // If this TypeCode has already been sent, use an indirection:
-  if (_OMNI_NS(orbParameters)::useTypeCodeIndirections &&
-      dom.lookup(d_o, tc_offset)) {
+  if (orbParameters::useTypeCodeIndirections && dom.lookup(d_o, tc_offset)) {
 
     CORBA::ULong tk_ind = 0xffffffff;
     tk_ind >>= stream;

@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.14  2001/09/20 14:51:24  dpg1
+// Allow ORB reinitialisation after destroy(). Clean up use of omni namespace.
+//
 // Revision 1.1.2.13  2001/08/21 10:52:40  dpg1
 // Update to new ORB core APIs.
 //
@@ -79,7 +82,9 @@
 #include <omniORB4/pydistdate.hh>
 #include <omnipy.h>
 #include <pyThreadCache.h>
+#include <initialiser.h>
 
+OMNI_USING_NAMESPACE(omni)
 
 ////////////////////////////////////////////////////////////////////////////
 // Global pointers to Python objects                                      //
@@ -187,6 +192,22 @@ omniPy::newTwin(void* twin)
   _Py_NewReference(ot);
   return (PyObject*)ot;
 }
+
+////////////////////////////////////////////////////////////////////////////
+// Module inititaliser to hook orb destruction                            //
+////////////////////////////////////////////////////////////////////////////
+
+class omni_python_initialiser : public omniInitialiser {
+public:
+  void attach() { }
+  void detach() {
+    omnipyThreadCache::shutdown();
+    if (omniPy::orb) omniPy::orb = 0;
+  }
+};
+
+static omni_python_initialiser the_omni_python_initialiser;
+
 
 
 // Things visible to Python:
@@ -331,6 +352,17 @@ extern "C" {
     return Py_None;
   }
 
+  static PyObject*
+  omnipy_need_ORB_init(PyObject* self, PyObject* args)
+  {
+    if (!PyArg_ParseTuple(args, (char*)""))
+      return 0;
+
+    if (omniPy::orb)
+      return PyInt_FromLong(0);
+    else
+      return PyInt_FromLong(1);
+  }
 
   ////////////////////////////////////////////////////////////////////////////
   // CORBA:: functions                                                      //
@@ -344,6 +376,8 @@ extern "C" {
     char*     orbid;
     int       argc;
     char**    argv;
+
+    OMNIORB_ASSERT(omniPy::orb == 0);
 
     if (!PyArg_ParseTuple(args, (char*)"OOs", &pyorb, &pyargv, &orbid))
       return 0;
@@ -722,6 +756,7 @@ OMNIORB_FOR_EACH_SYS_EXCEPTION(DO_CALL_DESC_SYSTEM_EXCEPTON)
     {(char*)"registerPyObjects", omnipy_registerPyObjects,       METH_VARARGS},
     {(char*)"cdrMarshal",        omnipy_cdrMarshal,              METH_VARARGS},
     {(char*)"cdrUnmarshal",      omnipy_cdrUnmarshal,            METH_VARARGS},
+    {(char*)"need_ORB_init",     omnipy_need_ORB_init,           METH_VARARGS},
 
     // Wrappers for functions in CORBA::
     {(char*)"ORB_init",          omnipy_ORB_init,                METH_VARARGS},
@@ -751,5 +786,7 @@ OMNIORB_FOR_EACH_SYS_EXCEPTION(DO_CALL_DESC_SYSTEM_EXCEPTON)
     omniPy::initPOAManagerFunc(d);
     omniPy::initPOACurrentFunc(d);
     omniPy::initomniFunc(d);
+
+    omniInitialiser::install(&the_omni_python_initialiser);
   }
 }

@@ -1,3 +1,20 @@
+Thu Sep 20 15:48:05 BST 2001 dpg1
+=================================
+
+- Allow ORB reinitialisation after destroy(). Clean up use of omni namespace.
+
+src/lib/omniORBpy/modules/omnipy.cc
+src/lib/omniORBpy/modules/pyCallDescriptor.cc
+src/lib/omniORBpy/modules/pyMarshal.cc
+src/lib/omniORBpy/modules/pyORBFunc.cc
+src/lib/omniORBpy/modules/pyObjectRef.cc
+src/lib/omniORBpy/modules/pyThreadCache.cc
+src/lib/omniORBpy/modules/pyTypeCode.cc
+src/lib/omniORBpy/python/omniORB/CORBA.py
+src/lib/omniORBpy/python/omniORB/PortableServer.py
+src/lib/omniORBpy/python/omniORB/__init__.py
+
+
 Thu Sep 20 11:11:55 BST 2001 dpg1
 =================================
 
