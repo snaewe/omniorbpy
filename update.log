@@ -1,3 +1,11 @@
+Wed Mar 14 17:40:59 GMT 2001 dpg1
+=================================
+
+- Minor misuse of "global" statement, warned about by Python 2.1.
+
+examples/tests/tclient.py
+
+
 Mon Mar 12 10:19:08 GMT 2001 dpg1
 =================================
 
