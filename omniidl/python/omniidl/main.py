@@ -29,11 +29,17 @@
 
 # $Id$
 # $Log$
-# Revision 1.23  2000/06/20 13:55:58  dpg1
+# Revision 1.24  2000/07/06 09:30:20  dpg1
+# Clarify omniidl usage in documentation and omniidl -u
+#
+# Revision 1.15.2.12  2000/06/27 16:23:26  sll
+# Merged OpenVMS port.
+#
+# Revision 1.15.2.11  2000/06/20 13:55:58  dpg1
 # omniidl now keeps the C++ tree until after the back-ends have run.
 # This means that back-ends can be C++ extension modules.
 #
-# Revision 1.22  2000/06/05 18:13:26  dpg1
+# Revision 1.15.2.10  2000/06/05 18:13:28  dpg1
 # Comments can be attached to subsequent declarations (with -K). Better
 # idea of most recent decl in operation declarations
 #
@@ -134,10 +140,11 @@ import idlast, idltype
 cmdname = "omniidl"
 
 def version():
-    print "omniidl version 0.1"
+    print "omniidl version 1.0"
 
 def usage():
-    print "\nUsage:", cmdname, "[flags] -b<back_end> file1 file2 ..."
+    global backends
+    print "\nUsage:", cmdname, "-b<back_end> [flags] file1 file2 ..."
     print """
 The supported flags are:
 
@@ -160,6 +167,17 @@ The supported flags are:
   -u              Print this usage message and exit
   -v              Trace compilation stages"""
 
+    if backends == []:
+        print """
+You must select a target back-end with -b. For C++, use -bcxx:
+
+  omniidl -bcxx file.idl
+
+Too see options specific to C++, use:
+
+  omniidl -bcxx -u
+"""
+
 preprocessor_args = []
 preprocessor_only = 0
 
@@ -168,9 +186,15 @@ if hasattr(_omniidl, "__file__"):
 else:
     preprocessor_path = os.path.dirname(sys.argv[0])
 
-preprocessor      = os.path.join(preprocessor_path, "omnicpp")
-preprocessor_cmd  = preprocessor + " -lang-c++ -undef -D__OMNIIDL__=" + \
-                    _omniidl.version
+if sys.platform != "OpenVMS":
+    preprocessor      = os.path.join(preprocessor_path, "omnicpp")
+    preprocessor_cmd  = preprocessor + " -lang-c++ -undef -D__OMNIIDL__=" + \
+			_omniidl.version
+else:    
+    names = string.split(preprocessor_path, "/")
+    preprocessor_cmd = \
+ 	'''mcr %s:[%s]omnicpp -lang-c++ -undef "-D__OMNIIDL__=%s"'''\
+ 	% (names[1], string.join(names[2:],"."), _omniidl.version)
 
 no_preprocessor   = 0
 backends          = []
@@ -192,7 +216,7 @@ def parseArgs(args):
         opts,files = getopt.getopt(args, "D:I:U:EY:NW:b:n:kKC:dVuhvqp:")
     except getopt.error, e:
         sys.stderr.write("Error in arguments: " + e + "\n")
-        sys.stderr.write("Use " + cmdname + " -u for usage\n")
+        sys.stderr.write("Use `" + cmdname + " -u' for usage\n")
         sys.exit(1)
 
     for opt in opts:
@@ -316,11 +340,12 @@ def main(argv=None):
     files = parseArgs(argv[1:])
 
     if print_usage:
-        usage()
+        usage()        
 
     elif len(files) == 0:
         if not quiet:
-            sys.stderr.write(cmdname + ": No files specified\n")
+            sys.stderr.write(cmdname + ": No files specified. Use `" \
+                             + cmdname + " -u' for usage.\n")
         sys.exit(1)
 
     # Import back-ends, and add any pre-processor arguments
@@ -371,8 +396,12 @@ def main(argv=None):
                 sys.stderr.write(cmdname + ": `" + file + "' does not exist\n")
             sys.exit(1)
 
-        preproc_cmd = preprocessor_cmd + " " + \
-                      string.join(preprocessor_args, " ") + " " + file
+ 	if sys.platform != 'OpenVMS' or len(preprocessor_args)==0:
+ 	    preproc_cmd = preprocessor_cmd + " " + \
+ 			  string.join(preprocessor_args, " ") + " " + file
+ 	else:
+ 	    preproc_cmd = preprocessor_cmd + ' "' + \
+                       string.join(preprocessor_args, '" "') + '" ' + file
 
         if not no_preprocessor:
             if verbose:
