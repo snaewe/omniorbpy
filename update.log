@@ -1,3 +1,27 @@
+Mon Oct 18 18:08:02 BST 2004 dgrisby
+====================================
+
+- This is the omniORBpy 2.5 release.
+
+
+Mon Oct 18 03:55:41 BST 2004 dgrisby
+====================================
+
+- Updates for 2.5 release.
+
+README
+README.txt
+ReleaseNotes_2_4.txt
+ReleaseNotes_2_5.txt
+THIS_IS_OMNIORBPY_2_4
+THIS_IS_OMNIORBPY_2_5
+aclocal.m4
+configure
+configure.ac
+contrib/RPMs/omniORBpy.spec
+mk/beforeauto.mk.in
+
+
 Wed Aug 11 12:17:05 BST 2004 dgrisby
 ====================================
 
