@@ -1,9 +1,17 @@
-RELEASE NOTES for omniORBpy 2.0
+RELEASE NOTES for omniORBpy 2.1
 ===============================
 
-This is omniORBpy 2.0. It is a stable release.
+This is omniORBpy 2.1. It is a stable release.
 
 See README for building instructions.
+
+New features since omniORBpy 2.0
+--------------------------------
+
+ - Per thread and per object reference timeouts.
+ - Generation of stubs for all COS IDL.
+ - New omniORB.any module to help convert to and from Anys.
+ - Minor bug fixes.
 
 
 Major new features since omniORBpy 1.x
@@ -23,12 +31,3 @@ Major new features since omniORBpy 1.x
  - Commercial support. See http://www.omniorb-support.com/
 
 And many other improvements.
-
-
-Known issues
-------------
-
-This release has the following known issues and omissions. They are
-planned for the 2.1 release:
-
- - The planned per-thread call timeout is not implemented.

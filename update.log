@@ -1,3 +1,43 @@
+Wed Mar 12 11:10:47 GMT 2003 dgrisby
+====================================
+
+- Registration of external pseudo object creation functions.
+
+include/omniORBpy.h
+modules/omnipy.cc
+modules/omnipy.h
+modules/pyObjectRef.cc
+
+- Any / TypeCode fixes.
+
+python/omniORB/__init__.py
+python/omniORB/any.py
+python/omniORB/tcInternal.py
+
+- Document any module, C++ API.
+
+doc/omniORBpy.pdf
+doc/omniORBpy.ps
+doc/omniORBpy/index.html
+doc/omniORBpy/omniORBpy001.html
+doc/omniORBpy/omniORBpy002.html
+doc/omniORBpy/omniORBpy003.html
+doc/omniORBpy/omniORBpy004.html
+doc/omniORBpy/omniORBpy005.html
+doc/omniORBpy/omniORBpy006.html
+doc/omniORBpy/omniORBpy007.html
+doc/omniORBpy/omniORBpy008.html
+doc/tex/omniORBpy.tex
+
+- Bump version number.
+
+ReleaseNotes_2_0.txt   -- deleted
+ReleaseNotes_2_1.txt   -- new
+THIS_IS_OMNIORBPY_2_0  -- deleted
+THIS_IS_OMNIORBPY_2_1  -- new
+bugfixes-21.xml        -- new
+
+
 Fri Mar  7 13:52:43 GMT 2003 dgrisby
 ====================================
 
