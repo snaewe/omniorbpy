@@ -114,8 +114,13 @@ endif
 
 ifdef Win32Platform
 
-DIR_CPPFLAGS += -I"c:\progra~1/Python/include"
-PYLIBPATH = -libpath:"c:\progra~1\Python\libs"
+PYPREFIX1 := $(shell python -c 'import sys; print sys.prefix')
+PYPREFIX := $(subst Program Files,progra~1,$(PYPREFIX1))
+PYINCDIR := $(PYPREFIX)/include
+PYLIBDIR := $(PYPREFIX)/libs
+
+DIR_CPPFLAGS += -I"$(PYINCDIR)"
+PYLIBPATH = -libpath:"$(PYLIBDIR)"
 
 implib = _omnipy.lib
 lib = $(patsubst %.lib,%.pyd,$(implib))
