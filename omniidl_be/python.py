@@ -28,6 +28,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.18  1999/12/21 16:05:11  dpg1
+# New module= option.
+#
 # Revision 1.17  1999/12/17 11:39:52  dpg1
 # New arguments to put modules and stubs in a specified package.
 #
@@ -86,7 +89,7 @@
 
 """omniORB Python bindings"""
 
-from omniidl import idlast, idltype, idlutil, output
+from omniidl import idlast, idltype, idlutil, output, main
 import sys, string, types, os.path, keyword
 
 cpp_args = ["-D__OMNIIDL_PYTHON__"]
@@ -95,7 +98,8 @@ usage_string = """\
   -Wbinline       Output stubs for #included files in line with the main file
   -Wbpackage=p    Put both Python modules and stub files in package p
   -Wbmodules=p    Put Python modules in package p
-  -Wbstubs=p      Put stub files in package p"""
+  -Wbstubs=p      Put stub files in package p
+  -Wbmodule=m     Module to use for global IDL scope (default _GlobalIDL)"""
 
 #""" Uncomment this line to get syntax highlighting on the output strings
 
@@ -430,13 +434,14 @@ exported_modules = {}
 
 # Command line options
 output_inline    = 0
+global_module    = "_GlobalIDL"
 module_package   = ""
 stub_package     = ""
 stub_directory   = ""
 
 def run(tree, args):
     global main_idl_file, imported_files, exported_modules, output_inline
-    global module_package, stub_package, stub_directory
+    global global_module, module_package, stub_package, stub_directory
 
     imported_files.clear()
     exported_modules.clear()
@@ -470,9 +475,18 @@ def run(tree, args):
             if module_package != "":
                 module_package = stub_package = module_package + "."
 
+        elif arg[:7] == "global=":
+            global_module = arg[7:]
+            if global_module == "":
+                sys.stderr.write(main.cmdname + \
+                                 ": You may not have an unnamed global " \
+                                 "module.\n")
+                sys.exit(1)
+                
         else:
-            print "Warning: python back-end does not understand argument:", \
-                  arg
+            sys.stderr.write(main.cmdname + ": Warning: Python " \
+                             "back-end does not understand argument: " + \
+                             arg + "\n")
     
     main_idl_file = tree.file()
 
@@ -528,10 +542,10 @@ class PythonVisitor:
     def visitAST(self, node):
         self.at_module_scope = 1
         self.at_global_scope = 1
-        self.currentScope    = ["_0__GlobalIDL"]
-        self.modname         = "_GlobalIDL"
+        self.currentScope    = ["_0_" + global_module]
+        self.modname         = global_module
 
-        self.st.out(module_start, sname="_GlobalIDL", filename=node.file(),
+        self.st.out(module_start, sname=global_module, filename=node.file(),
                     package=module_package)
 
         decls_in_global_module = 0
@@ -542,9 +556,9 @@ class PythonVisitor:
             n.accept(self)
 
         if decls_in_global_module:
-            exported_modules["_GlobalIDL"] = 1
+            exported_modules[global_module] = 1
 
-        self.st.out(module_end, modname=self.outpymodule, sname="_GlobalIDL",
+        self.st.out(module_end, modname=self.outpymodule, sname=global_module,
                     package="")
 
     #
@@ -578,7 +592,7 @@ class PythonVisitor:
             n.accept(self)
 
         if ags:
-            self.currentScope = ["_0__GlobalIDL"]
+            self.currentScope = ["_0_" + global_module]
         else:
             self.currentScope.pop()
         self.at_global_scope = ags
@@ -1200,7 +1214,9 @@ class PythonVisitor:
     def visitNative(self, node):
         if self.handleImported(node): return
 
-        print "Warning: ignoring declaration of native", node.identifier()
+        sys.stderr.write(main.cmdname + \
+                         ": Warning: ignoring declaration of native " + \
+                         node.identifier() + "\n")
 
 
 def operationToDescriptors(op):
@@ -1349,7 +1365,7 @@ def fixupScopedName(scopedName, prefix="_0_"):
     if isinstance(idlast.findDecl([scopedName[0]]), idlast.Module):
         scopedName = [prefix + scopedName[0]] + scopedName[1:]
     else:
-        scopedName = [prefix + "_GlobalIDL"] + scopedName
+        scopedName = [prefix + global_module] + scopedName
     return scopedName
 
 def valueToString(val, kind, scope=[]):
@@ -1385,8 +1401,8 @@ def checkStubPackage(package):
         
         if os.path.exists(path):
             if not os.path.isdir(path):
-                print 'Output error: "' + path +\
-                      '" exists and is not a directory.'
+                sys.stderr.write(main.cmdname + ': Output error: "' + path +\
+                                 '" exists and is not a directory.\n')
                 sys.exit(1)
         else:
             os.mkdir(path)
@@ -1395,8 +1411,9 @@ def checkStubPackage(package):
 
         if os.path.exists(initfile):
             if not os.path.isfile(initfile):
-                print 'Output error: "' + initfile +\
-                      '" exists and is not a file.'
+                sys.stderr.write(main.cmdname + ': Output error: "' + \
+                                 initfile + \
+                                 '" exists and is not a file.\n')
                 sys.exit(1)
         else:
             open(initfile, "w").write("# omniORB stub directory\n")
@@ -1436,8 +1453,8 @@ def real_updateModules(modules, pymodule):
             del f, st
 
         if not os.path.isfile(modfile):
-            print 'Output error: "' + modfile +\
-                  '" exists but is not a file.'
+            sys.stderr.write(main.cmdname + ': Output error: "' + modfile +\
+                             '" exists but is not a file.\n')
             sys.exit(1)
 
         # Insert the import line for the current IDL file
@@ -1448,11 +1465,11 @@ def real_updateModules(modules, pymodule):
         while line[:7] != "# ** 1.":
             line = inf.readline()
             if line == "":
-                print 'Output error: "' + modfile +\
-                      '" ended before I found a "# ** 1." tag.'
-                print
-                print 'Have you left behind some files from a ' + \
-                      'different Python ORB?'
+                sys.stderr.write(main.cmdname + ': Output error: "' + \
+                                 modfile + \
+                                 '" ended before I found a "# ** 1." tag.\n' \
+                                 'Have you left behind some files from a '  \
+                                 'different Python ORB?\n')
                 sys.exit(1)
                 
             outf.write(line)
@@ -1463,8 +1480,9 @@ def real_updateModules(modules, pymodule):
         while line != "\n":
             line = inf.readline()
             if line == "":
-                print 'Output error: "' + modfile +\
-                      '" ended while I was looking at imports.'
+                sys.stderr.write(main.cmdname + ': Output error: "' + \
+                                 modfile +\
+                                 '" ended while I was looking at imports.\n')
                 sys.exit(1)
 
             if line != "\n":
@@ -1510,8 +1528,9 @@ def real_updateModules(modules, pymodule):
         while line[:7] != "# ** 2.":
             line = inf.readline()
             if line == "":
-                print 'Output error: "' + modfile +\
-                      '" ended before I found a "# ** 2." tag.'
+                sys.stderr.write(main.cmdname + ': Output error: "' + \
+                                 modfile + \
+                                 '" ended before I found a "# ** 2." tag.\n')
                 sys.exit(1)
                 
             outf.write(line)
@@ -1522,8 +1541,9 @@ def real_updateModules(modules, pymodule):
         while line != "\n":
             line = inf.readline()
             if line == "":
-                print 'Output error: "' + modfile +\
-                      '" ended while I was looking at imports.'
+                sys.stderr.write(main.cmdname + ': Output error: "' + \
+                                 modfile +\
+                                 '" ended while I was looking at imports.\n')
                 sys.exit(1)
 
             if line != "\n":
