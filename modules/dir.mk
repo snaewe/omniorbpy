@@ -119,11 +119,11 @@ lib = $(patsubst %.lib,%.pyd,$(implib))
 all:: $(lib)
 
 $(lib): $(OBJS)
-	(if egrep '^ *static *omni_mutex *objectTableLock' $(OMNI_TREE)/include/omniORB2/omniInternal.h; then \
+	(if egrep '^ *static *omni_mutex *objectTableLock' $(TOP)/include/omniORB2/omniInternal.h; then \
            echo -e '\n\n\n\a'; \
 	   echo '*** ERROR !!! ***'; \
 	   echo; \
-	   echo 'Your $(OMNI_TREE)/include/omniORB2/omniInternal.h file needs to be patched.'; \
+	   echo 'Your $$TOP\include\omniORB2\omniInternal.h file needs to be patched.'; \
 	   echo; \
            echo 'Please check-out the latest omni2_8_develop branch from CVS.'; \
            echo 'See http://www.uk.research.att.com/omniORB/cvs.html for details.'; \
