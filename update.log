@@ -1,3 +1,15 @@
+Tue Dec  4 10:26:19 GMT 2001 dpg1
+=================================
+
+- Incorrect generated code for fixed constants.
+
+omniidl_be/python.py
+
+- Cope with null ORB.
+
+modules/pyORBFunc.cc
+
+
 Thu Oct 18 17:42:26 BST 2001 dpg1
 =================================
 

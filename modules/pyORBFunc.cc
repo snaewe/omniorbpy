@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.9  2001/12/04 12:17:43  dpg1
+// Cope with null ORB.
+//
 // Revision 1.1.2.8  2001/09/24 10:48:27  dpg1
 // Meaningful minor codes.
 //
@@ -306,14 +309,14 @@ extern "C" {
     if (!PyArg_ParseTuple(args, (char*)"O", &pyorb)) return NULL;
 
     CORBA::ORB_ptr orb = (CORBA::ORB_ptr)omniPy::getTwin(pyorb, ORB_TWIN);
-    OMNIORB_ASSERT(orb);
 
-    try {
-      omniPy::InterpreterUnlocker _u;
-      CORBA::release(orb);
+    if (orb) {
+      try {
+	omniPy::InterpreterUnlocker _u;
+	CORBA::release(orb);
+      }
+      OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
     }
-    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
-
     Py_INCREF(Py_None);
     return Py_None;
   }
