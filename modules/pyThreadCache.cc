@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.5  2003/07/29 14:52:10  dgrisby
+// Reuse Python thread state if possible. (Python 2.3.)
+//
 // Revision 1.1.2.4  2001/09/20 14:51:25  dpg1
 // Allow ORB reinitialisation after destroy(). Clean up use of omni namespace.
 //
@@ -127,19 +130,48 @@ addNewNode(long id, unsigned int hash)
   CacheNode* cn    = new CacheNode;
   cn->id           = id;
 
-  PyEval_AcquireLock();
-  cn->threadState  = PyThreadState_New(omniPy::pyInterpreter);
+#if PY_VERSION_HEX >= 0x02030000
+  cn->threadState = PyGILState_GetThisThreadState();
+  if (cn->threadState) {
+    if (omniORB::trace(20)) {
+      omniORB::logger l;
+      l << "Reusing Python state for thread id " << id << "\n";
+    }
+    cn->workerThread = 0;
+    cn->can_scavenge = 1;
+    cn->reused_state = 1;
+  }
+  else
+#endif
+  {
+    if (omniORB::trace(20)) {
+      omniORB::logger l;
+      l << "Creating new Python state for thread id " << id << "\n";
+    }
 
-  PyThreadState* oldState = PyThreadState_Swap(cn->threadState);
+    PyEval_AcquireLock();
+    cn->threadState  = PyThreadState_New(omniPy::pyInterpreter);
 
-  cn->workerThread = PyEval_CallObject(omniPy::pyWorkerThreadClass,
-				       omniPy::pyEmptyTuple);
-  PyThreadState_Swap(oldState);
-  PyEval_ReleaseLock();
+    PyThreadState* oldState = PyThreadState_Swap(cn->threadState);
 
-  cn->used         = 0;
-  cn->active       = 0;
-  cn->can_scavenge = 1;
+    cn->workerThread = PyEval_CallObject(omniPy::pyWorkerThreadClass,
+					 omniPy::pyEmptyTuple);
+    PyThreadState_Swap(oldState);
+    PyEval_ReleaseLock();
+
+    cn->reused_state = 0;
+    cn->can_scavenge = 1;
+
+    omni_thread* ot = omni_thread::self();
+    if (ot) {
+      if (ot->set_value(omnithread_key, new omnipyThreadData)) {
+	cn->can_scavenge = 0;
+      }
+    }
+  }
+
+  cn->used   = 0;
+  cn->active = 0;
 
   // Insert into hash table
   CacheNode* he = table[hash];
@@ -148,17 +180,6 @@ addNewNode(long id, unsigned int hash)
   if (he) he->back = &(cn->next);
   table[hash] = cn;
 
-  if (omniORB::trace(20)) {
-    omniORB::logger l;
-    l << "Creating new Python state for thread id " << id << "\n";
-  }
-
-  omni_thread* ot = omni_thread::self();
-  if (ot) {
-    if (ot->set_value(omnithread_key, new omnipyThreadData)) {
-      cn->can_scavenge = 0;
-    }
-  }
   return cn;
 }
 
@@ -178,6 +199,7 @@ threadExit()
 
       if (cn) {
 	OMNIORB_ASSERT(!cn->active);
+	OMNIORB_ASSERT(!cn->reused_state);
 	if (omniORB::trace(20)) {
 	  omniORB::logger l;
 	  l << "Deleting Python state for thread id " << cn->id
@@ -252,28 +274,37 @@ run_undetached(void*)
 	  if (cn->used)
 	    cn->used = 0;
 	  else {
-	    if (omniORB::trace(20)) {
-	      omniORB::logger l;
-	      l << "Deleting Python state for thread id "
-		<< cn->id << " (scavenged)\n";
+	    if (cn->reused_state) {
+	      if (omniORB::trace(20)) {
+		omniORB::logger l;
+		l << "Dropping reused Python state for thread id "
+		  << cn->id << " (scavenged)\n";
+	      }
 	    }
+	    else {
+	      if (omniORB::trace(20)) {
+		omniORB::logger l;
+		l << "Deleting Python state for thread id "
+		  << cn->id << " (scavenged)\n";
+	      }
 
-	    // Acquire Python thread lock and remove Python-world things
-	    PyEval_AcquireLock();
-	    oldState = PyThreadState_Swap(threadState_);
-	    if (cn->workerThread) {
-	      PyObject* argtuple = PyTuple_New(1);
-	      PyTuple_SET_ITEM(argtuple, 0, cn->workerThread);
+	      // Acquire Python thread lock and remove Python-world things
+	      PyEval_AcquireLock();
+	      oldState = PyThreadState_Swap(threadState_);
+	      if (cn->workerThread) {
+		PyObject* argtuple = PyTuple_New(1);
+		PyTuple_SET_ITEM(argtuple, 0, cn->workerThread);
 
-	      PyObject* tmp = PyEval_CallObject(omniPy::pyWorkerThreadDel,
-						argtuple);
-	      Py_XDECREF(tmp);
-	      Py_DECREF(argtuple);
+		PyObject* tmp = PyEval_CallObject(omniPy::pyWorkerThreadDel,
+						  argtuple);
+		Py_XDECREF(tmp);
+		Py_DECREF(argtuple);
+	      }
+	      PyThreadState_Clear(cn->threadState);
+	      PyThreadState_Delete(cn->threadState);
+	      PyThreadState_Swap(oldState);
+	      PyEval_ReleaseLock();
 	    }
-	    PyThreadState_Clear(cn->threadState);
-	    PyThreadState_Delete(cn->threadState);
-	    PyThreadState_Swap(oldState);
-	    PyEval_ReleaseLock();
 
 	    // Remove the CacheNode
 	    cnn = cn->next;
@@ -297,24 +328,25 @@ run_undetached(void*)
     cn = omnipyThreadCache::table[i];
 
     while (cn) {
-      if (omniORB::trace(20)) {
-	omniORB::logger l;
-	l << "Deleting Python state for thread id "
-	  << cn->id << " (shutdown)\n";
+      if (!cn->reused_state) {
+	if (omniORB::trace(20)) {
+	  omniORB::logger l;
+	  l << "Deleting Python state for thread id "
+	    << cn->id << " (shutdown)\n";
+	}
+
+	if (cn->workerThread) {
+	  PyObject* argtuple = PyTuple_New(1);
+	  PyTuple_SET_ITEM(argtuple, 0, cn->workerThread);
+
+	  PyObject* tmp = PyEval_CallObject(omniPy::pyWorkerThreadDel,
+					    argtuple);
+	  Py_XDECREF(tmp);
+	  Py_DECREF(argtuple);
+	}
+	PyThreadState_Clear(cn->threadState);
+	PyThreadState_Delete(cn->threadState);
       }
-
-      if (cn->workerThread) {
-	PyObject* argtuple = PyTuple_New(1);
-	PyTuple_SET_ITEM(argtuple, 0, cn->workerThread);
-
-	PyObject* tmp = PyEval_CallObject(omniPy::pyWorkerThreadDel,
-					  argtuple);
-	Py_XDECREF(tmp);
-	Py_DECREF(argtuple);
-      }
-      PyThreadState_Clear(cn->threadState);
-      PyThreadState_Delete(cn->threadState);
-
       // Remove the CacheNode
       cnn = cn->next;
       delete cn;
