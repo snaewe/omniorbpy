@@ -25,18 +25,21 @@ class Echo_i (_GlobalIDL__POA.Echo):
 
     def echoString(self, mesg):
         print "echoString() called with message:", mesg, \
-              ", ObjectId =", current.get_object_id()
+              ", ObjectId =", repr(current.get_object_id())
         return mesg
 
 class ServantLocator_i (PortableServer__POA.ServantLocator):
     def preinvoke(self, oid, poa, operation):
         print "preinvoke(): oid:", oid, "poa:", poa._get_the_name()
+        if oid == "MyEcho2":
+            raise PortableServer.ForwardRequest(rooteo)
+
         ei = Echo_i()
         return (ei, "Hmm, cookies")
 
     def postinvoke(self, oid, poa, operation, cookie, serv):
         print "postinvoke(): oid:", oid, "poa:", poa._get_the_name(), \
-              "cookie: `" + cookie + "'"
+              "cookie: '" + cookie + "'"
 
 # Initialise the ORB and activate the root POA.
 orb = CORBA.ORB_init(sys.argv, CORBA.ORB_ID)
@@ -57,6 +60,8 @@ child = poa.create_POA("MyPOA", poaManager, ps)
 sli = ServantLocator_i()
 slo = sli._this()
 child.set_servant_manager(slo)
+
+rooteo = Echo_i()._this()
 
 # Create an object reference with no servant
 eo = child.create_reference_with_id("MyEcho", CORBA.id(_GlobalIDL.Echo))
