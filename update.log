@@ -1,3 +1,12 @@
+Tue Dec  5 17:46:39 GMT 2000 dpg1
+=================================
+
+- Strings in TypeCodes need to be marshalled as raw strings. Fix
+  incorrect offset in recursive indirections.
+
+modules/pyTypeCode.cc
+
+
 Mon Dec  4 18:55:21 GMT 2000 dpg1
 =================================
 
@@ -33,8 +42,8 @@ Wed Nov 22 17:20:03 GMT 2000 dpg1
 
 - Twin strings pre-allocated.
 
-src/lib/omniORBpy/modules/omnipy.cc
-src/lib/omniORBpy/modules/omnipy.h
+modules/omnipy.cc
+modules/omnipy.h
 
 
 Wed Nov 22 14:40:58 GMT 2000 dpg1
@@ -42,21 +51,21 @@ Wed Nov 22 14:40:58 GMT 2000 dpg1
 
 - Remove dead omniORB 2.8 code.
 
-src/lib/omniORBpy/modules/dir.mk
-src/lib/omniORBpy/modules/pyExceptions.cc
+modules/dir.mk
+modules/pyExceptions.cc
 
 - Fix segfault in string_to_object and resolve_initial_references with
   nil objref.
 
-src/lib/omniORBpy/modules/pyORBFunc.cc
-src/lib/omniORBpy/modules/pyObjectRef.cc
+modules/pyORBFunc.cc
+modules/pyObjectRef.cc
 
 - Support code set conversion and wchar/wstring.
 
-src/lib/omniORBpy/modules/pyMarshal.cc
-src/lib/omniORBpy/modules/pyomniFunc.cc
-src/lib/omniORBpy/omniidl_be/python.py
-src/lib/omniORBpy/python/omniORB/CORBA.py
+modules/pyMarshal.cc
+modules/pyomniFunc.cc
+omniidl_be/python.py
+python/omniORB/CORBA.py
 
 
 Mon Nov  6 17:05:39 GMT 2000 dpg1
@@ -64,16 +73,16 @@ Mon Nov  6 17:05:39 GMT 2000 dpg1
 
 - Fix to prevent extra _is_a call after narrow
 
-src/lib/omniORBpy/modules/omnipy.cc
+modules/omnipy.cc
 
 - maxTcpConnectionPerServer function
 
-src/lib/omniORBpy/modules/pyomniFunc.cc
+modules/pyomniFunc.cc
 
 - Update to cdrStream interface
 
-src/lib/omniORBpy/modules/pyMarshal.cc
-src/lib/omniORBpy/modules/pyTypeCode.cc
+modules/pyMarshal.cc
+modules/pyTypeCode.cc
 
 
 Wed Nov  1 15:23:18 GMT 2000 dpg1
@@ -82,12 +91,12 @@ Wed Nov  1 15:23:18 GMT 2000 dpg1
 - Support for forward-declared structs and unions
 - RepoIds in indirections are now resolved at the time of use
 
-src/lib/omniORBpy/modules/omnipy.h
-src/lib/omniORBpy/modules/pyMarshal.cc
-src/lib/omniORBpy/modules/pyTypeCode.cc
-src/lib/omniORBpy/omniidl_be/python.py
-src/lib/omniORBpy/python/omniORB/CORBA.py
-src/lib/omniORBpy/python/omniORB/tcInternal.py
+modules/omnipy.h
+modules/pyMarshal.cc
+modules/pyTypeCode.cc
+omniidl_be/python.py
+python/omniORB/CORBA.py
+python/omniORB/tcInternal.py
 
 
 Fri Oct 13 14:44:24 BST 2000 dpg1
