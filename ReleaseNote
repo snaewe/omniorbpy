@@ -1,7 +1,7 @@
-Release Notes for omniORBpy 1.1  (18 August 2000)
+Release Notes for omniORBpy 1.2  (2 October 2000)
 ===============================
 
-This is omniORBpy 1.1, a robust high-performance CORBA ORB for Python.
+This is omniORBpy 1.2, a robust high-performance CORBA ORB for Python.
 
 The bindings adhere to the standard IDL to Python mapping which you
 may find at http://cgi.omg.org/cgi-bin/doc?ptc/00-04-08.
@@ -37,6 +37,17 @@ It is a good idea to subscribe to the omniORB mailing list. See
 Please report any bugs you find to the mailing list, or directly to
 Duncan Grisby,
                                          dgrisby@uk.research.att.com
+
+
+Summary of changes from omniORBpy 1.1
+-------------------------------------
+
+- Bug fixes. For details, see:
+
+    http://www.uk.research.att.com/omniORB/omniORBpy/bugfixes.html
+
+- Support for Python versions beyond 1.5.2.
+
 
 
 Summary of changes from omniORBpy 1.0
