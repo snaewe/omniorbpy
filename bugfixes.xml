@@ -8,6 +8,18 @@
 
 <buglist version="1.2">
 
+<bug id="6" date="Mon Dec  4 17:56:07 GMT 2000" user="dpg1">
+
+  <summary>BAD_TYPECODE exception with good TypeCode</summary>
+  <reported>Harri Pasanen</reported>
+  <link
+  href="http://www.uk.research.att.com/omniORB/archives/2000-12/0001.html"/>
+  <text>
+  The TypeCode unmarshalling code would fail to record offsets within
+  TypeCodes it already knew, so indirections to them would fail.
+  </text>
+</bug>
+
 <bug id="5" date="Wed Nov 29 17:01:06 GMT 2000" user="dpg1">
 
   <summary>Deadlock with concurrent calls to _this()</summary>

@@ -27,10 +27,12 @@
 // Description:
 //    TypeCode support
 
-
 // $Id$
 
 // $Log$
+// Revision 1.11.2.3  2000/12/04 18:04:42  dpg1
+// Fix bug with TypeCode indirections.
+//
 // Revision 1.11.2.2  2000/08/17 08:44:09  dpg1
 // Updates for long long were broken on platforms without it
 //
@@ -543,12 +545,12 @@ r_marshalTypeCode(NetBufferedStream&   stream,
   if (omniORB::useTypeCodeIndirections && dom.lookup(d_o, tc_offset)) {
 
     CORBA::ULong tk_ind = 0xffffffff;
-    CORBA::Long  offset = tc_offset - stream.WrMessageAlreadyWritten();
-
     tk_ind >>= stream;
+
+    CORBA::Long  offset = tc_offset - stream.WrMessageAlreadyWritten();
     offset >>= stream;
 
-    //    cout << "indirection to " << offset << endl;
+    //    cout << "indirection to " << offset << ", " << tc_offset << endl;
   }
   else {
     CORBA::ULong   tk;
@@ -939,12 +941,12 @@ r_marshalTypeCode(MemBufferedStream&   stream,
   if (omniORB::useTypeCodeIndirections && dom.lookup(d_o, tc_offset)) {
 
     CORBA::ULong tk_ind = 0xffffffff;
-    CORBA::Long  offset = tc_offset - stream.WrMessageAlreadyWritten();
-
     tk_ind >>= stream;
+
+    CORBA::Long  offset = tc_offset - stream.WrMessageAlreadyWritten();
     offset >>= stream;
 
-    //    cout << "indirection to " << offset << endl;
+    //    cout << "indirection to " << offset << ", " << tc_offset << endl;
   }
   else {
     CORBA::ULong   tk;
@@ -1418,7 +1420,23 @@ r_unmarshalTypeCode(NetBufferedStream& stream, OffsetDescriptorMap& odm)
 	// Static knowledge of the structure
 	Py_INCREF(d_o);
 	Py_DECREF(repoId);
-	//?? Is is worth checking the TypeCodes for equivalence?
+
+	// We could unmarshal the whole TypeCode and check it for
+	// equivalence, but we don't bother. We still have to recurse
+	// into the TypeCode in case there are later indirections into
+	// it.
+
+	odm.add(d_o, tc_offset);
+	OffsetDescriptorMap eodm(odm, tc_offset + 8);
+
+	UNMARSHAL_PYSTRING(encap, t_o); Py_DECREF(t_o); // Name
+	CORBA::ULong cnt; cnt <<= encap;
+
+	for (CORBA::ULong i=0; i < cnt; i++) {
+	  // Member name and type
+	  UNMARSHAL_PYSTRING(encap, t_o); Py_DECREF(t_o);
+	  t_o = r_unmarshalTypeCode(encap, eodm); Py_DECREF(t_o);
+	}
       }
       else {
 	// Don't know this structure
@@ -1458,7 +1476,7 @@ r_unmarshalTypeCode(NetBufferedStream& stream, OffsetDescriptorMap& odm)
 
 	// Create class object:
 	// *** Could be made faster by finding the createUnknownStruct
-	// function only once, and manually building the argument typle
+	// function only once, and manually building the argument tuple
 	t_o = PyObject_GetAttrString(omniPy::pyomniORBmodule,
 				     (char*)"createUnknownStruct");
 	OMNIORB_ASSERT(t_o && PyFunction_Check(t_o));
@@ -1490,7 +1508,32 @@ r_unmarshalTypeCode(NetBufferedStream& stream, OffsetDescriptorMap& odm)
 	// Static knowledge of the union
 	Py_INCREF(d_o);
 	Py_DECREF(repoId);
-	//?? Is is worth checking the TypeCodes for equivalence?
+
+	// We could unmarshal the whole TypeCode and check it for
+	// equivalence, but we don't bother. We still have to recurse
+	// into the TypeCode in case there are later indirections into
+	// it.
+
+	odm.add(d_o, tc_offset);
+	OffsetDescriptorMap eodm(odm, tc_offset + 8);
+
+	UNMARSHAL_PYSTRING(encap, t_o); Py_DECREF(t_o); // Name
+	PyObject* discriminant = r_unmarshalTypeCode(encap, eodm);
+
+	CORBA::Long  def_used; def_used <<= encap;
+	CORBA::ULong cnt;      cnt      <<= encap;
+
+	for (CORBA::ULong i=0; i<cnt; i++) {
+	  // Label value
+	  t_o = omniPy::unmarshalPyObject(encap, discriminant); Py_DECREF(t_o);
+
+	  // Member name
+	  UNMARSHAL_PYSTRING(encap, t_o); Py_DECREF(t_o);
+
+	  // Member type
+	  t_o = r_unmarshalTypeCode(encap, eodm); Py_DECREF(t_o);
+	}
+	Py_DECREF(discriminant);
       }
       else {
 	// Don't know this union
@@ -1698,6 +1741,11 @@ r_unmarshalTypeCode(NetBufferedStream& stream, OffsetDescriptorMap& odm)
 	// Static knowledge of the alias
 	Py_INCREF(d_o);
 	Py_DECREF(repoId);
+
+	odm.add(d_o, tc_offset);
+	OffsetDescriptorMap eodm(odm, tc_offset + 8);
+	UNMARSHAL_PYSTRING(encap, t_o); Py_DECREF(t_o); // name
+	t_o = r_unmarshalTypeCode(encap, eodm); Py_DECREF(t_o);
       }
       else {
 	OffsetDescriptorMap eodm(odm, tc_offset + 8);
@@ -1706,7 +1754,7 @@ r_unmarshalTypeCode(NetBufferedStream& stream, OffsetDescriptorMap& odm)
 	PyTuple_SET_ITEM(d_o, 0, PyInt_FromLong(tk));
 	PyTuple_SET_ITEM(d_o, 1, repoId);
 
-	// repoId and name
+	// name
 	UNMARSHAL_PYSTRING(encap, t_o); PyTuple_SET_ITEM(d_o, 2, t_o);
 
 	// TypeCode
@@ -1733,7 +1781,18 @@ r_unmarshalTypeCode(NetBufferedStream& stream, OffsetDescriptorMap& odm)
 	// Static knowledge of the exception
 	Py_INCREF(d_o);
 	Py_DECREF(repoId);
-	//?? Is is worth checking the TypeCodes for equivalence?
+
+	odm.add(d_o, tc_offset);
+	OffsetDescriptorMap eodm(odm, tc_offset + 8);
+
+	UNMARSHAL_PYSTRING(encap, t_o); Py_DECREF(t_o); // name
+	CORBA::ULong cnt; cnt <<= encap;
+
+	for (CORBA::ULong i=0; i < cnt; i++) {
+	  // Member name and type
+	  UNMARSHAL_PYSTRING(encap, t_o); Py_DECREF(t_o);
+	  t_o = r_unmarshalTypeCode(encap, eodm); Py_DECREF(t_o);
+	}
       }
       else {
 	// Don't know this exception
@@ -1772,8 +1831,8 @@ r_unmarshalTypeCode(NetBufferedStream& stream, OffsetDescriptorMap& odm)
 	}
 
 	// Create class object:
-	// *** Could be made faster by finding the createUnknownStruct
-	// function only once, and manually building the argument typle
+	// *** Could be made faster by finding the createUnknownUserException
+	// function only once, and manually building the argument tuple
 	t_o = PyObject_GetAttrString(omniPy::pyomniORBmodule,
 				     (char*)"createUnknownUserException");
 	OMNIORB_ASSERT(t_o && PyFunction_Check(t_o));
@@ -1791,7 +1850,7 @@ r_unmarshalTypeCode(NetBufferedStream& stream, OffsetDescriptorMap& odm)
   case 0xffffffff:
     {
       //      cout << "indirect" << endl;
-      CORBA::ULong position, offset;
+      CORBA::Long position, offset;
 
       offset  <<= stream;
       position  = tc_offset + 4 + offset;
@@ -1904,7 +1963,23 @@ r_unmarshalTypeCode(MemBufferedStream& stream, OffsetDescriptorMap& odm)
 	// Static knowledge of the structure
 	Py_INCREF(d_o);
 	Py_DECREF(repoId);
-	//?? Is is worth checking the TypeCodes for equivalence?
+
+	// We could unmarshal the whole TypeCode and check it for
+	// equivalence, but we don't bother. We still have to recurse
+	// into the TypeCode in case there are later indirections into
+	// it.
+
+	odm.add(d_o, tc_offset);
+	OffsetDescriptorMap eodm(odm, tc_offset + 8);
+
+	UNMARSHAL_PYSTRING(encap, t_o); Py_DECREF(t_o); // Name
+	CORBA::ULong cnt; cnt <<= encap;
+
+	for (CORBA::ULong i=0; i < cnt; i++) {
+	  // Member name and type
+	  UNMARSHAL_PYSTRING(encap, t_o); Py_DECREF(t_o);
+	  t_o = r_unmarshalTypeCode(encap, eodm); Py_DECREF(t_o);
+	}
       }
       else {
 	// Don't know this structure
@@ -1944,7 +2019,7 @@ r_unmarshalTypeCode(MemBufferedStream& stream, OffsetDescriptorMap& odm)
 
 	// Create class object:
 	// *** Could be made faster by finding the createUnknownStruct
-	// function only once, and manually building the argument typle
+	// function only once, and manually building the argument tuple
 	t_o = PyObject_GetAttrString(omniPy::pyomniORBmodule,
 				     (char*)"createUnknownStruct");
 	OMNIORB_ASSERT(t_o && PyFunction_Check(t_o));
@@ -1976,7 +2051,32 @@ r_unmarshalTypeCode(MemBufferedStream& stream, OffsetDescriptorMap& odm)
 	// Static knowledge of the union
 	Py_INCREF(d_o);
 	Py_DECREF(repoId);
-	//?? Is is worth checking the TypeCodes for equivalence?
+
+	// We could unmarshal the whole TypeCode and check it for
+	// equivalence, but we don't bother. We still have to recurse
+	// into the TypeCode in case there are later indirections into
+	// it.
+
+	odm.add(d_o, tc_offset);
+	OffsetDescriptorMap eodm(odm, tc_offset + 8);
+
+	UNMARSHAL_PYSTRING(encap, t_o); Py_DECREF(t_o); // Name
+	PyObject* discriminant = r_unmarshalTypeCode(encap, eodm);
+
+	CORBA::Long  def_used; def_used <<= encap;
+	CORBA::ULong cnt;      cnt      <<= encap;
+
+	for (CORBA::ULong i=0; i<cnt; i++) {
+	  // Label value
+	  t_o = omniPy::unmarshalPyObject(encap, discriminant); Py_DECREF(t_o);
+
+	  // Member name
+	  UNMARSHAL_PYSTRING(encap, t_o); Py_DECREF(t_o);
+
+	  // Member type
+	  t_o = r_unmarshalTypeCode(encap, eodm); Py_DECREF(t_o);
+	}
+	Py_DECREF(discriminant);
       }
       else {
 	// Don't know this union
@@ -2184,6 +2284,11 @@ r_unmarshalTypeCode(MemBufferedStream& stream, OffsetDescriptorMap& odm)
 	// Static knowledge of the alias
 	Py_INCREF(d_o);
 	Py_DECREF(repoId);
+
+	odm.add(d_o, tc_offset);
+	OffsetDescriptorMap eodm(odm, tc_offset + 8);
+	UNMARSHAL_PYSTRING(encap, t_o); Py_DECREF(t_o); // name
+	t_o = r_unmarshalTypeCode(encap, eodm); Py_DECREF(t_o);
       }
       else {
 	OffsetDescriptorMap eodm(odm, tc_offset + 8);
@@ -2192,7 +2297,7 @@ r_unmarshalTypeCode(MemBufferedStream& stream, OffsetDescriptorMap& odm)
 	PyTuple_SET_ITEM(d_o, 0, PyInt_FromLong(tk));
 	PyTuple_SET_ITEM(d_o, 1, repoId);
 
-	// repoId and name
+	// name
 	UNMARSHAL_PYSTRING(encap, t_o); PyTuple_SET_ITEM(d_o, 2, t_o);
 
 	// TypeCode
@@ -2219,7 +2324,18 @@ r_unmarshalTypeCode(MemBufferedStream& stream, OffsetDescriptorMap& odm)
 	// Static knowledge of the exception
 	Py_INCREF(d_o);
 	Py_DECREF(repoId);
-	//?? Is is worth checking the TypeCodes for equivalence?
+
+	odm.add(d_o, tc_offset);
+	OffsetDescriptorMap eodm(odm, tc_offset + 8);
+
+	UNMARSHAL_PYSTRING(encap, t_o); Py_DECREF(t_o); // name
+	CORBA::ULong cnt; cnt <<= encap;
+
+	for (CORBA::ULong i=0; i < cnt; i++) {
+	  // Member name and type
+	  UNMARSHAL_PYSTRING(encap, t_o); Py_DECREF(t_o);
+	  t_o = r_unmarshalTypeCode(encap, eodm); Py_DECREF(t_o);
+	}
       }
       else {
 	// Don't know this exception
@@ -2258,8 +2374,8 @@ r_unmarshalTypeCode(MemBufferedStream& stream, OffsetDescriptorMap& odm)
 	}
 
 	// Create class object:
-	// *** Could be made faster by finding the createUnknownStruct
-	// function only once, and manually building the argument typle
+	// *** Could be made faster by finding the createUnknownUserException
+	// function only once, and manually building the argument tuple
 	t_o = PyObject_GetAttrString(omniPy::pyomniORBmodule,
 				     (char*)"createUnknownUserException");
 	OMNIORB_ASSERT(t_o && PyFunction_Check(t_o));
@@ -2277,7 +2393,7 @@ r_unmarshalTypeCode(MemBufferedStream& stream, OffsetDescriptorMap& odm)
   case 0xffffffff:
     {
       //      cout << "indirect" << endl;
-      CORBA::ULong position, offset;
+      CORBA::Long position, offset;
 
       offset  <<= stream;
       position  = tc_offset + 4 + offset;
