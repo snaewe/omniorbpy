@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.11  1999/11/25 11:21:36  dpg1
+// Proper support for server-side _is_a().
+//
 // Revision 1.10  1999/11/16 17:32:36  dpg1
 // Changes for AIX.
 //
@@ -139,6 +142,9 @@ Py_Servant::Py_Servant(PyObject* pyservant, PyObject* opdict,
   Py_INCREF(pyservant_);
   Py_INCREF(opdict_);
 
+  pyskeleton_ = PyObject_GetAttrString(pyservant_, "_omni_skeleton");
+  assert(pyskeleton_ && PyClass_Check(pyskeleton_));
+
   omniObject::PR_IRRepositoryId(repoId);
   this->PR_setobj(this);
 }
@@ -149,6 +155,7 @@ Py_Servant::~Py_Servant()
   //  cout << "Py_Servant destructor." << endl;
   Py_DECREF(pyservant_);
   Py_DECREF(opdict_);
+  Py_DECREF(pyskeleton_);
 }
 
 omniORB::objectKey
@@ -175,8 +182,19 @@ Py_Servant::_widenFromTheMostDerivedIntf(const char* repoId,
     return (void*)((CORBA::Object_ptr)this);
   else if (!strcmp(repoId, NP_IRRepositoryId()))
     return (void*)this;
-  else
-    return 0;
+  else {
+    lockWithNewThreadState _t;
+    PyObject* isa = PyObject_CallMethod(omniPy::pyomniORBmodule,
+					"static_is_a", "Ns",
+					pyskeleton_, repoId);
+    if (!isa)
+      PyErr_Print();
+      
+    assert(isa && PyInt_Check(isa));
+    if (PyInt_AS_LONG(isa))
+      return (void*)this;
+  }
+  return 0;
 }
 
 

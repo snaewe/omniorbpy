@@ -28,6 +28,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.11  1999/11/25 11:21:36  dpg1
+# Proper support for server-side _is_a().
+#
 # Revision 1.10  1999/11/19 11:03:49  dpg1
 # Extremely important spelling correction in a comment. :-)
 #
@@ -220,6 +223,7 @@ skeleton_inheritmap = """\
     _op_d.update(@inheritclass@._op_d)"""
 
 skeleton_end = """
+@ifid@._omni_skeleton = @ifid@
 _0_POA_@modname@.@ifid@ = @ifid@
 del @ifid@
 __name__ = "@modname@"\
@@ -400,7 +404,10 @@ imported_files   = {}
 exported_modules = {}
 
 def run(tree, args):
-    global main_idl_file, imported_files
+    global main_idl_file, imported_files, exported_modules
+
+    imported_files.clear()
+    exported_modules.clear()
 
     # Look at the args:
     use_stdout = 0
@@ -517,9 +524,8 @@ class PythonVisitor:
         self.at_global_scope = ags
         self.modname         = parentmodname
 
-        exported_modules[sname] = 1
-
         if node.mainFile():
+            exported_modules[sname] = 1
             self.st.out(module_end, modname=parentmodname, sname=sname)
 
     #

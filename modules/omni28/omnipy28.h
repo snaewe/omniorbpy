@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.14  1999/11/25 11:21:37  dpg1
+// Proper support for server-side _is_a().
+//
 // Revision 1.13  1999/11/16 17:32:36  dpg1
 // Changes for AIX.
 //
@@ -496,6 +499,7 @@ public:
 private:
   PyObject* pyservant_;		// Python servant object
   PyObject* opdict_;		// Operation descriptor dictionary
+  PyObject* pyskeleton_;	// Skeleton class object
 
   Py_Servant(const Py_Servant&);
   Py_Servant& operator=(const Py_Servant&);

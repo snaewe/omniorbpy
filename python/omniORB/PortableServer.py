@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.5  1999/11/25 11:21:36  dpg1
+# Proper support for server-side _is_a().
+#
 # Revision 1.4  1999/09/28 16:19:41  dpg1
 # Small memory management issues fixed.
 #
@@ -51,6 +54,8 @@ from omniORB import CORBA
 
 # native Servant
 class Servant:
+    _NP_RepositoryId = ""
+
     def _this(self):
         try:
             return self._objref
