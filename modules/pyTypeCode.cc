@@ -29,6 +29,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.2.3  2000/11/06 17:10:09  dpg1
+// Update to cdrStream interface
+//
 // Revision 1.1.2.2  2000/11/01 15:29:00  dpg1
 // Support for forward-declared structs and unions
 // RepoIds in indirections are now resolved at the time of use
@@ -144,7 +147,7 @@ private:
   _slen >>= _stream; \
   if (_slen > 1) { \
     char* _str = PyString_AS_STRING(_pystring); \
-    _stream.put_char_array((const CORBA::Char*)((const char*)_str), _slen); \
+    _stream.put_octet_array((const CORBA::Octet*)((const char*)_str), _slen); \
   } \
 }
 
@@ -231,7 +234,7 @@ r_marshalTypeCode(cdrStream&           stream,
 
 	// Send encapsulation
 	::operator>>=((CORBA::ULong)encap.bufSize(), stream);
-	stream.put_char_array((CORBA::Char*)encap.bufPtr(), encap.bufSize());
+	stream.put_octet_array((CORBA::Octet*)encap.bufPtr(), encap.bufSize());
       }
       break;
 
@@ -266,15 +269,15 @@ r_marshalTypeCode(cdrStream&           stream,
 	  if (str[0] == '_') { --slen; ++str; }
 	  slen >>= encap;
 	  if (slen > 1) {
-	    encap.put_char_array((const CORBA::Char*)((const char*)str),
-				 slen);
+	    encap.put_octet_array((const CORBA::Octet*)((const char*)str),
+				  slen);
 	  }
 	  // member type
 	  r_marshalTypeCode(encap, PyTuple_GET_ITEM(d_o, j++), edom);
 	}
 	// Send encapsulation
 	::operator>>=((CORBA::ULong)encap.bufSize(), stream);
-	stream.put_char_array((CORBA::Char*)encap.bufPtr(), encap.bufSize());
+	stream.put_octet_array((CORBA::Octet*)encap.bufPtr(), encap.bufSize());
       }
       break;
 
@@ -328,15 +331,15 @@ r_marshalTypeCode(cdrStream&           stream,
 	  if (str[0] == '_') { --slen; ++str; }
 	  slen >>= encap;
 	  if (slen > 1) {
-	    encap.put_char_array((const CORBA::Char*)((const char*)str),
-				 slen);
+	    encap.put_octet_array((const CORBA::Octet*)((const char*)str),
+				  slen);
 	  }
 	  // Member typecode
 	  r_marshalTypeCode(encap, PyTuple_GET_ITEM(mem, 2), edom);
 	}
 	// Send encapsulation
 	::operator>>=((CORBA::ULong)encap.bufSize(), stream);
-	stream.put_char_array((CORBA::Char*)encap.bufPtr(), encap.bufSize());
+	stream.put_octet_array((CORBA::Octet*)encap.bufPtr(), encap.bufSize());
       }
       break;
 
@@ -372,7 +375,7 @@ r_marshalTypeCode(cdrStream&           stream,
 	}
       	// Send encapsulation
 	::operator>>=((CORBA::ULong)encap.bufSize(), stream);
-	stream.put_char_array((CORBA::Char*)encap.bufPtr(), encap.bufSize());
+	stream.put_octet_array((CORBA::Octet*)encap.bufPtr(), encap.bufSize());
       }
       break;
 
@@ -393,7 +396,7 @@ r_marshalTypeCode(cdrStream&           stream,
 
 	// Send encapsulation
 	::operator>>=((CORBA::ULong)encap.bufSize(), stream);
-	stream.put_char_array((CORBA::Char*)encap.bufPtr(), encap.bufSize());
+	stream.put_octet_array((CORBA::Octet*)encap.bufPtr(), encap.bufSize());
       }
       break;
 
@@ -414,7 +417,7 @@ r_marshalTypeCode(cdrStream&           stream,
 
 	// Send encapsulation
 	::operator>>=((CORBA::ULong)encap.bufSize(), stream);
-	stream.put_char_array((CORBA::Char*)encap.bufPtr(), encap.bufSize());
+	stream.put_octet_array((CORBA::Octet*)encap.bufPtr(), encap.bufSize());
       }
       break;
 
@@ -437,7 +440,7 @@ r_marshalTypeCode(cdrStream&           stream,
 
       	// Send encapsulation
 	::operator>>=((CORBA::ULong)encap.bufSize(), stream);
-	stream.put_char_array((CORBA::Char*)encap.bufPtr(), encap.bufSize());
+	stream.put_octet_array((CORBA::Octet*)encap.bufPtr(), encap.bufSize());
       }
       break;
 
@@ -473,15 +476,15 @@ r_marshalTypeCode(cdrStream&           stream,
 	  if (str[0] == '_') { --slen; ++str; }
 	  slen >>= encap;
 	  if (slen > 1) {
-	    encap.put_char_array((const CORBA::Char*)((const char*)str),
-				 slen);
+	    encap.put_octet_array((const CORBA::Octet*)((const char*)str),
+				  slen);
 	  }
 	  // member type
 	  r_marshalTypeCode(encap, PyTuple_GET_ITEM(d_o, j++), edom);
 	}
 	// Send encapsulation
 	::operator>>=((CORBA::ULong)encap.bufSize(), stream);
-	stream.put_char_array((CORBA::Char*)encap.bufPtr(), encap.bufSize());
+	stream.put_octet_array((CORBA::Octet*)encap.bufPtr(), encap.bufSize());
       }
       break;
 

@@ -29,6 +29,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.2.3  2000/11/06 17:10:08  dpg1
+// Update to cdrStream interface
+//
 // Revision 1.1.2.2  2000/11/01 15:29:00  dpg1
 // Support for forward-declared structs and unions
 // RepoIds in indirections are now resolved at the time of use
@@ -1241,23 +1244,20 @@ marshalPyObjectDouble(cdrStream& stream, PyObject* d_o, PyObject* a_o)
 static void
 marshalPyObjectBoolean(cdrStream& stream, PyObject* d_o, PyObject* a_o)
 {
-  CORBA::Boolean b = PyInt_AS_LONG(a_o) ? 1:0;
-  b >>= stream;
+  stream.marshalBoolean(PyInt_AS_LONG(a_o));
 }
 
 static void
 marshalPyObjectChar(cdrStream& stream, PyObject* d_o, PyObject* a_o)
 {
   char *str = PyString_AS_STRING(a_o);
-  CORBA::Char c = str[0];
-  c >>= stream;
+  stream.marshalChar(str[0]);
 }
 
 static void
 marshalPyObjectOctet(cdrStream& stream, PyObject* d_o, PyObject* a_o)
 {
-  CORBA::Octet o = PyInt_AS_LONG(a_o);
-  o >>= stream;
+  stream.marshalOctet(PyInt_AS_LONG(a_o));
 }
 
 static void
@@ -1393,10 +1393,10 @@ marshalPyObjectString(cdrStream& stream, PyObject* d_o, PyObject* a_o)
 
   if (slen > 1) {
     char* str = PyString_AS_STRING(a_o);
-    stream.put_char_array((const CORBA::Char*)((const char*)str), slen);
+    stream.put_octet_array((const CORBA::Octet*)((const char*)str), slen);
   }
   else {
-    CORBA::Char('\0') >>= stream;
+    stream.marshalChar('\0');
   }
 }
 
@@ -1416,13 +1416,13 @@ marshalPyObjectSequence(cdrStream& stream, PyObject* d_o, PyObject* a_o)
       len = PyString_GET_SIZE(a_o);
       len >>= stream;
       CORBA::Octet *l = (CORBA::Octet*)PyString_AS_STRING(a_o);
-      stream.put_char_array((const CORBA::Char*)l, len);
+      stream.put_octet_array((const CORBA::Octet*)l, len);
     }
     else if (etk == CORBA::tk_char) {
       len = PyString_GET_SIZE(a_o);
       len >>= stream;
       CORBA::Char *l = (CORBA::Char*)PyString_AS_STRING(a_o);
-      stream.put_char_array((const CORBA::Char*)l, len);
+      stream.put_octet_array((const CORBA::Octet*)l, len);
     }
     else if (PyList_Check(a_o)) {
       len = PyList_GET_SIZE(a_o);
@@ -1506,11 +1506,9 @@ marshalPyObjectSequence(cdrStream& stream, PyObject* d_o, PyObject* a_o)
 
       case CORBA::tk_boolean:
 	{
-	  CORBA::Boolean e;
 	  for (i=0; i < len; i++) {
 	    t_o = PyList_GET_ITEM(a_o, i);
-	    e = PyInt_AS_LONG(t_o);
-	    e >>= stream;
+	    stream.marshalBoolean(PyInt_AS_LONG(t_o));
 	  }
 	}
 	break;
@@ -1635,8 +1633,7 @@ marshalPyObjectSequence(cdrStream& stream, PyObject* d_o, PyObject* a_o)
 	  CORBA::Boolean e;
 	  for (i=0; i < len; i++) {
 	    t_o = PyTuple_GET_ITEM(a_o, i);
-	    e = PyInt_AS_LONG(t_o);
-	    e >>= stream;
+	    stream.marshalBoolean(PyInt_AS_LONG(t_o));
 	  }
 	}
 	break;
@@ -1706,12 +1703,12 @@ marshalPyObjectArray(cdrStream& stream, PyObject* d_o, PyObject* a_o)
     if (etk == CORBA::tk_octet) {
       len = PyString_GET_SIZE(a_o);
       CORBA::Octet *l = (CORBA::Octet*)PyString_AS_STRING(a_o);
-      stream.put_char_array((const CORBA::Char*)l, len);
+      stream.put_octet_array(l, len);
     }
     else if (etk == CORBA::tk_char) {
       len = PyString_GET_SIZE(a_o);
-      CORBA::Char *l = (CORBA::Char*)PyString_AS_STRING(a_o);
-      stream.put_char_array((const CORBA::Char*)l, len);
+      CORBA::Octet *l = (CORBA::Octet*)PyString_AS_STRING(a_o);
+      stream.put_octet_array(l, len);
     }
     else if (PyList_Check(a_o)) {
       len = PyList_GET_SIZE(a_o);
@@ -1797,8 +1794,7 @@ marshalPyObjectArray(cdrStream& stream, PyObject* d_o, PyObject* a_o)
 	  CORBA::Boolean e;
 	  for (i=0; i < len; i++) {
 	    t_o = PyList_GET_ITEM(a_o, i);
-	    e = PyInt_AS_LONG(t_o);
-	    e >>= stream;
+	    stream.marshalBoolean(PyInt_AS_LONG(t_o));
 	  }
 	}
 	break;
@@ -1922,8 +1918,7 @@ marshalPyObjectArray(cdrStream& stream, PyObject* d_o, PyObject* a_o)
 	  CORBA::Boolean e;
 	  for (i=0; i < len; i++) {
 	    t_o = PyTuple_GET_ITEM(a_o, i);
-	    e = PyInt_AS_LONG(t_o);
-	    e >>= stream;
+	    stream.marshalBoolean(PyInt_AS_LONG(t_o));
 	  }
 	}
 	break;
@@ -1992,10 +1987,10 @@ marshalPyObjectExcept(cdrStream& stream, PyObject* d_o, PyObject* a_o)
 
   if (slen > 1) {
     char* str = PyString_AS_STRING(t_o);
-    stream.put_char_array((const CORBA::Char*)((const char*)str), slen);
+    stream.put_octet_array((const CORBA::Octet*)((const char*)str), slen);
   }
   else {
-    CORBA::Char('\0') >>= stream;
+    stream.marshalChar('\0');
   }
 
   PyObject* sdict = ((PyInstanceObject*)a_o)->in_dict;
@@ -2216,17 +2211,14 @@ unmarshalPyObjectDouble(cdrStream& stream, PyObject* d_o)
 static PyObject*
 unmarshalPyObjectBoolean(cdrStream& stream, PyObject* d_o)
 {
-  CORBA::Boolean b;
-  b <<= stream;
+  CORBA::Boolean b = stream.unmarshalBoolean();
   return PyInt_FromLong(b);
 }
 
 static PyObject*
 unmarshalPyObjectChar(cdrStream& stream, PyObject* d_o)
 {
-  CORBA::Char c;
-  c <<= stream;
-
+  CORBA::Char c = stream.unmarshalChar();
   char* str     = new char[2];
   str[0]        = c;
   str[1]        = '\0';
@@ -2238,8 +2230,7 @@ unmarshalPyObjectChar(cdrStream& stream, PyObject* d_o)
 static PyObject*
 unmarshalPyObjectOctet(cdrStream& stream, PyObject* d_o)
 {
-  CORBA::Octet o;
-  o <<= stream;
+  CORBA::Octet o = stream.unmarshalOctet();
   return PyInt_FromLong(o);
 }
 
@@ -2429,8 +2420,8 @@ unmarshalPyObjectString(cdrStream& stream, PyObject* d_o)
     OMNIORB_THROW(MARSHAL,0, CORBA::COMPLETED_NO);
 
   PyObject*    r_o = PyString_FromStringAndSize(0, len - 1);
-  CORBA::Char* c   = (CORBA::Char*)PyString_AS_STRING(r_o);
-  stream.get_char_array(c, len);
+  CORBA::Octet* c  = (CORBA::Octet*)PyString_AS_STRING(r_o);
+  stream.get_octet_array(c, len);
 
   if (c[len - 1] != '\0')
     OMNIORB_THROW(MARSHAL, 0, CORBA::COMPLETED_NO);
@@ -2466,8 +2457,8 @@ unmarshalPyObjectSequence(cdrStream& stream, PyObject* d_o)
 	OMNIORB_THROW(MARSHAL,0, CORBA::COMPLETED_NO);
 
       r_o = PyString_FromStringAndSize(0, len);
-      CORBA::Char* c = (CORBA::Char*)PyString_AS_STRING(r_o);
-      stream.get_char_array(c, len);
+      CORBA::Octet* c = (CORBA::Octet*)PyString_AS_STRING(r_o);
+      stream.get_octet_array(c, len);
       return r_o;
     }
     else if (etk == CORBA::tk_char) {
@@ -2475,8 +2466,8 @@ unmarshalPyObjectSequence(cdrStream& stream, PyObject* d_o)
 	OMNIORB_THROW(MARSHAL,0, CORBA::COMPLETED_NO);
 
       r_o = PyString_FromStringAndSize(0, len);
-      CORBA::Char* c = (CORBA::Char*)PyString_AS_STRING(r_o);
-      stream.get_char_array(c, len);
+      CORBA::Octet* c = (CORBA::Octet*)PyString_AS_STRING(r_o);
+      stream.get_octet_array(c, len);
       return r_o;
     }
     else {
@@ -2573,7 +2564,7 @@ unmarshalPyObjectSequence(cdrStream& stream, PyObject* d_o)
 	  r_o = PyList_New(len);
 	  CORBA::Boolean e;
 	  for (i=0; i < len; i++) {
-	    e <<= stream;
+	    e = stream.unmarshalBoolean();
 	    PyList_SET_ITEM(r_o, i, PyInt_FromLong(e));
 	  }
 	}
@@ -2664,8 +2655,8 @@ unmarshalPyObjectArray(cdrStream& stream, PyObject* d_o)
 	OMNIORB_THROW(MARSHAL,0, CORBA::COMPLETED_NO);
 
       r_o = PyString_FromStringAndSize(0, len);
-      CORBA::Char* c = (CORBA::Char*)PyString_AS_STRING(r_o);
-      stream.get_char_array(c, len);
+      CORBA::Octet* c = (CORBA::Octet*)PyString_AS_STRING(r_o);
+      stream.get_octet_array(c, len);
       return r_o;
     }
     else if (etk == CORBA::tk_char) {
@@ -2673,8 +2664,8 @@ unmarshalPyObjectArray(cdrStream& stream, PyObject* d_o)
 	OMNIORB_THROW(MARSHAL,0, CORBA::COMPLETED_NO);
 
       r_o = PyString_FromStringAndSize(0, len);
-      CORBA::Char* c = (CORBA::Char*)PyString_AS_STRING(r_o);
-      stream.get_char_array(c, len);
+      CORBA::Octet* c = (CORBA::Octet*)PyString_AS_STRING(r_o);
+      stream.get_octet_array(c, len);
       return r_o;
     }
     else {
@@ -2771,7 +2762,7 @@ unmarshalPyObjectArray(cdrStream& stream, PyObject* d_o)
 	  r_o = PyList_New(len);
 	  CORBA::Boolean e;
 	  for (i=0; i < len; i++) {
-	    e <<= stream;
+	    e = stream.unmarshalBoolean();
 	    PyList_SET_ITEM(r_o, i, PyInt_FromLong(e));
 	  }
 	}

@@ -1,3 +1,20 @@
+Mon Nov  6 17:05:39 GMT 2000 dpg1
+=================================
+
+- Fix to prevent extra _is_a call after narrow
+
+src/lib/omniORBpy/modules/omnipy.cc
+
+- maxTcpConnectionPerServer function
+
+src/lib/omniORBpy/modules/pyomniFunc.cc
+
+- Update to cdrStream interface
+
+src/lib/omniORBpy/modules/pyMarshal.cc
+src/lib/omniORBpy/modules/pyTypeCode.cc
+
+
 Wed Nov  1 15:23:18 GMT 2000 dpg1
 =================================
 
