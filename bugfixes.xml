@@ -8,6 +8,14 @@
 
 <buglist version="1.4">
 
-<nobugs/>
+<bug id="1" date="Mon Dec 10 18:01:14 GMT 2001" user="dpg1">
+  <summary>Segfault with narrow on pseudo object</summary>
+  <reported>Krzysztof Czarnowski</reported>
+  <link
+  href="http://www.uk.research.att.com/omniORB/archives/2001-12/0082.html"/>
+  <text>
+  Attempts to narrow a pseudo object like a POA would segfault.
+  </text>
+</bug>
 
 </buglist>

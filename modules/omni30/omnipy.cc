@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.37.2.4  2001/12/10 18:06:55  dpg1
+// Segfault with narrow on pseudo object.
+//
 // Revision 1.37.2.3  2001/05/01 11:16:42  dpg1
 // omnipy_narrow() called createObjRef() while holding the interpreter
 // lock.
@@ -751,14 +754,18 @@ OMNIORB_FOR_EACH_SYS_EXCEPTION(DO_CALL_DESC_SYSTEM_EXCEPTON)
       isa = cxxsource->_is_a(repoId);
 
       if (isa) {
-	omniObjRef* oosource = cxxsource->_PR_getobj();
-	omniObjRef* oodest =
-	  omniPy::createObjRef(oosource->_mostDerivedRepoId(),
-			       repoId,
-			       oosource->_iopProfiles(),
-			       0, 1);
-	cxxdest =
-	  (CORBA::Object_ptr)(oodest->_ptrToObjRef(CORBA::Object::_PD_repoId));
+	if (!cxxsource->_NP_is_pseudo()) {
+	  omniObjRef* oosource = cxxsource->_PR_getobj();
+	  omniObjRef* oodest   =
+	    omniPy::createObjRef(oosource->_mostDerivedRepoId(),
+				 repoId,
+				 oosource->_iopProfiles(),
+				 0, 1);
+	  cxxdest = (CORBA::Object_ptr)
+	                   (oodest->_ptrToObjRef(CORBA::Object::_PD_repoId));
+	}
+	else
+	  cxxdest = CORBA::Object::_duplicate(cxxsource);
       }
     }
     OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
