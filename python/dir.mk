@@ -2,17 +2,8 @@ PYLIBROOT= $(EXPORT_TREE)/lib/python
 PYLIBDIR = $(PYLIBROOT)
 INSTALLPYLIBDIR = $(INSTALLPYTHONDIR)
 
-SUBDIRS = omniORB CosNaming CosNaming__POA
+SUBDIRS = omniORB COS
 
-ifeq ($(PYTHON),)
-PYTHON = python
-endif
-
-
-Naming_idl.py: Naming.idl
-	$(OMNIIDL) -v -p$(BASE_OMNI_TREE)/omniidl_be -bpython $^
-
-all:: Naming_idl.py
 
 all::
 	@$(MakeSubdirs)
@@ -25,7 +16,7 @@ install::
 	@$(MakeSubdirs)
 endif
 
-FILES = CORBA.py PortableServer.py PortableServer__POA.py Naming_idl.py
+FILES = CORBA.py PortableServer.py PortableServer__POA.py
 
 export:: $(FILES)
 	@(dir="$(PYLIBDIR)"; \

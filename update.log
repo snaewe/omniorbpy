@@ -1,3 +1,21 @@
+Sun Mar  2 19:10:18 GMT 2003 dgrisby
+====================================
+
+- Remove unnecessary #include.
+
+modules/pyFixed.cc
+
+- Build stubs for all COS IDL. Thanks Thomas Lockhart.
+
+configure
+configure.ac
+mk/beforeauto.mk.in
+python/dir.mk
+python/COS/GNUmakefile       -- new
+python/COS/GNUmakefile.in    -- new
+python/COS/dir.mk            -- new
+
+
 Mon Jan 27 11:50:19 GMT 2003 dgrisby
 ====================================
 

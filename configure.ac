@@ -19,6 +19,10 @@ AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 
 AM_PATH_PYTHON
+AC_PATH_PROG(OMKDEPEND, omkdepend, omkdepend,
+             $PATH:$OMNIORB_ROOT/bin:/usr/local/bin:/usr/bin)
+AC_PATH_PROGS(MKDIRHIER, omkdirhier mkdirhier, omkdirhier,
+             ./bin/scripts:$PATH:$OMNIORB_ROOT/bin:/usr/local/bin:/usr/bin)
 
 AC_LANG(C++)
 
@@ -124,9 +128,8 @@ AC_CONFIG_FILES(
                 modules/codesets/GNUmakefile
                 modules/sslTP/GNUmakefile
                 omniidl_be/GNUmakefile
-                python/CosNaming/GNUmakefile
-                python/CosNaming__POA/GNUmakefile
                 python/GNUmakefile
+                python/COS/GNUmakefile
                 python/omniORB/GNUmakefile
 		include/GNUmakefile
                )
