@@ -1,6 +1,6 @@
 # Version number
 OMNIPY_MAJOR = 2
-OMNIPY_MINOR = 2
+OMNIPY_MINOR = 3
 
 DIR_CPPFLAGS += -DOMNIPY_MAJOR=$(OMNIPY_MAJOR) -DOMNIPY_MINOR=$(OMNIPY_MINOR)
 DIR_CPPFLAGS += -DOMNIORB_VERSION_STRING=\"$(OMNIORB_VERSION)\"
@@ -71,7 +71,7 @@ endif
 #############################################################################
 
 ifdef UnixPlatform
-#CXXDEBUGFLAGS = -g
+CXXDEBUGFLAGS = -g
 
 PYPREFIX  := $(shell $(PYTHON) -c 'import sys; print sys.exec_prefix')
 PYVERSION := $(shell $(PYTHON) -c 'import sys; print sys.version[:3]')
