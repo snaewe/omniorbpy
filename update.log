@@ -1,3 +1,15 @@
+Mon Mar 12 10:19:08 GMT 2001 dpg1
+=================================
+
+- Missing try around object_to_string()
+
+src/lib/omniORBpy/modules/omni30/pyORBFunc.cc
+
+- Suppress annoying compiler warnings about uninitialised variables.
+
+src/lib/omniORBpy/modules/common/pyTypeCode.cc
+
+
 Tue Feb 20 10:34:35 GMT 2001 dpg1
 =================================
 
