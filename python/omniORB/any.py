@@ -185,7 +185,18 @@ def _to_tc_value(data):
         # Generic list
         tc = tcInternal.createTypeCode((tcInternal.tv_sequence,
                                         tcInternal.tv_any, 0))
-        return tc, map(to_any, data)
+        any_list = map(to_any, data)
+
+        atc = any_list[0]._t
+        for a in any_list:
+            if not a._t.equivalent(atc):
+                break
+        else:
+            tc = tcInternal.createTypeCode((tcInternal.tv_sequence, atc._d, 0))
+            for i in range(len(any_list)):
+                any_list[i] = any_list[i]._v
+            
+        return tc, any_list
 
     elif isinstance(data, TupleType):
         return _to_tc_value(list(data))
