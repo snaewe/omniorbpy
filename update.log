@@ -1,3 +1,12 @@
+Thu Sep  4 15:07:17 BST 2003 dgrisby
+====================================
+
+- Correct register_value_factory semantics.
+
+python/omniORB/CORBA.py
+python/omniORB/__init__.py
+
+
 Thu Jul 10 22:59:16 BST 2003 dgrisby
 ====================================
 

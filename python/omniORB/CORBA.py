@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.31.2.3  2003/09/04 14:08:41  dgrisby
+# Correct register_value_factory semantics.
+#
 # Revision 1.31.2.2  2003/05/20 17:10:25  dgrisby
 # Preliminary valuetype support.
 #
@@ -580,8 +583,7 @@ class ORB:
 
     # ValueFactory operations
     def register_value_factory(self, repoId, factory):
-        omniORB.registerValueFactory(repoId, factory)
-        return factory
+        return omniORB.registerValueFactory(repoId, factory)
 
     def unregister_value_factory(self, repoId):
         omniORB.unregisterValueFactory(repoId)

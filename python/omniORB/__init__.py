@@ -30,6 +30,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.30.2.4  2003/09/04 14:08:41  dgrisby
+# Correct register_value_factory semantics.
+#
 # Revision 1.30.2.3  2003/07/10 22:13:25  dgrisby
 # Abstract interface support.
 #
@@ -406,7 +409,9 @@ def findTypeCode(repoId):
     return typeCodeMapping.get(repoId)
 
 def registerValueFactory(repoId, factory):
+    old = valueFactoryMapping.get(repoId)
     valueFactoryMapping[repoId] = factory
+    return old
 
 def unregisterValueFactory(repoId):
     del valueFactoryMapping[repoId]
