@@ -1,4 +1,4 @@
-omniORBpy 2.x  (August 2003)
+omniORBpy 2.3  (November 2003)
 =============
 
 This is omniORBpy 2, a robust high-performance CORBA ORB for Python.
@@ -53,7 +53,7 @@ compilers and Python. It will always choose gcc over the platform's
 native compiler if it is available. To change the choices it makes,
 use variables CC, CXX and PYTHON, e.g.:
 
-  ../configure CXX=/usr/bin/platform_c++ PYTHON=/usr/local/bin/python2.2
+  ../configure CXX=/usr/bin/platform_c++ PYTHON=/usr/local/bin/python2.3
 
 
 If you do not have Autoconf support on your platform, you must install

@@ -1,9 +1,16 @@
-RELEASE NOTES for omniORBpy 2.2
+RELEASE NOTES for omniORBpy 2.3
 ===============================
 
-This is omniORBpy 2.2. It is a stable release.
+This is omniORBpy 2.3. It is a stable release.
 
 See README for building instructions.
+
+
+New features since omniORBpy 2.2
+--------------------------------
+
+ - Bug fixes.
+ - Minor new functions.
 
 
 New features since omniORBpy 2.1
@@ -12,6 +19,7 @@ New features since omniORBpy 2.1
  - Rudimentary interceptor support.
  - Support for Python 2.3.
  - Bug fixes.
+
 
 New features since omniORBpy 2.0
 --------------------------------

@@ -1,3 +1,18 @@
+Fri Nov 21 16:39:36 GMT 2003 dgrisby
+====================================
+
+- Updates for 2.3 release.
+
+README
+ReleaseNotes_2_2.txt   -- deleted
+ReleaseNotes_2_3.txt   -- new
+THIS_IS_OMNIORBPY_2_2  -- deleted
+THIS_IS_OMNIORBPY_2_3  -- new
+configure
+configure.ac
+modules/dir.mk
+
+
 Wed Nov 19 16:52:09 GMT 2003 dgrisby
 ====================================
 
