@@ -1,0 +1,38 @@
+RELEASE NOTES for omniORBpy 2.0 release candidate
+=================================================
+
+This is the first release candidate of omniORBpy 2.0.
+
+See README for building instructions.
+
+
+Major new features since omniORBpy 1.x
+--------------------------------------
+
+ - Updated to CORBA 2.6.
+ - Support for GIOP 1.1 and 1.2.
+ - Wide string and codeset negotiation.
+ - Unix domain and SSL transports.
+ - Bidirectional GIOP.
+ - Flexible thread pool mode.
+ - PortableServer::Current.
+ - Efficient in-process calls between C++ and Python.
+ - Python / C++ object reference translation API.
+ - Fixed point.
+ - New comprehensive configuration mechanism.
+ - Commercial support. See http://www.omniorb-support.com/
+
+And many other improvements.
+
+
+Known issues
+------------
+
+This release candidate has the following known issues and omissions.
+
+ - No known issues preventing the 4.0.0 release.
+
+These issues will not be resolved before the 2.0 release, but will be
+fixed by 2.1:
+
+ - The planned per-thread call timeout is not implemented.
