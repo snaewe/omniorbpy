@@ -1,3 +1,11 @@
+Fri Jan 18 17:40:34 GMT 2002 dpg1
+=================================
+
+- Support for "docstrings" in IDL.
+
+src/lib/omniORBpy/omniidl_be/python.py
+
+
 Fri Jan 18 15:44:02 GMT 2002 dpg1
 =================================
 

@@ -28,6 +28,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.29.2.11  2002/01/18 17:41:17  dpg1
+# Support for "docstrings" in IDL.
+#
 # Revision 1.29.2.10  2002/01/18 15:49:45  dpg1
 # Context support. New system exception construction. Fix None call problem.
 #
@@ -161,7 +164,7 @@
 
 """omniORB Python bindings"""
 
-from omniidl import idlast, idltype, idlutil, output, main
+from omniidl import idlast, idltype, idlutil, idlvisitor, output, main
 import sys, string, types, os.path, keyword
 
 cpp_args = ["-D__OMNIIDL_PYTHON__"]
@@ -604,6 +607,10 @@ def run(tree, args):
 
     pv = PythonVisitor(st, outpymodule)
     tree.accept(pv)
+
+    dv = DocstringVisitor(st)
+    tree.accept(dv)
+    dv.output()
 
     exports = exported_modules.keys()
     exports.sort()
@@ -1470,6 +1477,141 @@ class PythonVisitor:
                          ": omniORBpy does not support valuetype\n")
         sys.exit(1)
 
+
+def docConst(node):
+    if isinstance(node, idlast.Const)     and \
+       node.constKind() == idltype.tk_string and \
+       node.identifier()[-7:] == "__doc__":
+        return node.identifier()[:-7]
+    else:
+        return None
+
+def nodeId(node):
+    if hasattr(node, "identifier"):
+        return node.identifier()
+    else:
+        return None
+
+def docWarning(node):
+    sys.stderr.write(main.cmdname + \
+                     ": Warning: Constant '" + node.identifier() + "' looks "
+                     "like a Python docstring, but there is no declaration "
+                     "named '" + node.identifier()[:-7] + "'.\n")
+    
+class DocstringVisitor (idlvisitor.AstVisitor):
+    def __init__(self, st):
+        self.docs = []
+        self.st   = st
+
+    def output(self):
+        if self.docs:
+            self.st.out("""\
+#
+# Docstrings
+#
+""")
+        for nsn, dsn in self.docs:
+            nsn = fixupScopedName(nsn)
+            dsn = fixupScopedName(dsn)
+
+            self.st.out("@node@.__doc__ = @doc@",
+                        node=dotName(nsn), doc=dotName(dsn))
+            
+        if self.docs:
+            self.st.out("")
+
+    def visitAST(self, node):
+        for n in node.declarations():
+            if not output_inline and not n.mainFile(): continue
+            
+            d = docConst(n)
+            if d:
+                ok = 0
+                for o in node.declarations():
+                    if nodeId(o) == d:
+                        self.docs.append((o.scopedName(), n.scopedName()))
+                        if isinstance(o, idlast.Interface):
+                            sn = o.scopedName()[:]
+                            sn[-1] = "_objref_" + sn[-1]
+                            self.docs.append((sn, n.scopedName()))
+                        ok = 1
+                        break
+                if not ok:
+                    docWarning(n)
+            n.accept(self)
+
+    def visitModule(self, node):
+        for n in node.definitions():
+            d = docConst(n)
+            if d:
+                if d == node.identifier():
+                    self.docs.append((node.scopedName(), n.scopedName()))
+                else:
+                    ok = 0
+                    for o in node.definitions():
+                        if nodeId(o) == d:
+                            self.docs.append((o.scopedName(), n.scopedName()))
+                            if isinstance(o, idlast.Interface):
+                                sn = o.scopedName()[:]
+                                sn[-1] = "_objref_" + sn[-1]
+                                self.docs.append((sn, n.scopedName()))
+                            ok = 1
+                            break
+                    if not ok:
+                        docWarning(n)
+            n.accept(self)
+
+    def visitInterface(self, node):
+        for n in node.declarations():
+            d = docConst(n)
+            if d:
+                if d == node.identifier():
+                    self.docs.append((node.scopedName(), n.scopedName()))
+                    sn = node.scopedName()[:]
+                    sn[-1] = "_objref_" + sn[-1]
+                    self.docs.append((sn, n.scopedName()))
+                else:
+                    ok = 0
+                    for o in node.declarations():
+                        if nodeId(o) == d:
+                            self.docs.append((o.scopedName(), n.scopedName()))
+                            ok = 1
+                            break
+                                
+                    if ok:
+                        continue
+
+                    for o in node.callables():
+                        self.target_id   = d
+                        self.target_node = n
+                        self.ok          = 0
+                        o.accept(self)
+                        if self.ok:
+                            break
+                    
+                    if not self.ok:    
+                        docWarning(n)
+
+    def visitOperation(self, node):
+        if node.identifier() == self.target_id:
+            sn = node.scopedName() + ["im_func"]
+            sn[-3] = "_objref_" + sn[-3]
+            self.docs.append((sn, self.target_node.scopedName()))
+            self.ok = 1
+
+    def visitAttribute(self, node):
+        for n in node.declarators():
+            if n.identifier() == self.target_id:
+                sn = n.scopedName() + ["im_func"]
+                sn[-3] = "_objref_" + sn[-3]
+                sn[-2] = "_get_"    + sn[-2]
+                self.docs.append((sn, self.target_node.scopedName()))
+                if not node.readonly():
+                    sn = sn[:]
+                    sn[-2] = "_set_" + n.identifier()
+                    self.docs.append((sn, self.target_node.scopedName()))
+                self.ok = 1
+                
 
 
 
