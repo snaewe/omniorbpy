@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.6  1999/09/24 09:33:34  dpg1
+// Version numbers now come from make file.
+//
 // Revision 1.5  1999/09/24 09:22:03  dpg1
 // Added copyright notices.
 //
@@ -57,9 +60,6 @@
 #include <python1.5/Python.h>
 
 #include <iostream.h>
-
-#define OMNIPY_MAJOR 0
-#define OMNIPY_MINOR 1
 
 
 ////////////////////////////////////////////////////////////////////////////

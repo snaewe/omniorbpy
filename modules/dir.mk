@@ -1,3 +1,8 @@
+
+# Version number
+OMNIPY_MAJOR = 0
+OMNIPY_MINOR = 1
+
 CXXSRCS = omnipy.cc \
           pyExceptions.cc \
           pyObjectRef.cc \
@@ -14,7 +19,8 @@ OBJS    = omnipy.o \
           pyProxyCallWrapper.o \
           pyServant.o
 
-DIR_CPPFLAGS = $(patsubst %,-I%/src/lib/omniORB2/orbcore,$(IMPORT_TREES))
+DIR_CPPFLAGS = $(patsubst %,-I%/src/lib/omniORB2/orbcore,$(IMPORT_TREES)) \
+               -DOMNIPY_MAJOR=$(OMNIPY_MAJOR) -DOMNIPY_MINOR=$(OMNIPY_MINOR)
 
 
 CXXDEBUGFLAGS = -g
@@ -25,8 +31,8 @@ ifdef Linux
 CXXOPTIONS += -fpic
 
 libname = _omnipymodule.so
-soname  = $(libname).0
-lib     = $(soname).0
+soname  = $(libname).$(OMNIPY_MAJOR)
+lib     = $(soname).$(OMNIPY_MINOR)
 
 $(lib): $(OBJS)
 	(set -x; \
@@ -57,8 +63,8 @@ ifdef SunOS
 CXXOPTIONS += -Kpic -I/usr/local/include
 
 libname = _omnipymodule.so
-soname  = $(libname).0
-lib     = $(soname).0
+soname  = $(libname).$(OMNIPY_MAJOR)
+lib     = $(soname).$(OMNIPY_MINOR)
 
 $(lib): $(OBJS)
 	(set -x; \
