@@ -157,7 +157,7 @@
 \vfill
 
 { \Huge
-The omniORBpy version 1.2\\[4mm]
+The omniORBpy version 1.3\\[4mm]
 User's Guide
 }
 
@@ -184,15 +184,22 @@ August 2000
 
 {\Large \bf Changes and Additions, August 2000}
 \begin{itemize}
+\item New \code{omniORB.maxTcpConnectionPerServer} function.
+\end{itemize}
+
+\vspace{\baselineskip}
+
+{\Large \bf Changes and Additions, August 2000}
+\begin{itemize}
 \item New \code{omniORB.LOCATION\_FORWARD} exception.
-\item New \op{omniORB.traceLevel} function
+\item New \op{omniORB.traceLevel} function.
 \end{itemize}
 
 \vspace{\baselineskip}
 
 {\Large \bf Changes and Additions, June 2000}
 \begin{itemize}
-\item Brand new manual
+\item Brand new manual.
 \end{itemize}
 
 
@@ -2822,7 +2829,10 @@ only established when a remote invocation is about to be made.
 Therefore, there may be one or more object references in one address
 space that refer to objects in a different address space but unless
 the application invokes on these objects, no network connection is
-made.
+made. The maximum number of connections opened to another address
+space is 5 by default. This parameter can be changed by calling the
+\code{omniORB.\dsc{}maxTcpConnectionPerServer} function \emph{before}
+calling \op{ORB\_init}.
 
 It is wasteful to leave a connection open when it has been left unused
 for a considerable time. Too many idle connections could block out new

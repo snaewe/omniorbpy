@@ -92,6 +92,7 @@
           <p>
           The bugs pages for earlier versions can be found here:
           <ul> 
+              <li><a href="bugfixes12.html">omniORBpy 1.2</a></li>
               <li><a href="bugfixes11.html">omniORBpy 1.1</a></li>
               <li><a href="bugfixes10.html">omniORBpy 1.0</a></li>
           </ul>

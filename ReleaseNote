@@ -1,29 +1,16 @@
-Release Notes for omniORBpy 1.2  (2 October 2000)
+Release Notes for omniORBpy 1.3  (20 February 2001)
 ===============================
 
-This is omniORBpy 1.2, a robust high-performance CORBA ORB for Python.
+This is omniORBpy 1.3, a robust high-performance CORBA ORB for Python.
 
 The bindings adhere to the standard IDL to Python mapping which you
 may find at http://cgi.omg.org/cgi-bin/doc?ptc/00-04-08.
 
-
-----------------------------------------------------------------------
-                               WARNING!
-
-The mapping for server-side skeletons has changed since pre-release 2.
-Server-side code written for omniORBpy before pre-release 3 MUST be
-updated to work with omniORBpy 1.0 and above.
-
-This unfortunate state of affairs is due to an internal contradiction
-in drafts of the Python mapping. See below for full details.
-
-----------------------------------------------------------------------
-
-
 omniORBpy makes use of the C++ omniORB library. It can use either
 omniORB 3.0 or omniORB 2.8. If you use omniORB 3.0, the full POA
 functionality is available; with omniORB 2.8 many POA functions are
-not supported.
+not supported. Using omniORBpy with omniORB 2.8 is no longer actively
+supported.
 
 omniORBpy is currently available for many Unix platforms and Windows.
 It has been ported to a number of other operating systems by outside
@@ -34,9 +21,18 @@ It is a good idea to subscribe to the omniORB mailing list. See
     http://www.uk.research.att.com/omniORB/intouch.html
 
 
-Please report any bugs you find to the mailing list, or directly to
-Duncan Grisby,
-                                         dgrisby@uk.research.att.com
+Please report any bugs you find to the mailing list.
+
+
+Summary of changes from omniORBpy 1.2
+-------------------------------------
+
+- Bug fixes. For details, see:
+
+    http://www.uk.research.att.com/omniORB/omniORBpy/bugfixes.html
+
+- Expose the omniORB.maxTcpConnectonPerServer setting to Python.
+
 
 
 Summary of changes from omniORBpy 1.1
@@ -74,6 +70,20 @@ Summary of changes from pre-release 3
 
 Summary of changes from pre-release 2
 -------------------------------------
+
+
+----------------------------------------------------------------------
+                               WARNING!
+
+The mapping for server-side skeletons has changed since pre-release 2.
+Server-side code written for omniORBpy before pre-release 3 MUST be
+updated to work with omniORBpy 1.0 and above.
+
+This unfortunate state of affairs is due to an internal contradiction
+in drafts of the Python mapping.
+
+----------------------------------------------------------------------
+
 
 - Skeleton package names have changed
 

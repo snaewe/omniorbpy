@@ -11,7 +11,7 @@
 %DVIPSWebPage: (www.radicaleye.com)
 %DVIPSCommandLine: dvips omniORBpy
 %DVIPSParameters: dpi=600, compressed
-%DVIPSSource:  TeX output 2000.10.02:1722
+%DVIPSSource:  TeX output 2001.02.19:1926
 %%BeginProcSet: texc.pro
 %!
 /TeXDict 300 dict def TeXDict begin/N{def}def/B{bind def}N/S{exch}N/X{S
@@ -349,7 +349,7 @@ rf /Fq 75[30 28[91 45 27[45 51 47 76 51 55 30 39 36 51
 85 1[93 26[93 38[{TeXBase1Encoding ReEncodeFont}22 119.552
 /Palatino-Roman rf /Fs 134[115 2[117 125 1[88 82 1[124
 113 120 182 3[60 120 2[99 126 14[161 127 1[138 2[162
-7[158 4[126 15[103 103 2[52 6[57 39[{TeXBase1Encoding ReEncodeFont}23
+7[158 4[126 14[103 1[103 2[52 6[57 39[{TeXBase1Encoding ReEncodeFont}23
 206.559 /Palatino-Roman rf end
 %%EndProlog
 %%BeginSetup
@@ -359,18 +359,21 @@ TeXDict begin
 
 %%EndSetup
 %%Page: 1 1
-1 0 bop 418 597 a Fs(The)52 b(omniORBpy)g(version)f(1.2)1077
+1 0 bop 418 597 a Fs(The)52 b(omniORBpy)g(version)f(1.3)1077
 907 y(User)15 b('s)51 b(Guide)1306 1979 y Fr(Duncan)28
 b(Grisby)1029 2128 y Fq(\()p Fp(email:)i(dgrisby@uk.r)n(esear)n
 (ch.att.com)p Fq(\))885 2390 y Fr(A)-9 b(T&T)31 b(Laboratories)f
 (Cambridge)1455 4346 y Fq(August)21 b(2000)p eop
 %%Page: 2 2
 2 1 bop 362 539 a Fo(Changes)31 b(and)e(Additions,)h(August)h(2000)358
-726 y Fn(\017)45 b Fq(New)22 b Fm(omniORB.LOCATIO)o(N_)o(FO)o(RWA)o(RD)
-16 b Fq(exception.)358 914 y Fn(\017)45 b Fq(New)22 b
-Fm(omniORB.traceLe)o(ve)o(l\()o(\))17 b Fq(function)362
-1214 y Fo(Changes)31 b(and)e(Additions,)h(June)g(2000)358
-1402 y Fn(\017)45 b Fq(Brand)23 b(new)f(manual)p eop
+726 y Fn(\017)45 b Fq(New)22 b Fm(omniORB.maxTcpC)o(on)o(ne)o(cti)o(on)
+o(Pe)o(rS)o(er)o(ver)16 b Fq(function.)362 1027 y Fo(Changes)31
+b(and)e(Additions,)h(August)h(2000)358 1214 y Fn(\017)45
+b Fq(New)22 b Fm(omniORB.LOCATIO)o(N_)o(FO)o(RWA)o(RD)16
+b Fq(exception.)358 1402 y Fn(\017)45 b Fq(New)22 b Fm(omniORB.traceLe)
+o(ve)o(l\()o(\))17 b Fq(function.)362 1703 y Fo(Changes)31
+b(and)e(Additions,)h(June)g(2000)358 1890 y Fn(\017)45
+b Fq(Brand)23 b(new)f(manual.)p eop
 %%Page: 3 3
 3 2 bop 63 1204 a Fl(Contents)63 1743 y Fk(1)91 b(Introduction)2581
 b(1)199 1858 y Fq(1.1)96 b(Featur)n(es)85 b(.)46 b(.)f(.)g(.)g(.)g(.)g
@@ -2908,157 +2911,164 @@ b(ar)n(e)g(cr)n(eated)g(on)f(demand)h(and)g(cached)g(when)f(ther)n(e)g
 (connection)i(to)f(another)h(addr)n(ess)f(space)g(is)i(only)f(es-)221
 2804 y(tablished)f(when)g(a)h(r)n(emote)f(invocation)h(is)g(about)f(to)
 g(be)g(made.)36 b(Ther)n(efor)n(e,)25 b(ther)n(e)f(may)i(be)221
-2917 y(one)f(or)f(mor)n(e)h(object)g(r)n(efer)n(ences)f(in)i(one)e
-(addr)n(ess)g(space)h(that)g(r)n(efer)g(to)f(objects)h(in)g(a)h(dif)n
-(fer)n(-)221 3029 y(ent)e(addr)n(ess)g(space)g(but)h(unless)f(the)g
-(application)i(invokes)e(on)h(these)e(objects,)h(no)h(network)221
-3142 y(connection)d(is)h(made.)362 3260 y(It)33 b(is)h(wasteful)f(to)g
-(leave)h(a)g(connection)f(open)f(when)h(it)g(has)h(been)f(left)g
-(unused)f(for)h(a)221 3372 y(considerable)23 b(time.)31
-b(T)-8 b(oo)22 b(many)i(idle)f(connections)g(could)g(block)h(out)e(new)
-h(connections)g(to)221 3485 y(a)32 b(server)e(when)g(it)h(r)o(uns)g
-(out)f(of)h(spar)n(e)g(communication)h(channels.)54 b(For)30
-b(example,)j(most)221 3598 y(Unix)27 b(platforms)f(have)g(a)h(limit)h
-(on)e(the)f(number)h(of)h(\002le)f(handles)g(a)g(pr)n(ocess)f(can)i
-(open.)38 b(64)221 3711 y(is)23 b(the)f(usual)h(default)g(limit.)29
+2917 y(one)18 b(or)h(mor)n(e)f(object)h(r)n(efer)n(ences)e(in)j(one)e
+(addr)n(ess)f(space)h(that)h(r)n(efer)f(to)g(objects)h(in)g(a)g(dif)n
+(fer)n(ent)221 3029 y(addr)n(ess)h(space)g(but)h(unless)f(the)g
+(application)j(invokes)d(on)g(these)g(objects,)g(no)h(network)e(con-)
+221 3142 y(nection)i(is)g(made.)27 b(The)20 b(maximum)j(number)e(of)g
+(connections)f(opened)f(to)h(another)g(addr)n(ess)221
+3255 y(space)33 b(is)f(5)i(by)e(default.)58 b(This)33
+b(parameter)f(can)i(be)e(changed)g(by)h(calling)i(the)d
+Fm(omniORB.)221 3368 y(maxTcpConnectio)o(nP)o(erS)o(er)o(ve)o(r)17
+b Fq(function)22 b Fp(befor)n(e)j Fq(calling)f Fm(ORB_init\(\))p
+Fq(.)362 3485 y(It)33 b(is)h(wasteful)f(to)g(leave)h(a)g(connection)f
+(open)f(when)h(it)g(has)h(been)f(left)g(unused)f(for)h(a)221
+3598 y(considerable)23 b(time.)31 b(T)-8 b(oo)22 b(many)i(idle)f
+(connections)g(could)g(block)h(out)e(new)h(connections)g(to)221
+3711 y(a)32 b(server)e(when)g(it)h(r)o(uns)g(out)f(of)h(spar)n(e)g
+(communication)h(channels.)54 b(For)30 b(example,)j(most)221
+3824 y(Unix)27 b(platforms)f(have)g(a)h(limit)h(on)e(the)f(number)h(of)
+h(\002le)f(handles)g(a)g(pr)n(ocess)f(can)i(open.)38
+b(64)221 3937 y(is)23 b(the)f(usual)h(default)g(limit.)29
 b(The)22 b(value)i(can)f(be)g(incr)n(eased)g(to)f(a)h(maximum)h(of)f(a)
-g(thousand)221 3824 y(or)f(mor)n(e)h(by)f(changing)h(the)f(`ulimit')i
-(in)f(the)f(shell.)221 4149 y Fo(7.3)119 b(Idle)29 b(Connection)i
-(Shutdown)f(and)g(Remote)g(Call)g(T)-7 b(imeout)221 4369
+g(thousand)221 4050 y(or)f(mor)n(e)h(by)f(changing)h(the)f(`ulimit')i
+(in)f(the)f(shell.)221 4375 y Fo(7.3)119 b(Idle)29 b(Connection)i
+(Shutdown)f(and)g(Remote)g(Call)g(T)-7 b(imeout)221 4595
 y Fq(Inside)19 b(the)g(ORB,)g(a)h(thr)n(ead)f(is)h(dedicated)e(to)i
 (scan)g(for)f(idle)h(connections.)26 b(The)19 b(thr)n(ead)g(looks)221
-4482 y(after)k(both)f(the)g(outgoing)f(connections)g(and)i(the)f
-(incoming)h(connections.)362 4599 y(When)33 b(a)h(connection)e(is)h
+4708 y(after)k(both)f(the)g(outgoing)f(connections)g(and)i(the)f
+(incoming)h(connections.)362 4825 y(When)33 b(a)h(connection)e(is)h
 (idle)h(for)f(a)g(period)f(of)i(time,)h(the)e(connection)f(is)h
-(shutdown.)221 4712 y(Similarly)-10 b(,)32 b(if)d(a)h(r)n(emote)d(call)
+(shutdown.)221 4938 y(Similarly)-10 b(,)32 b(if)d(a)h(r)n(emote)d(call)
 k(has)d(not)g(completed)g(within)h(a)g(de\002ned)e(period)g(of)i(time,)
-h(the)221 4825 y(connection)22 b(is)h(shutdown)e(and)h(the)g(ORB)g
+h(the)221 5051 y(connection)22 b(is)h(shutdown)e(and)h(the)g(ORB)g
 (will)i(r)n(eturn)e Fm(COMM_FAILURE)17 b Fq(to)22 b(the)g(client.)362
-4942 y(How)d(often)g(the)h(internal)g(thr)n(ead)f(scans)h(the)f
+5168 y(How)d(often)g(the)h(internal)g(thr)n(ead)f(scans)h(the)f
 (connections)g(is)h(determined)e(by)i(the)f(value)221
-5055 y(of)31 b(the)f Fp(scan)h(granularity)p Fq(.)55
+5281 y(of)31 b(the)f Fp(scan)h(granularity)p Fq(.)55
 b(This)31 b(value)h(is)f(defaulted)e(to)i(5)g(seconds)e(and)i(can)h(be)
-f(changed)221 5168 y(using)d(the)f(command-line)i(option)e
+f(changed)221 5394 y(using)d(the)f(command-line)i(option)e
 Fm(-ORBscanGranula)o(ri)o(ty)o Fq(.)39 b(Notice)27 b(that)h(this)f
-(value)221 5281 y(determines)18 b(the)i(pr)n(ecision)g(the)g(ORB)g(is)g
-(able)i(to)d(keep)g(to)h(the)f(value)i(of)g(the)e(idle)i(connection)221
-5394 y(or)h(r)n(emote)g(call)j(timeout.)p eop
+(value)p eop
 %%Page: 47 53
 47 52 bop 63 282 a Fe(7.4.)51 b(INTEROPERABILITY)18 b(CONSIDERA)-7
-b(TIONS)1285 b Fq(47)204 539 y(How)26 b(long)g(the)g(ORB)g(will)i(wait)
-f(befor)n(e)f(it)h(shuts)e(down)h(an)h(idle)g(connection)f(is)h(deter)n
-(-)63 652 y(mined)e(by)g(the)f(idleConnectionPeriods.)33
-b(Ther)n(e)24 b(ar)n(e)i(separate)d(values)j(for)f(incoming)h(and)63
-764 y(outgoing)j(connections.)51 b(The)30 b(default)h(values)g(ar)n(e)h
-(180)g(and)f(120)h(seconds)d(for)i(incoming)63 877 y(and)k(outgoing)e
+b(TIONS)1285 b Fq(47)63 539 y(determines)18 b(the)i(pr)n(ecision)g(the)
+f(ORB)h(is)h(able)g(to)f(keep)e(to)i(the)g(value)h(of)f(the)g(idle)g
+(connection)63 652 y(or)i(r)n(emote)g(call)i(timeout.)204
+764 y(How)i(long)g(the)g(ORB)g(will)i(wait)f(befor)n(e)f(it)h(shuts)e
+(down)h(an)h(idle)g(connection)f(is)h(deter)n(-)63 877
+y(mined)e(by)g(the)f(idleConnectionPeriods.)33 b(Ther)n(e)24
+b(ar)n(e)i(separate)d(values)j(for)f(incoming)h(and)63
+990 y(outgoing)j(connections.)51 b(The)30 b(default)h(values)g(ar)n(e)h
+(180)g(and)f(120)h(seconds)d(for)i(incoming)63 1103 y(and)k(outgoing)e
 (connections)h(r)n(espectively)-10 b(.)63 b(These)34
-b(values)h(can)h(be)f(changed)f(using)g(the)63 990 y(command-line)23
+b(values)h(can)h(be)f(changed)f(using)g(the)63 1216 y(command-line)23
 b(options)f Fm(-ORBinConScanP)o(er)o(io)o(d)17 b Fq(and)22
-b Fm(-ORBoutConScanPe)o(ri)o(od)o Fq(.)204 1103 y(Similarly)-10
+b Fm(-ORBoutConScanPe)o(ri)o(od)o Fq(.)204 1329 y(Similarly)-10
 b(,)34 b(how)c(long)h(the)f(ORB)h(will)h(wait)f(for)g(a)g(r)n(emote)f
-(call)j(to)d(complete)g(is)h(deter)n(-)63 1216 y(mined)18
+(call)j(to)d(complete)g(is)h(deter)n(-)63 1442 y(mined)18
 b(by)g(the)f(parameter)h(clientCallT)-5 b(imeOutPeriod)19
 b(for)f(the)f(client)i(side)e(and)i(the)e(server)n(-)63
-1329 y(CallT)-5 b(imeOutPer)n(oid)27 b(for)e(the)g(server)g(side.)36
+1555 y(CallT)-5 b(imeOutPer)n(oid)27 b(for)e(the)g(server)g(side.)36
 b(By)25 b(default)h(calls)h(will)g(not)e(timeout)g(on)g(either)63
-1442 y(the)c(client)j(or)e(server)f(side.)204 1555 y(The)f(timeout)g
+1668 y(the)c(client)j(or)e(server)f(side.)204 1781 y(The)f(timeout)g
 (can)i(be)g(changed)e(with)h(the)g Fm(-ORBclientCall)o(Ti)o(me)o(Ou)o
-(tPe)o(ri)o(od)15 b Fq(and)63 1668 y Fm(-ORBserverCall)o(Ti)o(me)o(Out)
+(tPe)o(ri)o(od)15 b Fq(and)63 1894 y Fm(-ORBserverCall)o(Ti)o(me)o(Out)
 o(Pe)o(ri)o(od)e Fq(options.)25 b(The)18 b(scan)i(can)g(be)f(disabled)g
-(completely)63 1781 y(by)j(setting)f(the)h(scan)h(granularity)g(to)f
-(0.)63 2078 y Fo(7.4)119 b(Interoperability)27 b(Considerations)63
-2289 y Fq(The)k(IIOP)h(speci\002cation)g(allows)h(both)e(the)h(client)g
-(and)h(the)e(server)g(to)h(shutdown)e(a)i(con-)63 2402
+(completely)63 2006 y(by)j(setting)f(the)h(scan)h(granularity)g(to)f
+(0.)63 2304 y Fo(7.4)119 b(Interoperability)27 b(Considerations)63
+2515 y Fq(The)k(IIOP)h(speci\002cation)g(allows)h(both)e(the)h(client)g
+(and)h(the)e(server)g(to)h(shutdown)e(a)i(con-)63 2627
 y(nection)27 b(unilaterally)-10 b(.)45 b(When)27 b(one)g(end)g(is)h
 (about)g(to)g(shutdown)d(a)k(connection,)f(it)h(should)63
-2515 y(send)18 b(a)j(closeConnection)d(message)h(to)g(the)g(other)g
+2740 y(send)18 b(a)j(closeConnection)d(message)h(to)g(the)g(other)g
 (end.)26 b(It)19 b(should)g(also)h(make)g(sur)n(e)f(that)g(the)63
-2627 y(message)i(will)j(r)n(each)f(the)f(other)f(end)h(befor)n(e)g(it)h
+2853 y(message)i(will)j(r)n(each)f(the)f(other)f(end)h(befor)n(e)g(it)h
 (pr)n(oceeds)e(to)h(shutdown)e(the)i(connection.)204
-2740 y(The)35 b(client)i(should)e(distinguish)g(between)g(an)i(or)n
-(derly)e(and)h(an)h(abnormal)g(connec-)63 2853 y(tion)23
+2966 y(The)35 b(client)i(should)e(distinguish)g(between)g(an)i(or)n
+(derly)e(and)h(an)h(abnormal)g(connec-)63 3079 y(tion)23
 b(shutdown.)30 b(When)24 b(a)g(client)h(r)n(eceives)e(a)i
 (closeConnection)e(message)f(befor)n(e)i(the)f(con-)63
-2966 y(nection)28 b(is)g(closed,)h(the)e(condition)h(is)h(an)g(or)n
+3192 y(nection)28 b(is)g(closed,)h(the)e(condition)h(is)h(an)g(or)n
 (derly)e(shutdown.)43 b(If)29 b(the)e(message)g(is)i(not)e(r)n(e-)63
-3079 y(ceived,)34 b(the)e(condition)g(is)g(an)h(abnormal)h(shutdown.)54
-b(In)32 b(an)h(abnormal)h(shutdown,)e(the)63 3192 y(ORB)e(should)f
+3305 y(ceived,)34 b(the)e(condition)g(is)g(an)h(abnormal)h(shutdown.)54
+b(In)32 b(an)h(abnormal)h(shutdown,)e(the)63 3418 y(ORB)e(should)f
 (raise)i(a)g Fm(COMM_FAILURE)25 b Fq(exception)k(wher)n(eas)h(in)h(an)f
-(or)n(derly)g(shutdown,)63 3305 y(the)19 b(ORB)h(should)f
+(or)n(derly)g(shutdown,)63 3531 y(the)19 b(ORB)h(should)f
 Fp(not)i Fq(raise)f(an)h(exception)e(and)h(should)g(try)f(to)h(r)n
-(e-establish)g(a)h(new)e(connec-)63 3418 y(tion)j(transpar)n(ently)-10
-b(.)204 3531 y(omniORB)27 b(implements)g(these)e(semantics)i
+(e-establish)g(a)h(new)e(connec-)63 3644 y(tion)j(transpar)n(ently)-10
+b(.)204 3757 y(omniORB)27 b(implements)g(these)e(semantics)i
 (completely)-10 b(.)40 b(However)-7 b(,)27 b(it)h(is)f(known)f(that)63
-3644 y(some)34 b(ORBs)h(ar)n(e)h(not)f(\(yet\))g(able)i(to)e
+3869 y(some)34 b(ORBs)h(ar)n(e)h(not)f(\(yet\))g(able)i(to)e
 (distinguish)f(between)g(an)i(or)n(derly)f(and)h(an)g(abnor)n(-)63
-3757 y(mal)g(shutdown.)63 b(Usually)35 b(this)g(is)g(manifested)g(as)g
-(the)f(client)i(in)f(these)f(ORBs)g(seeing)g(a)63 3869
+3982 y(mal)g(shutdown.)63 b(Usually)35 b(this)g(is)g(manifested)g(as)g
+(the)f(client)i(in)f(these)f(ORBs)g(seeing)g(a)63 4095
 y Fm(COMM_FAILURE)23 b Fq(occasionally)30 b(when)d(connected)g(to)h(an)
-h(omniORB)g(server)-7 b(.)44 b(The)28 b(work-)63 3982
+h(omniORB)g(server)-7 b(.)44 b(The)28 b(work-)63 4208
 y(ar)n(ound)23 b(is)g(either)g(to)f(catch)j(the)d(exception)g(in)i(the)
 f(application)h(code)f(and)g(r)n(etry)-10 b(,)22 b(or)h(to)g(turn)63
-4095 y(of)n(f)g(the)f(idle)g(connection)h(shutdown)d(inside)i(the)g
-(omniORB)h(server)-7 b(.)63 4392 y Fo(7.5)119 b(Connection)30
-b(Acceptance)63 4603 y Fq(omniORB)25 b(pr)n(ovides)f(the)h(hook)f(to)g
+4321 y(of)n(f)g(the)f(idle)g(connection)h(shutdown)d(inside)i(the)g
+(omniORB)h(server)-7 b(.)63 4618 y Fo(7.5)119 b(Connection)30
+b(Acceptance)63 4829 y Fq(omniORB)25 b(pr)n(ovides)f(the)h(hook)f(to)g
 (implement)h(a)h(connection)f(acceptance)g(policy)-10
-b(.)36 b(Inside)63 4716 y(the)e(ORB)i(r)o(untime,)i(a)e(thr)n(ead)f(is)
+b(.)36 b(Inside)63 4942 y(the)e(ORB)i(r)o(untime,)i(a)e(thr)n(ead)f(is)
 h(dedicated)e(to)h(r)n(eceive)g(new)g(connections.)65
-b(When)35 b(the)63 4829 y(thr)n(ead)20 b(is)i(given)f(the)f(handle)h
+b(When)35 b(the)63 5055 y(thr)n(ead)20 b(is)i(given)f(the)f(handle)h
 (of)g(a)h(new)f(connection)f(by)i(the)e(operating)g(system,)f(it)j
-(calls)g(the)63 4942 y(policy)f(module)g(to)g(decide)g(if)h(the)f
+(calls)g(the)63 5168 y(policy)f(module)g(to)g(decide)g(if)h(the)f
 (connection)g(can)h(be)g(accepted.)k(If)c(the)f(answer)f(is)i(yes,)e
-(the)63 5055 y(ORB)31 b(will)i(start)e(serving)g(r)n(equests)e(coming)j
+(the)63 5281 y(ORB)31 b(will)i(start)e(serving)g(r)n(equests)e(coming)j
 (in)g(fr)n(om)g(that)g(connection.)54 b(Otherwise,)32
-b(the)63 5168 y(connection)22 b(is)g(shutdown)f(immediately)-10
-b(.)204 5281 y(Ther)n(e)26 b(can)i(be)f(a)h(number)f(of)h(policy)f
-(module)g(implementations.)41 b(The)27 b(basic)h(one)f(is)g(a)63
-5394 y(dummy)22 b(module)g(which)h(just)f(accepts)g(every)g
-(connection.)p eop
+b(the)63 5394 y(connection)22 b(is)g(shutdown)f(immediately)-10
+b(.)p eop
 %%Page: 48 54
 48 53 bop 221 282 a Fq(48)1256 b Fe(CHAPTER)21 b(7.)51
-b(CONNECTION)22 b(MANAGEMENT)362 539 y Fq(In)g(addition,)f(a)h
+b(CONNECTION)22 b(MANAGEMENT)362 539 y Fq(Ther)n(e)27
+b(can)h(be)f(a)h(number)f(of)g(policy)h(module)e(implementations.)42
+b(The)26 b(basic)j(one)d(is)h(a)221 652 y(dummy)22 b(module)g(which)i
+(just)e(accepts)g(every)f(connection.)362 764 y(In)h(addition,)f(a)h
 (host-based)f(access)g(contr)n(ol)h(module)f(is)h(available)j(on)d
-(Unix)f(platforms.)221 652 y(The)33 b(module)g(uses)f(the)h(IP)g(addr)n
+(Unix)f(platforms.)221 877 y(The)33 b(module)g(uses)f(the)h(IP)g(addr)n
 (ess)f(of)h(the)g(client)h(to)f(decide)g(if)h(the)f(connection)g(can)h
-(be)221 764 y(accepted.)66 b(The)35 b(module)g(is)h(implemented)e
+(be)221 990 y(accepted.)66 b(The)35 b(module)g(is)h(implemented)e
 (using)h Fp(tcp_wrappers)40 b(7.6)p Fq(.)67 b(The)35
-b(access)h(con-)221 877 y(tr)n(ol)28 b(policy)g(can)h(be)f(de\002ned)e
+b(access)h(con-)221 1103 y(tr)n(ol)28 b(policy)g(can)h(be)f(de\002ned)e
 (as)i(r)o(ules)g(in)g(two)f(access)h(contr)n(ol)g(\002les:)38
-b Fm(hosts.allow)23 b Fq(and)221 990 y Fm(hosts.deny)p
+b Fm(hosts.allow)23 b Fq(and)221 1216 y Fm(hosts.deny)p
 Fq(.)52 b(The)32 b(syntax)f(of)i(the)e(r)o(ules)h(is)g(described)f(in)i
-(the)e(manual)j(page)e Fm(hosts_)221 1103 y(access\(5\))24
+(the)e(manual)j(page)e Fm(hosts_)221 1329 y(access\(5\))24
 b Fq(which)29 b(can)g(be)f(found)g(in)g(appendix)g(A.)44
 b(The)27 b(syntax)h(de\002nes)e(a)j(simple)f(ac-)221
-1216 y(cess)23 b(contr)n(ol)g(language)g(that)h(is)f(based)g(on)g
+1442 y(cess)23 b(contr)n(ol)g(language)g(that)h(is)f(based)g(on)g
 (client)h(\(host)f(name/addr)n(ess,)f(user)g(name\),)i(and)221
-1329 y(server)i(\(pr)n(ocess)g(name,)i(host)e(name/addr)n(ess\))g
+1555 y(server)i(\(pr)n(ocess)g(name,)i(host)e(name/addr)n(ess\))g
 (patterns.)40 b(When)26 b(sear)n(ching)i(for)f(a)g(match)221
-1442 y(on)f(the)g(server)f(pr)n(ocess)g(name,)i(the)e(ORB)h(uses)f(the)
+1668 y(on)f(the)g(server)f(pr)n(ocess)g(name,)i(the)e(ORB)h(uses)f(the)
 h(value)h(of)f Fm(omniORB::serve)o(rNa)o(me)o Fq(.)221
-1555 y Fm(ORB_init\(\))18 b Fq(uses)j(the)g(ar)n(gument)h
+1781 y Fm(ORB_init\(\))18 b Fq(uses)j(the)g(ar)n(gument)h
 Fm(argv[0])d Fq(to)j(set)f(the)h(default)g(value)h(of)f(this)g
-(variable.)221 1668 y(This)32 b(can)h(be)g(overridden)d(by)j(the)e
+(variable.)221 1894 y(This)32 b(can)h(be)g(overridden)d(by)j(the)e
 (application)j(with)e(the)f Fm(-ORBserverName)48 b Fq(<)p
-Fp(string)p Fq(>)221 1781 y(command)23 b(line)g(ar)n(gument)362
-1894 y(The)h(default)g(location)h(of)g(the)e(access)i(contr)n(ol)f
+Fp(string)p Fq(>)221 2006 y(command)23 b(line)g(ar)n(gument)362
+2119 y(The)h(default)g(location)h(of)g(the)e(access)i(contr)n(ol)f
 (\002les)g(is)g Fm(/etc)p Fq(.)32 b(This)24 b(can)h(be)g(overridden)221
-2006 y(by)e(the)f(extra)g(options)f(in)i Fm(omniORB.cfg)p
-Fq(.)g(For)f(instance:)221 2206 y Fc(#)50 b(omniORB)e(configuration)g
-(file)h(-)g(extra)g(options)221 2405 y(GATEKEEPER_ALLOWFILE)146
-b(/project/omni/var/hosts.allow)221 2604 y(GATEKEEPER_DENYFILE)196
-b(/project/omni/var/hosts.deny)362 2916 y Fq(As)18 b(each)g(policy)h
+2232 y(by)e(the)f(extra)g(options)f(in)i Fm(omniORB.cfg)p
+Fq(.)g(For)f(instance:)221 2431 y Fc(#)50 b(omniORB)e(configuration)g
+(file)h(-)g(extra)g(options)221 2631 y(GATEKEEPER_ALLOWFILE)146
+b(/project/omni/var/hosts.allow)221 2830 y(GATEKEEPER_DENYFILE)196
+b(/project/omni/var/hosts.deny)362 3142 y Fq(As)18 b(each)g(policy)h
 (module)e(is)i(implemented)e(as)h(a)h(separate)e(library)-10
-b(,)20 b(the)d(choice)i(of)f(policy)221 3029 y(module)34
+b(,)20 b(the)d(choice)i(of)f(policy)221 3255 y(module)34
 b(is)h(determined)e(at)i(pr)n(ogram)g(linkage)f(time.)65
-b(For)34 b(instance,)j(if)f(the)e(host-based)221 3142
+b(For)34 b(instance,)j(if)f(the)e(host-based)221 3368
 y(access)23 b(contr)n(ol)f(module)g(is)h(in)g(use:)221
-3341 y Fc(\045)50 b(eg1)f(-ORBtraceLevel)e(2)221 3441
+3567 y Fc(\045)50 b(eg1)f(-ORBtraceLevel)e(2)221 3667
 y(omniORB)i(gateKeeper)f(is)h(tcpwrapGK)f(1.0)h(-)h(based)f(on)g
-(tcp_wrappers_7.6)221 3541 y(I)h(said,"Hello!".)d(The)i(Object)g
-(said,"Hello!")221 3753 y Fq(Wher)n(eas)22 b(if)i(the)d(dummy)i(module)
-f(is)g(in)h(use:)221 3952 y Fc(\045)50 b(eg1)f(-ORBtraceLevel)e(2)221
-4052 y(omniORB)i(gateKeeper)f(is)h(not)g(installed.)f(All)h(incoming)g
-(are)g(accepted.)221 4152 y(I)h(said,"Hello!".)d(The)i(Object)g
+(tcp_wrappers_7.6)221 3766 y(I)h(said,"Hello!".)d(The)i(Object)g
+(said,"Hello!")221 3979 y Fq(Wher)n(eas)22 b(if)i(the)d(dummy)i(module)
+f(is)g(in)h(use:)221 4178 y Fc(\045)50 b(eg1)f(-ORBtraceLevel)e(2)221
+4278 y(omniORB)i(gateKeeper)f(is)h(not)g(installed.)f(All)h(incoming)g
+(are)g(accepted.)221 4378 y(I)h(said,"Hello!".)d(The)i(Object)g
 (said,"Hello!")p eop
 %%Page: 49 55
 49 54 bop 63 1163 a Fj(Appendix)44 b(A)63 1579 y Fl(hosts_access\(5\))
