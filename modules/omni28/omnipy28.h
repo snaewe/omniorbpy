@@ -5,6 +5,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.3  1999/09/20 14:53:29  dpg1
+// Various fixes. Support for oneway.
+//
 // Revision 1.2  1999/07/19 15:52:07  dpg1
 // Things moved into module omniPy.
 // Twin type expanded so it can be put into dictionaries.
@@ -27,20 +30,16 @@
 #define OMNIPY_MINOR 1
 
 
-_CORBA_MODULE omniPy
-_CORBA_MODULE_BEG
-
-
 ////////////////////////////////////////////////////////////////////////////
 // Data structures and functions to manage C++ twins of Python objects    //
 ////////////////////////////////////////////////////////////////////////////
 
-struct omnipyTwin {
-  PyObject_VAR_HEAD
-  void* ob_twin;
-};
-
 extern "C" {
+
+  struct omnipyTwin {
+    PyObject_VAR_HEAD
+    void* ob_twin;
+  };
 
   static void
   omnipyTwin_dealloc(omnipyTwin* tp)
@@ -90,6 +89,10 @@ extern "C" {
       };
 }
 
+
+_CORBA_MODULE omniPy
+_CORBA_MODULE_BEG
+
 _CORBA_MODULE_FN
 inline PyObject*
 newTwin(void* twin)
@@ -134,6 +137,14 @@ remTwin(PyObject* obj)
 }
 
 
+
+////////////////////////////////////////////////////////////////////////////
+// The global Python interpreter state                                    //
+////////////////////////////////////////////////////////////////////////////
+
+_CORBA_MODULE_VAR PyInterpreterState* pyInterpreter;
+_CORBA_MODULE_VAR omni_mutex          pyInterpreterLock;
+
 ////////////////////////////////////////////////////////////////////////////
 // Global pointers to Python objects                                      //
 ////////////////////////////////////////////////////////////////////////////
@@ -143,8 +154,9 @@ _CORBA_MODULE_VAR PyObject* pyCORBAsysExcMap;	//  The system exception map
 _CORBA_MODULE_VAR PyObject* pyCORBAnilObject;	//  The nil object
 _CORBA_MODULE_VAR PyObject* pyCORBAAnyClass;    //  Any class
 _CORBA_MODULE_VAR PyObject* pyomniORBmodule;	// The omniORB module
-_CORBA_MODULE_VAR PyObject* pyomniORBproxyMap;	//  The proxy object class map
+_CORBA_MODULE_VAR PyObject* pyomniORBobjrefMap;	//  The objref class map
 _CORBA_MODULE_VAR PyObject* pyomniORBtypeMap;   //  Type map
+_CORBA_MODULE_VAR PyObject* pyomniORBwordMap;   //  Reserved word map
 _CORBA_MODULE_VAR PyObject* pyCreateTypeCode;	// Function to create a
 						//  TypeCode object
 
@@ -154,14 +166,38 @@ _CORBA_MODULE_VAR PyObject* pyCreateTypeCode;	// Function to create a
 // Utility functions                                                      //
 ////////////////////////////////////////////////////////////////////////////
 
-// Create the Python object relating to a CORBA object:
-_CORBA_MODULE_FN
-PyObject* createPyCorbaObject(const char* targetRepoId,
-			      const CORBA::Object_ptr obj);
-
 // Set the Python execution state to handle a system exception:
 _CORBA_MODULE_FN
 void handleSystemException(const CORBA::SystemException& ex);
+
+// Throw a system exception equivalent to the given Python exception
+_CORBA_MODULE_FN
+void produceSystemException(PyObject* eobj, PyObject* erepoId);
+
+
+////////////////////////////////////////////////////////////////////////////
+// Object reference functions                                             //
+////////////////////////////////////////////////////////////////////////////
+
+// Create the Python object relating to a CORBA object reference:
+_CORBA_MODULE_FN
+PyObject* createPyCorbaObjRef(const char* targetRepoId,
+			      const CORBA::Object_ptr obj);
+
+_CORBA_MODULE_FN
+omniObject* createObjRef(const char* mostDerivedRepoId,
+			 const char* targetRepoId,
+			 IOP::TaggedProfileList* profiles,
+			 CORBA::Boolean release);
+
+_CORBA_MODULE_FN
+omniObject* stringToObject(const char* str);
+
+_CORBA_MODULE_FN
+CORBA::Object_ptr UnMarshalObjRef(const char* repoId, NetBufferedStream& s);
+
+_CORBA_MODULE_FN
+CORBA::Object_ptr UnMarshalObjRef(const char* repoId, MemBufferedStream& s);
 
 
 
@@ -241,6 +277,8 @@ public:
       exc_d_(exc_d),
       args_(args)
   {
+    assert(PyTuple_Check(in_d));
+    assert(PyTuple_Check(out_d));
     tstate_ = 0;
     in_l_   = PyTuple_GET_SIZE(in_d_);
     out_l_  = PyTuple_GET_SIZE(out_d_);
@@ -271,7 +309,105 @@ private:
   PyObject*      args_;
   PyObject*      result_;
   PyThreadState* tstate_;
+
+  Py_OmniProxyCallDesc(const Py_OmniProxyCallDesc&);
+  Py_OmniProxyCallDesc& operator=(const Py_OmniProxyCallDesc&);
 };
+
+
+// Version for oneway:
+
+class Py_OmniOWProxyCallDesc : public OmniOWProxyCallDesc {
+public:
+
+  Py_OmniOWProxyCallDesc(const char* op, size_t len,
+		       PyObject* in_d, PyObject* args)
+    : OmniOWProxyCallDesc(op, len),
+      in_d_(in_d),
+      args_(args)
+  {
+    tstate_ = 0;
+    assert(PyTuple_Check(in_d));
+    in_l_   = PyTuple_GET_SIZE(in_d_);
+    //    cout << "Py_OmniProxyCallDesc created: " << op << " " << len << endl;
+  }
+
+  virtual ~Py_OmniOWProxyCallDesc() {
+    if (tstate_) PyEval_RestoreThread(tstate_);
+  }
+
+  virtual CORBA::ULong alignedSize(CORBA::ULong msgsize);
+
+  virtual void marshalArguments(GIOP_C& giop_client);
+
+  inline void systemException(const CORBA::SystemException& ex) {
+    if (tstate_) {
+      PyEval_RestoreThread(tstate_);
+      tstate_ = 0;
+    }
+    handleSystemException(ex);
+  }
+
+private:
+  PyObject*      in_d_;
+  int            in_l_;
+  PyObject*      args_;
+  PyThreadState* tstate_;
+
+  Py_OmniOWProxyCallDesc(const Py_OmniOWProxyCallDesc&);
+  Py_OmniOWProxyCallDesc& operator=(const Py_OmniOWProxyCallDesc&);
+};
+
+
+
+////////////////////////////////////////////////////////////////////////////
+// Servant object                                                         //
+////////////////////////////////////////////////////////////////////////////
+
+class Py_Servant : public virtual omniObject, public virtual CORBA::Object {
+
+public:
+
+  Py_Servant(PyObject* pyservant, PyObject* opdict, const char* repoId);
+
+  virtual ~Py_Servant();
+
+  omniORB::objectKey _key();
+
+  virtual CORBA::Boolean dispatch(GIOP_S&        giop_server,
+				  const char*    op,
+				  CORBA::Boolean response);
+
+  inline PyObject* local_dispatch(const char* op, PyObject* args) {
+    PyObject* method = PyObject_GetAttrString(pyservant_, (char*)op);
+    if (method) {
+      PyObject* ret = PyEval_CallObject(method, args);
+      Py_DECREF(method);
+      return ret;
+    }
+    else {
+      PyObject* err =
+	PyString_FromString("Local servant has no operation named ");
+
+      PyString_ConcatAndDel(&err, PyString_FromString(op));
+      PyErr_SetObject(PyExc_AttributeError, err);
+      Py_DECREF(err);
+      return 0;
+    }
+  }
+
+private:
+  PyObject* pyservant_;		// Python servant object
+  PyObject* opdict_;		// Operation descriptor dictionary
+
+  Py_Servant(const Py_Servant&);
+  Py_Servant& operator=(const Py_Servant&);
+
+protected:
+  virtual void* _widenFromTheMostDerivedIntf(const char* repoId,
+					     CORBA::Boolean is_cxx_type_id);
+};
+
 
 
 
