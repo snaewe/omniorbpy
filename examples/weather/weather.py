@@ -12,14 +12,14 @@ import gauge
 from omniORB import CORBA
 import _GlobalIDL
 
-stateLock = threading.Lock()
-
 immediateState  = None
 cumulativeState = None
 
 class CORBAThread(threading.Thread):
-    def __init__(self, argv):
+    def __init__(self, argv, gui):
         global weatherIOR, immediateState, cumulativeState
+
+        self.gui = gui
 
         threading.Thread.__init__(self)
         self.setDaemon(1)
@@ -40,6 +40,8 @@ class CORBAThread(threading.Thread):
         cumulativeState = self.wio.cumulative()
         print "...initial state acquired."
 
+        self.gui.update()
+
     def run(self):
         global cumulativeState, immediateState
 
@@ -50,18 +52,18 @@ class CORBAThread(threading.Thread):
             if self.verbose: print "CORBA calls...",
             sys.stdout.flush()
 
+            self.gui.startCORBA()
             before = time.time()
-            new_immediateState  = self.wio.immediate()
-            new_cumulativeState = self.wio.cumulative()
+            immediateState  = self.wio.immediate()
+            cumulativeState = self.wio.cumulative()
             after = time.time()
+            self.gui.endCORBA()
 
             if self.verbose:
                 print "done in", int((after-before) * 1000000), "microseconds"
 
-            stateLock.acquire()
-            immediateState  = new_immediateState
-            cumulativeState = new_cumulativeState
-            stateLock.release()
+            self.gui.update()
+            self.gui.callTime(int((after-before)*1000))
 
 
 class GUI:
@@ -91,7 +93,7 @@ class GUI:
                                    handcolour   = "orange")
 
         self.windAvg = gauge.Gauge(self.canvas, 400, 100,
-                                   title        = "Wind speed\n(10 min agv.)",
+                                   title        = "Wind speed\n(10 min avg.)",
                                    min          = 0,
                                    max          = 100,
                                    unitspertick = 5,
@@ -156,18 +158,19 @@ class GUI:
 
         self.clock   = gauge.Clock(self.canvas, 400, 400)
 
+        # CORBA run indicator:
+        self.canvas.create_oval(85,385, 115,415, fill="red", outline="black",
+                                width=3, tags="corba")
+        self.canvas.create_text(120,400, text="CORBA call in progress",
+                                anchor="w", fill="white")
 
-    def go(self):
-        self.update()
-        self.root.mainloop()
-        self.root.destroy()
+        self.canvas.create_text(550,400,
+                                text="CORBA invocation time: --- ms",
+                                anchor="w", fill="white", tags="call")
 
-    def delete_window(self):
-        self.root.quit()
+
 
     def update(self):
-        stateLock.acquire()
-
         self.windDir.set(immediateState.windDirection)
         self.wind.   set(immediateState.windSpeed)
         self.windAvg.set(immediateState.rollingWindSpeed)
@@ -179,13 +182,26 @@ class GUI:
         self.rain.   set(cumulativeState.rainfall)
         self.clock.  set(cumulativeState.end)
 
-        stateLock.release()
+    def startCORBA(self):
+        self.canvas.itemconfigure("corba", fill="green")
 
-        self.root.after(UpdateInterval * 1000, self.update)
+    def endCORBA(self):
+        time.sleep(0.1)
+        self.canvas.itemconfigure("corba", fill="blue")
 
+    def callTime(self, ct):
+        self.canvas.itemconfigure("call",
+                                  text="CORBA invocation time: %d ms" % ct)
 
-ct = CORBAThread(sys.argv)
-ct.start()
+    def go(self):
+        self.root.mainloop()
+        self.root.destroy()
+
+    def delete_window(self):
+        self.root.quit()
+
 
 gui = GUI()
+ct  = CORBAThread(sys.argv, gui)
+ct.start()
 gui.go()
