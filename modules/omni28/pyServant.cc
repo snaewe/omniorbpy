@@ -31,6 +31,10 @@
 // $Id$
 
 // $Log$
+// Revision 1.16  2000/04/06 14:12:40  dpg1
+// Incorrect format character in PyObject_CallMethod() caused a reference
+// count leak.
+//
 // Revision 1.15  2000/04/03 11:21:00  dpg1
 // Error report if a method does not exist on upcall.
 //
@@ -204,7 +208,7 @@ Py_Servant::_widenFromTheMostDerivedIntf(const char* repoId,
   else {
     lockWithNewThreadState _t;
     PyObject* isa = PyObject_CallMethod(omniPy::pyomniORBmodule,
-					(char*)"static_is_a", (char*)"Ns",
+					(char*)"static_is_a", (char*)"Os",
 					pyskeleton_, repoId);
     if (!isa)
       PyErr_Print();

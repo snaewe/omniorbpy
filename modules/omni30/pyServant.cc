@@ -30,6 +30,10 @@
 // $Id$
 
 // $Log$
+// Revision 1.21  2000/04/06 14:12:39  dpg1
+// Incorrect format character in PyObject_CallMethod() caused a reference
+// count leak.
+//
 // Revision 1.20  2000/04/03 11:02:51  dpg1
 // Error report if a method does not exist on upcall.
 //
@@ -343,7 +347,7 @@ Py_omniServant::_is_a(const char* logical_type_id)
   else {
     lockWithNewThreadState _t;
     PyObject* pyisa = PyObject_CallMethod(omniPy::pyomniORBmodule,
-					  (char*)"static_is_a", (char*)"Ns",
+					  (char*)"static_is_a", (char*)"Os",
 					  pyskeleton_, logical_type_id);
     if (!pyisa) PyErr_Print();
     OMNIORB_ASSERT(pyisa && PyInt_Check(pyisa));
