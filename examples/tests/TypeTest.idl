@@ -177,6 +177,11 @@ module TypeTest {
     // Fixed
     F1         complex40(in F1         a);
 
+    // WString
+    wstring     complex41(in wstring     a);
+    wstring<10> complex42(in wstring<10> a);
+
+
     // Exceptions
     void except1()          raises (X1);
     // Always raise X1

@@ -1428,6 +1428,66 @@ def doTests(orb, poa, io):
     else:  tfail()
 
 
+    tstart("WString")
+    ok = 1
+    s = u"Hello there"
+    r = io.complex41(s)
+    if r == s:
+        tresult("+")
+    else:
+        tresult("-")
+        ok = 0
+    
+    s = u"This is a much longer string with lots of stuff in it. Blah blah blah"
+    r = io.complex41(s)
+    if r == s:
+        tresult("+")
+    else:
+        tresult("-")
+        ok = 0
+
+    s = u"This is a string with a \0 in it."
+    try:
+        r = io.complex41(s)
+        tresult("-")
+        ok = 0
+    except CORBA.BAD_PARAM:
+        tresult("+")
+
+    if ok: tpass()
+    else:  tfail()
+
+    tstart("Bounded wstring")
+    ok = 1
+    s = u"Hello"
+    r = io.complex42(s)
+    if r == s:
+        tresult("+")
+    else:
+        tresult("-")
+        ok = 0
+    
+    s = u"This is a much longer string with lots of stuff in it. Blah blah blah"
+    try:
+        r = io.complex42(s)
+        tresult("-")
+        ok = 0
+    except CORBA.MARSHAL:
+        tresult("+")
+
+    s = u"str\0ing"
+    try:
+        r = io.complex42(s)
+        tresult("-")
+        ok = 0
+    except CORBA.BAD_PARAM:
+        tresult("+")
+
+    if ok: tpass()
+    else:  tfail()
+
+
+
     tstart("Exceptions")
 
     ok = 1

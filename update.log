@@ -1,3 +1,14 @@
+Fri Aug 29 14:24:42 BST 2003 dgrisby
+====================================
+
+- Support Pythons with UCS-4 Unicode.
+
+examples/tests/TypeTest.idl
+examples/tests/tclient.py
+examples/tests/tserver.py
+modules/pyMarshal.cc
+
+
 Thu Aug 28 13:13:31 BST 2003 dgrisby
 ====================================
 

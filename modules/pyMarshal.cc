@@ -29,6 +29,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.2.17  2003/08/29 13:31:42  dgrisby
+// Support Pythons with UCS-4 Unicode.
+//
 // Revision 1.1.2.16  2003/07/18 11:28:18  dgrisby
 // Reference count bug. Thanks Scott Robertson.
 //
@@ -1405,7 +1408,7 @@ validateTypeWString(PyObject* d_o, PyObject* a_o,
   if (!PyUnicode_Check(a_o))
     OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
 
-  CORBA::ULong len = PyString_GET_SIZE(a_o);
+  CORBA::ULong len = PyUnicode_GET_SIZE(a_o);
 
   if (max_len > 0 && len > max_len)
     OMNIORB_THROW(MARSHAL, MARSHAL_WStringIsTooLong, compstatus);
@@ -2515,7 +2518,27 @@ marshalPyObjectWString(cdrStream& stream, PyObject* d_o, PyObject* a_o)
 {
 #ifdef PY_HAS_UNICODE
   OMNIORB_CHECK_TCS_W_FOR_MARSHAL(stream.TCS_W(), stream);
+
+#  ifdef Py_UNICODE_WIDE
+  PyObject* ustr = PyUnicode_AsUTF16String(a_o);
+  if (!ustr) {
+    // Now we're in trouble...
+    if (omniORB::trace(1)) {
+      PyErr_Print();
+    }
+    PyErr_Clear();
+    OMNIORB_THROW(UNKNOWN, UNKNOWN_PythonException,
+		  (CORBA::CompletionStatus)stream.completion());
+  }
+  omniPy::PyRefHolder h(ustr);
+  OMNIORB_ASSERT(PyString_Check(ustr));
+
+  char* str = PyString_AS_STRING(ustr) + 2; // Skip BOM
+
+#  else
   Py_UNICODE* str = PyUnicode_AS_UNICODE(a_o);
+
+#  endif
   stream.TCS_W()->marshalWString(stream,
 				 PyUnicode_GET_SIZE(a_o),
 				 (const omniCodeSet::UniChar*)str);
@@ -3315,7 +3338,17 @@ unmarshalPyObjectWString(cdrStream& stream, PyObject* d_o)
   omniCodeSet::UniChar* us;
   CORBA::ULong len = stream.TCS_W()->unmarshalWString(stream, max_len, us);
 
+#  ifdef Py_UNICODE_WIDE
+#    if _OMNIORB_HOST_BYTE_ORDER_ == 0
+  int byteorder = 1;  // Big endian
+#    else
+  int byteorder = -1; // Little endian
+#    endif
+  PyObject* r_o = PyUnicode_DecodeUTF16((const char*)us, len*2, 0, &byteorder);
+
+#  else
   PyObject* r_o = PyUnicode_FromUnicode((Py_UNICODE*)us, len);
+#  endif
   omniCodeSetUtil::freeU(us);
   return r_o;
 #else
