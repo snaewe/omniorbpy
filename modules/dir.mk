@@ -395,8 +395,6 @@ endif
 ifdef IRIX
 ifeq ($(notdir $(CXX)),CC)
 
-# Not tested yet!
-
 CXXOPTIONS += -KPIC
 
 ifdef IRIX_n32
