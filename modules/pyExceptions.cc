@@ -27,10 +27,12 @@
 // Description:
 //    Exception handling functions
 
-
 // $Id$
 
 // $Log$
+// Revision 1.1.2.5  2001/05/29 17:10:14  dpg1
+// Support for in process identity.
+//
 // Revision 1.1.2.4  2001/05/14 12:47:21  dpg1
 // Fix memory leaks.
 //
@@ -149,7 +151,7 @@ PyUserException::PyUserException(PyObject* desc)
 omniPy::
 PyUserException::PyUserException(PyObject* desc, PyObject* exc,
 				 CORBA::CompletionStatus comp_status)
-  : desc_(desc), exc_(exc), decref_on_del_(0)
+  : desc_(desc), exc_(exc), decref_on_del_(1)
 {
   OMNIORB_ASSERT(desc_);
   OMNIORB_ASSERT(exc_);
@@ -174,17 +176,29 @@ PyUserException::PyUserException(PyObject* desc, PyObject* exc,
 
 omniPy::
 PyUserException::PyUserException(const PyUserException& e)
-  : desc_(e.desc_), exc_(e.exc_), decref_on_del_(0)
+  : desc_(e.desc_), exc_(e.exc_), decref_on_del_(1)
 {
   pd_insertToAnyFn    = 0;
   pd_insertToAnyFnNCP = 0;
+
+  // Oh dear. We need to mark the exception being copied to say that
+  // the exception object should not be DECREF'd when it is deleted.
+  ((PyUserException&)e).decref_on_del_ = 0;
 }
 
 omniPy::
 PyUserException::~PyUserException()
 {
-  if (decref_on_del_)
+  if (decref_on_del_) {
+    if (omniORB::trace(25)) {
+      omniORB::logger l;
+      const char* repoId = PyString_AS_STRING(PyTuple_GET_ITEM(desc_, 2));
+      l << "Python user exception state " << repoId << " dropped unused\n";
+    }
+    omnipyThreadCache::lock _t;
+    OMNIORB_ASSERT(exc_);
     Py_DECREF(exc_);
+  }
 }
 
 PyObject*
@@ -204,8 +218,19 @@ PyUserException::setPyExceptionState()
   }
   PyErr_SetObject(excclass, exc_);
   Py_DECREF(exc_);
+  decref_on_del_ = 0;
   exc_ = 0;
   return 0;
+}
+
+void
+omniPy::
+PyUserException::decrefPyException()
+{
+  OMNIORB_ASSERT(exc_);
+  Py_DECREF(exc_);
+  decref_on_del_ = 0;
+  exc_ = 0;
 }
 
 
@@ -308,11 +333,6 @@ void
 omniPy::
 PyUserException::_NP_marshal(cdrStream& stream) const
 {
-  // Oh dear. We need to mark ourselves to say that the exception
-  // object should be DECREF'd when we are deleted, but this inherited
-  // virtual function must be const.
-  ((PyUserException*)this)->decref_on_del_ = 1;
-
   omnipyThreadCache::lock _t;
   *this >>= stream;
 }

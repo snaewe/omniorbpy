@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.8  2001/05/29 17:10:14  dpg1
+// Support for in process identity.
+//
 // Revision 1.1.2.7  2001/05/14 12:47:22  dpg1
 // Fix memory leaks.
 //
@@ -85,7 +88,7 @@ public:
   }
   virtual ~Py_omniObjRef() { }
 
-  virtual CORBA::Boolean _compatibleServant(omniServant* svnt);
+  virtual const char* _localServantTarget();
 
 private:
   virtual void* _ptrToObjRef(const char* target);
@@ -95,13 +98,10 @@ private:
   Py_omniObjRef& operator=(const Py_omniObjRef&);
 };
 
-CORBA::Boolean
-Py_omniObjRef::_compatibleServant(omniServant* svnt)
+const char*
+Py_omniObjRef::_localServantTarget()
 {
-  if (svnt->_ptrToInterface("Py_omniServant"))
-    return 1;
-  else
-    return 0;
+  return "Py_omniServant";
 }
 
 void*

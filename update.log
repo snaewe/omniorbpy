@@ -1,3 +1,14 @@
+Tue May 29 18:04:34 BST 2001 dpg1
+=================================
+
+- Support for in process identity.
+
+modules/omnipy.h
+modules/pyExceptions.cc
+modules/pyObjectRef.cc
+modules/pyServant.cc
+
+
 Mon May 14 16:19:53 BST 2001 dpg1
 =================================
 
