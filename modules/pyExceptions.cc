@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.8  2001/10/18 15:48:39  dpg1
+// Track ORB core changes.
+//
 // Revision 1.1.2.7  2001/09/24 10:48:25  dpg1
 // Meaningful minor codes.
 //
@@ -312,7 +315,7 @@ PyUserException::operator<<=(cdrStream& stream)
 
 void
 omniPy::
-PyUserException::_raise()
+PyUserException::_raise() const
 {
   OMNIORB_ASSERT(desc_);
   OMNIORB_ASSERT(exc_);

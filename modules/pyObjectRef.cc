@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.15  2001/10/18 15:48:39  dpg1
+// Track ORB core changes.
+//
 // Revision 1.1.2.14  2001/09/24 10:48:27  dpg1
 // Meaningful minor codes.
 //
@@ -234,8 +237,13 @@ omniPy::createPyPseudoObjRef(const CORBA::Object_ptr objref)
     PortableServer::Current_var pc = PortableServer::Current::_narrow(objref);
     if (!CORBA::is_nil(pc)) return createPyPOACurrentObject(pc);
   }
-  CORBA::MARSHAL ex;
-  return handleSystemException(ex);
+  try {
+    // Use OMNIORB_THROW to get a nice trace message
+    OMNIORB_THROW(INV_OBJREF, INV_OBJREF_NoPythonTypeForPseudoObj,
+		  CORBA::COMPLETED_NO);
+  }
+  OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
+  return 0;
 }
 
 

@@ -201,7 +201,7 @@ CXXOPTIONS += -I. -I/usr/local/include
 
 lib = _omnipymodule.so
 libinit = init_omnipy
-py_exp = /usr/local/lib/python$(PYVERSION)/config/python.exp
+py_exp = $(PYPREFIX)/lib/python$(PYVERSION)/config/python.exp
 
 ifeq ($(notdir $(CXX)),xlC_r)
 
