@@ -28,6 +28,10 @@
 
 # $Id$
 # $Log$
+# Revision 1.12  1999/11/25 11:49:31  dpg1
+# Minor version number bumped since server-side _is_a() required an
+# incompatible change.
+#
 # Revision 1.11  1999/11/25 11:21:36  dpg1
 # Proper support for server-side _is_a().
 #
@@ -98,7 +102,7 @@ import omniORB, _omnipy
 from omniORB import CORBA, PortableServer
 _0_CORBA = CORBA
 
-_omnipy.checkVersion(0,1, __file__)
+_omnipy.checkVersion(0,2, __file__)
 """
 
 file_end = """\

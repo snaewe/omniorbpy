@@ -1,7 +1,7 @@
 
 # Version number
 OMNIPY_MAJOR = 0
-OMNIPY_MINOR = 1
+OMNIPY_MINOR = 2
 
 CXXSRCS = omnipy.cc \
           pyExceptions.cc \
@@ -19,8 +19,7 @@ OBJS    = omnipy.o \
           pyProxyCallWrapper.o \
           pyServant.o
 
-DIR_CPPFLAGS = $(patsubst %,-I%/src/lib/omniORB2/orbcore,$(IMPORT_TREES)) \
-               -DOMNIPY_MAJOR=$(OMNIPY_MAJOR) -DOMNIPY_MINOR=$(OMNIPY_MINOR)
+DIR_CPPFLAGS = $(patsubst %,-I%/src/lib/omniORB2/orbcore,$(IMPORT_TREES))
 
 
 #############################################################################

@@ -27,10 +27,16 @@
 // Description:
 //    Main entry points for _omnipy Python module
 
+#define OMNIPY_MAJOR 0
+#define OMNIPY_MINOR 2
 
 // $Id$
 
 // $Log$
+// Revision 1.24  1999/11/25 11:49:32  dpg1
+// Minor version number bumped since server-side _is_a() required an
+// incompatible change.
+//
 // Revision 1.23  1999/11/16 17:32:36  dpg1
 // Changes for AIX.
 //
@@ -175,13 +181,14 @@ extern "C" {
     if (!PyArg_ParseTuple(args, "iis", &maj, &min, &mod))
       return NULL;
 
-    if (maj != OMNIPY_MAJOR) {
+    if (maj != OMNIPY_MAJOR || (maj == 0 && min != OMNIPY_MINOR)) {
       omniORB::log << "omniORBpy: ***\n"
-		   << "omniORBpy: *** WARNING! omnipy module version "
-		   << OMNIPY_MAJOR << "." << OMNIPY_MINOR
-		   << ", stubs in " << mod << " are version "
+		   << "omniORBpy: *** WARNING! _omnipy module version "
+		   << OMNIPY_MAJOR << "." << OMNIPY_MINOR << "\n"
+		   << "omniORBpy: *** Stubs in " << mod << " are version "
 		   << maj << "." << min << "\n"
-		   << "omniORBpy: ***\n";
+		   << "omniORBpy: *** You may experience strange errors "
+		   << "until you recompile your IDL\n";
       omniORB::log.flush();
     }
     Py_INCREF(Py_None);
