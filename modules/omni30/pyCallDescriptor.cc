@@ -30,6 +30,12 @@
 // $Id$
 
 // $Log$
+// Revision 1.15  2000/04/25 13:36:17  dpg1
+// If an object is deactivated while invocations on it are happening, the
+// deletion is performed by a callback at the end of the invoke(). The
+// Python interpreter lock was being held at this time, causing a
+// deadlock.
+//
 // Revision 1.14  2000/03/24 16:48:57  dpg1
 // Local calls now have proper pass-by-value semantics.
 // Lots of little stability improvements.
@@ -78,9 +84,9 @@ omniPy::Py_omniCallDescriptor::marshalArguments(GIOP_C& giop_client)
 void
 omniPy::Py_omniCallDescriptor::unmarshalReturnedValues(GIOP_C& giop_client)
 {
-  reacquireInterpreterLock();
-
   if (out_l_ == -1) return;  // Oneway operation
+
+  reacquireInterpreterLock();
 
   if (out_l_ == 0) {
     Py_INCREF(Py_None);
@@ -99,6 +105,7 @@ omniPy::Py_omniCallDescriptor::unmarshalReturnedValues(GIOP_C& giop_client)
 						 PyTuple_GET_ITEM(out_d_, i)));
     }
   }
+  releaseInterpreterLock();
 }
 
 
@@ -134,10 +141,12 @@ omniPy::Py_omniCallDescriptor::userException(GIOP_C&     giop_client,
       PyErr_SetObject(excclass, exc_i);
       Py_DECREF(exc_i); // *** Find out why I don't need to Py_DECREF(excclass)
     }
+    releaseInterpreterLock();
     giop_client.RequestCompleted();
     throw UserExceptionHandled();
   }
   else {
+    releaseInterpreterLock();
     giop_client.RequestCompleted(1);
     throw CORBA::MARSHAL(0, CORBA::COMPLETED_MAYBE);
   }
@@ -157,4 +166,5 @@ omniPy::Py_localCallBackFunction(omniCallDescriptor* cd, omniServant* svnt)
 				       pycd->in_d_,  pycd->in_l_,
 				       pycd->out_d_, pycd->out_l_,
 				       pycd->exc_d_, pycd->args_);
+  pycd->releaseInterpreterLock();
 }
