@@ -38,3 +38,7 @@ endif
 
 $(omnicpp): $(OBJS)
 	@(libs=""; $(CExecutable))
+
+
+veryclean::
+	$(RM) $(omnicpp)
