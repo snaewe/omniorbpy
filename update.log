@@ -1,3 +1,12 @@
+Tue May  1 12:14:57 BST 2001 dpg1
+=================================
+
+- omnipy_narrow() called createObjRef() while holding the interpreter
+  lock.
+
+modules/omni30/omnipy.cc
+
+
 Tue Apr 10 17:31:53 BST 2001 dpg1
 =================================
 
