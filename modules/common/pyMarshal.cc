@@ -5,6 +5,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.5  1999/08/24 11:21:10  dpg1
+// Fixed typo in ulong marshalling.
+//
 // Revision 1.4  1999/08/03 09:03:34  dpg1
 // Unions with no default member fixed.
 //
@@ -515,7 +518,7 @@ omniPy::marshalPyObject(NetBufferedStream& stream,
     {
       CORBA::ULong ul = 0; // Initialised to stop egcs complaining
 
-      if (!PyLong_Check(a_o))
+      if (PyLong_Check(a_o))
 	ul = PyLong_AsUnsignedLong(a_o);
       else if (PyInt_Check(a_o))
 	ul = PyInt_AS_LONG(a_o);
@@ -899,7 +902,7 @@ omniPy::marshalPyObject(MemBufferedStream& stream,
     {
       CORBA::ULong ul = 0; // Initialised to stop egcs complaining
 
-      if (!PyLong_Check(a_o))
+      if (PyLong_Check(a_o))
 	ul = PyLong_AsUnsignedLong(a_o);
       else if (PyInt_Check(a_o))
 	ul = PyInt_AS_LONG(a_o);
