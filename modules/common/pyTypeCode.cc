@@ -5,6 +5,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.2  1999/07/19 14:41:03  dpg1
+// createPyTypeCodeObject() removed.
+//
 // Revision 1.1  1999/07/19 12:47:43  dpg1
 // Initial revision
 //
@@ -2083,15 +2086,4 @@ omniPy::unmarshalTypeCode(MemBufferedStream& stream)
 {
   OffsetDescriptorMap odm;
   return r_unmarshalTypeCode(stream, odm);
-}
-
-
-PyObject*
-omniPy::createPyTypeCodeObject(PyObject* desc)
-{
-  PyObject* argtuple = PyTuple_New(1);
-  PyTuple_SET_ITEM(argtuple, 0, desc);
-  PyObject* tcobject = PyEval_CallObject(pyCreateTypeCode, argtuple);
-  Py_DECREF(argtuple);
-  return tcobject;
 }
