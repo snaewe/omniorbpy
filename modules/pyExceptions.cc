@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.10  2003/08/28 12:13:57  dgrisby
+// Properly report unknown user exception, rather than system exception.
+//
 // Revision 1.1.2.9  2003/05/28 10:13:01  dgrisby
 // Preliminary interceptor support. General clean-up.
 //
@@ -137,9 +140,11 @@ omniPy::produceSystemException(PyObject* eobj, PyObject* erepoId)
 
 #undef THROW_SYSTEM_EXCEPTION_IF_MATCH
 
-  Py_DECREF(erepoId); OMNIORB_THROW(UNKNOWN,
-				    UNKNOWN_SystemException,
-				    CORBA::COMPLETED_MAYBE);
+  Py_DECREF(erepoId);
+  if (m && c && v)
+    OMNIORB_THROW(UNKNOWN, UNKNOWN_SystemException, CORBA::COMPLETED_MAYBE);
+  else
+    OMNIORB_THROW(UNKNOWN, UNKNOWN_UserException, CORBA::COMPLETED_MAYBE);
 }
 
 
