@@ -26,8 +26,7 @@
 
 weatherIOR = "IOR:0003003c0000001449444c3a77656174686572496e666f3a312e300000000001000000000000003400010000000000187777772e756b2e72657365617263682e6174742e636f6d00669800000000000c3519450765f2b96f00000001"
 
-CORBAInterval  = 1
-UpdateInterval = 1
+CORBAInterval = 1
 
 import Tkinter
 import sys, threading, time
@@ -100,7 +99,7 @@ class GUI:
                                      background="blue")
         self.canvas.pack()
 
-        self.root.protocol("WM_DELETE_WINDOW", self.delete_window)
+        self.root.protocol("WM_DELETE_WINDOW", self.root.quit)
 
         # Make gauges
         self.windDir = gauge.Compass(self.canvas, 100, 100,
@@ -211,7 +210,7 @@ class GUI:
 
     def endCORBA(self):
         time.sleep(0.1)
-        self.canvas.itemconfigure("corba", fill="blue")
+        self.canvas.itemconfigure("corba", fill="dark green")
 
     def callTime(self, ct):
         self.canvas.itemconfigure("call",
@@ -220,9 +219,6 @@ class GUI:
     def go(self):
         self.root.mainloop()
         self.root.destroy()
-
-    def delete_window(self):
-        self.root.quit()
 
 
 gui = GUI()
