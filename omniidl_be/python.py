@@ -28,6 +28,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.27  2000/07/12 14:32:13  dpg1
+# New no_package option to omniidl backend
+#
 # Revision 1.26  2000/06/28 12:47:48  dpg1
 # Proper error messages for unsupported IDL constructs.
 #
@@ -486,11 +489,16 @@ def run(tree, args):
     exported_modules.clear()
 
     # Look at the args:
-    use_stdout = 0
+    use_stdout     = 0
+    create_package = 1
     for arg in args:
 
         if arg == "stdout":
-            use_stdout = 1
+            use_stdout     = 1
+            create_package = 0
+
+        elif arg == "no_package":
+            create_package = 0
 
         elif arg == "inline":
             output_inline = 1
@@ -535,11 +543,13 @@ def run(tree, args):
 
     imported_files[outpybasename] = 1
 
-    if (use_stdout):
+    if use_stdout:
         st = output.Stream(sys.stdout, 4)
     else:
-        checkStubPackage(stub_package)
         st = output.Stream(open(outpyname, "w"), 4)
+
+    if create_package:
+        checkStubPackage(stub_package)
 
     st.out(file_start, filename=main_idl_file)
 
@@ -553,7 +563,7 @@ def run(tree, args):
 
     st.out(file_end, export_string=export_string)
 
-    if not use_stdout:
+    if create_package:
         updateModules(exports, outpymodule)
 
 
