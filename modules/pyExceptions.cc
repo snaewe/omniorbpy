@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.4  2001/05/14 12:47:21  dpg1
+// Fix memory leaks.
+//
 // Revision 1.1.2.3  2001/05/10 15:16:02  dpg1
 // Big update to support new omniORB 4 internals.
 //
@@ -130,21 +133,32 @@ omniPy::produceSystemException(PyObject* eobj, PyObject* erepoId)
 
 omniPy::
 PyUserException::PyUserException(PyObject* desc)
-  : desc_(desc), exc_(0)
+  : desc_(desc), exc_(0), decref_on_del_(0)
 {
   OMNIORB_ASSERT(desc_);
-  Py_INCREF(desc_);
   pd_insertToAnyFn    = 0;
   pd_insertToAnyFnNCP = 0;
+
+  if (omniORB::trace(25)) {
+    omniORB::logger l;
+    const char* repoId = PyString_AS_STRING(PyTuple_GET_ITEM(desc_, 2));
+    l << "Prepare to unmarshal Python user exception " << repoId << "\n";
+  }
 }
 
 omniPy::
 PyUserException::PyUserException(PyObject* desc, PyObject* exc,
 				 CORBA::CompletionStatus comp_status)
-  : desc_(desc), exc_(exc)
+  : desc_(desc), exc_(exc), decref_on_del_(0)
 {
   OMNIORB_ASSERT(desc_);
   OMNIORB_ASSERT(exc_);
+
+  if (omniORB::trace(25)) {
+    omniORB::logger l;
+    const char* repoId = PyString_AS_STRING(PyTuple_GET_ITEM(desc_, 2));
+    l << "Construct Python user exception " << repoId << "\n";
+  }
 
   try {
     omniPy::validateType(desc_, exc_, comp_status);
@@ -154,18 +168,14 @@ PyUserException::PyUserException(PyObject* desc, PyObject* exc,
     throw;
   }
 
-  Py_INCREF(desc_);
-
   pd_insertToAnyFn    = 0;
   pd_insertToAnyFnNCP = 0;
 }
 
 omniPy::
 PyUserException::PyUserException(const PyUserException& e)
-  : desc_(e.desc_), exc_(e.exc_)
+  : desc_(e.desc_), exc_(e.exc_), decref_on_del_(0)
 {
-  if (desc_)  Py_INCREF(desc_);
-  if (exc_)   Py_INCREF(exc_);
   pd_insertToAnyFn    = 0;
   pd_insertToAnyFnNCP = 0;
 }
@@ -173,13 +183,13 @@ PyUserException::PyUserException(const PyUserException& e)
 omniPy::
 PyUserException::~PyUserException()
 {
-  Py_XDECREF(desc_);
-  Py_XDECREF(exc_);
+  if (decref_on_del_)
+    Py_DECREF(exc_);
 }
 
 PyObject*
 omniPy::
-PyUserException::setPyExceptionState() const
+PyUserException::setPyExceptionState()
 {
   OMNIORB_ASSERT(desc_);
   OMNIORB_ASSERT(exc_);
@@ -187,7 +197,14 @@ PyUserException::setPyExceptionState() const
   PyObject* excclass = PyTuple_GET_ITEM(desc_, 1);
   OMNIORB_ASSERT(PyClass_Check(excclass));
   
+  if (omniORB::trace(25)) {
+    omniORB::logger l;
+    const char* repoId = PyString_AS_STRING(PyTuple_GET_ITEM(desc_, 2));
+    l << "Set Python user exception state " << repoId << "\n";
+  }
   PyErr_SetObject(excclass, exc_);
+  Py_DECREF(exc_);
+  exc_ = 0;
   return 0;
 }
 
@@ -196,6 +213,14 @@ void
 omniPy::
 PyUserException::operator>>=(cdrStream& stream) const
 {
+  OMNIORB_ASSERT(exc_);
+
+  if (omniORB::trace(25)) {
+    omniORB::logger l;
+    const char* repoId = PyString_AS_STRING(PyTuple_GET_ITEM(desc_, 2));
+    l << "Marshal Python user exception " << repoId << "\n";
+  }
+
   PyUnlockingCdrStream pystream(stream);
 
   PyObject* sdict = ((PyInstanceObject*)exc_)->in_dict;
@@ -216,6 +241,12 @@ void
 omniPy::
 PyUserException::operator<<=(cdrStream& stream)
 {
+  if (omniORB::trace(25)) {
+    omniORB::logger l;
+    const char* repoId = PyString_AS_STRING(PyTuple_GET_ITEM(desc_, 2));
+    l << "Unmarshal Python user exception " << repoId << "\n";
+  }
+
   PyUnlockingCdrStream pystream(stream);
 
   PyObject* excclass = PyTuple_GET_ITEM(desc_, 1);
@@ -223,29 +254,23 @@ PyUserException::operator<<=(cdrStream& stream)
 
   int       cnt      = (PyTuple_GET_SIZE(desc_) - 4) / 2;
   PyObject* exctuple = PyTuple_New(cnt);
+  omniPy::PyRefHolder exctuple_holder(exctuple);
 
   int i, j;
-  try {
-    for (i=0, j=5; i < cnt; i++, j+=2) {
-      PyTuple_SET_ITEM(exctuple, i,
-		       unmarshalPyObject(pystream,
-					 PyTuple_GET_ITEM(desc_, j)));
-    }
-  }
-  catch (...) {
-    Py_DECREF(exctuple);
-    throw;
+  for (i=0, j=5; i < cnt; i++, j+=2) {
+    PyTuple_SET_ITEM(exctuple, i,
+		     unmarshalPyObject(pystream,
+				       PyTuple_GET_ITEM(desc_, j)));
   }
   exc_ = PyEval_CallObject(excclass, exctuple);
-  Py_DECREF(exctuple);
 
   if (!exc_) {
     // Oh dear. Python exception constructor threw an exception.
-    if (omniORB::trace(1)) {
+    if (omniORB::trace(25)) {
       {
 	omniORB::logger l;
 	l <<
-	  "Caught internal omniORB error trying to create an exception:\n";
+	  "Caught unexpected error trying to create an exception:\n";
       }
       PyErr_Print();
     }
@@ -259,6 +284,12 @@ PyUserException::_raise()
 {
   OMNIORB_ASSERT(desc_);
   OMNIORB_ASSERT(exc_);
+
+  if (omniORB::trace(25)) {
+    omniORB::logger l;
+    const char* repoId = PyString_AS_STRING(PyTuple_GET_ITEM(desc_, 2));
+    l << "C++ throw of Python user exception " << repoId << "\n";
+  }
   throw *this;
 }
 
@@ -277,6 +308,12 @@ void
 omniPy::
 PyUserException::_NP_marshal(cdrStream& stream) const
 {
+  // Oh dear. We need to mark ourselves to say that the exception
+  // object should be DECREF'd when we are deleted, but this inherited
+  // virtual function must be const.
+  ((PyUserException*)this)->decref_on_del_ = 1;
+
+  omnipyThreadCache::lock _t;
   *this >>= stream;
 }
 

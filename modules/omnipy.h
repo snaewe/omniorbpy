@@ -31,6 +31,9 @@
 #define _omnipy_h_
 
 // $Log$
+// Revision 1.2.4.8  2001/05/14 12:47:21  dpg1
+// Fix memory leaks.
+//
 // Revision 1.2.4.7  2001/05/10 15:16:01  dpg1
 // Big update to support new omniORB 4 internals.
 //
@@ -91,7 +94,6 @@ public:
   ////////////////////////////////////////////////////////////////////////////
 
   static PyInterpreterState* pyInterpreter;
-  static omni_mutex*         pyInterpreterLock;
 
   ////////////////////////////////////////////////////////////////////////////
   // Global pointers to Python objects                                      //
@@ -259,9 +261,8 @@ public:
 
   // Copy a Python object reference in an argument or return value.
   // Compares the type of the objref with the target type, and creates
-  // a new objref of the target type if they are not compatible. Sets
-  // Python exception status to BAD_PARAM and returns 0 if the Python
-  // object is not an object reference.
+  // a new objref of the target type if they are not compatible.
+  // Throws BAD_PARAM if the Python object is not an object reference.
   //
   // Caller must hold the Python interpreter lock.
   static
@@ -390,7 +391,9 @@ public:
     CORBA::ULong tk = descriptorToTK(d_o);
 
     if (tk <= 33) { // tk_local_interface
-      return copyArgumentFns[tk](d_o, a_o, compstatus);
+      PyObject* r = copyArgumentFns[tk](d_o, a_o, compstatus);
+      OMNIORB_ASSERT(r);
+      return r;
     }
     else if (tk == 0xffffffff) { // Indirection
       return copyArgumentIndirect(d_o, a_o, compstatus);
@@ -599,7 +602,7 @@ public:
     // Set the Python exception state to the contents of this exception.
     // Caller must hold the Python interpreter lock.
     // Returns 0 so callers can do return ex.setPyExceptionState().
-    PyObject* setPyExceptionState() const;
+    PyObject* setPyExceptionState();
 
     // Marshalling operators for exception body, not including
     // repository id:
@@ -618,8 +621,10 @@ public:
     virtual const char*       _NP_typeId()            	     const;
 
   private:
-    PyObject* desc_; // Descriptor tuple
-    PyObject* exc_;  // The exception object
+    PyObject* 	   desc_;          // Descriptor tuple
+    PyObject* 	   exc_;           // The exception object
+    CORBA::Boolean decref_on_del_; // True if exc_ should be DECREF'd when
+				   // this object is deleted.
   };
 
   ////////////////////////////////////////////////////////////////////////////
@@ -666,6 +671,27 @@ public:
 						      size_t required);
     _CORBA_Boolean maybeReserveOutputSpace(omni::alignment_t align,
 					   size_t required);
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  // PyRefHolder holds a references to a Python object                      //
+  ////////////////////////////////////////////////////////////////////////////
+
+  class PyRefHolder {
+  public:
+    inline PyRefHolder(PyObject* obj) : obj_(obj) {}
+
+    inline ~PyRefHolder() {
+      Py_XDECREF(obj_);
+    }
+    inline PyObject* retn() {
+      PyObject* r = obj_; obj_ = 0; return r;
+    }
+    inline PyObject* change(PyObject* o) {
+      Py_XDECREF(obj_); obj_ = o; return o;
+    }
+  private:
+    PyObject* obj_;
   };
 
 };

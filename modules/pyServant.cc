@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.5  2001/05/14 12:47:22  dpg1
+// Fix memory leaks.
+//
 // Revision 1.1.2.4  2001/05/10 15:16:03  dpg1
 // Big update to support new omniORB 4 internals.
 //
@@ -450,6 +453,7 @@ Py_omniServant::_dispatch(_OMNI_NS(IOP_S)& iop_s)
     _upcall(iop_s, call_desc);
   }
   catch (omniPy::PyUserException& ex) {
+    omniPy::InterpreterUnlocker _u;
     iop_s.SendException(&ex);
   }
   return 1;
@@ -517,7 +521,7 @@ Py_omniServant::remote_dispatch(Py_omniCallDescriptor* pycd)
 
       if (edesc) {
 	PyUserException ex(edesc, evalue, CORBA::COMPLETED_MAYBE);
-	throw ex;
+	ex._raise();
       }
     }
 
@@ -613,7 +617,6 @@ Py_omniServant::local_dispatch(Py_omniCallDescriptor* pycd)
 			     PyTuple_GET_ITEM(result, i),
 			     CORBA::COMPLETED_MAYBE);
 
-	  OMNIORB_ASSERT(t_o);
 	  PyTuple_SET_ITEM(retval, i, t_o);
 	}
       }
@@ -660,7 +663,7 @@ Py_omniServant::local_dispatch(Py_omniCallDescriptor* pycd)
 
       if (edesc) {
 	PyUserException ex(edesc, evalue, CORBA::COMPLETED_MAYBE);
-	throw ex;
+	ex._raise();
       }
     }
 
