@@ -1,3 +1,12 @@
+Fri Jun  2 10:58:27 BST 2000 dpg1
+=================================
+
+- Thread cache now calls PyThreadState_Clear() when it is deleting a
+  thread state
+
+modules/common/pyThreadCache.cc
+
+
 Thu Jun  1 12:08:18 BST 2000 dme
 ================================
 

@@ -31,6 +31,10 @@
 // $Id$
 
 // $Log$
+// Revision 1.3  2000/06/02 09:59:53  dpg1
+// Thread cache now calls PyThreadState_Clear() when it is deleting a
+// thread state
+//
 // Revision 1.2  2000/05/30 08:57:10  dpg1
 // Accidentally set hash table size to 3 elements.
 //
@@ -194,6 +198,7 @@ run_undetached(void*)
 	      Py_XDECREF(tmp);
 	      Py_DECREF(argtuple);
 	    }
+	    PyThreadState_Clear(cn->threadState);
 	    PyThreadState_Delete(cn->threadState);
 	    PyThreadState_Swap(oldState);
 	    PyEval_ReleaseLock();
@@ -234,6 +239,7 @@ run_undetached(void*)
 	Py_XDECREF(tmp);
 	Py_DECREF(argtuple);
       }
+      PyThreadState_Clear(cn->threadState);
       PyThreadState_Delete(cn->threadState);
 
       // Remove the CacheNode
@@ -259,6 +265,7 @@ run_undetached(void*)
     Py_DECREF(argtuple);
   }
   PyThreadState_Swap(oldState);
+  PyThreadState_Clear(threadState_);
   PyThreadState_Delete(threadState_);
   PyEval_ReleaseLock();
 
