@@ -1,6 +1,6 @@
 # omniORBpy RPM SPEC file
 
-%define version       2.2pre1
+%define version       2.2
 %define release       1
 %define name          omniORBpy
 %define lib_major     2
@@ -17,7 +17,7 @@ Group:          System/Libraries
 Source0:        %{name}-%{version}.tar.gz
 #Patch0:         omniORBpy.patches
 URL:            http://omniorb.sourceforge.net/
-Requires:       omniORB = 4.0.2pre1
+Requires:       omniORB = 4.0.2
 Buildroot:      %{_tmppath}/%{name}-%{version}-root
 BuildRequires:	omniORB-devel
 #BuildArch:      i586
@@ -64,6 +64,7 @@ make CCFLAGS+="$RPM_OPT_FLAGS" all
 
 %install
 make DESTDIR=$RPM_BUILD_ROOT install
+rm -f $RPM_BUILD_ROOT/lib/python%{py_ver}/site-packages/omniidl_be/__init__.py*
 
 %clean
 [ -z $RPM_BUILD_ROOT ] || rm -rf $RPM_BUILD_ROOT
@@ -97,6 +98,9 @@ make DESTDIR=$RPM_BUILD_ROOT install
 %doc examples
 
 %changelog
+* Wed Aug  6 2003 Duncan Grisby <dgrisby@apasphere.com> 4.0.2
+- Remove clashing omniidl __init__.py. Bump version number.
+
 * Tue Jun 10 2003 Duncan Grisby <dgrisby@apasphere.com> 2.2pre1
 - Fix some text, bump version number, minor tweaks.
 

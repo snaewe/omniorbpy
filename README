@@ -1,4 +1,4 @@
-omniORBpy 2.x  (August 2002)
+omniORBpy 2.x  (August 2003)
 =============
 
 This is omniORBpy 2, a robust high-performance CORBA ORB for Python.
@@ -9,7 +9,7 @@ may find at
   http://www.omg.org/technology/documents/formal/python_language_mapping.htm
 
 
-omniORBpy makes use of the C++ omniORB library. omniORBpy version 2
+omniORBpy makes use of the C++ omniORB library. omniORBpy version 2.x
 can only be used with omniORB 4.0.x.
 
 omniORBpy is currently available for many Unix platforms and Windows.
