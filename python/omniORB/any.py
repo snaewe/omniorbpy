@@ -242,6 +242,9 @@ def _to_tc_value(data):
     elif hasattr(data, "_NP_RepositoryId"):
         return omniORB.findTypeCode(data._NP_RepositoryId), data
 
+    raise CORBA.BAD_PARAM(omniORB.BAD_PARAM_WrongPythonType,
+                          CORBA.COMPLETED_NO)
+
 
 def from_any(any, keep_structs=0):
     """from_any(any, keep_structs=0) -- extract the data from an Any.

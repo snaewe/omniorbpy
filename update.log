@@ -1,3 +1,11 @@
+Fri Oct 17 16:43:31 BST 2003 dgrisby
+====================================
+
+- Raise BAD_PARAM if we fall off the end of to_any().
+
+python/omniORB/any.py
+
+
 Thu Sep 25 14:15:24 BST 2003 dgrisby
 ====================================
 
