@@ -7,13 +7,12 @@ The bindings adhere to the proposed IDL to Python mapping which you
 may find at ftp://ftp.omg.org/pub/docs/orbos/98-08-02.pdf. There are a
 number of errors in the mapping document, which are outlined below.
 
-omniORBpy is currently available for Linux and Solaris. Windows NT
-support will be available soon.
+omniORBpy is currently available for Linux and Solaris, and should be
+reasonably easy to port to any other Unix. Windows NT support will be
+available soon.
 
-The omniORBpy runtime is believed to be reasonably stable. The IDL
-compiler, omniidlpy, is less stable, since the front-end parser is
-still in development. The majority of valid IDL will be handled
-correctly, but many invalid IDL files will also be accepted.
+The package is believed to be reasonably stable, but there are
+probably still some latent bugs.
 
 Please report any bugs you find to Duncan Grisby,
 
@@ -77,7 +76,7 @@ as Fnorb).
 
 Anyway, first compile the echo_example.idl file with:
 
-  omniidlpy echo_example.idl
+  omniidl -bpython echo_example.idl
 
 This generates the Python modules named Example and POA_Example.
 
@@ -162,7 +161,7 @@ the same IDL:
     string echoString(in string mesg);
   };
 
-If you run this though omniidlpy, you'll find that you get a Python
+If you run this though omniidl, you'll find that you get a Python
 module named _GlobalIDL. To modify the client shown above, simply
 change the line which reads:
 
@@ -282,8 +281,8 @@ The significant differences are as follows:
    With Fnorb, if you do "fnidl a.idl" followed by "fnidl b.idl", then
    the Python module named M will only contain the definition of
    interface J, having overwritten the definition of I. Under
-   omniORBpy, "omniidlpy a.idl" followed by "omniidlpy b.idl" results
-   in Python module M containing both I and J.
+   omniORBpy, "omniidl -bpython a.idl" followed by "omniidl -bpython
+   b.idl" results in Python module M containing both I and J.
 
 5. omniORBpy copes better with inherited interfaces when it does not
    have full knowledge of the most derived interfaces. For example,
@@ -339,7 +338,7 @@ Missing features
 ----------------
 
 There are a number of features which are currently missing from
-omniORBpy. Most (with the exception of object by value) will be
+omniORBpy. Most (with the exception of objects by value) will be
 available in the near future.
 
 
