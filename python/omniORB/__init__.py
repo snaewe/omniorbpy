@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.20  2000/06/02 14:25:51  dpg1
+# orb.run() now properly exits when the ORB is shut down
+#
 # Revision 1.19  2000/06/01 11:10:30  dme
 # add omniORB.WorkerThread create/delete hooks (e.g. for profiling)
 #
@@ -251,6 +254,7 @@ runtime creates any "WorkerThread"s.
 
 # ORB:
 orb_lock = threading.Lock()
+orb_cond = threading.Condition(orb_lock)
 orb      = None
 
 # Maps for object reference classes and IDL-defined types:

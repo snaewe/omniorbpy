@@ -1,3 +1,14 @@
+Fri Jun  2 15:24:13 BST 2000 dpg1
+=================================
+
+- orb.run() now properly exits when the ORB is shut down
+
+src/lib/omniORBpy/modules/common/pyThreadCache.cc
+src/lib/omniORBpy/modules/omni30/pyORBFunc.cc
+src/lib/omniORBpy/python/omniORB/CORBA.py
+src/lib/omniORBpy/python/omniORB/__init__.py
+
+
 Fri Jun  2 10:58:27 BST 2000 dpg1
 =================================
 

@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.25  2000/06/02 14:25:51  dpg1
+# orb.run() now properly exits when the ORB is shut down
+#
 # Revision 1.24  2000/05/16 10:43:24  dpg1
 # Add TC_foo names for TypeCode constants.
 #
@@ -450,6 +453,7 @@ class ORB:
     def __init__(self, argv, orb_identifier):
         _omnipy.ORB_init(self, argv, orb_identifier)
         self._omni_argv = argv # For omniORB 2.8 to initialise its BOA
+        self._shutdown = 0
 
     def string_to_object(self, ior):
         return _omnipy.orb_func.string_to_object(self, ior)
@@ -470,15 +474,23 @@ class ORB:
         return
 
     def run(self):
-        # *** This is broken. It should finish when shutdown() is called.
-        while 1:
-            time.sleep(60)
+        omniORB.orb_lock.acquire()
+        while not self._shutdown:
+            omniORB.orb_cond.wait(60)
+        omniORB.orb_lock.release()
 
     def shutdown(self, wait_for_completion):
         _omnipy.orb_func.shutdown(self, wait_for_completion)
 
     def destroy(self):
         _omnipy.orb_func.destroy(self)
+
+    def _has_shutdown(self):
+        # Callback from the C++ world to kill threads blocked in run()
+        omniORB.orb_lock.acquire()
+        self._shutdown = 1
+        omniORB.orb_cond.notifyAll()
+        omniORB.orb_lock.release()
 
 
     # TypeCode operations

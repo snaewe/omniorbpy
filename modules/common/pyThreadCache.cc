@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.4  2000/06/02 14:25:50  dpg1
+// orb.run() now properly exits when the ORB is shut down
+//
 // Revision 1.3  2000/06/02 09:59:53  dpg1
 // Thread cache now calls PyThreadState_Clear() when it is deleting a
 // thread state
@@ -248,13 +251,20 @@ run_undetached(void*)
       cn = cnn;
     }
   }
-  PyThreadState_Swap(oldState);
-  PyEval_ReleaseLock();
 
+  // Signal to Python threads blocked in orb.run() that the ORB has
+  // shut down
+  {
+    PyObject* pyorb = PyObject_GetAttrString(omniPy::pyomniORBmodule,
+					     (char*)"orb");
+    OMNIORB_ASSERT(pyorb);
+    PyObject* ret = PyObject_CallMethod(pyorb, (char*)"_has_shutdown",
+					(char*)"");
+    Py_XDECREF(ret);
+    Py_DECREF(pyorb);
+  }
 
   // Remove this thread's Python state
-  PyEval_AcquireLock();
-  oldState = PyThreadState_Swap(threadState_);
   if (workerThread_) {
     PyObject* argtuple = PyTuple_New(1);
     PyTuple_SET_ITEM(argtuple, 0, workerThread_);
