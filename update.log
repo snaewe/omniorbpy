@@ -1,3 +1,15 @@
+Fri Jun  9 12:01:25 BST 2000 dpg1
+=================================
+
+- Off-by-one error in line number for __omni_pragma pragmas.
+
+omniidl/cxx/idl.ll
+omniidl/cxx/idl.yy
+omniidl/cxx/lex.yy.cc
+omniidl/cxx/y.tab.cc
+omniidl/cxx/y.tab.h
+
+
 Thu Jun  8 15:21:49 BST 2000 dpg1
 =================================
 
