@@ -29,7 +29,10 @@
 
 # $Id$
 # $Log$
-# Revision 1.24  2000/07/06 09:30:20  dpg1
+# Revision 1.25  2000/07/06 09:40:44  dpg1
+# Spelling mistake :-(
+#
+# Revision 1.15.2.13  2000/07/06 09:30:20  dpg1
 # Clarify omniidl usage in documentation and omniidl -u
 #
 # Revision 1.15.2.12  2000/06/27 16:23:26  sll
@@ -173,7 +176,7 @@ You must select a target back-end with -b. For C++, use -bcxx:
 
   omniidl -bcxx file.idl
 
-Too see options specific to C++, use:
+To see options specific to C++, use:
 
   omniidl -bcxx -u
 """
