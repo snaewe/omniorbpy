@@ -28,6 +28,9 @@
 //    ValueType support
 
 // $Log$
+// Revision 1.1.2.8  2005/01/17 15:19:11  dgrisby
+// Minor changes to compile on Windows.
+//
 // Revision 1.1.2.7  2005/01/06 23:22:27  dgrisby
 // Properly align output in valuetype marshalling.
 //
@@ -148,12 +151,14 @@ public:
 
 
 private:
-  static const CORBA::ULong MAGIC_ = 0x50594f56; // "PYOV"
+  static const CORBA::ULong MAGIC_;
   CORBA::ULong magic_;
 
   PyObject*    dict_;
   CORBA::ULong in_truncatable_;
 };
+
+const CORBA::ULong pyOutputValueTracker::MAGIC_ = 0x50594f56; // "PYOV"
 
 
 class pyInputValueTracker : public ValueIndirectionTracker {
@@ -203,11 +208,13 @@ public:
   }
 
 private:
-  static const CORBA::ULong MAGIC_ = 0x50594956; // "PYIV"
+  static const CORBA::ULong MAGIC_;
   CORBA::ULong magic_;
 
   PyObject*    dict_;
 };
+
+const CORBA::ULong pyInputValueTracker::MAGIC_ = 0x50594956; // "PYIV"
 
 
 //

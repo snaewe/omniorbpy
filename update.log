@@ -1,3 +1,11 @@
+Mon Jan 17 15:18:36 GMT 2005 dgrisby
+====================================
+
+- Minor changes to compile on Windows.
+
+modules/pyValueType.cc
+
+
 Fri Jan  7 00:20:07 GMT 2005 dgrisby
 ====================================
 
