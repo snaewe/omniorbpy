@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.14  2000/01/20 17:47:09  dpg1
+// Refcounting bug in any handling.
+//
 // Revision 1.13  2000/01/10 19:58:59  dpg1
 // Struct marshalling is more forgiving. BAD_PARAM exceptions instead of
 // assertion failures with incorrect data.
@@ -74,7 +77,6 @@
 //
 
 #include <omnipy.h>
-
 
 CORBA::ULong
 omniPy::alignedSize(CORBA::ULong msgsize,
@@ -1545,6 +1547,7 @@ omniPy::unmarshalPyObject(NetBufferedStream& stream,
       // TypeCode
       PyObject* desc     = unmarshalTypeCode(stream);
       PyObject* argtuple = PyTuple_New(1);
+      Py_INCREF(desc);
       PyTuple_SET_ITEM(argtuple, 0, desc);
       PyObject* tcobj    = PyEval_CallObject(pyCreateTypeCode, argtuple);
       Py_DECREF(argtuple);
@@ -1970,6 +1973,7 @@ omniPy::unmarshalPyObject(MemBufferedStream& stream,
       // TypeCode
       PyObject* desc     = unmarshalTypeCode(stream);
       PyObject* argtuple = PyTuple_New(1);
+      Py_INCREF(desc);
       PyTuple_SET_ITEM(argtuple, 0, desc);
       PyObject* tcobj    = PyEval_CallObject(pyCreateTypeCode, argtuple);
       Py_DECREF(argtuple);
