@@ -31,6 +31,10 @@
 # $Id$
 
 # $Log$
+# Revision 1.14  1999/11/25 14:12:34  dpg1
+# sleep()ing for maxint seconds wasn't a good idea, since some platforms
+# use milliseconds for their sleep system call.
+#
 # Revision 1.13  1999/11/25 14:01:45  dpg1
 # orb.run() now uses time.sleep() to sleep, rather than blocking in
 # impl_is_ready(). This means Python can interrupt the sleep.
@@ -511,8 +515,8 @@ class ORB:
     def run(self):
         poa = self.resolve_initial_references("RootPOA")
         _omnipy.implIsReady(poa, 0, 1)
-        while 1: # While loop will repeat every 68 years :-)
-            time.sleep(0x7fffffff)
+        while 1:
+            time.sleep(60)
 
     __methods__ = ["string_to_object", "object_to_string",
                    "list_initial_services", "resolve_initial_references",
