@@ -1,3 +1,36 @@
+Thu Jul 10 22:59:16 BST 2003 dgrisby
+====================================
+
+- Test long sequence to check GIOP 1.0 re-entrancy.
+
+examples/tests/tclient.py
+
+- Extend valuetype examples/tests.
+
+examples/valuetype/client.py
+examples/valuetype/server.py
+examples/valuetype/value1.idl
+
+- Abstract interface support.
+
+modules/dir.mk
+modules/omnipy.cc
+modules/omnipy.h
+modules/pyAbstractIntf.cc   -- new
+modules/pyMarshal.cc
+omniidl_be/python.py
+python/omniORB/__init__.py
+python/omniORB/tcInternal.py
+
+- Fix locking issues (merge from omnipy2_develop).
+
+modules/pyCallDescriptor.cc
+
+- Track orb core changes, fix bugs.
+
+modules/pyValueType.cc
+
+
 Tue May 20 17:56:32 BST 2003 dgrisby
 ====================================
 

@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.4.2  2003/07/10 22:17:02  dgrisby
+// Track orb core changes, fix bugs.
+//
 // Revision 1.1.4.1  2003/03/23 21:51:57  dgrisby
 // New omnipy3_develop branch.
 //
@@ -72,6 +75,25 @@
 #include <pyThreadCache.h>
 #include <omniORB4/IOP_C.h>
 
+#ifdef HAS_Cplusplus_Namespace
+namespace {
+#endif
+  class cdLockHolder {
+  public:
+    inline cdLockHolder(omniPy::Py_omniCallDescriptor* cd) : cd_(cd) {
+      cd->reacquireInterpreterLock();
+    }
+    inline ~cdLockHolder() {
+      cd_->releaseInterpreterLock();
+    }
+  private:
+    omniPy::Py_omniCallDescriptor* cd_;
+  };
+#ifdef HAS_Cplusplus_Namespace
+};
+#endif
+
+
 OMNI_USING_NAMESPACE(omni)
 
 
@@ -89,14 +111,12 @@ omniPy::Py_omniCallDescriptor::initialiseCall(cdrStream&)
   // initialiseCall() is called with the interpreter lock
   // released. Reacquire it so we can touch the descriptor objects
   // safely
-  reacquireInterpreterLock();
+  cdLockHolder _l(this);
 
   for (int i=0; i < in_l_; i++)
     omniPy::validateType(PyTuple_GET_ITEM(in_d_,i),
 			 PyTuple_GET_ITEM(args_,i),
 			 CORBA::COMPLETED_NO);
-
-  releaseInterpreterLock();
 }
 
 
@@ -105,13 +125,17 @@ omniPy::Py_omniCallDescriptor::marshalArguments(cdrStream& stream)
 {
   int i;
   if (in_marshal_) {
-    if (omniORB::trace(1)) {
-      omniORB::logger l;
-      l <<
-	"Warning: omniORBpy marshalArguments re-entered. "
-	"Untested code may fail.\n";
-    }
-    // Re-entered to figure out the size
+    omniORB::logs(25, "Python marshalArguments re-entered.");
+
+    // marshalArguments can be re-entered when using GIOP 1.0, to
+    // calculate the message size if the message is too big for a
+    // single buffer. In that case, the interpreter lock has been
+    // released by the PyUnlockingCdrStream, meaning the call
+    // descriptor does not have the lock details. We have to use the
+    // thread cache lock.
+
+    omnipyThreadCache::lock _t;
+
     for (i=0; i < in_l_; i++)
       omniPy::marshalPyObject(stream,
 			      PyTuple_GET_ITEM(in_d_,i),
@@ -120,21 +144,24 @@ omniPy::Py_omniCallDescriptor::marshalArguments(cdrStream& stream)
       omniPy::marshalContext(stream, ctxt_d_, PyTuple_GET_ITEM(args_, i));
   }
   else {
-    reacquireInterpreterLock();
+    cdLockHolder _l(this);
 
     in_marshal_ = 1;
     PyUnlockingCdrStream pystream(stream);
 
-    for (i=0; i < in_l_; i++)
-      omniPy::marshalPyObject(pystream,
-			      PyTuple_GET_ITEM(in_d_,i),
-			      PyTuple_GET_ITEM(args_,i));
-    if (ctxt_d_)
-      omniPy::marshalContext(pystream, ctxt_d_, PyTuple_GET_ITEM(args_, i));
-
+    try {
+      for (i=0; i < in_l_; i++)
+	omniPy::marshalPyObject(pystream,
+				PyTuple_GET_ITEM(in_d_,i),
+				PyTuple_GET_ITEM(args_,i));
+      if (ctxt_d_)
+	omniPy::marshalContext(pystream, ctxt_d_, PyTuple_GET_ITEM(args_, i));
+    }
+    catch (...) {
+      in_marshal_ = 0;
+      throw;
+    }
     in_marshal_ = 0;
-
-    releaseInterpreterLock();
   }
 }
 
@@ -144,7 +171,7 @@ omniPy::Py_omniCallDescriptor::unmarshalReturnedValues(cdrStream& stream)
 {
   if (out_l_ == -1) return;  // Oneway operation
 
-  reacquireInterpreterLock();
+  cdLockHolder _l(this);
 
   if (out_l_ == 0) {
     Py_INCREF(Py_None);
@@ -170,7 +197,6 @@ omniPy::Py_omniCallDescriptor::unmarshalReturnedValues(cdrStream& stream)
       }
     }
   }
-  releaseInterpreterLock();
 }
 
 
