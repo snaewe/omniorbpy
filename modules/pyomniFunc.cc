@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.16  2005/01/04 14:52:15  dgrisby
+// Handle exceptions thrown by setClientThreadCallTimeout.
+//
 // Revision 1.1.2.15  2004/07/26 11:12:28  dgrisby
 // Support new traceExceptions function.
 //
@@ -249,14 +252,19 @@ omniPy::ensureOmniThread()
 
   // Get the threading.Thread object for this thread.
   PyObject* threading = PyImport_ImportModule((char*)"threading");
-  if (!threading)
+  if (!threading) {
+    omniORB::logs(1, "Unable to import Python threading module.");
     return 0;
+  }
 
   PyObject* current = PyObject_CallMethod(threading,
 					  (char*)"currentThread",
 					  (char*)"");
-  if (!current)
+  if (!current) {
+    omniORB::logs(1, "Unexpected exception calling threading.currentThread.");
+    if (omniORB::trace(1)) PyErr_Print();
     return 0;
+  }
 
   // Create a dummy omni_thread
   self = omni_thread::create_dummy();
@@ -271,8 +279,10 @@ omniPy::ensureOmniThread()
   PyObject* hook = PyObject_CallMethod(omniPy::pyomniORBmodule,
 				       (char*)"omniThreadHook", (char*)"O",
 				       current);
-  if (!hook)
-    PyErr_Print();
+  if (!hook) {
+    omniORB::logs(1, "Unexpected exception calling omniThreadHook.");
+    if (omniORB::trace(1)) PyErr_Print();
+  }
 
   Py_XDECREF(hook);
   Py_DECREF(cobj);
@@ -714,8 +724,11 @@ extern "C" {
     if (!PyArg_ParseTuple(args, (char*)"i", &timeout))
       return 0;
 
-    omniPy::ensureOmniThread();
-    omniORB::setClientThreadCallTimeout(timeout);
+    try {
+      omniPy::ensureOmniThread();
+      omniORB::setClientThreadCallTimeout(timeout);
+    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
 
     Py_INCREF(Py_None);
     return Py_None;
