@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.12  1999/11/10 16:08:21  dpg1
+# Some types weren't registered properly.
+#
 # Revision 1.11  1999/10/18 08:25:57  dpg1
 # _is_a() now works properly for local objects.
 #
@@ -625,6 +628,7 @@ _ad_Identifier = (tcInternal.tv_alias,
                   "IDL:omg.org/CORBA/Identifier:1.0",
                   "Identifier", _d_Identifier)
 _tc_Identifier = tcInternal.createTypeCode(_ad_Identifier)
+omniORB.registerType(_ad_Identifier[1], _ad_Identifier, _tc_Identifier)
 
 # typedef string ScopedName
 _d_ScopedName  = (tcInternal.tv_string, 0)
@@ -632,6 +636,7 @@ _ad_ScopedName = (tcInternal.tv_alias,
                   "IDL:omg.org/CORBA/ScopedName:1.0",
                   "ScopedName", _d_ScopedName)
 _tc_ScopedName = tcInternal.createTypeCode(_ad_ScopedName)
+omniORB.registerType(_ad_ScopedName[1], _ad_ScopedName, _tc_ScopedName)
 
 # typedef string RepositoryId
 _d_RepositoryId  = (tcInternal.tv_string, 0)
@@ -639,6 +644,7 @@ _ad_RepositoryId = (tcInternal.tv_alias,
                     "IDL:omg.org/CORBA/RepositoryId:1.0",
                     "RepositoryId", _d_RepositoryId)
 _tc_RepositoryId = tcInternal.createTypeCode(_ad_RepositoryId)
+omniORB.registerType(_ad_RepositoryId[1], _ad_RepositoryId, _tc_RepositoryId)
 
 # interface IDLType;
 _d_IDLType = (tcInternal.tv_objref,
@@ -661,6 +667,8 @@ _d_StructMember  = (tcInternal.tv_struct, StructMember,
                     "type",     _d_TypeCode,
                     "type_def", _d_IDLType)
 _tc_StructMember = tcInternal.createTypeCode(_d_StructMember)
+omniORB.registerType(StructMember._NP_RepositoryId, _d_StructMember,
+                     _tc_StructMember)
 
 # typedef sequence <StructMember> StructMemberSeq;
 _d_StructMemberSeq  = (omniORB.tcInternal.tv_sequence, _d_StructMember, 0)
@@ -668,6 +676,8 @@ _ad_StructMemberSeq = (omniORB.tcInternal.tv_alias,
                        "IDL:omg.org/CORBA/StructMemberSeq:1.0",
                        "StructMemberSeq", _d_StructMemberSeq)
 _tc_StructMemberSeq = omniORB.tcInternal.createTypeCode(_ad_StructMemberSeq)
+omniORB.registerType(_ad_StructMemberSeq[1], _ad_StructMemberSeq,
+                     _tc_StructMemberSeq)
 
 # struct UnionMember
 class UnionMember:
@@ -686,6 +696,8 @@ _d_UnionMember  = (tcInternal.tv_struct, UnionMember,
                    "type",     _d_TypeCode,
                    "type_def", _d_IDLType)
 _tc_UnionMember = tcInternal.createTypeCode(_d_UnionMember)
+omniORB.registerType(UnionMember._NP_RepositoryId, _d_UnionMember,
+                     _tc_UnionMember)
 
 # typedef sequence <UnionMember> UnionMemberSeq;
 _d_UnionMemberSeq  = (omniORB.tcInternal.tv_sequence, _d_UnionMember, 0)
@@ -693,6 +705,8 @@ _ad_UnionMemberSeq = (omniORB.tcInternal.tv_alias,
                       "IDL:omg.org/CORBA/UnionMemberSeq:1.0",
                       "UnionMemberSeq", _d_UnionMemberSeq)
 _tc_UnionMemberSeq = omniORB.tcInternal.createTypeCode(_ad_UnionMemberSeq)
+omniORB.registerType(_ad_UnionMemberSeq[1], _ad_UnionMemberSeq,
+                     _tc_UnionMemberSeq)
 
 # typedef sequence <Identifier> EnumMemberSeq;
 _d_EnumMemberSeq  = (omniORB.tcInternal.tv_sequence, _d_Identifier, 0)
@@ -700,3 +714,5 @@ _ad_EnumMemberSeq = (omniORB.tcInternal.tv_alias,
                      "IDL:omg.org/CORBA/EnumMemberSeq:1.0",
                      "EnumMemberSeq", _d_EnumMemberSeq)
 _tc_EnumMemberSeq = omniORB.tcInternal.createTypeCode(_ad_EnumMemberSeq)
+omniORB.registerType(_ad_EnumMemberSeq[1], _ad_EnumMemberSeq,
+                     _tc_EnumMemberSeq)
