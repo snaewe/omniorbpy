@@ -31,6 +31,10 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.3  2005/01/24 17:28:58  dgrisby
+// Unbelievably unlikely race condition in thread cache / Python worker
+// thread creation. Of course it happened anyway.
+//
 // Revision 1.1.2.2  2003/07/29 14:52:10  dgrisby
 // Reuse Python thread state if possible. (Python 2.3.)
 //
@@ -101,15 +105,17 @@ public:
     CacheNode* cn;
     {
       omni_mutex_lock _l(*guard);
+      OMNIORB_ASSERT(table);
 
       cn = table[hash];
       while (cn && cn->id != id) cn = cn->next;
-      if (!cn) cn = addNewNode(id, hash);
-
-      cn->used = 1;
-      cn->active++;
+      if (cn) {
+	cn->used = 1;
+	cn->active++;
+	return cn;
+      }
     }
-    return cn;
+    return addNewNode(id, hash);
   }
 
   static inline void releaseNode(CacheNode* cn) {
