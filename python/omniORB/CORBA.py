@@ -3,6 +3,10 @@
 # $Id$
 
 # $Log$
+# Revision 1.5  1999/09/13 14:51:46  dpg1
+# Any coercion implemented. TypeCode() constructor now complies to
+# latest spec.
+#
 # Revision 1.4  1999/09/13 09:55:02  dpg1
 # Initial references support. __methods__ added.
 #
@@ -280,54 +284,43 @@ class TypeCode:
     class BadKind (UserException):
         pass
 
-    def __init__(self):
-        self._d = 0
-        self._k = tk_null
+    def __init__(self, cr):
+        self._t = tcInternal.typeCodeFromClassOrRepoId(cr)
+        self._d = self._t._d
+        self._k = self._t._k
 
-    def equal(self, tc):
-        if self._d == tc._d: return TRUE
-        else:                return FALSE
-
-    def equivalent(self, tc):
-        return self.equal(tc)
-
-    def get_compact_typecode(self):
-        return self
-
-    def kind(self):
-        return self._k
+    def equal(self, tc):                return self._t.equal(tc)
+    def equivalent(self, tc):           return self._t.equivalent(tc)
+    def get_compact_typecode(self):     return self._t.get_compact_typecode()
+    def kind(self):                     return self._t.kind()
     
     # Operations which are only available for some kinds:
-    def id(self):                       raise TypeCode.BadKind
-    def name(self):                     raise TypeCode.BadKind
-    def member_count(self):             raise TypeCode.BadKind
-    def member_name(self, index):       raise TypeCode.BadKind
-    def member_type(self, index):       raise TypeCode.BadKind
-    def member_label(self, index):      raise TypeCode.BadKind
+    def id(self):                       return self._t.id()
+    def name(self):                     return self._t.name()
+    def member_count(self):             return self._t.member_count()
+    def member_name(self, index):       return self._t.member_name(index)
+    def member_type(self, index):       return self._t.member_type(index)
+    def member_label(self, index):      return self._t.member_label(index)
 
-    def discriminator_type(self):       raise TypeCode.BadKind
-    def default_index(self):            raise TypeCode.BadKind
-    def length(self):                   raise TypeCode.BadKind
-    def content_type(self):             raise TypeCode.BadKind
+    def discriminator_type(self):       return self._t.discriminator_type()
+    def default_index(self):            return self._t.default_index()
+    def length(self):                   return self._t.length()
+    def content_type(self):             return self._t.content_type()
 
     # Things for types we don't support:
-    def fixed_digits(self):             raise TypeCode.BadKind
-    def fixed_scale(self):              raise TypeCode.BadKind
-    def member_visibility(self, index): raise TypeCode.BadKind
-    def type_modifier(self):            raise TypeCode.BadKind
-    def concrete_base_type(self):       raise TypeCode.BadKind
+    def fixed_digits(self):             return self._t.fixed_digits()
+    def fixed_scale(self):              return self._t.fixed_scale()
+    def member_visibility(self, index): return self._t.member_visibility(index)
+    def type_modifier(self):            return self._t.type_modifier()
+    def concrete_base_type(self):       return self._t.concrete_base_type()
 
     __methods__ = ["equal", "equivalent", "get_compact_typecode",
-                   "kind", "id", "name", "member_count", "member_type",
-                   "member_label", "discriminator_type", "default_index",
-                   "length", "content_type"]
+                   "kind", "id", "name", "member_count", "member_name",
+                   "member_type", "member_label", "discriminator_type",
+                   "default_index", "length", "content_type"]
 
 import tcInternal
-
 _d_TypeCode = tcInternal.tv_TypeCode
-
-def typecode(t):
-    return tcInternal.typecode(t)
 
 
 # TypeCodes of basic types:
@@ -368,7 +361,11 @@ class Any:
     def value(self, coerce=None):
         if coerce is None:
             return self._v
-        raise NotImplementedError("Any coercion not yet supported.")
+
+        if not isinstance(coerce, TypeCode):
+            raise TypeError("Argument 1 must be a TypeCode if present.")
+
+        return omniORB.coerceAny(self._v, self._t._d, coerce._d)
 
     __methods__ = ["typecode", "value"]
 
@@ -494,15 +491,15 @@ class BOA:
 class Object:
     """ CORBA::Object base class """
 
-    _NP_RepositoryId = "IDL:omg.org/CORBA/Object:1.0"
+    _NP_RepositoryId = ""
 
     _nil = None
 
     def __init__(self):
-        print "CORBA.Object created."
+        pass
 
     def __del__(self):
-        print "CORBA.Object destructor."
+        pass
 
     def _get_interface(self):
         # ***
@@ -534,7 +531,7 @@ class Object:
     __methods__ = ["_is_a", "_non_existent", "_is_equivalent",
                    "_hash", "_narrow"]
 
-_d_Object  = (omniORB.tcInternal.tv_objref, None, "Object")
+_d_Object  = (omniORB.tcInternal.tv_objref, Object._NP_RepositoryId, "Object")
 _tc_Object = omniORB.tcInternal.createTypeCode(_d_Object)
 
 
