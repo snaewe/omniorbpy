@@ -28,6 +28,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.19  1999/12/21 16:06:15  dpg1
+# DOH!  global= not module= !
+#
 # Revision 1.18  1999/12/21 16:05:11  dpg1
 # New module= option.
 #
@@ -99,7 +102,7 @@ usage_string = """\
   -Wbpackage=p    Put both Python modules and stub files in package p
   -Wbmodules=p    Put Python modules in package p
   -Wbstubs=p      Put stub files in package p
-  -Wbmodule=m     Module to use for global IDL scope (default _GlobalIDL)"""
+  -Wbglobal=g     Module to use for global IDL scope (default _GlobalIDL)"""
 
 #""" Uncomment this line to get syntax highlighting on the output strings
 
