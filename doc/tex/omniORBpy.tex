@@ -3281,8 +3281,14 @@ autodetected in many locations, or its location can be given with the
 platforms, the \code{OPEN\_SSL\_ROOT} make variable must be set in the
 platform file.
 
-To use the SSL transport from Python you must import the
-\code{omniORB.sslTP} module before calling \op{CORBA.ORB\_init}.
+To use the SSL transport from Python you must import and set
+parameters in the \code{omniORB.sslTP} module before calling
+\op{CORBA.ORB\_init}. To initialise the module, you must call the
+\op{certificate\_authority\_file}, \op{key\_file} and
+\op{key\_file\_password} functions, providing the file names of the
+certificate authority and encryption keys, and the key file password.
+
+
 
 
 

@@ -26,6 +26,7 @@ AC_LANG(C++)
 dnl ** Libraries
 
 OMNI_OMNIORB_ROOT
+OMNI_OPENSSL_ROOT
 
 
 dnl ** Compiler name
@@ -119,6 +120,8 @@ AC_CONFIG_FILES(
                 GNUmakefile
                 examples/embed/GNUmakefile
                 modules/GNUmakefile
+                modules/codesets/GNUmakefile
+                modules/sslTP/GNUmakefile
                 omniidl_be/GNUmakefile
                 python/CosNaming/GNUmakefile
                 python/CosNaming__POA/GNUmakefile

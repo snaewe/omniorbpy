@@ -802,6 +802,7 @@ Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-omniorb          omniORB root directory
+  --with-openssl          OpenSSL root directory (default none)
 
 Some influential environment variables:
   CC          C compiler command
@@ -2872,6 +2873,54 @@ fi
 OMNIORB_ROOT=$omni_cv_omniorb_root
 
 
+echo "$as_me:$LINENO: checking for OpenSSL root" >&5
+echo $ECHO_N "checking for OpenSSL root... $ECHO_C" >&6
+if test "${omni_cv_openssl_root+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+
+# Check whether --with-openssl or --without-openssl was given.
+if test "${with_openssl+set}" = set; then
+  withval="$with_openssl"
+  omni_cv_openssl_root=$withval
+else
+  if test "x$prefix" != "xNONE"; then
+               omni_cv_openssl_root=$prefix/openssl
+             else
+               omni_cv_openssl_root=$ac_default_prefix/openssl
+             fi
+	     if test -d $omni_cv_openssl_root/lib; then
+               :
+             else
+               omni_cv_openssl_root=no
+	     fi
+fi;
+
+fi
+echo "$as_me:$LINENO: result: $omni_cv_openssl_root" >&5
+echo "${ECHO_T}$omni_cv_openssl_root" >&6
+if test "$omni_cv_openssl_root" = "yes"; then
+  if test "x$prefix" != "xNONE"; then
+    omni_cv_openssl_root=$prefix/openssl
+  else
+    omni_cv_openssl_root=$ac_default_prefix/openssl
+  fi
+  if test -d $omni_cv_openssl_root; then
+    :
+  else
+    { { echo "$as_me:$LINENO: error: Can't find OpenSSL in '$omni_cv_openssl_root'. Please give me the full path or leave out --with-openssl." >&5
+echo "$as_me: error: Can't find OpenSSL in '$omni_cv_openssl_root'. Please give me the full path or leave out --with-openssl." >&2;}
+   { (exit 1); exit 1; }; }
+    omni_cv_openssl_root=no
+  fi
+fi
+open_ssl_root=$omni_cv_openssl_root
+if test "$open_ssl_root" = "no"; then
+  open_ssl_root=""
+fi
+OPEN_SSL_ROOT=$open_ssl_root
+
+
 
 
 
@@ -2962,7 +3011,7 @@ PROCESSOR_NAME=$processor_name
 ac_config_files="$ac_config_files mk/beforeauto.mk mk/afterauto.mk"
 
 
-ac_config_files="$ac_config_files GNUmakefile examples/embed/GNUmakefile modules/GNUmakefile omniidl_be/GNUmakefile python/CosNaming/GNUmakefile python/CosNaming__POA/GNUmakefile python/GNUmakefile python/omniORB/GNUmakefile include/GNUmakefile"
+ac_config_files="$ac_config_files GNUmakefile examples/embed/GNUmakefile modules/GNUmakefile modules/codesets/GNUmakefile modules/sslTP/GNUmakefile omniidl_be/GNUmakefile python/CosNaming/GNUmakefile python/CosNaming__POA/GNUmakefile python/GNUmakefile python/omniORB/GNUmakefile include/GNUmakefile"
 
 
 cat >confcache <<\_ACEOF
@@ -3467,6 +3516,8 @@ do
   "GNUmakefile" ) CONFIG_FILES="$CONFIG_FILES GNUmakefile" ;;
   "examples/embed/GNUmakefile" ) CONFIG_FILES="$CONFIG_FILES examples/embed/GNUmakefile" ;;
   "modules/GNUmakefile" ) CONFIG_FILES="$CONFIG_FILES modules/GNUmakefile" ;;
+  "modules/codesets/GNUmakefile" ) CONFIG_FILES="$CONFIG_FILES modules/codesets/GNUmakefile" ;;
+  "modules/sslTP/GNUmakefile" ) CONFIG_FILES="$CONFIG_FILES modules/sslTP/GNUmakefile" ;;
   "omniidl_be/GNUmakefile" ) CONFIG_FILES="$CONFIG_FILES omniidl_be/GNUmakefile" ;;
   "python/CosNaming/GNUmakefile" ) CONFIG_FILES="$CONFIG_FILES python/CosNaming/GNUmakefile" ;;
   "python/CosNaming__POA/GNUmakefile" ) CONFIG_FILES="$CONFIG_FILES python/CosNaming__POA/GNUmakefile" ;;
@@ -3588,6 +3639,7 @@ s,@pkgpythondir@,$pkgpythondir,;t t
 s,@pyexecdir@,$pyexecdir,;t t
 s,@pkgpyexecdir@,$pkgpyexecdir,;t t
 s,@OMNIORB_ROOT@,$OMNIORB_ROOT,;t t
+s,@OPEN_SSL_ROOT@,$OPEN_SSL_ROOT,;t t
 s,@COMPILER_NAME@,$COMPILER_NAME,;t t
 s,@PLATFORM_NAME@,$PLATFORM_NAME,;t t
 s,@OSVERSION@,$OSVERSION,;t t

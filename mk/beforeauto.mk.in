@@ -518,6 +518,11 @@ OMNIORB_LIB_NODYN_DEPEND += $(OMNITHREAD_LIB_DEPEND)
 OMNITHREAD_LIB = $(patsubst %,$(LibSearchPattern),omnithread)
 
 
+# CodeSets library
+OMNIORB_CODESETS_LIB = $(patsubst %,$(LibSearchPattern),omniCodeSets$(OMNIORB_MAJOR_VERSION))
+lib_depend := $(patsubst %,$(LibPattern),omniCodeSets$(OMNIORB_MAJOR_VERSION))
+OMNIORB_CODESETS_LIB_DEPEND := $(GENERATE_LIB_DEPEND)
+
 
 # omniORB SSL transport
 OMNIORB_SSL_VERSION = $(OMNIORB_MAJOR_VERSION).$(OMNIORB_MINOR_VERSION)
@@ -665,7 +670,7 @@ INSTEXEFLAGS	= -m 0755
 CP		= cp
 MV		= mv -f
 CPP		= @CPP@
-OMKDEPEND	= $(TOOLBINDIR)/omkdepend
+OMKDEPEND	= $(INSTALLBINDIR)/omkdepend
 RMDIRHIER	= $(RM) -rf
 
 CXXMAKEDEPEND   = $(OMKDEPEND) -D__cplusplus

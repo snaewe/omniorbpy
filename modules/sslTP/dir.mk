@@ -7,39 +7,9 @@ DIR_CPPFLAGS += -DOMNIORB_VERSION_STRING=\"$(OMNIORB_VERSION)\"
 
 OMNIORB_VERSION_NOMICRO := $(OMNIORB_MAJOR_VERSION).$(OMNIORB_MINOR_VERSION)
 
-CXXSRCS = omnipy.cc \
-          pyORBFunc.cc \
-          pyPOAFunc.cc \
-          pyPOAManagerFunc.cc \
-          pyPOACurrentFunc.cc \
-          pyObjectRef.cc \
-          pyCallDescriptor.cc \
-          pyServant.cc \
-          pyExceptions.cc \
-          pyMarshal.cc \
-          pyTypeCode.cc \
-          pyThreadCache.cc \
-          pyomniFunc.cc \
-	  pyFixed.cc \
-          pyContext.cc \
-          cxxAPI.cc
+CXXSRCS = pysslTP.cc
 
-OBJS =    omnipy.o \
-          pyORBFunc.o \
-          pyPOAFunc.o \
-          pyPOAManagerFunc.o \
-          pyPOACurrentFunc.o \
-          pyObjectRef.o \
-          pyCallDescriptor.o \
-          pyServant.o \
-          pyExceptions.o \
-          pyMarshal.o \
-          pyTypeCode.o \
-          pyThreadCache.o \
-          pyomniFunc.o \
-	  pyFixed.o \
-	  pyContext.o \
-          cxxAPI.o
+OBJS =    pysslTP.o
 
 
 DIR_CPPFLAGS += $(patsubst %,-I%/include,$(OMNIORB_ROOT))
@@ -47,21 +17,6 @@ DIR_CPPFLAGS += $(patsubst %,-I%/include/omniORB4/internal,$(OMNIORB_ROOT))
 DIR_CPPFLAGS += $(patsubst %,-I%/include/omniORB4/internal,$(IMPORT_TREES))
 DIR_CPPFLAGS += -I../include
 
-
-all:: pydistdate.hh
-
-pydistdate.hh: ../update.log
-	$(PYTHON) $(BASE_OMNI_TREE)/bin/scripts/distdate.py OMNIORBPY <$^ >pydistdate.hh
-
-export:: pydistdate.hh
-	@(file=$^; dir="$(EXPORT_TREE)/$(INCDIR)/omniORB4"; \
-	 $(ExportFileToDir))
-
-ifdef INSTALLTARGET
-install:: pydistdate.hh
-	@(file=$^; dir="$(INSTALLINCDIR)/omniORB4"; \
-	 $(ExportFileToDir))
-endif
 
 
 #############################################################################
@@ -87,7 +42,7 @@ endif
 
 ifeq ($(platform),autoconf)
 
-namespec := _omnipymodule _ $(OMNIPY_MAJOR) $(OMNIPY_MINOR)
+namespec := _omnisslTPmodule _ $(OMNIPY_MAJOR) $(OMNIPY_MINOR)
 
 SharedLibraryFullNameTemplate = $$1$$2.$(SHAREDLIB_SUFFIX).$$3.$$4
 SharedLibrarySoNameTemplate   = $$1$$2.$(SHAREDLIB_SUFFIX).$$3
@@ -102,7 +57,7 @@ shlib := $(shell $(SharedLibraryFullName) $(namespec))
 DIR_CPPFLAGS += $(SHAREDLIB_CPPFLAGS)
 
 $(shlib): $(OBJS)
-	@(namespec="$(namespec)"; extralibs="$(OMNIORB_LIB_NODYN)";\
+	@(namespec="$(namespec)"; extralibs="$(OMNIORB_SSL_LIB)";\
           $(MakeCXXSharedLibrary))
 
 all:: $(shlib)
@@ -134,7 +89,7 @@ ifdef Linux
 
 CXXOPTIONS += -fpic
 
-libname = _omnipymodule.so
+libname = _omnisslTPmodule.so
 soname  = $(libname).$(OMNIPY_MAJOR)
 lib     = $(soname).$(OMNIPY_MINOR)
 
@@ -142,7 +97,7 @@ $(lib): $(OBJS)
 	(set -x; \
 	$(RM) $@; \
 	$(CXXLINK) $(CXXLINKOPTIONS) -shared -o $@ -Wl,-soname,$(soname) $(IMPORT_LIBRARY_FLAGS) \
-	 $(filter-out $(LibSuffixPattern),$^) $(OMNIORB_LIB_NODYN)\
+	 $(filter-out $(LibSuffixPattern),$^) $(OMNIORB_SSL_LIB)\
 	)
 
 all:: $(lib)
@@ -168,7 +123,7 @@ endif
 
 ifdef SunOS
 
-libname = _omnipymodule.so
+libname = _omnisslTPmodule.so
 soname  = $(libname).$(OMNIPY_MAJOR)
 lib     = $(soname).$(OMNIPY_MINOR)
 
@@ -185,7 +140,7 @@ $(lib): $(OBJS)
         fi; \
         $(CXX) -G -o $@ -h $(soname) $(IMPORT_LIBRARY_FLAGS) \
          $(patsubst %,-R %,$(IMPORT_LIBRARY_DIRS)) \
-         $(filter-out $(LibSuffixPattern),$^) $(OMNIORB_LIB_NODYN) \
+         $(filter-out $(LibSuffixPattern),$^) $(OMNIORB_SSL_LIB) \
          $$CXX_RUNTIME \
 	)
 
@@ -199,7 +154,7 @@ $(lib): $(OBJS)
 	(set -x; \
 	$(RM) $@; \
 	$(CXXLINK) $(CXXLINKOPTIONS) -shared -o $@ -Wl-soname,$(soname) $(IMPORT_LIBRARY_FLAGS) \
-	 $(filter-out $(LibSuffixPattern),$^) $(OMNIORB_LIB_NODYN)\
+	 $(filter-out $(LibSuffixPattern),$^) $(OMNIORB_SSL_LIB)\
 	)
 
 endif
@@ -240,7 +195,7 @@ DIR_CPPFLAGS += -I$(PYINCDIR) -I$(PYINCDIR)/python$(PYVERSION) \
 
 PYLIBPATH = $(patsubst %,-libpath:%,$(PYLIBDIR))
 
-implib = _omnipy.lib
+implib = _omnisslTP.lib
 lib = $(patsubst %.lib,%.pyd,$(implib))
 
 all:: $(lib)
@@ -267,8 +222,8 @@ ifdef AIX
 
 CXXOPTIONS += -I. -I/usr/local/include
 
-lib = _omnipymodule.so
-libinit = init_omnipy
+lib = _omnisslTPmodule.so
+libinit = init_omnisslTP
 py_exp = $(PYPREFIX)/lib/python$(PYVERSION)/config/python.exp
 
 ifeq ($(notdir $(CXX)),xlC_r)
@@ -281,7 +236,7 @@ $(lib): $(OBJS) $(PYOBJS)
 	     -bI:$(py_exp) \
 	     -n $(libinit) \
 	     $(IMPORT_LIBRARY_FLAGS) \
-	     $(OMNIORB_LIB_NODYN) \
+	     $(OMNIORB_SSL_LIB) \
 	     -bhalt:4 -T512 -H512 \
 	     $(filter-out $(LibSuffixPattern),$^) \
 	     -p 40 \
@@ -310,7 +265,7 @@ ifdef FreeBSD
 
 CXXOPTIONS += -fPIC
 
-libname = _omnipymodule.so
+libname = _omnisslTPmodule.so
 soname  = $(libname).$(OMNIPY_MAJOR)
 lib     = $(soname).$(OMNIPY_MINOR)
 
@@ -350,12 +305,12 @@ PYPREFIX = $(shell $(PYTHON) -c "import sys;print sys.exec_prefix")
 CXXOPTIONS += -I$(PYPREFIX)/include
 CXXLINKOPTIONS += -nostdlib -r
 SO = .so
-libname = _omnipymodule$(SO)
+libname = _omnisslTPmodule$(SO)
 soname  = $(libname).$(OMNIPY_MAJOR)
 lib     = $(soname).$(OMNIPY_MINOR)
 
 $(lib): $(OBJS)
-      $(CXXLINK) $(CXXLINKOPTIONS) $(OBJS) $(OMNIORB_LIB_NODYN) -o $(lib)
+      $(CXXLINK) $(CXXLINKOPTIONS) $(OBJS) $(OMNIORB_SSL_LIB) -o $(lib)
 
 all:: $(lib)
 
@@ -386,7 +341,7 @@ ifeq ($(notdir $(CXX)),aCC)
 
 CXXOPTIONS += +Z
 
-libname = _omnipymodule.sl
+libname = _omnisslTPmodule.sl
 soname  = $(libname).$(OMNIPY_MAJOR)
 lib     = $(soname).$(OMNIPY_MINOR)
 
@@ -395,7 +350,7 @@ $(lib): $(OBJS)
          $(RM) $@; \
          aCC -b -Wl,+h$(soname) -o $@  $(IMPORT_LIBRARY_FLAGS) \
            $(patsubst %,-L %,$(IMPORT_LIBRARY_DIRS)) \
-           $(filter-out $(LibSuffixPattern),$^) $(OMNIORB_LIB_NODYN); \
+           $(filter-out $(LibSuffixPattern),$^) $(OMNIORB_SSL_LIB); \
         )
 
 all:: $(lib)
@@ -432,7 +387,7 @@ ifdef IRIX_64
 ADD_CPPFLAGS = -64
 endif
 
-libname = _omnipymodule.so
+libname = _omnisslTPmodule.so
 soname  = $(libname).$(OMNIPY_MAJOR)
 lib     = $(soname).$(OMNIPY_MINOR)
 
@@ -442,7 +397,7 @@ $(lib): $(OBJS)
          $(LINK.cc) -KPIC -shared -Wl,-h,$(libname) \
            -Wl,-set_version,$(soname) -Wl,-rpath,$(LIBDIR) \
            -o $@ $(IMPORT_LIBRARY_FLAGS) \
-           $(filter-out $(LibSuffixPattern),$^) $(OMNIORB_LIB_NODYN)\
+           $(filter-out $(LibSuffixPattern),$^) $(OMNIORB_SSL_LIB)\
            $(LDLIBS); \
         )
 
@@ -471,7 +426,7 @@ endif
 ifdef OSF1
 ifeq ($(notdir $(CXX)),cxx)
 
-libname = _omnipymodule.so
+libname = _omnisslTPmodule.so
 soname  = $(libname).$(OMNIPY_MAJOR)
 lib     = $(soname).$(OMNIPY_MINOR)
 
@@ -481,7 +436,7 @@ $(lib): $(OBJS)
 	(set -x; \
          $(RM) $@; \
          ld -shared -soname $(soname) -set_version $(soname) -o $@ $(IMPORT_LIBRARY_FLAGS) \
-         $(filter-out $(LibSuffixPattern),$^) $(OMNIORB_LIB_NODYN) -lcxxstd -lcxx -lexc -lots -lc \
+         $(filter-out $(LibSuffixPattern),$^) $(OMNIORB_SSL_LIB) -lcxxstd -lcxx -lexc -lots -lc \
         )
 
 
@@ -501,26 +456,4 @@ export:: $(lib)
 endif
 endif
 
-endif
-
-
-#############################################################################
-#   Subdirectories                                                          #
-#############################################################################
-
-SUBDIRS = codesets
-
-ifdef OPEN_SSL_ROOT
-SUBDIRS += sslTP
-endif
-
-all::
-	@$(MakeSubdirs)
-
-export::
-	@$(MakeSubdirs)
-
-ifdef INSTALLTARGET
-install::
-	@$(MakeSubdirs)
 endif

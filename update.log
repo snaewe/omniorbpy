@@ -1,3 +1,34 @@
+Fri Sep  6 22:18:15 BST 2002 dgrisby
+====================================
+
+- Int/long unification.
+
+modules/pyMarshal.cc
+examples/tests/tclient.py
+
+- Add codesets and sslTP modules.
+
+configure
+configure.ac
+doc/omniORBpy.pdf
+doc/omniORBpy.ps
+doc/omniORBpy/omniORBpy007.html
+doc/tex/omniORBpy.tex
+mk/beforeauto.mk.in
+modules/dir.mk
+modules/codesets/GNUmakefile     -- new
+modules/codesets/GNUmakefile.in  -- new
+modules/codesets/dir.mk          -- new
+modules/codesets/pyCodeSets.cc   -- new
+modules/sslTP/GNUmakefile        -- new
+modules/sslTP/GNUmakefile.in     -- new
+modules/sslTP/dir.mk             -- new
+modules/sslTP/pysslTP.cc         -- new
+python/omniORB/codesets.py       -- new
+python/omniORB/dir.mk
+python/omniORB/sslTP.py          -- new
+
+
 Wed Aug 21 21:16:43 BST 2002 dgrisby
 ====================================
 

@@ -461,8 +461,12 @@ autodetected in many locations, or its location can be given with the
 platforms, the <TT>OPEN_SSL_ROOT</TT> make variable must be set in the
 platform file.<BR>
 <BR>
-To use the SSL transport from Python you must import the
-<TT>omniORB.sslTP</TT> module before calling <TT>CORBA.ORB_init()</TT>.<BR>
+To use the SSL transport from Python you must import and set
+parameters in the <TT>omniORB.sslTP</TT> module before calling
+<TT>CORBA.ORB_init()</TT>. To initialise the module, you must call the
+<TT>certificate_authority_file()</TT>, <TT>key_file()</TT> and
+<TT>key_file_password()</TT> functions, providing the file names of the
+certificate authority and encryption keys, and the key file password.<BR>
 <BR>
 <HR WIDTH="50%" SIZE=1><DL><DT><A NAME="note12" HREF="#text12"><FONT SIZE=5>1</FONT></A><DD>GIOP 1.2 supports
 `bidirectional GIOP', which permits the rôles to be reversed.
