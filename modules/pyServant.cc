@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.13  2003/01/27 11:56:58  dgrisby
+// Correctly handle invalid returns from application code.
+//
 // Revision 1.1.2.12  2002/03/18 12:40:38  dpg1
 // Support overriding _non_existent.
 //
@@ -720,6 +723,11 @@ Py_omniServant::local_dispatch(Py_omniCallDescriptor* pycd)
 			      result, CORBA::COMPLETED_MAYBE);
       }
       else {
+	if (!PyTuple_Check(result) || PyTuple_GET_SIZE(result) != out_l)
+	  OMNIORB_THROW(BAD_PARAM,
+			BAD_PARAM_WrongPythonType,
+			CORBA::COMPLETED_MAYBE);
+
 	retval = PyTuple_New(out_l);
 	
 	for (i=0; i < out_l; ++i) {

@@ -29,6 +29,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.2.15  2003/01/27 11:56:58  dgrisby
+// Correctly handle invalid returns from application code.
+//
 // Revision 1.1.2.14  2002/09/06 21:30:42  dgrisby
 // Int/long unification.
 //
@@ -390,9 +393,10 @@ validateTypeStruct(PyObject* d_o, PyObject* a_o,
       else {
 	// Not such a fast case after all
 	value = PyObject_GetAttr(a_o, name);
-	if (!value)
+	if (!value) {
+	  PyErr_Clear();
 	  OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
-
+	}
 	// DECREF now in case validateType() throws an exception. Safe
 	// because the struct object still holds a reference to the
 	// value.
@@ -406,8 +410,10 @@ validateTypeStruct(PyObject* d_o, PyObject* a_o,
       name    = PyTuple_GET_ITEM(d_o, j++);
       OMNIORB_ASSERT(PyString_Check(name));
       value   = PyObject_GetAttr(a_o, name);
-      if (!value)
+      if (!value) {
+	PyErr_Clear();
 	OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
+      }
 
       Py_DECREF(value);
       omniPy::validateType(PyTuple_GET_ITEM(d_o, j), value, compstatus);
@@ -3771,6 +3777,8 @@ copyArgumentStruct(PyObject* d_o, PyObject* a_o,
 	  t_o = omniPy::copyArgument(PyTuple_GET_ITEM(d_o, j),
 				     value, compstatus);
 	}
+	else
+	  PyErr_Clear();
       }
       if (value) {
 	PyTuple_SET_ITEM(argtuple, i, t_o);
@@ -3790,8 +3798,10 @@ copyArgumentStruct(PyObject* d_o, PyObject* a_o,
 				   value, compstatus);
 	PyTuple_SET_ITEM(argtuple, i, t_o);
       }
-      else
+      else {
+	PyErr_Clear();
 	OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
+      }
     }
   }
   return PyEval_CallObject(PyTuple_GET_ITEM(d_o, 1), argtuple);
