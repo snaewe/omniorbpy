@@ -1,14 +1,30 @@
+Mon Aug 14 17:08:04 BST 2000 dpg1
+=================================
+
+- Error message now says "Could not open..." rather than "Could not
+  find..." when Python imports fail.
+
+omniidl/cxx/idlpython.cc
+omniidl/python/scripts/omniidlrun.py
+
+- Missed out some explicit casts to (char*) for string constants.
+
+modules/common/pyomniFunc.cc
+modules/omni28/omnipy.cc
+modules/omni28/pyServant.cc
+
+
 Mon Aug  7 10:18:32 BST 2000 dpg1
 =================================
 
 - Long long support
 
-src/lib/omniORBpy/modules/dir.mk
-src/lib/omniORBpy/modules/common/pyMarshal.cc
-src/lib/omniORBpy/modules/common/pyTypeCode.cc
-src/lib/omniORBpy/omniidl_be/python.py
-src/lib/omniORBpy/python/omniORB/CORBA.py
-src/lib/omniORBpy/python/omniORB/tcInternal.py
+modules/dir.mk
+modules/common/pyMarshal.cc
+modules/common/pyTypeCode.cc
+omniidl_be/python.py
+python/omniORB/CORBA.py
+python/omniORB/tcInternal.py
 
 
 Tue Aug  1 12:21:35 BST 2000 dpg1
