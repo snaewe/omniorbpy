@@ -1,3 +1,11 @@
+Wed May 24 11:34:31 BST 2000 dpg1
+=================================
+
+- _this() wasn't catching exceptions
+
+modules/omni30/pyPOAFunc.cc
+
+
 Tue May 16 11:41:52 BST 2000 dpg1
 =================================
 
