@@ -1,9 +1,25 @@
 #!/usr/bin/env python
 
-import CORBA, ValueTest, Derived
+import CORBA, ValueTest, ValueTest__POA, Derived
+
+
+class Three_i(ValueTest.Three):
+    def test(self):
+        print "test local call"
+        return "value"
+
+class Four_i(ValueTest__POA.Four):
+    def test(self):
+        print "test callback"
+        return "object"
+
 
 def main(args):
     orb = CORBA.ORB_init(args)
+    poa = orb.resolve_initial_references("RootPOA")
+    poa._get_the_POAManager().activate()
+
+    orb.register_value_factory(CORBA.id(ValueTest.Three), Three_i)
 
     obj = orb.string_to_object(args[1])
     obj = obj._narrow(ValueTest.Test)
@@ -35,8 +51,19 @@ def main(args):
     obj.op2(v1, v7)
     obj.op2(v7, v1)
 
-    r9 = obj.op4("Hello")
+    r9  = obj.op4("Hello")
     r10 = obj.op4(None)
+
+    # Abstract interface test
+    obj.op5(None)
+
+    fi = Four_i()
+    fo = fi._this()
+
+    obj.op5(fo)
+
+    t = Three_i("experiment")
+    obj.op5(t)
 
     orb.destroy()
 

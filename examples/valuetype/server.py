@@ -2,6 +2,12 @@
 
 import CORBA, ValueTest, ValueTest__POA
 
+class Three_i(ValueTest.Three):
+    def test(self):
+        print "test local call"
+        return "value"
+
+
 class Test_i (ValueTest__POA.Test):
 
     def op1(self, a):
@@ -32,9 +38,17 @@ class Test_i (ValueTest__POA.Test):
         print "op4:", a
         return a
 
+    def op5(self, a):
+        print "op5:", a
+        if a is not None:
+            print a.test()
+
+
 def main(args):
     orb = CORBA.ORB_init(args)
     poa = orb.resolve_initial_references("RootPOA")
+
+    orb.register_value_factory(CORBA.id(ValueTest.Three), Three_i)
 
     ti = Test_i()
     to = ti._this()
