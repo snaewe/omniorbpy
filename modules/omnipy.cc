@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.22  2003/07/24 15:04:34  dgrisby
+// Python 2.3's threading.Thread is a new-style class.
+//
 // Revision 1.1.2.21  2003/05/28 10:13:00  dgrisby
 // Preliminary interceptor support. General clean-up.
 //
@@ -381,7 +384,6 @@ extern "C" {
     OMNIORB_ASSERT(omniPy::pyCreateTypeCode);
     OMNIORB_ASSERT(PyFunction_Check(omniPy::pyCreateTypeCode));
     OMNIORB_ASSERT(omniPy::pyWorkerThreadClass);
-    OMNIORB_ASSERT(PyClass_Check(omniPy::pyWorkerThreadClass));
     OMNIORB_ASSERT(omniPy::pyWorkerThreadDel);
     OMNIORB_ASSERT(PyMethod_Check(omniPy::pyWorkerThreadDel));
     OMNIORB_ASSERT(omniPy::pyEmptyTuple);

@@ -1,3 +1,11 @@
+Thu Jul 24 15:59:33 BST 2003 dgrisby
+====================================
+
+- Python 2.3's threading.Thread is a new-style class.
+
+modules/omnipy.cc
+
+
 Fri Jul 18 12:22:53 BST 2003 dgrisby
 ====================================
 
