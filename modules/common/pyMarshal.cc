@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.16  2000/02/15 09:50:22  dpg1
+// Bug in union unmashalling.
+//
 // Revision 1.15  2000/02/04 12:17:10  dpg1
 // Support for VMS.
 //
@@ -1665,6 +1668,10 @@ omniPy::unmarshalPyObject(NetBufferedStream& stream,
 	  assert(PyTuple_Check(t_o));
 	  value = unmarshalPyObject(stream, PyTuple_GET_ITEM(t_o, 2));
 	}
+	else {
+	  Py_INCREF(Py_None);
+	  value = Py_None;
+	}
       }
 
       PyObject* untuple = PyTuple_New(2);
@@ -2090,6 +2097,10 @@ omniPy::unmarshalPyObject(MemBufferedStream& stream,
 	if (t_o != Py_None) {
 	  assert(PyTuple_Check(t_o));
 	  value = unmarshalPyObject(stream, PyTuple_GET_ITEM(t_o, 2));
+	}
+	else {
+	  Py_INCREF(Py_None);
+	  value = Py_None;
 	}
       }
 
