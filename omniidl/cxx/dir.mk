@@ -5,13 +5,9 @@ IDLMODULE_VERSION = 0x2301# => CORBA 2.3, front-end 0.1
 DIR_CPPFLAGS += -DIDLMODULE_VERSION="\"$(IDLMODULE_VERSION)\""
 
 
-ifndef PYTHON
-all::
-	@$(NoPythonError)
-export::
-	@$(NoPythonError)
+ifeq ($(PYTHON),)
+PYTHON = python
 endif
-
 
 SUBDIRS = cccp
 
