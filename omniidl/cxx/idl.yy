@@ -28,7 +28,11 @@
 
 // $Id$
 // $Log$
-// Revision 1.12  2000/06/05 18:13:25  dpg1
+// Revision 1.13  2000/06/08 14:36:18  dpg1
+// Comments and pragmas are now objects rather than plain strings, so
+// they can have file,line associated with them.
+//
+// Revision 1.9.2.1  2000/06/05 18:13:26  dpg1
 // Comments can be attached to subsequent declarations (with -K). Better
 // idea of most recent decl in operation declarations
 //
@@ -1447,7 +1451,7 @@ pragma_version:
 
 unknown_pragma:
     PRAGMA unknown_pragma_body_plus END_PRAGMA {
-      Pragma::add($2);
+      Pragma::add($2, currentFile, yylineno);
     }
     ;
 

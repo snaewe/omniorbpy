@@ -1,3 +1,19 @@
+Thu Jun  8 15:21:49 BST 2000 dpg1
+=================================
+
+- Comments and pragmas are now objects rather than plain strings, so
+  they can have file,line associated with them.
+
+omniidl/cxx/idl.ll
+omniidl/cxx/idl.yy
+omniidl/cxx/idlast.cc
+omniidl/cxx/idlast.h
+omniidl/cxx/idlpython.cc
+omniidl/cxx/lex.yy.cc
+omniidl/cxx/y.tab.cc
+omniidl/python/omniidl/idlast.py
+
+
 Tue Jun  6 16:17:00 BST 2000 dpg1
 =================================
 
