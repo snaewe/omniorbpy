@@ -188,10 +188,14 @@ module TypeTest {
     // Fixed
     F1         complex40(in F1         a);
 
+    // WString
+    wstring     complex41(in wstring     a);
+    wstring<10> complex42(in wstring<10> a);
+
     // ValueType
-    V1         complex41(in V1         a);
-    V2         complex42(in V2         a);
-    B1         complex43(in B1         a);
+    V1         complex43(in V1         a);
+    V2         complex44(in V2         a);
+    B1         complex45(in B1         a);
 
     // Exceptions
     void except1()          raises (X1);

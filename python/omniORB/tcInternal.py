@@ -29,8 +29,10 @@
 
 
 # $Id$
-
 # $Log$
+# Revision 1.13.2.4  2005/01/07 00:22:35  dgrisby
+# Big merge from omnipy2_develop.
+#
 # Revision 1.13.2.3  2003/07/10 22:13:25  dgrisby
 # Abstract interface support.
 #
@@ -159,7 +161,7 @@ tv_value_box          = 30
 tv_native             = 31
 tv_abstract_interface = 32
 tv_local_interface    = 33
-tv__indirect          = 0xffffffff
+tv__indirect          = -1
 
 
 # Create a TypeCode given a class or a repoId
@@ -805,7 +807,9 @@ def equivalentDescriptors(a, b, seen=None, a_ids=None, b_ids=None):
             return 0
 
         # Follow aliases and indirections
-        while a[0] == tv_alias or a[0] == tv__indirect:
+        while (type(a) is types.TupleType and
+               (a[0] == tv_alias or a[0] == tv__indirect)):
+
             if a[0] == tv_alias:
                 if a[1] != "": a_ids[a[1]] = a
                 a = a[3]
@@ -815,7 +819,9 @@ def equivalentDescriptors(a, b, seen=None, a_ids=None, b_ids=None):
                 else:
                     a = a[1][0]
 
-        while b[0] == tv_alias or b[0] == tv__indirect:
+        while (type(b) is types.TupleType and
+               (b[0] == tv_alias or b[0] == tv__indirect)):
+            
             if b[0] == tv_alias:
                 if b[1] != "": b_ids[b[1]] = b
                 b = b[3]
@@ -825,6 +831,13 @@ def equivalentDescriptors(a, b, seen=None, a_ids=None, b_ids=None):
                 else:
                     b = b[1][0]
 
+        # Re-do the trivial checks on the underlying types.
+        if a == b: return 1
+
+        if type(a) is not types.TupleType or type(b) is not types.TupleType:
+            return 0
+
+        # Handle cycles
         if seen.has_key((id(a),id(b))):
             return 1
 

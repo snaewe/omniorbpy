@@ -31,6 +31,9 @@
 #define _omnipy_h_
 
 // $Log$
+// Revision 1.3.2.4  2005/01/07 00:22:32  dgrisby
+// Big merge from omnipy2_develop.
+//
 // Revision 1.3.2.3  2003/07/10 22:13:25  dgrisby
 // Abstract interface support.
 //
@@ -243,11 +246,12 @@ public:
   // Module initialisation functions                                        //
   ////////////////////////////////////////////////////////////////////////////
 
-  static void initORBFunc       (PyObject* d);
-  static void initPOAFunc       (PyObject* d);
-  static void initPOAManagerFunc(PyObject* d);
-  static void initPOACurrentFunc(PyObject* d);
-  static void initomniFunc      (PyObject* d);
+  static void initORBFunc        (PyObject* d);
+  static void initPOAFunc        (PyObject* d);
+  static void initPOAManagerFunc (PyObject* d);
+  static void initPOACurrentFunc (PyObject* d);
+  static void initInterceptorFunc(PyObject* d);
+  static void initomniFunc       (PyObject* d);
 
 
   ////////////////////////////////////////////////////////////////////////////
@@ -266,7 +270,8 @@ public:
 
   // Throw a C++ system exception equivalent to the given Python exception
   static
-  void produceSystemException(PyObject* eobj, PyObject* erepoId);
+  void produceSystemException(PyObject* eobj, PyObject* erepoId,
+			      PyObject* etype, PyObject* etraceback);
 
   // Handle the current Python exception. An exception must have
   // occurred. Deals with system exceptions and
@@ -629,6 +634,15 @@ public:
 
 
   ////////////////////////////////////////////////////////////////////////////
+  // Interceptor functions                                                  //
+  ////////////////////////////////////////////////////////////////////////////
+
+  // Register ORB interceptors if need be
+  static
+  void registerInterceptors();
+
+
+  ////////////////////////////////////////////////////////////////////////////
   // Proxy call descriptor object                                           //
   ////////////////////////////////////////////////////////////////////////////
 
@@ -684,8 +698,9 @@ public:
       tstate_ = 0;
     }
 
-    // Extract and take ownership of stored args/results
-    inline PyObject* args()   { PyObject* r = args_;   args_ = 0;   return r; }
+    inline PyObject* args() { return args_; }
+
+    // Extract and take ownership of stored results
     inline PyObject* result() { PyObject* r = result_; result_ = 0; return r; }
 
     //

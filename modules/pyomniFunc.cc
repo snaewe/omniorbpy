@@ -28,8 +28,10 @@
 //    omniORB API functions
 
 // $Id$
-
 // $Log$
+// Revision 1.1.4.2  2005/01/07 00:22:33  dgrisby
+// Big merge from omnipy2_develop.
+//
 // Revision 1.1.4.1  2003/03/23 21:51:56  dgrisby
 // New omnipy3_develop branch.
 //
@@ -69,6 +71,8 @@
 
 #include <omnipy.h>
 #include <pyThreadCache.h>
+#include <omniORB4/giopEndpoint.h>
+
 
 OMNI_USING_NAMESPACE(omni);
 
@@ -218,6 +222,7 @@ extern "C" {
   static void removeDummyOmniThread(void* vself) {
     if ((omni_thread*)vself == omni_thread::self()) {
       omniORB::logs(10, "Remove dummy omni thread.");
+      omniPy::InterpreterUnlocker _u;
       omni_thread::release_dummy();
     }
     else
@@ -237,14 +242,19 @@ omniPy::ensureOmniThread()
 
   // Get the threading.Thread object for this thread.
   PyObject* threading = PyImport_ImportModule((char*)"threading");
-  if (!threading)
+  if (!threading) {
+    omniORB::logs(1, "Unable to import Python threading module.");
     return 0;
+  }
 
   PyObject* current = PyObject_CallMethod(threading,
 					  (char*)"currentThread",
 					  (char*)"");
-  if (!current)
+  if (!current) {
+    omniORB::logs(1, "Unexpected exception calling threading.currentThread.");
+    if (omniORB::trace(1)) PyErr_Print();
     return 0;
+  }
 
   // Create a dummy omni_thread
   self = omni_thread::create_dummy();
@@ -259,8 +269,10 @@ omniPy::ensureOmniThread()
   PyObject* hook = PyObject_CallMethod(omniPy::pyomniORBmodule,
 				       (char*)"omniThreadHook", (char*)"O",
 				       current);
-  if (!hook)
-    PyErr_Print();
+  if (!hook) {
+    omniORB::logs(1, "Unexpected exception calling omniThreadHook.");
+    if (omniORB::trace(1)) PyErr_Print();
+  }
 
   Py_XDECREF(hook);
   Py_DECREF(cobj);
@@ -435,6 +447,31 @@ extern "C" {
 
       if (PyInt_Check(pytl)) {
 	omniORB::traceLevel = PyInt_AS_LONG(pytl);
+	Py_INCREF(Py_None);
+	return Py_None;
+      }
+    }
+    PyErr_SetString(PyExc_TypeError,
+		    (char*)"Operation requires a single integer argument");
+    return 0;
+  }
+
+  static char traceExceptions_doc [] =
+  "traceExceptions(int) -> None\n"
+  "traceExceptions()    -> int\n"
+  "\n"
+  "Set or get the omniORB exception tracing flag.\n";
+
+  static PyObject* pyomni_traceExceptions(PyObject* self, PyObject* args)
+  {
+    if (PyTuple_GET_SIZE(args) == 0) {
+      return PyInt_FromLong(omniORB::traceExceptions);
+    }
+    else if (PyTuple_GET_SIZE(args) == 1) {
+      PyObject* pytl = PyTuple_GET_ITEM(args, 0);
+
+      if (PyInt_Check(pytl)) {
+	omniORB::traceExceptions = PyInt_AS_LONG(pytl);
 	Py_INCREF(Py_None);
 	return Py_None;
       }
@@ -677,12 +714,69 @@ extern "C" {
     if (!PyArg_ParseTuple(args, (char*)"i", &timeout))
       return 0;
 
-    omniPy::ensureOmniThread();
-    omniORB::setClientThreadCallTimeout(timeout);
+    try {
+      omniPy::ensureOmniThread();
+      omniORB::setClientThreadCallTimeout(timeout);
+    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
 
     Py_INCREF(Py_None);
     return Py_None;
   }
+
+  static char myIPAddresses_doc [] =
+  "myIPAddresses()\n"
+  "\n"
+  "Return a list of IP address strings for this host. Returns an empty list\n"
+  "if called before the ORB is initialised.\n";
+
+  static PyObject* pyomni_myIPAddresses(PyObject* self, PyObject* args)
+  {
+    if (!PyArg_ParseTuple(args, (char*)""))
+      return 0;
+
+    const omnivector<const char*>* ifaddrs
+      = omni::giopTransportImpl::getInterfaceAddress("giop:tcp");
+
+    PyObject* pyaddrs = PyList_New(ifaddrs->size());
+
+    omnivector<const char*>::const_iterator i;
+    int j;
+
+    for (i = ifaddrs->begin(), j=0; i != ifaddrs->end(); i++, j++) {
+      PyList_SetItem(pyaddrs, j, PyString_FromString(*i));
+    }
+
+    return pyaddrs;
+  }
+
+  static char setPersistentServerIdentifier_doc [] =
+  "setPersistentServerIdentifier(ident)\n"
+  "\n"
+  "Sets an octet sequence used to persistently identify \"this\"\n"
+  "server. Stored object references matching this identifier are\n"
+  "re-written to use the current endpoint details.\n";
+
+  static PyObject* pyomni_setPersistentServerIdentifier(PyObject* self,
+							PyObject* args)
+  {
+    char* idstr;
+    int   idlen;
+
+    if (!PyArg_ParseTuple(args, (char*)"s#", &idstr, &idlen))
+      return 0;
+
+    CORBA::OctetSeq idseq(idlen, idlen, (CORBA::Octet*)idstr, 0);
+    try {
+      omniPy::InterpreterUnlocker _u;
+      omniORB::setPersistentServerIdentifier(idseq);
+    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
+
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
+
 
   static PyMethodDef pyomni_methods[] = {
     {(char*)"installTransientExceptionHandler",
@@ -700,6 +794,10 @@ extern "C" {
     {(char*)"traceLevel",
      pyomni_traceLevel,
      METH_VARARGS, traceLevel_doc},
+
+    {(char*)"traceExceptions",
+     pyomni_traceExceptions,
+     METH_VARARGS, traceExceptions_doc},
 
     {(char*)"traceInvocations",
      pyomni_traceInvocations,
@@ -732,6 +830,14 @@ extern "C" {
     {(char*)"setClientThreadCallTimeout",
      pyomni_setClientThreadCallTimeout,
      METH_VARARGS, setClientThreadCallTimeout_doc},
+
+    {(char*)"myIPAddresses",
+     pyomni_myIPAddresses,
+     METH_VARARGS, myIPAddresses_doc},
+
+    {(char*)"setPersistentServerIdentifier",
+     pyomni_setPersistentServerIdentifier,
+     METH_VARARGS, setPersistentServerIdentifier_doc},
 
     {NULL,NULL}
   };

@@ -28,6 +28,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.33.2.6  2005/01/07 00:22:34  dgrisby
+# Big merge from omnipy2_develop.
+#
 # Revision 1.33.2.5  2004/03/24 22:28:50  dgrisby
 # TypeCodes / truncation for inherited state members were broken.
 #
@@ -200,6 +203,7 @@ usage_string = """\
   -Wbpackage=p    Put both Python modules and stub files in package p
   -Wbmodules=p    Put Python modules in package p
   -Wbstubs=p      Put stub files in package p
+  -Wbextern=f:p   Assume Python stub file for file f is in package p.
   -Wbglobal=g     Module to use for global IDL scope (default _GlobalIDL)"""
 
 #""" Uncomment this line to get syntax highlighting on the output strings
@@ -317,7 +321,7 @@ objref_attribute_set = """
         return _omnipy.invoke(self, "_set_@attr@", _0_@modname@.@ifid@._d__set_@attr@, args)"""
 objref_operation = """
     def @opname@(self, *args):
-        return _omnipy.invoke(self, "@opname@", _0_@modname@.@ifid@._d_@opname@, args)"""
+        return _omnipy.invoke(self, "@r_opname@", _0_@modname@.@ifid@._d_@opname@, args)"""
 objref_methods = """
     __methods__ = @methods@"""
 
@@ -539,7 +543,7 @@ enum_start = """
 """
 
 enum_item_at_module_scope = """\
-_0_@modname@.@item@ = omniORB.EnumItem("@item@", @eval@)"""
+_0_@modname@.@eitem@ = omniORB.EnumItem("@item@", @eval@)"""
 
 enum_object_and_descriptor_at_module_scope = """\
 _0_@modname@.@ename@ = omniORB.Enum("@repoId@", (@eitems@,))
@@ -549,7 +553,7 @@ _0_@modname@._tc_@ename@ = omniORB.tcInternal.createTypeCode(_0_@modname@._d_@en
 omniORB.registerType(_0_@modname@.@ename@._NP_RepositoryId, _0_@modname@._d_@ename@, _0_@modname@._tc_@ename@)"""
 
 enum_item = """\
-@item@ = omniORB.EnumItem("@item@", @eval@)"""
+@eitem@ = omniORB.EnumItem("@item@", @eval@)"""
 
 enum_object_and_descriptor = """\
 @ename@ = omniORB.Enum("@repoId@", (@eitems@,))
@@ -626,6 +630,70 @@ del @boxname@
 """
 
 
+example_start = """\
+#!/usr/bin/env python
+
+# Python example implementations generated from @filename@
+
+import CORBA, PortableServer
+
+# Import the Python stub modules so type definitions are available.
+"""
+
+example_import_skels = """
+# Import the Python Skeleton modules so skeleton base classes are available.
+"""
+
+example_import = """\
+import @module@"""
+
+example_classdef = """
+
+# Implementation of interface @ccname@
+
+class @ifname@_i (@skname@):
+@inheritance_note@
+    def __init__(self):
+        # Initialise member variables here
+        pass
+"""
+
+example_opdef = """\
+    # @signature@
+    def @opname@(self@args@):
+        raise CORBA.NO_IMPLEMENT(0, CORBA.COMPLETED_NO)
+        # *** Implement me
+        # Must return: @returnspec@
+"""
+
+example_end = """
+if __name__ == "__main__":
+    import sys
+    
+    # Initialise the ORB
+    orb = CORBA.ORB_init(sys.argv)
+    
+    # As an example, we activate an object in the Root POA
+    poa = orb.resolve_initial_references("RootPOA")
+
+    # Create an instance of a servant class
+    servant = @ifname@_i()
+
+    # Activate it in the Root POA
+    poa.activate_object(servant)
+
+    # Get the object reference to the object
+    objref = servant._this()
+    
+    # Print a stringified IOR for it
+    print orb.object_to_string(objref)
+
+    # Activate the Root POA's manager
+    poa._get_the_POAManager().activate()
+
+    # Run the ORB, blocking this thread
+    orb.run()
+"""
 
 
 # Global state
@@ -639,6 +707,8 @@ module_package   = ""
 stub_package     = ""
 stub_directory   = ""
 all_factories    = 0
+example_impl     = 0
+extern_stub_pkgs = {}
 
 
 def error_exit(message):
@@ -648,7 +718,7 @@ def error_exit(message):
 def run(tree, args):
     global main_idl_file, imported_files, exported_modules, output_inline
     global global_module, module_package, stub_package, stub_directory
-    global all_factories
+    global all_factories, example_impl, extern_stub_pkgs
 
     imported_files.clear()
     exported_modules.clear()
@@ -694,12 +764,22 @@ def run(tree, args):
             global_module = arg[7:]
             if global_module == "":
                 error_exit("You may not have an unnamed global module.")
-                
+
+        elif arg == "example":
+            example_impl = 1
+
+        elif arg[:7] == "extern=":
+            f_p = string.split(arg[7:], ":", 1)
+            if len(f_p) == 1:
+                extern_stub_pkgs[f_p[0]] = None
+            else:
+                extern_stub_pkgs[f_p[0]] = f_p[1]
+
         else:
             sys.stderr.write(main.cmdname + ": Warning: Python " \
                              "back-end does not understand argument: " + \
                              arg + "\n")
-    
+
     main_idl_file = tree.file()
 
     outpybasename = outputFileName(main_idl_file)
@@ -708,6 +788,9 @@ def run(tree, args):
 
     imported_files[outpybasename] = 1
 
+    if create_package:
+        checkStubPackage(stub_package)
+
     if use_stdout:
         st = output.Stream(sys.stdout, 4)
     else:
@@ -715,9 +798,6 @@ def run(tree, args):
             st = output.Stream(open(outpyname, "w"), 4)
         except IOError:
             error_exit('Cannot open "%s" for writing.' % outpyname)
-
-    if create_package:
-        checkStubPackage(stub_package)
 
     st.out(file_start, filename=main_idl_file)
 
@@ -730,7 +810,7 @@ def run(tree, args):
 
     exports = exported_modules.keys()
     exports.sort()
-    export_list   = map(lambda s: '"' + module_package + s + '"', exports)
+    export_list = map(lambda s: '"' + module_package + s + '"', exports)
     if len(export_list) == 1: export_list.append("")
     export_string = string.join(export_list, ", ")
 
@@ -738,6 +818,21 @@ def run(tree, args):
 
     if create_package:
         updateModules(exports, outpymodule)
+
+    if example_impl:
+        implname = os.path.join(stub_directory, outpybasename + "_example.py")
+        exst = output.Stream(open(implname, "w"), 4)
+        exst.out(example_start, filename=main_idl_file)
+        for mod in exports:
+            exst.out(example_import, module=mod)
+        exst.out(example_import_skels)
+        for mod in exports:
+            exst.out(example_import, module=skeletonModuleName(mod))
+
+        ev = ExampleVisitor(exst)
+        tree.accept(ev)
+
+        exst.out(example_end, ifname=ev.first)
 
 
 class PythonVisitor:
@@ -754,9 +849,19 @@ class PythonVisitor:
             ifilename = outputFileName(node.file())
             if not imported_files.has_key(ifilename):
                 imported_files[ifilename] = 1
+                ibasename,ext = os.path.splitext(os.path.basename(node.file()))
+                if extern_stub_pkgs.has_key(ibasename):
+                    ipackage = extern_stub_pkgs[ibasename]
+                    if ipackage:
+                        fn = ipackage + '.' + ifilename
+                    else:
+                        fn = ifilename
+                else:
+                    fn = stub_package + ifilename
+
                 self.st.out(import_idl_file,
                             idlfile=node.file(),
-                            ifilename=stub_package + ifilename)
+                            ifilename=fn)
             return 1
         
     #
@@ -798,10 +903,21 @@ class PythonVisitor:
     def visitModule(self, node):
         if self.handleImported(node):
             imodname = dotName(node.scopedName())
+            ibasename,ext = os.path.splitext(os.path.basename(node.file()))
+
+            if extern_stub_pkgs.has_key(ibasename):
+                package = extern_stub_pkgs[ibasename]
+                if package is None:
+                    package = ""
+                else:
+                    package = package + "."
+            else:
+                package = module_package
+
             self.st.out(open_imported_module_name,
                         imodname=imodname,
                         s_imodname=skeletonModuleName(imodname),
-                        package=module_package)
+                        package=package)
 
         assert self.at_module_scope
 
@@ -1000,9 +1116,10 @@ class PythonVisitor:
                 opname = mangle(c.identifier())
                 
                 self.st.out(objref_operation,
-                            opname  = opname,
-                            ifid    = ifid,
-                            modname = self.modname)
+                            opname   = opname,
+                            r_opname = c.identifier(),
+                            ifid     = ifid,
+                            modname  = self.modname)
                 
                 methodl.append('"' + opname + '"')
 
@@ -1566,17 +1683,19 @@ class PythonVisitor:
             if self.at_module_scope:
                 self.st.out(enum_item_at_module_scope,
                             item    = item.identifier(),
+                            eitem   = mangle(item.identifier()),
                             eval    = eval,
                             modname = self.modname)
             else:
                 self.st.out(enum_item,
                             item    = item.identifier(),
+                            eitem   = mangle(item.identifier()),
                             eval    = eval)
 
             if self.at_module_scope:
                 elist.append(dotName(fixupScopedName(item.scopedName())))
             else:
-                elist.append(item.identifier())
+                elist.append(mangle(item.identifier()))
 
             i = i + 1
 
@@ -2010,7 +2129,180 @@ class DocstringVisitor (idlvisitor.AstVisitor):
                     sn[-2] = "_set_" + n.identifier()
                     self.docs.append((sn, self.target_node.scopedName()))
                 self.ok = 1
-                
+
+
+class ExampleVisitor (idlvisitor.AstVisitor, idlvisitor.TypeVisitor):
+    def __init__(self, st):
+        self.st = st
+        self.first = None
+
+    def visitAST(self, node):
+        for n in node.declarations():
+            if not output_inline and not n.mainFile(): continue
+
+            if isinstance(n, idlast.Module) or isinstance(n, idlast.Interface):
+                n.accept(self)
+
+    def visitModule(self, node):
+        for n in node.definitions():
+            if not output_inline and not n.mainFile(): continue
+
+            if isinstance(n, idlast.Module) or isinstance(n, idlast.Interface):
+                n.accept(self)
+
+    def visitInterface(self, node):
+        ifname = mangle(node.identifier())
+        sname  = node.scopedName()
+        ccname = idlutil.ccolonName(sname)
+        fsname = fixupScopedName(sname, prefix="")
+        dname  = dotName(fsname)
+        skname = skeletonModuleName(dname)
+
+        if self.first is None:
+            self.first = ifname
+
+        if len(node.inherits()) == 1:
+            inheritance_note = """
+    # Note: this interface inherits from another interface. You must
+    # either multiply inherit from the servant class implementing the
+    # base interface, or explicitly implement the inherited operations
+    # here.
+    #
+    # Inherited interface:
+    #
+"""
+        elif node.inherits():
+            inheritance_note = """
+    # Note: this interface inherits from other interfaces. You must either
+    # multiply inherit from the servant classes implementing the base
+    # interfaces, or explicitly implement the inherited operations here.
+    #
+    # Inherited interfaces:
+    #
+"""
+        else:
+            inheritance_note = ""
+
+        for inh in node.inherits():
+            iname = idlutil.ccolonName(inh.scopedName())
+            inheritance_note = inheritance_note + "    #   %s\n" % iname
+        
+        self.st.out(example_classdef, ifname=ifname,
+                    ccname=ccname, skname=skname,
+                    inheritance_note = inheritance_note)
+
+        for c in node.callables():
+
+            if isinstance(c, idlast.Attribute):
+
+                c.attrType().accept(self)
+                attrtype = self.__result_type
+
+                for attr in c.identifiers():
+
+                    signature = "attribute %s %s" % (attrtype, attr)
+
+                    if c.readonly():
+                        signature = "readonly " + signature
+
+                    if not c.readonly():
+                        self.st.out(example_opdef,
+                                    signature = signature,
+                                    opname = "_set_" + attr,
+                                    args = ", value",
+                                    returnspec = "None")
+
+                    self.st.out(example_opdef,
+                                signature = signature,
+                                opname = "_get_" + attr,
+                                args = "",
+                                returnspec = "attribute value")
+            else:
+                # Operation
+                innames  = []
+                outnames = []
+                siglist  = []
+
+                c.returnType().accept(self)
+                rettype = self.__result_type
+
+                if c.returnType().kind() != idltype.tk_void:
+                    outnames.append("result")
+
+                for p in c.parameters():
+                    if p.is_in():
+                        innames.append(p.identifier())
+                    if p.is_out():
+                        outnames.append(p.identifier())
+
+                    direction = {0:"in", 1:"out", 2:"inout"}[p.direction()]
+
+                    p.paramType().accept(self)
+                    siglist.append("%s %s %s" % (direction,
+                                                 self.__result_type,
+                                                 p.identifier()))
+
+                signature = "%s %s(%s)" % (rettype, c.identifier(),
+                                           string.join(siglist, ", "))
+
+                if innames:
+                    args = ", " + string.join(innames, ", ")
+                else:
+                    args = ""
+
+                if outnames:
+                    returnspec = string.join(outnames, ", ")
+                else:
+                    returnspec = "None"
+
+                self.st.out(example_opdef,
+                            signature = signature,
+                            opname = c.identifier(),
+                            args = args,
+                            returnspec = returnspec)
+
+
+
+    ttsMap = {
+        idltype.tk_void:       "void",
+        idltype.tk_short:      "short",
+        idltype.tk_long:       "long",
+        idltype.tk_ushort:     "unsigned short",
+        idltype.tk_ulong:      "unsigned long",
+        idltype.tk_float:      "float",
+        idltype.tk_double:     "double",
+        idltype.tk_boolean:    "boolean",
+        idltype.tk_char:       "char",
+        idltype.tk_octet:      "octet",
+        idltype.tk_any:        "any",
+        idltype.tk_TypeCode:   "CORBA::TypeCode",
+        idltype.tk_Principal:  "CORBA::Principal",
+        idltype.tk_longlong:   "long long",
+        idltype.tk_ulonglong:  "unsigned long long",
+        idltype.tk_longdouble: "long double",
+        idltype.tk_wchar:      "wchar"
+        }
+
+    def visitBaseType(self, type):
+        self.__result_type = self.ttsMap[type.kind()]
+
+    def visitStringType(self, type):
+        if type.bound() == 0:
+            self.__result_type = "string"
+        else:
+            self.__result_type = "string<" + str(type.bound()) + ">"
+
+    def visitWStringType(self, type):
+        if type.bound() == 0:
+            self.__result_type = "wstring"
+        else:
+            self.__result_type = "wstring<" + str(type.bound()) + ">"
+
+
+    def visitDeclaredType(self, type):
+        self.__result_type = idlutil.ccolonName(type.decl().scopedName())
+
+
 
 
 

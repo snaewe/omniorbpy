@@ -29,8 +29,10 @@
 
 
 # $Id$
-
 # $Log$
+# Revision 1.31.2.4  2005/01/07 00:22:34  dgrisby
+# Big merge from omnipy2_develop.
+#
 # Revision 1.31.2.3  2003/09/04 14:08:41  dgrisby
 # Correct register_value_factory semantics.
 #
@@ -591,6 +593,21 @@ class ORB:
     def lookup_value_factory(self, repoId):
         return omniORB.findValueFactory(repoId)
 
+    # Policy operation
+    def create_policy(self, ptype, val):
+        if isinstance(val, Any):
+            val = val._v
+
+        import PortableServer
+        p = PortableServer._create_policy(ptype, val)
+        if p: return p
+
+        import BiDirPolicy
+        p = BiDirPolicy._create_policy(ptype, val)
+        if p: return p
+
+        raise PolicyError(BAD_POLICY)
+
 
     __methods__ = ["string_to_object", "object_to_string",
                    "list_initial_services", "resolve_initial_references",
@@ -765,7 +782,7 @@ omniORB.registerValueFactory(WStringValue._NP_RepositoryId, WStringValue)
 #############################################################################
 
 class Policy (Object):
-    _NP_ReposotoryId = "IDL:omg.org/CORBA/Policy:1.0"
+    _NP_RepositoryId = "IDL:omg.org/CORBA/Policy:1.0"
 
     def __init__(self):
         raise RuntimeError("Cannot construct objects of this type.")
@@ -1023,3 +1040,40 @@ for exc in _omnipy.system_exceptions:
     omniORB.registerType(r,d,t)
 
 del _minor, _completed, g, r, d, t, exc
+
+
+
+#############################################################################
+#                                                                           #
+# Exceptions defined in CORBA module                                        #
+#                                                                           #
+#############################################################################
+
+# typedef ... PolicyErrorCode
+class PolicyErrorCode:
+    _NP_RepositoryId = "IDL:omg.org/CORBA/PolicyErrorCode:1.0"
+    def __init__(self, *args, **kw):
+        raise RuntimeError("Cannot construct objects of this type.")
+_d_PolicyErrorCode  = tcInternal.tv_short
+_ad_PolicyErrorCode = (tcInternal.tv_alias, PolicyErrorCode._NP_RepositoryId, "PolicyErrorCode", tcInternal.tv_short)
+_tc_PolicyErrorCode = tcInternal.createTypeCode(_ad_PolicyErrorCode)
+omniORB.registerType(PolicyErrorCode._NP_RepositoryId, _ad_PolicyErrorCode, _tc_PolicyErrorCode)
+
+BAD_POLICY = 0
+UNSUPPORTED_POLICY = 1
+BAD_POLICY_TYPE = 2
+BAD_POLICY_VALUE = 3
+UNSUPPORTED_POLICY_VALUE = 4
+
+# exception PolicyError
+class PolicyError (UserException):
+    _NP_RepositoryId = "IDL:omg.org/CORBA/PolicyError:1.0"
+
+    def __init__(self, reason):
+        UserException.__init__(self, reason)
+        self.reason = reason
+
+_d_PolicyError  = (tcInternal.tv_except, PolicyError, PolicyError._NP_RepositoryId, "PolicyError", "reason", omniORB.typeMapping["IDL:omg.org/CORBA/PolicyErrorCode:1.0"])
+_tc_PolicyError = tcInternal.createTypeCode(_d_PolicyError)
+omniORB.registerType(PolicyError._NP_RepositoryId, _d_PolicyError, _tc_PolicyError)
+

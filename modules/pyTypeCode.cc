@@ -29,6 +29,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.4.4  2005/01/07 00:22:33  dgrisby
+// Big merge from omnipy2_develop.
+//
 // Revision 1.1.4.3  2003/11/06 12:00:35  dgrisby
 // ValueType TypeCode support; track ORB core changes.
 //
@@ -836,6 +839,7 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
 	  t_o = omniPy::unmarshalRawPyString(encap);
 
 	  if ((word = PyDict_GetItem(omniPy::pyomniORBwordMap, t_o))) {
+	    Py_INCREF(word);
 	    Py_DECREF(t_o);
 	    t_o = word;
 	  }
@@ -953,6 +957,7 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
 	  t_o = omniPy::unmarshalRawPyString(encap);
 
 	  if ((word = PyDict_GetItem(omniPy::pyomniORBwordMap, t_o))) {
+	    Py_INCREF(word);
 	    Py_DECREF(t_o);
 	    t_o = word;
 	  }
@@ -965,12 +970,9 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
 	  PyTuple_SET_ITEM(mems, i, mem);
 
 	  if (def_used > 0 && i == (CORBA::ULong)def_used) {
-	    Py_INCREF(mem); // **** Error here?
 	    PyTuple_SET_ITEM(d_o, 7, mem);
 	  }
 	  else {
-	    Py_INCREF(mem); // ****
-	    Py_INCREF(label); // ****
 	    PyDict_SetItem(dict, label, mem);
 	  }
 	}
@@ -1027,12 +1029,14 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
 
 	// members
 	for (CORBA::ULong i=0; i<cnt; i++) {
-	  t_o = omniPy::unmarshalRawPyString(encap);
+	  PyObject* mname = omniPy::unmarshalRawPyString(encap);
 
-	  if (PyString_GET_SIZE(t_o) > 0)
-	    t_o = PyObject_CallFunction(eclass, (char*)"Oi", t_o, i);
+	  if (PyString_GET_SIZE(mname) > 0)
+	    t_o = PyObject_CallFunction(eclass, (char*)"Oi", mname, i);
 	  else
 	    t_o = PyObject_CallFunction(aclass, (char*)"i", i);
+
+	  Py_DECREF(mname);
 
 	  OMNIORB_ASSERT(t_o && PyInstance_Check(t_o));
 
@@ -1109,7 +1113,8 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
 	PyTuple_SET_ITEM(d_o, 1, repoId);
 	
 	// name
-	t_o = omniPy::unmarshalRawPyString(encap); PyTuple_SET_ITEM(d_o, 2, t_o);
+	t_o = omniPy::unmarshalRawPyString(encap);
+	PyTuple_SET_ITEM(d_o, 2, t_o);
 
 	// TypeCode
 	t_o = r_unmarshalTypeCode(encap, eodm);
@@ -1168,6 +1173,7 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
 	  t_o = omniPy::unmarshalRawPyString(encap);
 
 	  if ((word = PyDict_GetItem(omniPy::pyomniORBwordMap, t_o))) {
+	    Py_INCREF(word);
 	    Py_DECREF(t_o);
 	    t_o = word;
 	  }

@@ -24,6 +24,7 @@ CXXSRCS = omnipy.cc \
           pyContext.cc \
           pyValueType.cc \
           pyAbstractIntf.cc \
+          pyInterceptors.cc \
           cxxAPI.cc
 
 OBJS =    omnipy.o \
@@ -43,6 +44,7 @@ OBJS =    omnipy.o \
 	  pyContext.o \
           pyValueType.o \
           pyAbstractIntf.o \
+          pyInterceptors.o \
           cxxAPI.o
 
 
@@ -85,6 +87,7 @@ DIR_CPPFLAGS += $(CORBA_CPPFLAGS)
 
 endif
 
+
 #############################################################################
 #   Make rules for Autoconf builds                                          #
 #############################################################################
@@ -92,6 +95,10 @@ endif
 ifeq ($(platform),autoconf)
 
 namespec := _omnipymodule _ $(OMNIPY_MAJOR) $(OMNIPY_MINOR)
+
+ifdef PythonSHAREDLIB_SUFFIX
+SHAREDLIB_SUFFIX = $(PythonSHAREDLIB_SUFFIX)
+endif
 
 SharedLibraryFullNameTemplate = $$1$$2.$(SHAREDLIB_SUFFIX).$$3.$$4
 SharedLibrarySoNameTemplate   = $$1$$2.$(SHAREDLIB_SUFFIX).$$3
@@ -106,7 +113,7 @@ shlib := $(shell $(SharedLibraryFullName) $(namespec))
 DIR_CPPFLAGS += $(SHAREDLIB_CPPFLAGS)
 
 $(shlib): $(OBJS)
-	@(namespec="$(namespec)"; extralibs="$(OMNIORB_LIB_NODYN)";\
+	@(namespec="$(namespec)"; extralibs="$(OMNIORB_LIB_NODYN) $(extralibs)";\
           $(MakeCXXSharedLibrary))
 
 all:: $(shlib)

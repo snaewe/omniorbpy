@@ -1,3 +1,56 @@
+Fri Jan  7 00:20:07 GMT 2005 dgrisby
+====================================
+
+- Big merge from omnipy2_develop.
+
+README					-- deleted
+README.txt				-- new
+acinclude.m4
+aclocal.m4
+bugfixes-21.xml				-- deleted
+configure
+configure.ac
+bin/scripts/omkdirhier
+contrib/RPMs/omniORBpy.spec		-- new
+doc/tex/omniORBpy.tex
+examples/echo/example_echo_nsclt.py
+examples/embed/dir.mk
+examples/tests/TypeTest.idl
+examples/tests/tclient.py
+examples/tests/tserver.py
+mk/beforeauto.mk.in
+modules/dir.mk
+modules/omnipy.cc
+modules/omnipy.h
+modules/pyCallDescriptor.cc
+modules/pyExceptions.cc
+modules/pyFixed.cc
+modules/pyFixed.h
+modules/pyInterceptors.cc		-- new
+modules/pyMarshal.cc
+modules/pyObjectRef.cc
+modules/pyPOACurrentFunc.cc
+modules/pyPOAFunc.cc
+modules/pyServant.cc
+modules/pyThreadCache.cc
+modules/pyThreadCache.h
+modules/pyTypeCode.cc
+modules/pyomniFunc.cc
+modules/codesets/dir.mk
+modules/sslTP/dir.mk
+omniidl_be/python.py
+python/COS/__init__.py			-- new
+python/COS/dir.mk
+python/omniORB/BiDirPolicy.py		-- new
+python/omniORB/CORBA.py
+python/omniORB/PortableServer.py
+python/omniORB/__init__.py
+python/omniORB/any.py
+python/omniORB/dir.mk
+python/omniORB/interceptors.py		-- new
+python/omniORB/tcInternal.py
+
+
 Thu Jan  6 23:20:56 GMT 2005 dgrisby
 ====================================
 

@@ -90,8 +90,9 @@ comma := ,
 #
 
 IMPORT_CPPFLAGS += -I. $(patsubst %,-I%,$(VPATH)) \
-                   -I$(TOP)/include -I$(BASE_OMNI_TREE)/include \
-                   -D__OSVERSION__=@OSVERSION@
+                   -I$(TOP)/include -I$(BASE_OMNI_TREE)/include
+
+IMPORT_CPPFLAGS += -D__OSVERSION__=@OSVERSION@
 
 CPPFLAGS = $(DIR_CPPFLAGS) $(IMPORT_CPPFLAGS)
 
@@ -532,8 +533,6 @@ OMNIORB_SSL_LIB = $(patsubst %,$(LibSearchPattern),omnisslTP)
 lib_depend := $(patsubst %,$(LibPattern),omnisslTP)
 OMNIORB_SSL_LIB_DEPEND := $(GENERATE_LIB_DEPEND)
 
-OPEN_SSL_CPPFLAGS = -I$(OPEN_SSL_ROOT)/include
-OPEN_SSL_LIB = -L$(OPEN_SSL_ROOT)/lib -lssl -lcrypto
 OMNIORB_SSL_LIB += $(OPEN_SSL_LIB)
 OMNIORB_SSL_CPPFLAGS += $(OPEN_SSL_CPPFLAGS)
 
@@ -696,6 +695,8 @@ OMNINAMES_LOG_DEFAULT_LOCATION  = @OMNINAMES_LOGDIR@
 # OpenSSL
 #
 OPEN_SSL_ROOT = @OPEN_SSL_ROOT@
+OPEN_SSL_LIB = @OPEN_SSL_LIB@
+OPEN_SSL_CPPFLAGS = @OPEN_SSL_CPPFLAGS@
 
 #
 # Static libraries?
@@ -771,6 +772,9 @@ CXXMTFLAG     = -mt
 SHAREDLIB_CPPFLAGS = -KPIC
 endif
 ifdef Compiler_Sun4
+CXXMTFLAG     = -mt
+CXXDEBUGFLAGS = -O2 -g
+SHAREDLIB_CPPFLAGS = -KPIC
 SharedLibraryPlatformLinkFlagsTemplate = -G -h $$soname
 PythonLibraryPlatformLinkFlagsTemplate = -G -h $$soname -lC
 endif
@@ -800,7 +804,7 @@ define MakeCXXSharedLibrary
  $(RM) $@; \
  ld -shared -soname $$soname -set_version $$soname -o $@ \
     $(IMPORT_LIBRARY_FLAGS) $(filter-out $(LibSuffixPattern),$^) $$extralibs \
-    -lcxxstd -lcxx -lexc -lots -lc;
+    -lpthread -lcxxstd -lcxx -lexc -lots -lc;
 endef
 
 ifdef Compiler_DEC61
@@ -837,6 +841,7 @@ else
 OMNITHREAD_POSIX_CPPFLAGS = -DPthreadDraftVersion=10
 OMNITHREAD_CPPFLAGS += -D_HPUX_SOURCE \
 		       -D_POSIX_C_SOURCE=199506L
+OMNITHREAD_LIB += -lpthread
 endif
 
 define StaticLinkLibrary
@@ -881,7 +886,7 @@ COPTIONS	  = -w -Aa -D_HPUX_SOURCE +DAportable
 CLINKOPTIONS      = -Wl,+s
 
 SHAREDLIB_CPPFLAGS += +Z
-SharedLibraryPlatformLinkFlagsTemplate = -b -Wl,+h$$soname -Wl,+s
+SharedLibraryPlatformLinkFlagsTemplate = -b -Wl,+h$$soname -Wl,+s -lstd -lCsup
 endif
 
 endif
@@ -922,13 +927,31 @@ endif
 
 ###################
 ifdef AIX
+ifndef Compiler_GCC
+
 IMPORT_CPPFLAGS += -D__aix__
 
 CMAKEDEPEND     += -D_AIX
 CXXMAKEDEPEND   += -D_AIX
+CDEBUGFLAGS      =
+CXXDEBUGFLAGS    =
 
-error Not supported yet. Too nasty.
-endif
+CXXOPTIONS	= -qstaticinline -qmaxmem=8192 -qlonglong -qlongdouble
+
+COPTIONS	= -qmaxmem=8192 -qlonglong -qlongdouble
+
+OMNITHREAD_POSIX_CPPFLAGS = -DNoNanoSleep -DPthreadDraftVersion=10
+OMNITHREAD_CPPFLAGS = -D_REENTRANT
+OMNITHREAD_LIB += -lpthread
+
+#SHAREDLIB_SUFFIX = so
+PythonSHAREDLIB_SUFFIX = so
+
+# this works only for xlc version >= 5
+SharedLibraryPlatformLinkFlagsTemplate = -qmkshrobj
+
+endif	# compiler not gcc
+endif	# AIX
 
 ###################
 ifdef Darwin
@@ -985,6 +1008,54 @@ OMNITHREAD_POSIX_CPPFLAGS = -DPthreadDraftVersion=6 \
 			    -DPthreadSupportThreadPriority -DNoNanoSleep
 endif
 
+
+###################
+ifdef Cygwin
+extralibs += -L$(PYPREFIX)/lib/python$(PYVERSION)/config \
+ -lpython$(PYVERSION).dll
+IMPORT_CPPFLAGS += -D__linux__ -D__cygwin__
+SHAREDLIB_CPPFLAGS =
+OMNITHREAD_POSIX_CPPFLAGS = -DNoNanoSleep -DPthreadDraftVersion=10
+OMNITHREAD_CPPFLAGS = -D_REENTRANT
+OMNITHREAD_LIB += -lpthread
+BinPattern = %.exe
+
+SharedLibraryPlatformLinkFlagsTemplate = -shared -Wl,-soname,$$soname,--export-all-symbols,--enable-auto-import
+
+define ExportLibraryToDir
+(files="$^"; \
+ for file in $$files; do \
+   $(ExportExecutableFileToDir); \
+ done; \
+)
+endef
+
+define MakeCXXSharedLibrary
+ $(ParseNameSpec); \
+ soname=$(SharedLibrarySoNameTemplate); \
+ set -x; \
+ $(RM) $@; \
+ $(CXX) $(SharedLibraryPlatformLinkFlagsTemplate) -o $@ \
+ $(IMPORT_LIBRARY_FLAGS) $(filter-out $(LibSuffixPattern),$^) $$extralibs;
+endef
+
+define ExportSharedLibrary
+ dir="$(EXPORT_TREE)/$(BINDIR)"; \
+ $(ExportSharedLibraryToDir)
+endef
+
+define InstallSharedLibrary
+ dir="$(INSTALLBINDIR)"; \
+ $(ExportSharedLibraryToDir)
+endef
+
+SHAREDLIB_SUFFIX = dll
+
+SharedLibraryFullNameTemplate = lib$$1$$2.$(SHAREDLIB_SUFFIX).$$3.$$4
+SharedLibrarySoNameTemplate   = lib$$1$$2.$(SHAREDLIB_SUFFIX).$$3
+SharedLibraryLibNameTemplate  = lib$$1$$2.$(SHAREDLIB_SUFFIX)
+
+endif
 
 
 

@@ -36,6 +36,10 @@ DIR_CPPFLAGS += $(CORBA_CPPFLAGS)
 
 endif
 
+ifdef Cygwin
+extralibs += -lomniORB4 -lomnithread -lpthread
+endif
+
 #############################################################################
 #   Make rules for Autoconf builds                                          #
 #############################################################################
@@ -43,6 +47,10 @@ endif
 ifeq ($(platform),autoconf)
 
 namespec := _omnisslTPmodule _ $(OMNIPY_MAJOR) $(OMNIPY_MINOR)
+
+ifdef PythonSHAREDLIB_SUFFIX
+SHAREDLIB_SUFFIX = $(PythonSHAREDLIB_SUFFIX)
+endif
 
 SharedLibraryFullNameTemplate = $$1$$2.$(SHAREDLIB_SUFFIX).$$3.$$4
 SharedLibrarySoNameTemplate   = $$1$$2.$(SHAREDLIB_SUFFIX).$$3
@@ -57,7 +65,7 @@ shlib := $(shell $(SharedLibraryFullName) $(namespec))
 DIR_CPPFLAGS += $(SHAREDLIB_CPPFLAGS)
 
 $(shlib): $(OBJS)
-	@(namespec="$(namespec)"; extralibs="$(OMNIORB_SSL_LIB)";\
+	@(namespec="$(namespec)"; extralibs="$(OMNIORB_SSL_LIB) $(extralibs)";\
           $(MakeCXXSharedLibrary))
 
 all:: $(shlib)

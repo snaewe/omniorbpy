@@ -28,8 +28,10 @@
 //    PortableServer::Current functions
 
 // $Id$
-
 // $Log$
+// Revision 1.1.4.2  2005/01/07 00:22:33  dgrisby
+// Big merge from omnipy2_develop.
+//
 // Revision 1.1.4.1  2003/03/23 21:51:57  dgrisby
 // New omnipy3_develop branch.
 //
@@ -129,12 +131,12 @@ extern "C" {
 
     OMNIORB_ASSERT(pc);
 
-    CORBA::Object_var objref;
     CORBA::Object_ptr lobjref;
     const char* mdri;
 
     try {
       omniPy::InterpreterUnlocker _u;
+      CORBA::Object_var objref;
       objref  = pc->get_reference();
       mdri    = objref->_PR_getobj()->_mostDerivedRepoId();
       lobjref = omniPy::makeLocalObjRef(mdri, objref);

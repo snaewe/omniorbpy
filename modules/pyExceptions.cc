@@ -28,8 +28,10 @@
 //    Exception handling functions
 
 // $Id$
-
 // $Log$
+// Revision 1.1.4.3  2005/01/07 00:22:32  dgrisby
+// Big merge from omnipy2_develop.
+//
 // Revision 1.1.4.2  2003/05/20 17:10:23  dgrisby
 // Preliminary valuetype support.
 //
@@ -102,7 +104,8 @@ omniPy::createPySystemException(const CORBA::SystemException& ex)
 
 
 void
-omniPy::produceSystemException(PyObject* eobj, PyObject* erepoId)
+omniPy::produceSystemException(PyObject* eobj, PyObject* erepoId,
+			       PyObject* etype, PyObject* etraceback)
 {
   CORBA::ULong            minor  = 0;
   CORBA::CompletionStatus status = CORBA::COMPLETED_MAYBE;
@@ -110,9 +113,14 @@ omniPy::produceSystemException(PyObject* eobj, PyObject* erepoId)
   PyObject *m = 0, *c = 0, *v = 0;
 
   m = PyObject_GetAttrString(eobj, (char*)"minor");
-  if (m && PyInt_Check(m)) {
-    minor = PyInt_AS_LONG(m);
 
+  if (m) {
+    if (PyInt_Check(m)) {
+      minor = PyInt_AS_LONG(m);
+    }
+    else if (PyLong_Check(m)) {
+      minor = PyLong_AsUnsignedLong(m);
+    }
     c = PyObject_GetAttrString(eobj, (char*)"completed");
 
     if (c) {
@@ -129,20 +137,45 @@ omniPy::produceSystemException(PyObject* eobj, PyObject* erepoId)
 
   char* repoId = PyString_AS_STRING(erepoId);
 
-  Py_DECREF(eobj);
-
 #define THROW_SYSTEM_EXCEPTION_IF_MATCH(ex) \
-  if (!strcmp(repoId, "IDL:omg.org/CORBA/" #ex ":1.0")) { \
-    Py_DECREF(erepoId); OMNIORB_THROW(ex, minor, status); \
+  if (omni::strMatch(repoId, "IDL:omg.org/CORBA/" #ex ":1.0")) { \
+    if (omniORB::trace(10)) { \
+      { \
+        omniORB::logger l; \
+        l << "Caught a CORBA system exception during up-call: " \
+          << PyString_AS_STRING(erepoId) << "\n"; \
+      } \
+      PyErr_Restore(etype, eobj, etraceback); \
+      PyErr_Print(); \
+    } \
+    else { \
+      Py_XDECREF(eobj); Py_DECREF(etype); Py_XDECREF(etraceback); \
+    } \
+    Py_DECREF(erepoId); \
+    OMNIORB_THROW(ex, minor, status); \
   }
 
   OMNIORB_FOR_EACH_SYS_EXCEPTION(THROW_SYSTEM_EXCEPTION_IF_MATCH)
 
 #undef THROW_SYSTEM_EXCEPTION_IF_MATCH
 
-  Py_DECREF(erepoId); OMNIORB_THROW(UNKNOWN,
-				    UNKNOWN_SystemException,
-				    CORBA::COMPLETED_MAYBE);
+  if (omniORB::trace(1)) {
+    {
+      omniORB::logger l;
+      l << "Caught an unexpected CORBA exception during up-call: "
+        << PyString_AS_STRING(erepoId) << "\n";
+    }
+    PyErr_Restore(etype, eobj, etraceback);
+    PyErr_Print();
+  }
+  else {
+    Py_XDECREF(eobj); Py_DECREF(etype); Py_XDECREF(etraceback);
+  }
+  Py_DECREF(erepoId);
+  if (m && c && v)
+    OMNIORB_THROW(UNKNOWN, UNKNOWN_SystemException, CORBA::COMPLETED_MAYBE);
+  else
+    OMNIORB_THROW(UNKNOWN, UNKNOWN_UserException, CORBA::COMPLETED_MAYBE);
 }
 
 
@@ -173,18 +206,15 @@ omniPy::handlePythonException()
 		  CORBA::COMPLETED_MAYBE);
   }
 
-  Py_DECREF(etype);
-  Py_XDECREF(etraceback);
-
   // Is it a LOCATION_FORWARD?
   if (omni::strMatch(PyString_AS_STRING(erepoId),
 		     "omniORB.LOCATION_FORWARD")) {
-    Py_DECREF(erepoId);
+    Py_DECREF(erepoId); Py_DECREF(etype); Py_XDECREF(etraceback);
     omniPy::handleLocationForward(evalue);
   }
 
   // System exception
-  omniPy::produceSystemException(evalue, erepoId);
+  omniPy::produceSystemException(evalue, erepoId, etype, etraceback);
 }
 
 
@@ -209,19 +239,22 @@ omniPy::handleLocationForward(PyObject* evalue)
   CORBA::Object_ptr fwd =
     (CORBA::Object_ptr)omniPy::getTwin(pyfwd, OBJREF_TWIN);
 
+  if (fwd)
+    CORBA::Object::_duplicate(fwd);
+
   Py_DECREF(pyfwd);
   Py_DECREF(pyperm);
   Py_DECREF(evalue);
-  if (fwd)
-    throw omniORB::LOCATION_FORWARD(CORBA::Object::_duplicate(fwd), perm);
+  if (fwd) {
+    OMNIORB_ASSERT(CORBA::Object::_PR_is_valid(fwd));
+    throw omniORB::LOCATION_FORWARD(fwd, perm);
+  }
   else {
     omniORB::logs(1, "Invalid object reference inside "
 		  "omniORB.LOCATION_FORWARD exception");
     OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, CORBA::COMPLETED_NO);
   }
 }
-
-
 
 
 

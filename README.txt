@@ -1,8 +1,10 @@
-omniORBpy 3.x
-=============
+omniORBpy 3 development
+=======================
 
-This is the development branch of what will become omniORBpy 3. It is
-unstable. Do not use it for production code.
+This is a development version of omniORBpy 3, a robust
+high-performance CORBA ORB for Python.
+
+It is beta code. Do not use it for production applications.
 
 The bindings adhere to the standard IDL to Python mapping which you
 may find at
@@ -10,8 +12,8 @@ may find at
   http://www.omg.org/technology/documents/formal/python_language_mapping.htm
 
 
-omniORBpy makes use of the C++ omniORB library. omniORBpy version 2
-can only be used with omniORB 4.0.x.
+omniORBpy makes use of the C++ omniORB library. omniORBpy version 3.x
+can only be used with omniORB 4.1.x.
 
 omniORBpy is currently available for many Unix platforms and Windows.
 It has been ported to a number of other operating systems by outside
@@ -54,7 +56,7 @@ compilers and Python. It will always choose gcc over the platform's
 native compiler if it is available. To change the choices it makes,
 use variables CC, CXX and PYTHON, e.g.:
 
-  ../configure CXX=/usr/bin/platform_c++ PYTHON=/usr/local/bin/python2.2
+  ../configure CXX=/usr/bin/platform_c++ PYTHON=/usr/local/bin/python2.3
 
 
 If you do not have Autoconf support on your platform, you must install

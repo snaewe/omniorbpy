@@ -29,8 +29,10 @@
 //    threading.Thread objects
 
 // $Id$
-
 // $Log$
+// Revision 1.1.4.2  2005/01/07 00:22:33  dgrisby
+// Big merge from omnipy2_develop.
+//
 // Revision 1.1.4.1  2003/03/23 21:51:57  dgrisby
 // New omnipy3_develop branch.
 //
@@ -60,6 +62,7 @@ public:
 
     CORBA::Boolean used;
     CORBA::Boolean can_scavenge;
+    CORBA::Boolean reused_state;
     int            active;
 
     CacheNode*     next;

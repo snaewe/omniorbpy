@@ -1445,76 +1445,70 @@ def doTests(orb, poa, io):
     else:  tfail()
 
 
-    tstart("ValueType")
+    tstart("WString")
     ok = 1
-    v1 = TypeTest.V1("hello", 5)
-    r = io.complex41(v1)
-    if r.s == v1.s and r.l == v1.l:
+    s = u"Hello there"
+    r = io.complex41(s)
+    if r == s:
         tresult("+")
     else:
-        ok = 0
         tresult("-")
-
-    r = io.complex41(None)
-    if r is None:
+        ok = 0
+    
+    s = u"This is a much longer string with lots of stuff in it. Blah blah blah"
+    r = io.complex41(s)
+    if r == s:
         tresult("+")
     else:
-        ok = 0
         tresult("-")
+        ok = 0
 
-    v2 = TypeTest.V2("two", 42, v1)
-    r = io.complex41(v2)
-    if r.s == v2.s and r.l == v2.l:
+    s = u"This is a string with a \0 in it."
+    try:
+        r = io.complex41(s)
+        tresult("-")
+        ok = 0
+    except CORBA.BAD_PARAM:
         tresult("+")
-    else:
-        ok = 0
-        tresult("-")
-
-    r = io.complex41(None)
-    if r is None:
-        tresult("+")
-    else:
-        ok = 0
-        tresult("-")
-
-    r = io.complex42(v2)
-    if r.s == v2.s and r.l == v2.l and r.v.s == v1.s:
-        tresult("+")
-    else:
-        ok = 0
-        tresult("-")
-
-    v2.v = v2
-
-    r = io.complex41(v2)
-    if r.s == v2.s and r.l == v2.l:
-        tresult("+")
-    else:
-        ok = 0
-        tresult("-")
-
-    r = io.complex42(v2)
-    if r.s == v2.s and r.l == v2.l and r.v.s == v2.s:
-        tresult("+")
-    else:
-        ok = 0
-        tresult("-")
-
-    r = io.complex42(None)
-    if r is None:
-        tresult("+")
-    else:
-        ok = 0
-        tresult("-")
 
     if ok: tpass()
     else:  tfail()
 
-    tstart("ValueBox")
+    tstart("Bounded wstring")
     ok = 1
+    s = u"Hello"
+    r = io.complex42(s)
+    if r == s:
+        tresult("+")
+    else:
+        tresult("-")
+        ok = 0
+    
+    s = u"This is a much longer string with lots of stuff in it. Blah blah blah"
+    try:
+        r = io.complex42(s)
+        tresult("-")
+        ok = 0
+    except CORBA.MARSHAL:
+        tresult("+")
 
-    r = io.complex43(1234)
-    if r == 1234:
+    s = u"str\0ing"
+    try:
+        r = io.complex42(s)
+        tresult("-")
+        ok = 0
+    except CORBA.BAD_PARAM:
+        tresult("+")
+
+    if ok: tpass()
+    else:  tfail()
+
+
+    tstart("ValueType")
+    ok = 1
+    v1 = TypeTest.V1("hello", 5)
+    r = io.complex43(v1)
+    if r.s == v1.s and r.l == v1.l:
         tresult("+")
     else:
         ok = 0
@@ -1527,9 +1521,73 @@ def doTests(orb, poa, io):
         ok = 0
         tresult("-")
 
+    v2 = TypeTest.V2("two", 42, v1)
+    r = io.complex43(v2)
+    if r.s == v2.s and r.l == v2.l:
+        tresult("+")
+    else:
+        ok = 0
+        tresult("-")
+
+    r = io.complex43(None)
+    if r is None:
+        tresult("+")
+    else:
+        ok = 0
+        tresult("-")
+
+    r = io.complex44(v2)
+    if r.s == v2.s and r.l == v2.l and r.v.s == v1.s:
+        tresult("+")
+    else:
+        ok = 0
+        tresult("-")
+
+    v2.v = v2
+
+    r = io.complex43(v2)
+    if r.s == v2.s and r.l == v2.l:
+        tresult("+")
+    else:
+        ok = 0
+        tresult("-")
+
+    r = io.complex44(v2)
+    if r.s == v2.s and r.l == v2.l and r.v.s == v2.s:
+        tresult("+")
+    else:
+        ok = 0
+        tresult("-")
+
+    r = io.complex44(None)
+    if r is None:
+        tresult("+")
+    else:
+        ok = 0
+        tresult("-")
+
     if ok: tpass()
     else:  tfail()
 
+    tstart("ValueBox")
+    ok = 1
+
+    r = io.complex45(1234)
+    if r == 1234:
+        tresult("+")
+    else:
+        ok = 0
+        tresult("-")
+
+    r = io.complex45(None)
+    if r is None:
+        tresult("+")
+    else:
+        ok = 0
+        tresult("-")
+
+    if ok: tpass()
+    else:  tfail()
 
     tstart("Exceptions")
 

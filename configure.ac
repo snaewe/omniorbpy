@@ -1,5 +1,5 @@
 dnl -*- M4 -*-
-AC_INIT(omniORBpy, 2.1, bugs@omniorb-support.com)
+AC_INIT(omniORBpy, 2.5, bugs@omniorb-support.com)
 
 AC_PREREQ(2.52)
 AC_CONFIG_SRCDIR(python/omniORB/CORBA.py)
@@ -95,6 +95,7 @@ case "$host" in
   *-*-freebsd4*) platform_name="FreeBSD";  os_version="4";;
   *-*-freebsd5*) platform_name="FreeBSD";  os_version="5";;
   *-*-sco*)      platform_name="OSR5";     os_version="5";;
+  *-*-cygwin*)   platform_name="Cygwin";   os_version="2";;
 esac
 
 AC_SUBST(PLATFORM_NAME, $platform_name)

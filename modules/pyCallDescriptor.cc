@@ -28,8 +28,10 @@
 //    Implementation of Python call descriptor object
 
 // $Id$
-
 // $Log$
+// Revision 1.1.4.3  2005/01/07 00:22:32  dgrisby
+// Big merge from omnipy2_develop.
+//
 // Revision 1.1.4.2  2003/07/10 22:17:02  dgrisby
 // Track orb core changes, fix bugs.
 //

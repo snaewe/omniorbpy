@@ -29,10 +29,18 @@
 //    objects, rather than C++ objects
 
 // $Id$
-
 // $Log$
-// Revision 1.1.4.1  2003/03/23 21:51:57  dgrisby
-// New omnipy3_develop branch.
+// Revision 1.1.4.2  2005/01/07 00:22:32  dgrisby
+// Big merge from omnipy2_develop.
+//
+// Revision 1.1.2.21  2004/04/05 09:06:42  dgrisby
+// Bidirectional servers didn't work.
+//
+// Revision 1.1.2.20  2004/03/02 15:33:57  dgrisby
+// Support persistent server id.
+//
+// Revision 1.1.2.19  2003/07/28 15:44:21  dgrisby
+// Unlock interpreter during string_to_object.
 //
 // Revision 1.1.2.18  2003/03/14 15:28:43  dgrisby
 // Use Python 1.5.2 sequence length function.
@@ -102,6 +110,10 @@
 #include <inProcessIdentity.h>
 #include <objectAdapter.h>
 #include <omniORB4/omniURI.h>
+#include <giopStrand.h>
+#include <giopStream.h>
+#include <omniCurrent.h>
+#include <poaimpl.h>
 
 OMNI_USING_NAMESPACE(omni)
 
@@ -343,6 +355,35 @@ omniPy::createObjRef(const char*    	targetRepoId,
     id->gainRef(objref);
   }
 
+  if (orbParameters::persistentId.length()) {
+    // Check to see if we need to re-write the IOR.
+
+    omniIOR::IORExtraInfoList& extra = ior->getIORInfo()->extraInfo();
+
+    for (CORBA::ULong index = 0; index < extra.length(); index++) {
+
+      if (extra[index]->compid == IOP::TAG_OMNIORB_PERSISTENT_ID)
+
+	if (!id->inThisAddressSpace()) {
+
+	  omniORB::logs(15, "Re-write local persistent object reference.");
+
+	  omniObjRef* new_objref;
+	  {
+	    omni_optional_lock sync(*internalLock, locked, locked);
+
+	    omniIOR* new_ior = new omniIOR(ior->repositoryID(),
+					   id->key(), id->keysize());
+
+	    new_objref = createObjRef(targetRepoId, new_ior,
+				      1, 0, type_verified);
+	  }
+	  releaseObjRef(objref);
+	  objref = new_objref;
+	}
+      break;
+    }
+  }
   return objref;
 }
 
@@ -543,16 +584,17 @@ CORBA::Object_ptr
 omniPy::stringToObject(const char* uri)
 {
   CORBA::Object_ptr cxxobj;
-
-  cxxobj = omniURI::stringToObject(uri);
-
-  if (CORBA::is_nil(cxxobj) || cxxobj->_NP_is_pseudo()) {
-    return cxxobj;
-  }
-  omniObjRef* cxxobjref = cxxobj->_PR_getobj();
   omniObjRef* objref;
+
   {
     omniPy::InterpreterUnlocker _u;
+    cxxobj = omniURI::stringToObject(uri);
+
+    if (CORBA::is_nil(cxxobj) || cxxobj->_NP_is_pseudo()) {
+      return cxxobj;
+    }
+    omniObjRef* cxxobjref = cxxobj->_PR_getobj();
+
     objref = omniPy::createObjRef(CORBA::Object::_PD_repoId,
 				  cxxobjref->_getIOR(), 0, 0);
     CORBA::release(cxxobj);
@@ -587,6 +629,22 @@ omniPy::UnMarshalObjRef(const char* repoId, cdrStream& s)
     // this has been accepted as a valid behaviour in GIOP 1.1/IIOP 1.1.
     // 
     omniIOR* ior = new omniIOR(id._retn(),profiles._retn());
+
+    giopStream* gs = giopStream::downcast(&s);
+    if (gs) {
+      giopStrand& g = (giopStrand&)*gs;
+      if (g.biDir && !g.isClient()) {
+	// Check the POA policy to see if the servant's POA is willing
+	// to use bidirectional on its callback objects.
+	omniCurrent* current = omniCurrent::get();
+	omniCallDescriptor* desc = ((current)? current->callDescriptor() :0);
+
+	if (desc && desc->poa() && desc->poa()->acceptBiDirectional()) {
+	  const char* sendfrom = g.connection->peeraddress();
+	  omniIOR::add_TAG_OMNIORB_BIDIR(sendfrom,*ior);
+	}
+      }
+    }
     omniObjRef* objref = omniPy::createObjRef(repoId,ior,0);
 
     if (!objref) OMNIORB_THROW(MARSHAL, MARSHAL_InvalidIOR,

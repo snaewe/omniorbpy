@@ -36,6 +36,7 @@ DIR_CPPFLAGS += $(CORBA_CPPFLAGS)
 
 endif
 
+
 #############################################################################
 #   Make rules for Autoconf builds                                          #
 #############################################################################
@@ -43,6 +44,10 @@ endif
 ifeq ($(platform),autoconf)
 
 namespec := _omnicodesetsmodule _ $(OMNIPY_MAJOR) $(OMNIPY_MINOR)
+
+ifdef PythonSHAREDLIB_SUFFIX
+SHAREDLIB_SUFFIX = $(PythonSHAREDLIB_SUFFIX)
+endif
 
 SharedLibraryFullNameTemplate = $$1$$2.$(SHAREDLIB_SUFFIX).$$3.$$4
 SharedLibrarySoNameTemplate   = $$1$$2.$(SHAREDLIB_SUFFIX).$$3
@@ -57,7 +62,7 @@ shlib := $(shell $(SharedLibraryFullName) $(namespec))
 DIR_CPPFLAGS += $(SHAREDLIB_CPPFLAGS)
 
 $(shlib): $(OBJS)
-	@(namespec="$(namespec)"; extralibs="$(OMNIORB_CODESETS_LIB)";\
+	@(namespec="$(namespec)"; extralibs="$(OMNIORB_CODESETS_LIB) $(extralibs)";\
           $(MakeCXXSharedLibrary))
 
 all:: $(shlib)

@@ -30,6 +30,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.30.2.5  2005/01/07 00:22:35  dgrisby
+# Big merge from omnipy2_develop.
+#
 # Revision 1.30.2.4  2003/09/04 14:08:41  dgrisby
 # Correct register_value_factory semantics.
 #
@@ -193,6 +196,32 @@ Error: your Python executable was not built with thread support.
 import _omnipy
 
 _coreVersion = _omnipy.coreVersion()
+
+
+# Make sure _omnipy submodules are in sys.modules, and have not been
+# damaged. This can happen if someone has messed with sys.modules, or
+# the interpreter has been stopped and restarted.
+reinit = 0
+for k, v in _omnipy.__dict__.items():
+    if k[-5:] == "_func" and isinstance(v, types.ModuleType):
+        sub = "_omnipy." + k
+        if not sys.modules.has_key(sub):
+            reinit = 1
+            sys.modules[sub] = v
+        del sub
+del k, v
+
+if reinit:
+    _omnipy.ensureInit()
+del reinit
+
+
+# Add path to COS stubs if need be
+_cospath = os.path.join(os.path.dirname(__file__), "COS")
+if _cospath not in sys.path:
+    sys.path.append(_cospath)
+del _cospath
+
 
 # Public functions
 
@@ -368,9 +397,13 @@ Make stubs for the Interface Repository appear in the CORBA module"""
 #   traceLevel
 #   traceInvocations
 #   traceThreadId
+#   log
 #   nativeCharCodeSet
 #   fixed
 #   minorCodeToString
+#   setClientCallTimeout
+#   setClientThreadCallTimeout
+#   myIPAddresses
 
 from _omnipy.omni_func import *
 
@@ -473,11 +506,27 @@ class EnumItem:
         self._n = name
         self._v = value
         return
+
     def __str__(self):
         return self._n
 
     def __repr__(self):
         return self._n
+
+    def __cmp__(self, other):
+        try:
+            if isinstance(other, EnumItem):
+                if other._parent_id == self._parent_id:
+                    return cmp(self._v, other._v)
+                else:
+                    return cmp(self._parent_id, other._parent_id)
+            else:
+                return cmp(id(self), id(other))
+        except:
+            return cmp(id(self), id(other))
+
+    def __hash__(self):
+        return id(self)
 
 class AnonymousEnumItem (EnumItem):
     def __init__(self, value):
@@ -853,6 +902,18 @@ is set to 1, a permanent location forward is requested."""
     def __str__(self):
         return "Location forward exception"
 
+# "Static" objects required by the _omnipy module. They are here so
+# memory management works correctly if the omniORB modules are
+# unloaded.
+
+_emptyTuple      = ()
+_ORB_TWIN        = "__omni_orb"
+_OBJREF_TWIN     = "__omni_obj"
+_SERVANT_TWIN    = "__omni_svt"
+_POA_TWIN        = "__omni_poa"
+_POAMANAGER_TWIN = "__omni_mgr"
+_POACURRENT_TWIN = "__omni_pct"
+_NP_RepositoryId = "_NP_RepositoryId"
 
 
 # Register this module and the threading module with omnipy:
