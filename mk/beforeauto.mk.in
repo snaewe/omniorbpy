@@ -52,6 +52,16 @@ INSTALLLIBDIR 	 := @libdir@
 INSTALLPYTHONDIR := @pythondir@
 INSTALLPYEXECDIR := @pyexecdir@
 
+#############################################################################
+#
+# Tool bindir to use depends on make target
+#
+ifeq ($(MAKECMDGOALS),install)
+  TOOLBINDIR = $(INSTALLBINDIR)
+else
+  TOOLBINDIR = $(TOP)/$(BINDIR)
+endif
+
 
 #############################################################################
 #
@@ -504,7 +514,7 @@ OMNIORB_LIB_NODYN += $(OMNITHREAD_LIB) $(SOCKET_LIB)
 OMNIORB_LIB_DEPEND += $(OMNITHREAD_LIB_DEPEND)
 OMNIORB_LIB_NODYN_DEPEND += $(OMNITHREAD_LIB_DEPEND)
 
-OMNITHREAD_LIB = $(patsubst %,$(LibSearchPattern),omnithread) -lpthread
+OMNITHREAD_LIB = $(patsubst %,$(LibSearchPattern),omnithread)
 
 
 
@@ -654,7 +664,7 @@ INSTEXEFLAGS	= -m 0755
 CP		= cp
 MV		= mv -f
 CPP		= @CPP@
-OMKDEPEND	= $(OMNIORB_BINDIR)/omkdepend
+OMKDEPEND	= $(TOOLBINDIR)/omkdepend
 RMDIRHIER	= $(RM) -rf
 
 CXXMAKEDEPEND   = $(OMKDEPEND) -D__cplusplus
@@ -729,6 +739,7 @@ ifdef Linux
 IMPORT_CPPFLAGS += -D__linux__
 OMNITHREAD_POSIX_CPPFLAGS = -DNoNanoSleep -DPthreadDraftVersion=10
 OMNITHREAD_CPPFLAGS = -D_REENTRANT
+OMNITHREAD_LIB += -lpthread
 endif
 
 ###################
@@ -739,7 +750,7 @@ OMNITHREAD_POSIX_CPPFLAGS = -DPthreadDraftVersion=10 \
 OMNITHREAD_CPPFLAGS = -DUsePthread -D_REENTRANT $(CXXMTFLAG)
 SOCKET_LIB = -lsocket -lnsl
 THREAD_LIB = -lthread $(CXXMTFLAG)
-OMNITHREAD_LIB += -lposix4 $(CXXMTFLAG)
+OMNITHREAD_LIB += -lpthread -lposix4 $(CXXMTFLAG)
 
 ifdef Compiler_GCC
 SharedLibraryPlatformLinkFlagsTemplate = -shared -Wl,-h,$$soname
@@ -810,6 +821,7 @@ endif
 ###################
 ifdef HPUX
 IMPORT_CPPFLAGS += -D__hpux__
+INSTLIBFLAGS     = -m 0755
 
 ifeq (@OSVERSION@,10)
 OMNITHREAD_POSIX_CPPFLAGS = -DPthreadDraftVersion=4
@@ -886,6 +898,7 @@ IMPORT_CPPFLAGS += -D__irix__
 
 OMNITHREAD_POSIX_CPPFLAGS = -DPthreadDraftVersion=10 \
 			    -DPthreadSupportThreadPriority
+OMNITHREAD_LIB += -lpthread
 
 # *** FIXME. How do we know what ABI to use?  Perhaps it has to be a
 # configure option?
@@ -926,6 +939,9 @@ SharedLibrarySoNameTemplate = lib$$1$$2.$$3.$(SHAREDLIB_SUFFIX)
 SharedLibraryLibNameTemplate = lib$$1$$2.$(SHAREDLIB_SUFFIX)
 SharedLibraryPlatformLinkFlagsTemplate = -dynamiclib -flat_namespace \
                                          -undefined suppress
+PythonLibraryPlatformLinkFlagsTemplate = -bundle -flat_namespace \
+                                         -undefined suppress
+PythonSHAREDLIB_SUFFIX = so
 
 # Re-define 'ExportLibrary' to run 'ranlib' after the file is copied,
 # for static libraries as otherwise the linker complains: "table of 
@@ -950,6 +966,7 @@ IMPORT_CPPFLAGS += -D__freebsd__
 
 OMNITHREAD_CPPFLAGS = -D_REENTRANT -D_THREAD_SAFE
 OMNITHREAD_POSIX_CPPFLAGS = -DUsePthread -DPthreadDraftVersion=10
+OMNITHREAD_LIB += -pthread
 endif
 
 ###################
