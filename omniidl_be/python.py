@@ -28,6 +28,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.9  1999/11/12 15:53:48  dpg1
+# New functions omniORB.importIDL() and omniORB.importIDLString().
+#
 # Revision 1.8  1999/11/11 15:55:29  dpg1
 # Python back-end interface now supports valuetype declarations.
 # Back-ends still don't support them, though.
@@ -92,7 +95,9 @@ _0_CORBA = CORBA
 _omnipy.checkVersion(0,1, __file__)
 """
 
-file_end = """
+file_end = """\
+_exported_modules = ( @export_list@, )
+
 # The end."""
 
 module_start = """
@@ -393,27 +398,43 @@ exported_modules = {}
 
 def run(tree, args):
     global main_idl_file, imported_files
+
+    # Look at the args:
+    use_stdout = 0
+    for arg in args:
+        if arg == "stdout":
+            use_stdout = 1
+        else:
+            print "Warning: python back-end does not understand argument:", \
+                  arg
     
     main_idl_file = tree.file()
 
     imported_files[outputFileName(main_idl_file)] = 1
 
-    checkStubDir(stub_directory)
-
     outpybasename = outputFileName(main_idl_file)
     outpymodule   = stub_module + outpybasename
     outpyname     = os.path.join(stub_directory, outpybasename + ".py")
 
-    st = output.Stream(open(outpyname, "w"), 4)
+    if (use_stdout):
+        st = output.Stream(sys.stdout, 4)
+    else:
+        checkStubDir(stub_directory)
+        st = output.Stream(open(outpyname, "w"), 4)
 
     st.out(file_start, filename=main_idl_file)
 
     pv = PythonVisitor(st, outpymodule)
     tree.accept(pv)
 
-    st.out(file_end)
+    exports = exported_modules.keys()
+    exports.sort()
+    export_list = string.join(map(lambda s: '"' + s + '"', exports), ", ")
 
-    updateModules(exported_modules.keys(), outpymodule)
+    st.out(file_end, export_list=export_list)
+
+    if not use_stdout:
+        updateModules(exports, outpymodule)
 
 
 class PythonVisitor:

@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.11  1999/11/12 15:53:48  dpg1
+# New functions omniORB.importIDL() and omniORB.importIDLString().
+#
 # Revision 1.10  1999/10/18 08:25:57  dpg1
 # _is_a() now works properly for local objects.
 #
@@ -65,7 +68,7 @@
 # Initial revision
 #
 
-import sys, types, imp
+import sys, types, string, imp, os, os.path, tempfile
 
 try:
     import threading
@@ -78,13 +81,64 @@ Error: your Python executable was not built with thread support.
 
 import _omnipy
 
+
+# Public functions
+
+# Import an IDL file by forking the IDL compiler and processing the
+# output
+def importIDL(idlname):
+    """importIDL(filename) -> tuple
+
+Run the IDL compiler on the specified IDL file, and import the
+resulting stubs. Returns a tuple of Python module names corresponding
+to the IDL module names declared in the file. The modules can be
+accessed through sys.modules."""
+
+    if not os.path.isfile(idlname):
+        raise ImportError("File " + idlname + " does not exist")
+
+    modname = string.replace(os.path.basename(idlname), ".", "_")
+    pipe    = os.popen("omniidl -q -bpython -Wbstdout " + idlname)
+
+    try:
+        m = imp.load_module(modname, pipe, "", (".idl", "r", imp.PY_SOURCE))
+    finally:
+        if pipe.close() is not None:
+            del sys.modules[modname]
+            raise ImportError("Error spawning omniidl")
+    try:
+        m.__file__ = idlname
+        return m._exported_modules
+    except AttributeError:
+        del sys.modules[modname]
+        raise ImportError("Invalid output from omniidl")
+
+def importIDLString(str):
+    """importIDLString(string) -> tuple
+
+Run the IDL compiler on the given string, and import the resulting
+stubs. Returns a tuple of Python module names corresponding to the IDL
+module names declared in the file. The modules can be accessed through
+sys.modules."""
+
+    tfn = tempfile.mktemp()
+    tf  = open(tfn, "w")
+    tf.write(str)
+    tf.close()
+    try:
+        ret = importIDL(tfn)
+    finally:
+        os.remove(tfn)
+    return ret
+
+
+# Private things
+
 # ORB:
 orb_lock = threading.Lock()
 orb      = None
 
-
 # Maps for object reference classes and IDL-defined types:
-
 map_lock = threading.Lock()
 
 objrefMapping   = {}
@@ -142,7 +196,6 @@ def openModule(mname, fname=None):
     return mod
 
 
-
 # Classes to support IDL type mapping
 
 class EnumItem:
@@ -172,7 +225,6 @@ class Enum:
 
     def _item(self, n):
         return self._items[n]
-
 
 
 class Union:
@@ -237,8 +289,6 @@ class Union:
 # Import sub-modules
 import CORBA, tcInternal
 
-
-
 def createUnknownStruct(repoId, members):
 
     class UnknownStruct:
@@ -262,7 +312,6 @@ def createUnknownStruct(repoId, members):
     UnknownStruct._members         = members
     return UnknownStruct
 
-
 def createUnknownUnion(repoId, def_used, members):
 
     class UnknownUnion (Union):
@@ -281,7 +330,6 @@ def createUnknownUnion(repoId, def_used, members):
             UnknownUnion._m_to_d[members[i][1]] = members[i][0]
 
     return UnknownUnion
-
 
 def createUnknownUserException(repoId, members):
 
@@ -388,7 +436,6 @@ def static_is_a(cls, repoId):
     return 0
 
 
-
 # System exception mapping:
 sysExceptionMapping = {
     "IDL:omg.org/CORBA/UNKNOWN":                CORBA.UNKNOWN,
@@ -460,3 +507,4 @@ keywordMapping = {
 import omniORB, omniORB.PortableServer
 _omnipy.registerPyObjects(omniORB, threading)
 del omniORB
+del sys, types, string, imp, os, tempfile, threading
