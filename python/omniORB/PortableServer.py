@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.7.4.8  2002/05/28 22:04:41  dgrisby
+# Incorrect repoIds.
+#
 # Revision 1.7.4.7  2002/03/18 12:40:38  dpg1
 # Support overriding _non_existent.
 #
@@ -162,7 +165,7 @@ class POAManager (CORBA.Object) :
 
 # interface POA
 _d_POA = (omniORB.tcInternal.tv_objref,
-          "IDL:omg.org/PortableServer/POA:2.3", "POA")
+          "IDL:omg.org/PortableServer/POA:1.0", "POA")
 
 class POA (CORBA.Object) :
     """POA implementation."""
@@ -721,7 +724,7 @@ omniORB.registerType(RequestProcessingPolicyValue._NP_RepositoryId,
 
 # interface ServantManager
 _d_ServantManager = (omniORB.tcInternal.tv_objref,
-                     "IDL:omg.org/PortableServer/ServantManager:2.3",
+                     "IDL:omg.org/PortableServer/ServantManager:1.0",
                      "ServantManager")
 class ServantManager :
     _NP_RepositoryId = _d_ServantManager[1]
@@ -749,7 +752,7 @@ omniORB.registerObjref(ServantManager._NP_RepositoryId, _objref_ServantManager)
 
 # interface ServantActivator
 _d_ServantActivator = (omniORB.tcInternal.tv_objref,
-                       "IDL:omg.org/PortableServer/ServantActivator:2.3",
+                       "IDL:omg.org/PortableServer/ServantActivator:1.0",
                        "ServantActivator")
 class ServantActivator (ServantManager):
     _NP_RepositoryId = _d_ServantActivator[1]
@@ -801,7 +804,7 @@ omniORB.registerObjref(ServantActivator._NP_RepositoryId,
 
 # interface ServantLocator
 _d_ServantLocator = (omniORB.tcInternal.tv_objref,
-                     "IDL:omg.org/PortableServer/ServantLocator:2.3",
+                     "IDL:omg.org/PortableServer/ServantLocator:1.0",
                      "ServantLocator")
 
 class ServantLocator (ServantManager):
@@ -857,7 +860,7 @@ omniORB.registerObjref(ServantLocator._NP_RepositoryId, _objref_ServantLocator)
 
 # interface AdapterActivator
 _d_AdapterActivator = (omniORB.tcInternal.tv_objref,
-                       "IDL:omg.org/PortableServer/AdapterActivator:2.3",
+                       "IDL:omg.org/PortableServer/AdapterActivator:1.0",
                        "AdapterActivator")
 class AdapterActivator :
     _NP_RepositoryId = _d_AdapterActivator[1]
