@@ -8,6 +8,19 @@
 
 <buglist version="1.2">
 
+<bug id="7" date="Thu Jan 18 11:45:43 GMT 2001" user="dpg1">
+
+  <summary>Crash when marshalling CORBA::Object TypeCode</summary>
+  <reported>Lars von Wedel</reported>
+  <link
+  href="http://www.uk.research.att.com/omniORB/archives/2001-01/0125.html"/>
+  <text>
+  The TypeCode marshaller would calculate the correct size for a base
+  CORBA::Object TypeCode, but then marshal it incorrectly, leading to
+  an error from an omniORB sanity check.
+  </text>
+</bug>
+
 <bug id="6" date="Mon Dec  4 17:56:07 GMT 2000" user="dpg1">
 
   <summary>BAD_TYPECODE exception with good TypeCode</summary>

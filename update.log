@@ -1,3 +1,11 @@
+Thu Jan 18 11:45:43 GMT 2001 dpg1
+=================================
+
+- Silly bug with marshalling TypeCode for CORBA::Object.
+
+modules/common/pyTypeCode.cc
+
+
 Mon Dec  4 17:56:07 GMT 2000 dpg1
 =================================
 
