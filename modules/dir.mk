@@ -28,6 +28,10 @@ DIR_CPPFLAGS = $(patsubst %,-I%/src/lib/omniORB2/orbcore,$(IMPORT_TREES))
 
 ifdef UnixPlatform
 CXXDEBUGFLAGS = -g
+
+PYPREFIX := $(shell python -c 'import sys; print sys.prefix')
+PYINCDIR := $(PYPREFIX)/include
+DIR_CPPFLAGS += -I$(PYINCDIR)
 endif
 
 #############################################################################
@@ -75,8 +79,6 @@ ifdef SunOS
 libname = _omnipymodule.so
 soname  = $(libname).$(OMNIPY_MAJOR)
 lib     = $(soname).$(OMNIPY_MINOR)
-
-DIR_CPPFLAGS += -I/usr/local/include
 
 ifeq ($(notdir $(CXX)),CC)
 
