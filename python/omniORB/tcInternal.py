@@ -31,6 +31,10 @@
 # $Id$
 
 # $Log$
+# Revision 1.7  1999/11/01 20:59:42  dpg1
+# Fixed bug in insertIndirections() if the same node is indirected to
+# more than once.
+#
 # Revision 1.6  1999/09/24 09:22:00  dpg1
 # Added copyright notices.
 #
@@ -894,14 +898,16 @@ def r_insertIndirections(d, seen, ind):
     k = d[0]
 
     if k == tv_struct:
-        seen[d[2]] = d
-        for i in range(4, len(d), 2):
-            r_insertIndirections(d[i+1], seen, ind)
+        if not seen.has_key(d[2]):
+            seen[d[2]] = d
+            for i in range(4, len(d), 2):
+                r_insertIndirections(d[i+1], seen, ind)
     
     elif k == tv_union:
-        seen[d[2]] = d
-        for u in d[6]:
-            r_insertIndirections(u[2], seen, ind)
+        if not seen.has_key(d[2]):
+            seen[d[2]] = d
+            for u in d[6]:
+                r_insertIndirections(u[2], seen, ind)
         
     elif k == tv_sequence:
         r_insertIndirections(d[1], seen, ind)
@@ -914,9 +920,10 @@ def r_insertIndirections(d, seen, ind):
         r_insertIndirections(d[3], seen, ind)
 
     elif k == tv_except:
-        seen[d[2]] = d
-        for i in range(4, len(d), 2):
-            r_insertIndirections(d[i+1], seen, ind)
+        if not seen.has_key(d[2]):
+            seen[d[2]] = d
+            for i in range(4, len(d), 2):
+                r_insertIndirections(d[i+1], seen, ind)
 
     elif k == tv__indirect:
         if type(d[1][0]) == types.StringType:
