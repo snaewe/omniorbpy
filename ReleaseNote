@@ -1,7 +1,10 @@
-Release Notes for omniORBpy 1.0 pre 3
+Release Notes for omniORBpy 1.0 pre 3  (28 June 2000)
 =====================================
 
-This is the third pre-release of Python bindings for omniORB.
+This is the release candidate for omniORBpy 1.0. The purpose of
+producing this pre-release is to give our users a chance to check if
+there are any problems remaining before we release 1.0. So please give
+it a try and report any problems ASAP.
 
 The bindings adhere to the standard IDL to Python mapping which you
 may find at http://www.omg.org/cgi-bin/doc?ptc/00-04-08.
@@ -29,9 +32,16 @@ omniORBpy is currently available for Linux, Solaris, and Windows NT.
 It has been ported to a number of other Unix flavours by outside
 contributors.
 
-Please report any bugs you find to Duncan Grisby,
+It is a good idea to subscribe to the omniORB mailing list. See
 
+    http://www.uk.research.att.com/omniORB/intouch.html
+
+
+Please report any bugs you find to the mailing list, or directly to
+Duncan Grisby,
                                          dgrisby@uk.research.att.com
+
+
 
 
 Summary of changes from pre-release 2
