@@ -1,12 +1,16 @@
 <?xml version="1.0"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
+<xsl:output method="html"/>
 
 <!-- This style sheet formats buglist.xml for inclusion on the omniORB -->
 <!-- web pages. The html output assumes that it lives at               -->
 <!-- http://www.uk.research.att.com/omniORB/omniORBpy/bugfixes.html.   -->
 
-
 <xsl:template match="/">
+    <xsl:apply-templates/>
+</xsl:template>
+
+<xsl:template match="buglist">
   <html>
   <head>
   <title>omniORBpy bugs</title>
@@ -19,7 +23,7 @@
   <tr>
     <td width="15%"><img src="omniORBpylogo.gif"/></td>
     <td align="center" bgcolor="#000000"><h1 class="banner">
-        <font color="#FFFFFF"><em>omniORBpy 1.2 Bug List</em></font></h1>
+        <font color="#FFFFFF"><em>omniORBpy <xsl:value-of select="@version"/> Bug List</em></font></h1>
     </td>
 
     <td width="15%"><p align="center">
@@ -70,8 +74,9 @@
         <tr><td>
 
 	  <p>
-	  The following bugs in omniORBpy 1.2 have been fixed. You can
-	  get the fixes in three ways:</p>
+	  The following bugs in omniORBpy <xsl:value-of
+	  select="@version"/> have been fixed. You can get the fixes
+	  in three ways:</p>
 
           <ul><li>Update from <a href="../cvs.html">CVS</a> in the
                   <code>"omnipy1_develop"</code> branch.</li>
@@ -90,6 +95,7 @@
               <li><a href="bugfixes11.html">omniORBpy 1.1</a></li>
               <li><a href="bugfixes10.html">omniORBpy 1.0</a></li>
           </ul>
+
           </p>
 
           <table align="center" width="95%">
@@ -119,8 +125,10 @@
   </html>
 </xsl:template>
 
-<xsl:template match="buglist">
-    <xsl:apply-templates/>
+<xsl:template match="nobugs">
+
+    <tr><td>No bugs yet.</td></tr>
+
 </xsl:template>
 
 

@@ -1,4 +1,4 @@
-<?xml version="1.0" standalone="yes"?>
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
 <?xml-stylesheet type="text/xsl" href="bugfixes.xsl"?>
 
 <!-- The following bugs have been fixed since the omniORBpy 1.0     -->
@@ -6,7 +6,7 @@
 
 <!-- Editors: make sure the content you add is well-formed XML.     -->
 
-<buglist>
+<buglist version="1.2">
 
 <bug id="7" date="Thu Sep 21 14:14:30 BST 2000" user="dpg1">
 
