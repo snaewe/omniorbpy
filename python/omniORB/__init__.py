@@ -31,6 +31,10 @@
 # $Id$
 
 # $Log$
+# Revision 1.18  2000/04/06 09:31:43  dpg1
+# newModule() spots if we're trying to re-open the CORBA module, and if
+# so uses omniORB.CORBA.
+#
 # Revision 1.17  2000/03/03 17:41:27  dpg1
 # Major reorganisation to support omniORB 3.0 as well as 2.8.
 #
@@ -294,6 +298,11 @@ def newModule(mname):
     mlist   = string.split(mname, ".")
     current = ""
     mod     = None
+
+    # If we're trying to re-open the CORBA module, make it appear as
+    # just "CORBA", as well as "omniORB.CORBA"
+    if mlist[0] == "CORBA" and sys.modules.has_key("omniORB.CORBA"):
+        sys.modules["CORBA"] = sys.modules["omniORB.CORBA"]
 
     for name in mlist:
         current = current + name
