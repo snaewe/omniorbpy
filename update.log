@@ -1,3 +1,21 @@
+Mon May 14 13:44:51 BST 2001 dpg1
+=================================
+
+- Fix memory leaks.
+
+modules/omnipy.cc
+modules/omnipy.h
+modules/pyExceptions.cc
+modules/pyFixed.cc
+modules/pyMarshal.cc
+modules/pyObjectRef.cc
+modules/pyServant.cc
+
+- Report exception minor code in hex.
+
+python/omniORB/CORBA.py
+
+
 Thu May 10 16:14:10 BST 2001 dpg1
 =================================
 

@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.28.2.6  2001/05/14 12:48:27  dpg1
+# Report exception minor code in hex.
+#
 # Revision 1.28.2.5  2001/04/10 11:11:14  dpg1
 # TypeCode support and tests for Fixed point.
 #
@@ -189,7 +192,7 @@ class SystemException (Exception):
         Exception.__init__(self, minor, self.completed)
 
     def __str__(self):
-        return "Minor: " + str(self.minor) + \
+        return "Minor: " + hex(self.minor) + \
                ", Completed: " + str(self.completed) + "."
 
 class UserException (Exception):
