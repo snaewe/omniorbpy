@@ -1,3 +1,25 @@
+Wed Jul 12 15:29:04 BST 2000 dpg1
+=================================
+
+- Update manual with details about path configuration, IfR stubs,
+  change of corbaloc default port to 2809.
+
+src/lib/omniORBpy/doc/tex/omniORBpy.tex
+
+- New no_package option to omniidl backend
+
+src/lib/omniORBpy/omniidl_be/python.py
+
+- Support for Interface Repository stubs
+
+src/lib/omniORBpy/python/omniORB/__init__.py
+src/lib/omniORBpy/python/omniORB/dir.mk
+
+- Remove dodgy-looking blank line
+
+src/lib/omniORBpy/modules/dir.mk
+
+
 Wed Jul 12 14:21:46 BST 2000 sll
 ================================
 
