@@ -1,3 +1,109 @@
+Tue Jun 27 15:53:26 BST 2000 dpg1
+=================================
+
+- Under omniORB 2.8, omniidl is built before all other things, so it
+  can be used to build the Naming stubs.
+
+dir.mk
+
+- Examples modified to reflect documentation, and M__POA mapping
+  change.
+
+examples/echo/echo_clt.py
+examples/echo/echo_example.idl         -- deleted
+examples/echo/echo_example_clt.py      -- deleted
+examples/echo/echo_example_srv.py      -- deleted
+examples/echo/echo_srv.py
+examples/echo/example_echo.idl         -- new
+examples/echo/example_echo_clt.py      -- new
+examples/echo/example_echo_coloc.py    -- new
+examples/echo/example_echo_nsclt.py    -- new
+examples/echo/example_echo_nssrv.py    -- new
+examples/echo/example_echo_srv.py      -- new
+examples/poa/servantactivator.py
+examples/poa/servantlocator.py
+examples/tests/pserver.py
+examples/tests/tclient.py
+examples/tests/tserver.py
+examples/weather/wserver.py
+
+- Change from POA_M to M__POA mapping
+
+external_merge/python/CosNaming__POA/GNUmakefile   -- new
+external_merge/python/POA_CosNaming/GNUmakefile    -- removed
+python/CosNaming__POA/__init__.py                  -- new
+python/CosNaming__POA/dir.mk                       -- new
+python/POA_CosNaming/__init__.py                   -- removed
+python/POA_CosNaming/dir.mk                        -- removed
+python/omniORB/POA_PortableServer.py               -- removed
+python/omniORB/PortableServer__POA.py              -- new
+python/omniORB/dir.mk
+
+- Change from POA_M to M__POA mapping.
+- Global module only built if necessary.
+
+omniidl_be/python.py
+
+- CosNaming module is now generated rather than hand-coded
+
+python/Naming_idl.py  -- deleted
+python/dir.mk
+
+- Dummy CORBA, PortableServer, PortableServer__POA modules which
+  import the omniORB ones.
+
+python/CORBA.py                -- new
+python/PortableServer.py       -- new
+python/PortableServer__POA.py  -- new
+
+- Fix to _is_a(). CORBA.Object registered in the objref map.
+
+python/omniORB/CORBA.py
+
+- Expanded comment
+
+python/omniORB/__init__.py
+
+
+- Fix for Windows pathname brokenness
+
+modules/dir.mk
+
+- Change error message for version clash
+
+modules/omni28/omnipy.cc
+modules/omni30/omnipy.cc
+
+- New copyObjRefArgument() function
+
+modules/common/pyMarshal.cc
+modules/omni28/omnipy28.h
+modules/omni28/pyObjectRef.cc
+modules/omni30/omnipy30.h
+modules/omni30/pyObjectRef.cc
+
+
+- New omniORBpy manual
+
+doc/tex/omniORBpy.tex
+external_merge/doc/omniORBpy.pdf
+external_merge/doc/omniORBpy.ps
+external_merge/doc/omniORBpy/contents_motif.gif
+external_merge/doc/omniORBpy/index.html
+external_merge/doc/omniORBpy/next_motif.gif
+external_merge/doc/omniORBpy/omniORBpy001.html
+external_merge/doc/omniORBpy/omniORBpy002.html
+external_merge/doc/omniORBpy/omniORBpy003.html
+external_merge/doc/omniORBpy/omniORBpy004.html
+external_merge/doc/omniORBpy/omniORBpy005.html
+external_merge/doc/omniORBpy/omniORBpy006.html
+external_merge/doc/omniORBpy/omniORBpy007.html
+external_merge/doc/omniORBpy/omniORBpy008.html
+external_merge/doc/omniORBpy/omniORBpy009.html
+external_merge/doc/omniORBpy/previous_motif.gif
+
+
+
 Tue Jun 20 14:51:11 BST 2000 dpg1
 =================================
 
