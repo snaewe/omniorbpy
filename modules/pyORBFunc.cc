@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.5  2001/05/10 15:16:02  dpg1
+// Big update to support new omniORB 4 internals.
+//
 // Revision 1.1.2.4  2001/03/13 10:38:07  dpg1
 // Fixes from omnipy1_develop
 //
@@ -238,7 +241,7 @@ extern "C" {
 }
 
 
-class omni_python_initialiser : public omniInitialiser {
+class omni_python_initialiser : public _OMNI_NS(omniInitialiser) {
 public:
   void attach() { }
   void detach() {
@@ -256,5 +259,5 @@ omniPy::initORBFunc(PyObject* d)
   PyDict_SetItemString(d, (char*)"orb_func", m);
 
   omni_python_initialiser* init = new omni_python_initialiser();
-  omniInitialiser::install(init);
+  _OMNI_NS(omniInitialiser)::install(init);
 }

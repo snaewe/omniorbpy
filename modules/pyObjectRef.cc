@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.6  2001/05/10 15:16:03  dpg1
+// Big update to support new omniORB 4 internals.
+//
 // Revision 1.1.2.5  2001/03/13 10:38:07  dpg1
 // Fixes from omnipy1_develop
 //
@@ -52,8 +55,7 @@
 
 #include <omnipy.h>
 
- // Internal omniORB interfaces
-#include <ropeFactory.h>
+// Internal omniORB interfaces
 #include <localIdentity.h>
 #include <remoteIdentity.h>
 #include <objectAdapter.h>
@@ -213,72 +215,62 @@ omniPy::createPyPseudoObjRef(const CORBA::Object_ptr objref)
 
 
 omniObjRef*
-omniPy::createObjRef(const char*    targetRepoId,
-		     omniIOR*       ior,
-		     CORBA::Boolean locked,
-		     CORBA::Boolean type_verified)
+omniPy::createObjRef(const char*    	targetRepoId,
+		     omniIOR*       	ior,
+		     CORBA::Boolean 	locked,
+		     omniIdentity*  	id,
+		     omniLocalIdentity* local_id,
+		     CORBA::Boolean     type_verified)
 {
   ASSERT_OMNI_TRACEDMUTEX_HELD(*omni::internalLock, locked);
   OMNIORB_ASSERT(targetRepoId);
   OMNIORB_ASSERT(ior);
 
-  Rope*          rope = 0;
-  CORBA::Boolean is_local = 0;
-
-  if (!ropeFactory::iorToRope(ior, rope, is_local)) {
-    ior->release();
-    return 0;
+  if (!id) {
+    ior->duplicate();  // consumed by createIdentity
+    id = omni::createIdentity(ior, local_id, "Py_omniServant", locked);
+    if (!id) {
+      ior->release();
+      return 0;
+    }
   }
-
-  if (is_local) {
-    CORBA::Octet* key     = ior->iiop.object_key.get_buffer();
-    int           keysize = ior->iiop.object_key.length();
-    CORBA::ULong  hashv   = omni::hash(key, keysize);
-
-    omni_optional_lock sync(*omni::internalLock, locked, locked);
-
-    // If the identity does not exist in the local object table,
-    // locateIdentity() will insert a dummy entry.
-
-    omniLocalIdentity* local_id = omni::locateIdentity(key, keysize, hashv, 1);
-
-    return omniPy::createObjRef(targetRepoId, local_id, ior, type_verified);
-  }
-
-  ior->duplicate();
-
-  omniRemoteIdentity* id = new omniRemoteIdentity(ior, rope);
 
   if (omniORB::trace(10)) {
     omniORB::logger l;
-    l << "Creating Python ref to remote: " << id << "\n"
+    l << "Creating Python ref to "  << ((id == local_id) ? "local" : "remote")
+      << ": " << id << "\n"
       " target id      : " << targetRepoId << "\n"
-      " most derived id: " << (const char*)ior->repositoryID << "\n";
+      " most derived id: " << (const char*)ior->repositoryID() << "\n";
   }
-  omniObjRef* objref = new Py_omniObjRef(targetRepoId, ior, id, 0);
+
+  omniObjRef* objref = new Py_omniObjRef(targetRepoId, ior, id, local_id);
 
   if (!type_verified && strcmp(targetRepoId, CORBA::Object::_PD_repoId))
     objref->pd_flags.type_verified = 0;
 
-  if (!locked) omni::internalLock->lock();
-  id->gainObjRef(objref);
-  if (!locked) omni::internalLock->unlock();
+  {
+    omni_optional_lock sync(*omni::internalLock, locked, locked);
+    if (id != local_id)
+      id->gainObjRef(objref);
+    if (local_id)
+      local_id->gainObjRef(objref);
+  }
 
   return objref;
 }
 
 
 omniObjRef*
-omniPy::createObjRef(const char*        targetRepoId,
+omniPy::createObjRef(const char*        mostDerivedRepoId,
+		     const char*        targetRepoId,
 		     omniLocalIdentity* local_id,
-		     omniIOR*           ior,
 		     CORBA::Boolean     type_verified)
 {
   ASSERT_OMNI_TRACEDMUTEX_HELD(*omni::internalLock, 1);
   OMNIORB_ASSERT(targetRepoId);
-  OMNIORB_ASSERT(ior);
+  OMNIORB_ASSERT(local_id);
 
-  omniIdentity* remote_id = 0;
+  omniIdentity* id = 0;
 
   // See if a suitable reference exists in the local ref list.
   // Suitable means having the same most-derived-intf-repo-id, and
@@ -288,7 +280,7 @@ omniPy::createObjRef(const char*        targetRepoId,
 
     while (objref) {
 
-      if (!strcmp(ior->repositoryID, objref->_mostDerivedRepoId()) &&
+      if (!strcmp(mostDerivedRepoId, objref->_mostDerivedRepoId()) &&
 	  objref->_ptrToObjRef("Py_omniObjRef") &&
 	  !strcmp(targetRepoId, objref->pd_intfRepoId)) {
 
@@ -305,68 +297,23 @@ omniPy::createObjRef(const char*        targetRepoId,
 	omni::objref_rc_lock->unlock();
 
 	if (!dying) {
-	  ior->release();
 	  return objref;
 	}
       }
 
       if (objref->_identity() != objref->_localId())
-	// If there is a remote id available, just keep a
+	// If there is an id available, just keep a
 	// note of it in case we need it.
-	remote_id = objref->_identity();
+	id = objref->_identity();
 
       objref = objref->_nextInLocalRefList();
     }
   }
 
-  omniServant* servant = local_id->servant();
-
-  if (omniORB::trace(10)) {
-    omniORB::logger l;
-    l << "Creating Python ref to local: " << local_id << "\n"
-      " target id      : " << targetRepoId << "\n"
-      " most derived id: " << ior->repositoryID << "\n";
-  }
-
-  if (servant && !servant->_ptrToInterface("Py_omniServant"))
-    servant = 0;
-
-  if (servant) {
-    remote_id = 0;
-  }
-  else {
-
-    // There are two possibilities here. Either:
-    //  1. This object has not yet been activated, and the object
-    //     table contains a dummy entry.
-    //  2. The object has been activated, but does not support
-    //     the c++ type interface that we require.
-    //
-    // We use a remote id -- so that the usual mechanisms will be
-    // used to indicate that there is a problem.  If the object has
-    // not been activated yet, we will replace this remote id with
-    // the local id when it is.
-
-    if (!remote_id) {
-      Rope* rope = omniObjAdapter::defaultLoopBack();
-      rope->incrRefCount();
-      ior->duplicate();
-      remote_id = new omniRemoteIdentity(ior, rope);
-    }
-  }
-
-  omniObjRef* objref = new Py_omniObjRef(targetRepoId,
-					 ior,
-					 remote_id ? remote_id : local_id,
-					 local_id);
-
-  if (!type_verified && strcmp(targetRepoId, CORBA::Object::_PD_repoId))
-    objref->pd_flags.type_verified = 0;
-
-  local_id->gainObjRef(objref);
-  if (remote_id) remote_id->gainObjRef(objref);
-
-  return objref;
+  // Reach here if we have to create a new objref.
+  omniIOR* ior = new omniIOR(mostDerivedRepoId,local_id);
+  return omniPy::createObjRef(targetRepoId, ior, 1, id,
+			      local_id, type_verified);
 }
 
 
@@ -382,8 +329,8 @@ omniPy::makeLocalObjRef(const char* targetRepoId,
 
   {
     omni_tracedmutex_lock sync(*omni::internalLock);
-    newooref = omniPy::createObjRef(targetRepoId, ooref->_localId(),
-				    ooref->_getIOR(), 1);
+    newooref = omniPy::createObjRef(ooref->_mostDerivedRepoId(),
+				    targetRepoId, ooref->_localId(), 1);
   }
   return (CORBA::Object_ptr)newooref->_ptrToObjRef(CORBA::Object::_PD_repoId);
 }
@@ -469,7 +416,7 @@ omniPy::stringToObject(const char* uri)
 {
   CORBA::Object_ptr cxxobj;
 
-  cxxobj = omniURI::stringToObject(uri);
+  cxxobj = _OMNI_NS(omniURI)::stringToObject(uri);
 
   if (CORBA::is_nil(cxxobj) || cxxobj->_NP_is_pseudo()) {
     return cxxobj;

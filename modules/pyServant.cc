@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.4  2001/05/10 15:16:03  dpg1
+// Big update to support new omniORB 4 internals.
+//
 // Revision 1.1.2.3  2001/03/13 10:38:08  dpg1
 // Fixes from omnipy1_develop
 //
@@ -44,6 +47,8 @@
 
 #include <omnipy.h>
 #include <pyThreadCache.h>
+
+#include <omniORB4/IOP_S.h>
 
 
 // Implementation classes for ServantManagers and AdapterActivator
@@ -75,8 +80,8 @@ public:
   const char* _mostDerivedRepoId() {
     return PY_OMNISERVANT_BASE::_mostDerivedRepoId();
   }
-  CORBA::Boolean _dispatch(GIOP_S& giop_s) {
-    return PY_OMNISERVANT_BASE::_dispatch(giop_s);
+  CORBA::Boolean _dispatch(_OMNI_NS(IOP_S)& iop_s) {
+    return PY_OMNISERVANT_BASE::_dispatch(iop_s);
   }
 
 private:
@@ -116,8 +121,8 @@ public:
   const char* _mostDerivedRepoId() {
     return PY_OMNISERVANT_BASE::_mostDerivedRepoId();
   }
-  CORBA::Boolean _dispatch(GIOP_S& giop_s) {
-    return PY_OMNISERVANT_BASE::_dispatch(giop_s);
+  CORBA::Boolean _dispatch(_OMNI_NS(IOP_S)& iop_s) {
+    return PY_OMNISERVANT_BASE::_dispatch(iop_s);
   }
 
 private:
@@ -150,8 +155,8 @@ public:
   const char* _mostDerivedRepoId() {
     return PY_OMNISERVANT_BASE::_mostDerivedRepoId();
   }
-  CORBA::Boolean _dispatch(GIOP_S& giop_s) {
-    return PY_OMNISERVANT_BASE::_dispatch(giop_s);
+  CORBA::Boolean _dispatch(_OMNI_NS(IOP_S)& iop_s) {
+    return PY_OMNISERVANT_BASE::_dispatch(iop_s);
   }
 
 private:
@@ -260,8 +265,8 @@ Py_omniServant::_default_POA()
 {
   {
     omnipyThreadCache::lock _t;
-    PyObject* pyPOA = PyObject_CallMethod(pyservant_, (char*)"_default_POA", 0);
-
+    PyObject* pyPOA = PyObject_CallMethod(pyservant_,
+					  (char*)"_default_POA", 0);
     if (pyPOA) {
       PortableServer::POA_ptr poa =
 	(PortableServer::POA_ptr)omniPy::getTwin(pyPOA, POA_TWIN);
@@ -273,7 +278,8 @@ Py_omniServant::_default_POA()
       else {
 	if (omniORB::trace(1)) {
 	  omniORB::logger l;
-	  l << "Python servant returned an invalid object from `_default_POA'.\n"
+	  l <<
+	    "Python servant returned an invalid object from `_default_POA'.\n"
 	    "Returning Root POA\n";
 	}
       }      
@@ -281,7 +287,8 @@ Py_omniServant::_default_POA()
     else {
       if (omniORB::trace(1)) {
 	omniORB::logger l;
-	l << "Exception while trying to call _default_POA(). "
+	l <<
+	  "Exception while trying to call _default_POA(). "
 	  "Returning Root POA\n";
 	PyErr_Print();
       }
@@ -417,29 +424,15 @@ Py_omniServant::_is_a(const char* logical_type_id)
 }
 
 
-class Py_UserException_Marshaller : public giopMarshaller {
-public:
-  Py_UserException_Marshaller(PyObject* edesc, PyObject* evalue)
-    : edesc_(edesc), evalue_(evalue) {}
-
-  void marshal(cdrStream& s) {
-    omniPy::marshalPyObject(s, edesc_, evalue_);
-  }
-private:
-  PyObject* edesc_;
-  PyObject* evalue_;
-};
-
-
 CORBA::Boolean
 omniPy::
-Py_omniServant::_dispatch(GIOP_S& giop_s)
+Py_omniServant::_dispatch(_OMNI_NS(IOP_S)& iop_s)
 {
   int i;
   omnipyThreadCache::lock _t;
 
-  PyObject* desc =
-    PyDict_GetItemString(opdict_, (char*)giop_s.invokeInfo().operation());
+  const char* op   = iop_s.operation_name();
+  PyObject*   desc = PyDict_GetItemString(opdict_, (char*)op);
 
   if (!desc) return 0; // Unknown operation name
 
@@ -449,48 +442,44 @@ Py_omniServant::_dispatch(GIOP_S& giop_s)
   PyObject* out_d = PyTuple_GET_ITEM(desc,1);
   PyObject* exc_d = PyTuple_GET_ITEM(desc,2);
 
-  Py_omniCallDescriptor call_desc(giop_s.invokeInfo().operation(), 0,
+  Py_omniCallDescriptor call_desc(op, 0,
 				  (out_d == Py_None),
 				  in_d, out_d, exc_d, 0, 1);
+  try {
+    omniPy::InterpreterUnlocker _u;
+    _upcall(iop_s, call_desc);
+  }
+  catch (omniPy::PyUserException& ex) {
+    iop_s.SendException(&ex);
+  }
+  return 1;
+}
 
-  call_desc.unmarshalArguments((cdrStream&)giop_s);
-  giop_s.RequestReceived();
-
-  // Do the up-call
-  PyObject* method =
-    PyObject_GetAttrString(pyservant_, (char*)giop_s.invokeInfo().operation());
+void
+omniPy::
+Py_omniServant::remote_dispatch(Py_omniCallDescriptor* pycd)
+{
+  const char* op     = pycd->op();
+  PyObject*   method = PyObject_GetAttrString(pyservant_, (char*)op);
 
   if (!method) {
     if (omniORB::trace(1)) {
       omniORB::logger l;
       l << "Python servant for `" << repoId_ << "' has no method named `"
-	<< giop_s.invokeInfo().operation() << "'.\n";
+	<< op << "'.\n";
     }
     PyErr_Clear();
-    Py_DECREF(call_desc.args());
     OMNIORB_THROW(NO_IMPLEMENT, 0, CORBA::COMPLETED_NO);
   }
 
-  PyObject* result = PyEval_CallObject(method, call_desc.args());
+  PyObject* args   = pycd->args();
+  PyObject* result = PyEval_CallObject(method, args);
   Py_DECREF(method);
-  Py_DECREF(call_desc.args());
+  Py_DECREF(args);
 
   if (result) {
-    // No exception was thrown. Marshal the return value
-    if (!call_desc.is_oneway()) {
-      try {
-	call_desc.validateReturnedValues(result);
-	omniServerCallMarshaller m(call_desc);
-	giop_s.InitialiseReply(GIOP::NO_EXCEPTION, m);
-      }
-      catch (...) {
-	Py_DECREF(result);
-	throw;
-      }
-    }
-    Py_DECREF(result);
-    giop_s.ReplyCompleted();
-    return 1;
+    // No exception was thrown. Set the return value
+    pycd->setAndValidateReturnedValues(result);
   }
   else {
     // An exception of some sort was thrown
@@ -517,20 +506,18 @@ Py_omniServant::_dispatch(GIOP_S& giop_s)
     Py_DECREF(etype);
     Py_XDECREF(etraceback);
 
+    PyObject* exc_d = pycd->exc_d_;
+
     // Is it a user exception?
     if (exc_d != Py_None) {
       OMNIORB_ASSERT(PyDict_Check(exc_d));
 
       PyObject* edesc = PyDict_GetItem(exc_d, erepoId);
+      Py_DECREF(erepoId);
 
       if (edesc) {
-	omniPy::validateType(edesc, evalue, CORBA::COMPLETED_MAYBE);
-	Py_UserException_Marshaller m(edesc, evalue);
-	giop_s.InitialiseReply(GIOP::USER_EXCEPTION, m);
-	giop_s.ReplyCompleted();
-	Py_DECREF(erepoId);
-	Py_DECREF(evalue);
-	return 1;
+	PyUserException ex(edesc, evalue, CORBA::COMPLETED_MAYBE);
+	throw ex;
       }
     }
 
@@ -543,20 +530,16 @@ Py_omniServant::_dispatch(GIOP_S& giop_s)
     // System exception or unknown user exception
     omniPy::produceSystemException(evalue, erepoId);
   }
-  OMNIORB_ASSERT(0); // Never reach here.
-  return 0;
 }
 
 
-PyObject*
+void
 omniPy::
-Py_omniServant::local_dispatch(const char* op,
-			       PyObject*   in_d,  int in_l,
-			       PyObject*   out_d, int out_l,
-			       PyObject*   exc_d,
-			       PyObject*   args)
+Py_omniServant::local_dispatch(Py_omniCallDescriptor* pycd)
 {
-  PyObject* method = PyObject_GetAttrString(pyservant_, (char*)op);
+  const char* op     = pycd->op();
+  PyObject*   method = PyObject_GetAttrString(pyservant_, (char*)op);
+
   if (!method) {
     if (omniORB::trace(1)) {
       omniORB::logger l;
@@ -567,137 +550,130 @@ Py_omniServant::local_dispatch(const char* op,
     OMNIORB_THROW(NO_IMPLEMENT, 0,CORBA::COMPLETED_NO);
   }
 
+  PyObject* in_d  = pycd->in_d_;
+  int       in_l  = pycd->in_l_;
+  PyObject* out_d = pycd->out_d_;
+  int       out_l = pycd->out_l_;
+  PyObject* exc_d = pycd->exc_d_;
+
+  PyObject* args  = pycd->args();
+
   // Copy args which would otherwise have reference semantics
   PyObject* argtuple = PyTuple_New(in_l);
   PyObject* t_o;
 
-  int i, valid = 1;
-  for (i=0; i < in_l; i++) {
-    t_o = copyArgument(PyTuple_GET_ITEM(in_d, i),
-		       PyTuple_GET_ITEM(args, i),
-		       CORBA::COMPLETED_NO);
-    if (t_o)
+  int i;
+
+  try {
+    for (i=0; i < in_l; ++i) {
+      t_o = copyArgument(PyTuple_GET_ITEM(in_d, i),
+			 PyTuple_GET_ITEM(args, i),
+			 CORBA::COMPLETED_NO);
+      OMNIORB_ASSERT(t_o);
       PyTuple_SET_ITEM(argtuple, i, t_o);
-    else {
-      Py_INCREF(Py_None);
-      PyTuple_SET_ITEM(argtuple, i, Py_None);
-      valid = 0;
     }
   }
-
-  if (valid) {
-    // Do the call
-    PyObject* result = PyEval_CallObject(method, argtuple);
-    Py_DECREF(method);
+  catch (...) {
+    Py_DECREF(args);
     Py_DECREF(argtuple);
+    Py_DECREF(method);
+    throw;
+  }
 
-    if (result) {
-      PyObject* retval = 0;
+  Py_DECREF(args);
 
+  //
+  // Do the call
+
+  PyObject* result = PyEval_CallObject(method, argtuple);
+  Py_DECREF(method);
+  Py_DECREF(argtuple);
+
+  if (result) {
+    PyObject* retval = 0;
+
+    try {
       if (out_l == -1 || out_l == 0) {
 	if (result == Py_None) {
-	  return result;
+	  pycd->setReturnedValues(result);
+	  return;
 	}
-	else {
-	  Py_DECREF(result);
-	  OMNIORB_THROW(BAD_PARAM, 0,CORBA::COMPLETED_MAYBE);
-	}
+	else
+	  OMNIORB_THROW(BAD_PARAM,0,CORBA::COMPLETED_MAYBE);
       }
       else if (out_l == 1) {
 	retval = copyArgument(PyTuple_GET_ITEM(out_d, 0),
 			      result, CORBA::COMPLETED_MAYBE);
       }
       else {
-	valid = 1;
 	retval = PyTuple_New(out_l);
 	
-	for (i=0; i < out_l; i++) {
+	for (i=0; i < out_l; ++i) {
 	  t_o = copyArgument(PyTuple_GET_ITEM(out_d, i),
 			     PyTuple_GET_ITEM(result, i),
 			     CORBA::COMPLETED_MAYBE);
-	  if (t_o)
-	    PyTuple_SET_ITEM(retval, i, t_o);
-	  else {
-	    Py_INCREF(Py_None);
-	    PyTuple_SET_ITEM(retval, i, Py_None);
-	    valid = 0;
-	  }
-	}
-	if (!valid) {
-	  Py_DECREF(retval);
-	  retval = 0;
+
+	  OMNIORB_ASSERT(t_o);
+	  PyTuple_SET_ITEM(retval, i, t_o);
 	}
       }
+    }
+    catch (...) {
       Py_DECREF(result);
-      return retval;
+      Py_XDECREF(retval);
+      throw;
     }
-    else {
-      // The call raised a Python exception
-      PyObject *etype, *evalue, *etraceback;
-      PyObject *erepoId = 0;
-      PyErr_Fetch(&etype, &evalue, &etraceback);
-      OMNIORB_ASSERT(etype);
-
-      if (evalue && PyInstance_Check(evalue))
-	erepoId = PyObject_GetAttrString(evalue, (char*)"_NP_RepositoryId");
-
-      if (!(erepoId && PyString_Check(erepoId))) {
-	Py_XDECREF(erepoId);
-	if (omniORB::trace(1)) {
-	  {
-	    omniORB::logger l;
-	    l << "Caught an unexpected Python exception during up-call.\n";
-	  }
-	  PyErr_Restore(etype, evalue, etraceback);
-	  PyErr_Print();
-	}
-	OMNIORB_THROW(UNKNOWN, 0,CORBA::COMPLETED_MAYBE);
-      }
-
-      Py_DECREF(etype);
-      Py_XDECREF(etraceback);
-
-      // Is it a user exception?
-      if (exc_d != Py_None) {
-	OMNIORB_ASSERT(PyDict_Check(exc_d));
-
-	PyObject* edesc = PyDict_GetItem(exc_d, erepoId);
-
-	if (edesc) {
-	  PyObject* cevalue = copyArgument(edesc, evalue,
-					   CORBA::COMPLETED_MAYBE);
-	  Py_DECREF(erepoId);
-	  Py_DECREF(evalue);
-
-	  if (!cevalue)
-	    OMNIORB_THROW(MARSHAL, 0,CORBA::COMPLETED_MAYBE);
-
-	  PyErr_SetObject(PyTuple_GET_ITEM(edesc, 1), cevalue);
-	  Py_DECREF(cevalue);
-	  return 0;
-	}
-      }
-
-      // Is it a LOCATION_FORWARD?
-      if (!strcmp(PyString_AS_STRING(erepoId), "omniORB.LOCATION_FORWARD")) {
-	Py_DECREF(erepoId);
-	HandleLocationForward(evalue);
-      }
-
-      // System exception or unknown user exception
-      omniPy::produceSystemException(evalue, erepoId);
-    }
+    Py_DECREF(result);
+    pycd->setReturnedValues(retval);
   }
   else {
-    // Args were in invalid
-    Py_DECREF(argtuple);
-    Py_DECREF(method);
-    return 0;
-  }
-  OMNIORB_ASSERT(0); // Never reach here
-  return 0;
-}
+    // The call raised a Python exception
+    PyObject *etype, *evalue, *etraceback;
+    PyObject *erepoId = 0;
+    PyErr_Fetch(&etype, &evalue, &etraceback);
+    OMNIORB_ASSERT(etype);
 
+    if (evalue && PyInstance_Check(evalue))
+      erepoId = PyObject_GetAttrString(evalue, (char*)"_NP_RepositoryId");
+
+    if (!(erepoId && PyString_Check(erepoId))) {
+      Py_XDECREF(erepoId);
+      if (omniORB::trace(1)) {
+	{
+	  omniORB::logger l;
+	  l << "Caught an unexpected Python exception during up-call.\n";
+	}
+	PyErr_Restore(etype, evalue, etraceback);
+	PyErr_Print();
+      }
+      OMNIORB_THROW(UNKNOWN, 0, CORBA::COMPLETED_MAYBE);
+    }
+    Py_DECREF(etype);
+    Py_XDECREF(etraceback);
+
+    // Is it a user exception?
+    if (exc_d != Py_None) {
+      OMNIORB_ASSERT(PyDict_Check(exc_d));
+
+      PyObject* edesc = PyDict_GetItem(exc_d, erepoId);
+      Py_DECREF(erepoId);
+
+      if (edesc) {
+	PyUserException ex(edesc, evalue, CORBA::COMPLETED_MAYBE);
+	throw ex;
+      }
+    }
+
+    // Is it a LOCATION_FORWARD?
+    if (!strcmp(PyString_AS_STRING(erepoId), "omniORB.LOCATION_FORWARD")) {
+      Py_DECREF(erepoId);
+      HandleLocationForward(evalue);
+    }
+
+    // System exception or unknown user exception
+    omniPy::produceSystemException(evalue, erepoId);
+  }
+}
 
 
 // Implementation of Py_ServantActivator

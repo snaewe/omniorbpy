@@ -1,3 +1,20 @@
+Thu May 10 16:14:10 BST 2001 dpg1
+=================================
+
+- Big update to support new omniORB 4 internals.
+
+modules/dir.mk
+modules/omnipy.cc
+modules/omnipy.h
+modules/pyCallDescriptor.cc
+modules/pyExceptions.cc
+modules/pyMarshal.cc
+modules/pyORBFunc.cc
+modules/pyObjectRef.cc
+modules/pyServant.cc
+omniidl_be/python.py
+
+
 Thu Apr 12 12:05:00 BST 2001 dpg1
 =================================
 

@@ -28,6 +28,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.29.2.5  2001/05/10 15:16:03  dpg1
+# Big update to support new omniORB 4 internals.
+#
 # Revision 1.29.2.4  2001/04/09 15:22:16  dpg1
 # Fixed point support.
 #
@@ -217,7 +220,7 @@ import_idl_file = """\
 import @ifilename@"""
 
 open_imported_module_name = """\
-_0_@imodname@     = omniORB.openModule("@package@@imodname@")
+_0_@imodname@ = omniORB.openModule("@package@@imodname@")
 _0_@s_imodname@ = omniORB.openModule("@package@@s_imodname@")"""
 
 forward_interface = """\

@@ -39,8 +39,7 @@ OBJS =    omnipy.o \
 	  pyFixed.o
 
 
-DIR_CPPFLAGS += $(patsubst %,-I%/src/lib/omniORB,$(IMPORT_TREES))
-DIR_CPPFLAGS += $(patsubst %,-I%/src/lib/omniORB/orbcore,$(IMPORT_TREES))
+DIR_CPPFLAGS += $(patsubst %,-I%/src/lib/omniORB/include,$(IMPORT_TREES))
 
 
 #############################################################################

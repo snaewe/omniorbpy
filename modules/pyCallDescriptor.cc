@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.3  2001/05/10 15:16:02  dpg1
+// Big update to support new omniORB 4 internals.
+//
 // Revision 1.1.2.2  2001/01/10 12:00:07  dpg1
 // Release the Python interpreter lock when doing potentially blocking
 // stream calls.
@@ -39,30 +42,17 @@
 //
 
 #include <omnipy.h>
+#include <pyThreadCache.h>
+#include <omniORB4/IOP_C.h>
 #include <iostream.h>
 
 
-class PyUnlockingCdrStream : public cdrStreamAdapter {
-public:
-  PyUnlockingCdrStream(cdrStream& stream, omniPy::Py_omniCallDescriptor* cd)
-    : cdrStreamAdapter(stream), callDescriptor_(cd)
-  {
-  }
-
-  ~PyUnlockingCdrStream() { }
-
-  // Override virtual functions in cdrStreamAdapter...
-  void put_octet_array(const _CORBA_Octet* b, int size,
-		       omni::alignment_t align=omni::ALIGN_1);
-  void get_octet_array(_CORBA_Octet* b,int size,
-		       omni::alignment_t align=omni::ALIGN_1);
-  void skipInput(_CORBA_ULong size);
-  void fetchInputData(omni::alignment_t,size_t);
-  _CORBA_Boolean reserveOutputSpace(omni::alignment_t,size_t);
-
-private:
-  omniPy::Py_omniCallDescriptor* callDescriptor_;
-};
+omniPy::Py_omniCallDescriptor::~Py_omniCallDescriptor()
+{
+  OMNIORB_ASSERT(!tstate_);
+  Py_XDECREF(args_);
+  Py_XDECREF(result_);
+}
 
 
 void
@@ -81,7 +71,7 @@ omniPy::Py_omniCallDescriptor::initialiseCall(cdrStream&)
 
 
 void
-omniPy::Py_omniCallDescriptor::marshalArguments(cdrStream& giop_client)
+omniPy::Py_omniCallDescriptor::marshalArguments(cdrStream& stream)
 {
   // We should always hold the interpreter lock when entering this
   // function. The call to releaseInterpreterLock() will assert that
@@ -91,13 +81,13 @@ omniPy::Py_omniCallDescriptor::marshalArguments(cdrStream& giop_client)
   if (in_marshal_) {
     // Re-entered to figure out the size
     for (int i=0; i < in_l_; i++)
-      omniPy::marshalPyObject(giop_client,
+      omniPy::marshalPyObject(stream,
 			      PyTuple_GET_ITEM(in_d_,i),
 			      PyTuple_GET_ITEM(args_,i));
   }
   else {
     in_marshal_ = 1;
-    PyUnlockingCdrStream pystream(giop_client, this);
+    PyUnlockingCdrStream pystream(stream);
 
     for (int i=0; i < in_l_; i++)
       omniPy::marshalPyObject(pystream,
@@ -110,7 +100,7 @@ omniPy::Py_omniCallDescriptor::marshalArguments(cdrStream& giop_client)
 
 
 void
-omniPy::Py_omniCallDescriptor::unmarshalReturnedValues(cdrStream& giop_client)
+omniPy::Py_omniCallDescriptor::unmarshalReturnedValues(cdrStream& stream)
 {
   if (out_l_ == -1) return;  // Oneway operation
 
@@ -121,7 +111,7 @@ omniPy::Py_omniCallDescriptor::unmarshalReturnedValues(cdrStream& giop_client)
     result_ = Py_None;
   }
   else {
-    PyUnlockingCdrStream pystream(giop_client, this);
+    PyUnlockingCdrStream pystream(stream);
 
     if (out_l_ == 1)
       result_ = omniPy::unmarshalPyObject(pystream,
@@ -143,7 +133,7 @@ omniPy::Py_omniCallDescriptor::unmarshalReturnedValues(cdrStream& giop_client)
 
 
 void
-omniPy::Py_omniCallDescriptor::userException(GIOP_C& giop_client,
+omniPy::Py_omniCallDescriptor::userException(_OMNI_NS(IOP_C)& iop_client,
 					     const char* repoId)
 {
   reacquireInterpreterLock();
@@ -152,61 +142,27 @@ omniPy::Py_omniCallDescriptor::userException(GIOP_C& giop_client,
 
   if (d_o) { // class, repoId, exc name, name, descriptor, ...
 
-    // Can't use normal exception unmarshalling code, since the repoId
-    // has already been unmarshalled.
-
-    PyObject* excclass = PyTuple_GET_ITEM(d_o, 1);
-    OMNIORB_ASSERT(PyClass_Check(excclass));
-
-    int       cnt      = (PyTuple_GET_SIZE(d_o) - 4) / 2;
-    PyObject* exctuple = PyTuple_New(cnt);
-
-    int i, j;
     try {
-      PyUnlockingCdrStream pystream(giop_client, this);
+      PyUserException ex(d_o);
+      
+      cdrStream& stream = iop_client.getStream();
 
-      for (i=0, j=5; i < cnt; i++, j+=2) {
-	PyTuple_SET_ITEM(exctuple, i,
-			 unmarshalPyObject(pystream,
-					   PyTuple_GET_ITEM(d_o, j)));
-      }
+      ex <<= stream;
+      ex._raise();
     }
     catch (...) {
-      Py_DECREF(exctuple);
       releaseInterpreterLock();
-      giop_client.RequestCompleted();
+      iop_client.RequestCompleted();
       throw;
     }
-    PyObject* exc_i = PyEval_CallObject(excclass, exctuple);
-    Py_DECREF(exctuple);
-
-    if (exc_i) {
-      PyErr_SetObject(excclass, exc_i);
-      Py_DECREF(exc_i);
-    }
-    releaseInterpreterLock();
-    giop_client.RequestCompleted();
-    throw UserExceptionHandled();
+    OMNIORB_ASSERT(0); // Never reach here
   }
   else {
     releaseInterpreterLock();
-    giop_client.RequestCompleted(1);
+    iop_client.RequestCompleted(1);
     OMNIORB_THROW(MARSHAL, 0, CORBA::COMPLETED_MAYBE);
   }
 }
-
-
-class reacquireLockInScope {
-public:
-  inline reacquireLockInScope(omniPy::Py_omniCallDescriptor* pycd)
-    : pycd_(pycd) { pycd->reacquireInterpreterLock(); }
-
-  inline ~reacquireLockInScope() {
-    pycd_->releaseInterpreterLock();
-  }
-private:
-  omniPy::Py_omniCallDescriptor* pycd_;
-};
 
 
 void
@@ -216,26 +172,32 @@ omniPy::Py_localCallBackFunction(omniCallDescriptor* cd, omniServant* svnt)
   Py_omniServant*        pyos =
     (Py_omniServant*)svnt->_ptrToInterface("Py_omniServant");
 
-  {
-    // local_dispatch() can throw CORBA system exceptions, hence the
-    // helper class
-    reacquireLockInScope _l(pycd);
-    pycd->result_ = pyos->local_dispatch(pycd->op(),
-					 pycd->in_d_,  pycd->in_l_,
-					 pycd->out_d_, pycd->out_l_,
-					 pycd->exc_d_, pycd->args_);
+  // Unfortunately, we can't use the call descriptor's
+  // reacquireInterpreterLock() function, since this call-back may be
+  // running in a different thread to the creator of the call
+  // descriptor.
+
+  if (cd->is_upcall()) {
+    omnipyThreadCache::lock _t;
+    pyos->remote_dispatch(pycd);
+  }
+  else {
+    omnipyThreadCache::lock _t;
+    pyos->local_dispatch(pycd);
   }
 }
 
 
 void
-omniPy::Py_omniCallDescriptor::unmarshalArguments(cdrStream& giop_s)
+omniPy::Py_omniCallDescriptor::unmarshalArguments(cdrStream& stream)
 {
   OMNIORB_ASSERT(args_ == 0);
 
+  omnipyThreadCache::lock _t;
+
   args_ = PyTuple_New(in_l_);
 
-  PyUnlockingCdrStream pystream(giop_s, this);
+  PyUnlockingCdrStream pystream(stream);
 
   for (int i=0; i < in_l_; i++) {
     PyTuple_SET_ITEM(args_, i,
@@ -245,10 +207,15 @@ omniPy::Py_omniCallDescriptor::unmarshalArguments(cdrStream& giop_s)
 }
 
 void
-omniPy::Py_omniCallDescriptor::validateReturnedValues(PyObject* result)
+omniPy::Py_omniCallDescriptor::setAndValidateReturnedValues(PyObject* result)
 {
   OMNIORB_ASSERT(result_ == 0);
   result_ = result;
+
+  if (out_l_ == -1 || out_l_ == 0) {
+    if (result_ != Py_None)
+      OMNIORB_THROW(BAD_PARAM, 0, CORBA::COMPLETED_MAYBE);
+  }
 
   if (out_l_ == 1) {
     omniPy::validateType(PyTuple_GET_ITEM(out_d_,0),
@@ -265,9 +232,10 @@ omniPy::Py_omniCallDescriptor::validateReturnedValues(PyObject* result)
 }
 
 void
-omniPy::Py_omniCallDescriptor::marshalReturnedValues(cdrStream& giop_s)
+omniPy::Py_omniCallDescriptor::marshalReturnedValues(cdrStream& stream)
 {
-  PyUnlockingCdrStream pystream(giop_s, this);
+  omnipyThreadCache::lock _t;
+  PyUnlockingCdrStream pystream(stream);
 
   if (out_l_ == 1) {
     omniPy::marshalPyObject(pystream,
@@ -281,50 +249,4 @@ omniPy::Py_omniCallDescriptor::marshalReturnedValues(cdrStream& giop_s)
 			      PyTuple_GET_ITEM(result_,i));
     }
   }
-}
-
-
-
-void
-PyUnlockingCdrStream::put_octet_array(const _CORBA_Octet* b, int size,
-				      omni::alignment_t align)
-{
-  callDescriptor_->releaseInterpreterLock();
-  cdrStreamAdapter::put_octet_array(b, size, align);
-  callDescriptor_->reacquireInterpreterLock();
-}
-
-void
-PyUnlockingCdrStream::get_octet_array(_CORBA_Octet* b,int size,
-				      omni::alignment_t align)
-{
-  callDescriptor_->releaseInterpreterLock();
-  cdrStreamAdapter::get_octet_array(b, size, align);
-  callDescriptor_->reacquireInterpreterLock();
-}
-  
-void
-PyUnlockingCdrStream::skipInput(_CORBA_ULong size)
-{
-  callDescriptor_->releaseInterpreterLock();
-  cdrStreamAdapter::skipInput(size);
-  callDescriptor_->reacquireInterpreterLock();
-}
-
-void
-PyUnlockingCdrStream::fetchInputData(omni::alignment_t align, size_t required)
-{
-  callDescriptor_->releaseInterpreterLock();
-  cdrStreamAdapter::fetchInputData(align, required);
-  callDescriptor_->reacquireInterpreterLock();
-}
-
-_CORBA_Boolean
-PyUnlockingCdrStream::reserveOutputSpace(omni::alignment_t align,
-					 size_t required)
-{
-  callDescriptor_->releaseInterpreterLock();
-  _CORBA_Boolean ret = cdrStreamAdapter::reserveOutputSpace(align, required);
-  callDescriptor_->reacquireInterpreterLock();
-  return ret;
 }

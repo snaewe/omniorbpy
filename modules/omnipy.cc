@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.6  2001/05/10 15:16:01  dpg1
+// Big update to support new omniORB 4 internals.
+//
 // Revision 1.1.2.5  2001/04/09 16:28:49  dpg1
 // De-uglify ORB_init command line argument eating.
 //
@@ -507,9 +510,9 @@ extern "C" {
 OMNIORB_FOR_EACH_SYS_EXCEPTION(DO_CALL_DESC_SYSTEM_EXCEPTON)
 #undef DO_CALL_DESC_SYSTEM_EXCEPTON
 #endif
-    catch (const omniPy::UserExceptionHandled& ex) {
-      // Exception has been handled by the call descriptor
+    catch (const omniPy::PyUserException& ex) {
       call_desc.reacquireInterpreterLock();
+      ex.setPyExceptionState();
     }
     return 0;
   }
@@ -648,20 +651,25 @@ OMNIORB_FOR_EACH_SYS_EXCEPTION(DO_CALL_DESC_SYSTEM_EXCEPTON)
 
     RAISE_PY_BAD_PARAM_IF(!cxxsource);
 
-    CORBA::Boolean isa;
+    CORBA::Boolean    isa;
+    CORBA::Object_ptr cxxdest;
+
     try {
       omniPy::InterpreterUnlocker ul;
       isa = cxxsource->_is_a(repoId);
+
+      if (isa) {
+	omniObjRef* oosource = cxxsource->_PR_getobj();
+	omniObjRef* oodest   = omniPy::createObjRef(repoId,
+						    oosource->_getIOR(),
+						    0, 0, 0, 1);
+	cxxdest =
+	  (CORBA::Object_ptr)(oodest->_ptrToObjRef(CORBA::Object::_PD_repoId));
+      }
     }
     OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
 
     if (isa) {
-      omniObjRef* oosource = cxxsource->_PR_getobj();
-      omniObjRef* oodest = omniPy::createObjRef(repoId,
-						oosource->_getIOR(), 0, 1);
-      CORBA::Object_ptr cxxdest =
-	(CORBA::Object_ptr)(oodest->_ptrToObjRef(CORBA::Object::_PD_repoId));
-
       return omniPy::createPyCorbaObjRef(repoId, cxxdest);
     }
     else {

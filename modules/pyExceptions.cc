@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.3  2001/05/10 15:16:02  dpg1
+// Big update to support new omniORB 4 internals.
+//
 // Revision 1.1.2.2  2000/11/22 14:42:05  dpg1
 // Remove dead omniORB 2.8 code.
 //
@@ -39,6 +42,7 @@
 //
 
 #include <omnipy.h>
+#include <pyThreadCache.h>
 
 
 PyObject*
@@ -107,97 +111,187 @@ omniPy::produceSystemException(PyObject* eobj, PyObject* erepoId)
 
   Py_DECREF(eobj);
 
-  if (!strcmp(repoId, "IDL:omg.org/CORBA/UNKNOWN:1.0")) {
-    Py_DECREF(erepoId); OMNIORB_THROW(UNKNOWN, minor, status);
+#define THROW_SYSTEM_EXCEPTION_IF_MATCH(ex) \
+  if (!strcmp(repoId, "IDL:omg.org/CORBA/" #ex ":1.0")) { \
+    Py_DECREF(erepoId); OMNIORB_THROW(ex, minor, status); \
   }
-  else if (!strcmp(repoId, "IDL:omg.org/CORBA/BAD_PARAM:1.0")) {
-    Py_DECREF(erepoId); OMNIORB_THROW(BAD_PARAM, minor, status);
+
+  OMNIORB_FOR_EACH_SYS_EXCEPTION(THROW_SYSTEM_EXCEPTION_IF_MATCH)
+
+#undef THROW_SYSTEM_EXCEPTION_IF_MATCH
+
+  Py_DECREF(erepoId); OMNIORB_THROW(UNKNOWN, 0, CORBA::COMPLETED_MAYBE);
+}
+
+
+//
+// Implementation of PyUserException
+//
+
+omniPy::
+PyUserException::PyUserException(PyObject* desc)
+  : desc_(desc), exc_(0)
+{
+  OMNIORB_ASSERT(desc_);
+  Py_INCREF(desc_);
+  pd_insertToAnyFn    = 0;
+  pd_insertToAnyFnNCP = 0;
+}
+
+omniPy::
+PyUserException::PyUserException(PyObject* desc, PyObject* exc,
+				 CORBA::CompletionStatus comp_status)
+  : desc_(desc), exc_(exc)
+{
+  OMNIORB_ASSERT(desc_);
+  OMNIORB_ASSERT(exc_);
+
+  try {
+    omniPy::validateType(desc_, exc_, comp_status);
   }
-  else if (!strcmp(repoId, "IDL:omg.org/CORBA/NO_MEMORY:1.0")) {
-    Py_DECREF(erepoId); OMNIORB_THROW(NO_MEMORY, minor, status);
+  catch (...) {
+    Py_DECREF(exc_);
+    throw;
   }
-  else if (!strcmp(repoId, "IDL:omg.org/CORBA/IMP_LIMIT:1.0")) {
-    Py_DECREF(erepoId); OMNIORB_THROW(IMP_LIMIT, minor, status);
+
+  Py_INCREF(desc_);
+
+  pd_insertToAnyFn    = 0;
+  pd_insertToAnyFnNCP = 0;
+}
+
+omniPy::
+PyUserException::PyUserException(const PyUserException& e)
+  : desc_(e.desc_), exc_(e.exc_)
+{
+  if (desc_)  Py_INCREF(desc_);
+  if (exc_)   Py_INCREF(exc_);
+  pd_insertToAnyFn    = 0;
+  pd_insertToAnyFnNCP = 0;
+}
+
+omniPy::
+PyUserException::~PyUserException()
+{
+  Py_XDECREF(desc_);
+  Py_XDECREF(exc_);
+}
+
+PyObject*
+omniPy::
+PyUserException::setPyExceptionState() const
+{
+  OMNIORB_ASSERT(desc_);
+  OMNIORB_ASSERT(exc_);
+
+  PyObject* excclass = PyTuple_GET_ITEM(desc_, 1);
+  OMNIORB_ASSERT(PyClass_Check(excclass));
+  
+  PyErr_SetObject(excclass, exc_);
+  return 0;
+}
+
+
+void
+omniPy::
+PyUserException::operator>>=(cdrStream& stream) const
+{
+  PyUnlockingCdrStream pystream(stream);
+
+  PyObject* sdict = ((PyInstanceObject*)exc_)->in_dict;
+  int       cnt   = (PyTuple_GET_SIZE(desc_) - 4) / 2;
+
+  PyObject* name;
+  PyObject* value;
+
+  int i, j;
+  for (i=0,j=4; i < cnt; i++) {
+    name  = PyTuple_GET_ITEM(desc_, j++);
+    value = PyDict_GetItem(sdict, name);
+    omniPy::marshalPyObject(pystream, PyTuple_GET_ITEM(desc_, j++), value);
   }
-  else if (!strcmp(repoId, "IDL:omg.org/CORBA/COMM_FAILURE:1.0")) {
-    Py_DECREF(erepoId); OMNIORB_THROW(COMM_FAILURE, minor, status);
+}
+
+void
+omniPy::
+PyUserException::operator<<=(cdrStream& stream)
+{
+  PyUnlockingCdrStream pystream(stream);
+
+  PyObject* excclass = PyTuple_GET_ITEM(desc_, 1);
+  OMNIORB_ASSERT(PyClass_Check(excclass));
+
+  int       cnt      = (PyTuple_GET_SIZE(desc_) - 4) / 2;
+  PyObject* exctuple = PyTuple_New(cnt);
+
+  int i, j;
+  try {
+    for (i=0, j=5; i < cnt; i++, j+=2) {
+      PyTuple_SET_ITEM(exctuple, i,
+		       unmarshalPyObject(pystream,
+					 PyTuple_GET_ITEM(desc_, j)));
+    }
   }
-  else if (!strcmp(repoId, "IDL:omg.org/CORBA/INV_OBJREF:1.0")) {
-    Py_DECREF(erepoId); OMNIORB_THROW(INV_OBJREF, minor, status);
+  catch (...) {
+    Py_DECREF(exctuple);
+    throw;
   }
-  else if (!strcmp(repoId, "IDL:omg.org/CORBA/OBJECT_NOT_EXIST:1.0")) {
-    Py_DECREF(erepoId); OMNIORB_THROW(OBJECT_NOT_EXIST, minor, status);
+  exc_ = PyEval_CallObject(excclass, exctuple);
+  Py_DECREF(exctuple);
+
+  if (!exc_) {
+    // Oh dear. Python exception constructor threw an exception.
+    if (omniORB::trace(1)) {
+      {
+	omniORB::logger l;
+	l <<
+	  "Caught internal omniORB error trying to create an exception:\n";
+      }
+      PyErr_Print();
+    }
+    OMNIORB_THROW(INTERNAL, 0, CORBA::COMPLETED_MAYBE);
   }
-  else if (!strcmp(repoId, "IDL:omg.org/CORBA/NO_PERMISSION:1.0")) {
-    Py_DECREF(erepoId); OMNIORB_THROW(NO_PERMISSION, minor, status);
-  }
-  else if (!strcmp(repoId, "IDL:omg.org/CORBA/INTERNAL:1.0")) {
-    Py_DECREF(erepoId); OMNIORB_THROW(INTERNAL, minor, status);
-  }
-  else if (!strcmp(repoId, "IDL:omg.org/CORBA/MARSHAL:1.0")) {
-    Py_DECREF(erepoId); OMNIORB_THROW(MARSHAL, minor, status);
-  }
-  else if (!strcmp(repoId, "IDL:omg.org/CORBA/INITIALIZE:1.0")) {
-    Py_DECREF(erepoId); OMNIORB_THROW(INITIALIZE, minor, status);
-  }
-  else if (!strcmp(repoId, "IDL:omg.org/CORBA/NO_IMPLEMENT:1.0")) {
-    Py_DECREF(erepoId); OMNIORB_THROW(NO_IMPLEMENT, minor, status);
-  }
-  else if (!strcmp(repoId, "IDL:omg.org/CORBA/BAD_TYPECODE:1.0")) {
-    Py_DECREF(erepoId); OMNIORB_THROW(BAD_TYPECODE, minor, status);
-  }
-  else if (!strcmp(repoId, "IDL:omg.org/CORBA/BAD_OPERATION:1.0")) {
-    Py_DECREF(erepoId); OMNIORB_THROW(BAD_OPERATION, minor, status);
-  }
-  else if (!strcmp(repoId, "IDL:omg.org/CORBA/NO_RESOURCES:1.0")) {
-    Py_DECREF(erepoId); OMNIORB_THROW(NO_RESOURCES, minor, status);
-  }
-  else if (!strcmp(repoId, "IDL:omg.org/CORBA/NO_RESPONSE:1.0")) {
-    Py_DECREF(erepoId); OMNIORB_THROW(NO_RESPONSE, minor, status);
-  }
-  else if (!strcmp(repoId, "IDL:omg.org/CORBA/PERSIST_STORE:1.0")) {
-    Py_DECREF(erepoId); OMNIORB_THROW(PERSIST_STORE, minor, status);
-  }
-  else if (!strcmp(repoId, "IDL:omg.org/CORBA/BAD_INV_ORDER:1.0")) {
-    Py_DECREF(erepoId); OMNIORB_THROW(BAD_INV_ORDER, minor, status);
-  }
-  else if (!strcmp(repoId, "IDL:omg.org/CORBA/TRANSIENT:1.0")) {
-    Py_DECREF(erepoId); OMNIORB_THROW(TRANSIENT, minor, status);
-  }
-  else if (!strcmp(repoId, "IDL:omg.org/CORBA/FREE_MEM:1.0")) {
-    Py_DECREF(erepoId); OMNIORB_THROW(FREE_MEM, minor, status);
-  }
-  else if (!strcmp(repoId, "IDL:omg.org/CORBA/INV_IDENT:1.0")) {
-    Py_DECREF(erepoId); OMNIORB_THROW(INV_IDENT, minor, status);
-  }
-  else if (!strcmp(repoId, "IDL:omg.org/CORBA/INV_FLAG:1.0")) {
-    Py_DECREF(erepoId); OMNIORB_THROW(INV_FLAG, minor, status);
-  }
-  else if (!strcmp(repoId, "IDL:omg.org/CORBA/INTF_REPOS:1.0")) {
-    Py_DECREF(erepoId); OMNIORB_THROW(INTF_REPOS, minor, status);
-  }
-  else if (!strcmp(repoId, "IDL:omg.org/CORBA/BAD_CONTEXT:1.0")) {
-    Py_DECREF(erepoId); OMNIORB_THROW(BAD_CONTEXT, minor, status);
-  }
-  else if (!strcmp(repoId, "IDL:omg.org/CORBA/OBJ_ADAPTER:1.0")) {
-    Py_DECREF(erepoId); OMNIORB_THROW(OBJ_ADAPTER, minor, status);
-  }
-  else if (!strcmp(repoId, "IDL:omg.org/CORBA/DATA_CONVERSION:1.0")) {
-    Py_DECREF(erepoId); OMNIORB_THROW(DATA_CONVERSION, minor, status);
-  }
-  else if (!strcmp(repoId, "IDL:omg.org/CORBA/TRANSACTION_REQUIRED:1.0")) {
-    Py_DECREF(erepoId); OMNIORB_THROW(TRANSACTION_REQUIRED, minor, status);
-  }
-  else if (!strcmp(repoId, "IDL:omg.org/CORBA/TRANSACTION_ROLLEDBACK:1.0")) {
-    Py_DECREF(erepoId); OMNIORB_THROW(TRANSACTION_ROLLEDBACK, minor, status);
-  }
-  else if (!strcmp(repoId, "IDL:omg.org/CORBA/INVALID_TRANSACTION:1.0")) {
-    Py_DECREF(erepoId); OMNIORB_THROW(INVALID_TRANSACTION, minor, status);
-  }
-  else if (!strcmp(repoId, "IDL:omg.org/CORBA/WRONG_TRANSACTION:1.0")) {
-    Py_DECREF(erepoId); OMNIORB_THROW(WRONG_TRANSACTION, minor, status);
-  }
-  else {
-    Py_DECREF(erepoId); OMNIORB_THROW(UNKNOWN, 0, CORBA::COMPLETED_NO);
-  }
+}
+
+void
+omniPy::
+PyUserException::_raise()
+{
+  OMNIORB_ASSERT(desc_);
+  OMNIORB_ASSERT(exc_);
+  throw *this;
+}
+
+const char*
+omniPy::
+PyUserException::_NP_repoId(int* size) const
+{
+  PyObject* pyrepoId = PyTuple_GET_ITEM(desc_, 2);
+  OMNIORB_ASSERT(PyString_Check(pyrepoId));
+
+  *size = PyString_GET_SIZE(pyrepoId) + 1;
+  return PyString_AS_STRING(pyrepoId);
+}
+
+void
+omniPy::
+PyUserException::_NP_marshal(cdrStream& stream) const
+{
+  *this >>= stream;
+}
+
+CORBA::Exception*
+omniPy::
+PyUserException::_NP_duplicate() const
+{
+  return new PyUserException(*this);
+}
+
+const char*
+omniPy::
+PyUserException::_NP_typeId() const
+{
+  int cannot_downcast = 0;
+  OMNIORB_ASSERT(cannot_downcast);
+  return 0;
 }

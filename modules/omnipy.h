@@ -31,6 +31,9 @@
 #define _omnipy_h_
 
 // $Log$
+// Revision 1.2.4.7  2001/05/10 15:16:01  dpg1
+// Big update to support new omniORB 4 internals.
+//
 // Revision 1.2.4.6  2001/04/09 15:22:15  dpg1
 // Fixed point support.
 //
@@ -234,12 +237,14 @@ public:
   omniObjRef* createObjRef(const char*        targetRepoId,
 			   omniIOR*           ior,
 			   CORBA::Boolean     locked,
+			   omniIdentity*      id = 0,
+			   omniLocalIdentity* local_id = 0,
 			   CORBA::Boolean     type_verified = 0);
 
   static
-  omniObjRef* createObjRef(const char*        targetRepoId,
+  omniObjRef* createObjRef(const char*        mostDerivedRepoId,
+			   const char*        targetRepoId,
 			   omniLocalIdentity* id,
-			   omniIOR*           ior,
 			   CORBA::Boolean     type_verified = 0);
 
   // When a POA creates a reference to a Python servant, it does not
@@ -368,8 +373,7 @@ public:
 
   // Take a descriptor and an argument object, and return a "copy" of
   // the argument. Immutable types need not be copied. If the argument
-  // does not match the descriptor, set Python's exception status to
-  // BAD_PARAM and return 0.
+  // does not match the descriptor, throws BAD_PARAM.
   //
   typedef PyObject* (*CopyArgumentFn)(PyObject*, PyObject*,
 				      CORBA::CompletionStatus);
@@ -392,7 +396,7 @@ public:
       return copyArgumentIndirect(d_o, a_o, compstatus);
     }
     else OMNIORB_THROW(BAD_TYPECODE, 0, CORBA::COMPLETED_NO);
-    return 0;
+    return 0; // For dumb compilers
   }
 
 
@@ -445,11 +449,13 @@ public:
 	OMNIORB_ASSERT(PyTuple_Check(out_d));
 	out_l_ = PyTuple_GET_SIZE(out_d_);
       }
+      if (args_) {
+	OMNIORB_ASSERT(!is_upcall);
+	Py_INCREF(args_);
+      }
     }
 
-    virtual ~Py_omniCallDescriptor() {
-      OMNIORB_ASSERT(!tstate_);
-    }
+    virtual ~Py_omniCallDescriptor();
 
     inline void releaseInterpreterLock() {
       OMNIORB_ASSERT(!tstate_);
@@ -462,11 +468,18 @@ public:
       tstate_ = 0;
     }
 
+    // Extract and take ownership of stored args/results
+    inline PyObject* args()   { PyObject* r = args_;   args_ = 0;   return r; }
+    inline PyObject* result() { PyObject* r = result_; result_ = 0; return r; }
+
+    //
     // Client side methods
+
     virtual void initialiseCall(cdrStream&);
-    virtual void marshalArguments(cdrStream& giop_c);
-    virtual void unmarshalReturnedValues(cdrStream& giop_c);
-    virtual void userException(GIOP_C& giop_client, const char* repoId);
+    virtual void marshalArguments(cdrStream& stream);
+    virtual void unmarshalReturnedValues(cdrStream& stream);
+    virtual void userException(_OMNI_NS(IOP_C)& iop_client,
+			       const char* repoId);
 
     inline void systemException(const CORBA::SystemException& ex) {
       if (tstate_) {
@@ -476,26 +489,31 @@ public:
       handleSystemException(ex);
     }
 
-    inline PyObject* args()   { return args_;   }
-    inline PyObject* result() { return result_; }
-
+    //
     // Server side methods
-    virtual void unmarshalArguments(cdrStream& giop_s);
-    void         validateReturnedValues(PyObject* result);
-    virtual void marshalReturnedValues(cdrStream& giop_s);
 
-    // These should be private, but MSVC won't let me declare
-    // Py_localCallBackFunction to be a friend :-(
+    virtual void unmarshalArguments(cdrStream& stream);
+
+    // Throws BAD_PARAM if result is bad. _Always_ consumes result.
+    void         setAndValidateReturnedValues(PyObject* result);
+
+    // Simply set the returned values
+    void         setReturnedValues(PyObject* result) { result_ = result; }
+
+    // Marshal the returned values, and release the stored result
+    virtual void marshalReturnedValues(cdrStream& stream);
+
   public:
     PyObject*      in_d_;
     int            in_l_;
     PyObject*      out_d_;
     int            out_l_;
     PyObject*      exc_d_;
+
+  private:
     PyObject*      args_;
     PyObject*      result_;
 
-  private:
     PyThreadState* tstate_;
     CORBA::Boolean in_marshal_;
 
@@ -516,13 +534,10 @@ public:
 
     virtual ~Py_omniServant();
 
-    virtual CORBA::Boolean _dispatch(GIOP_S& giop_s);
+    virtual CORBA::Boolean _dispatch(_OMNI_NS(IOP_S)& iop_s);
 
-    PyObject* local_dispatch(const char* op,
-			     PyObject*   in_d,  int in_l,
-			     PyObject*   out_d, int out_l,
-			     PyObject*   exc_d,
-			     PyObject*   args);
+    void remote_dispatch(Py_omniCallDescriptor* pycd);
+    void local_dispatch (Py_omniCallDescriptor* pycd);
 
     PyObject* py_this();
 
@@ -561,6 +576,53 @@ public:
 
 
   ////////////////////////////////////////////////////////////////////////////
+  // PyUserException is a special CORBA::UserException                      //
+  ////////////////////////////////////////////////////////////////////////////
+
+  class PyUserException : public CORBA::UserException {
+  public:
+    // Constructor used during unmarshalling
+    PyUserException(PyObject* desc);
+
+    // Constructor used during marshalling. Throws BAD_PARAM with the
+    // given completion status if the exception object doesn't match
+    // the descriptor.
+    // Always consumes reference to exc.
+    PyUserException(PyObject* desc, PyObject* exc,
+		    CORBA::CompletionStatus comp_status);
+
+    // Copy constructor
+    PyUserException(const PyUserException& e);
+
+    virtual ~PyUserException();
+
+    // Set the Python exception state to the contents of this exception.
+    // Caller must hold the Python interpreter lock.
+    // Returns 0 so callers can do return ex.setPyExceptionState().
+    PyObject* setPyExceptionState() const;
+
+    // Marshalling operators for exception body, not including
+    // repository id:
+
+    // Caller must not hold interpreter lock
+    void operator>>=(cdrStream& stream) const;
+
+    // Caller must hold interpreter lock
+    void operator<<=(cdrStream& stream);
+
+    // Inherited virtual functions
+    virtual void              _raise();
+    virtual const char*       _NP_repoId(int* size)          const;
+    virtual void              _NP_marshal(cdrStream& stream) const;
+    virtual CORBA::Exception* _NP_duplicate()         	     const;
+    virtual const char*       _NP_typeId()            	     const;
+
+  private:
+    PyObject* desc_; // Descriptor tuple
+    PyObject* exc_;  // The exception object
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
   // InterpreterUnlocker releases the Python interpreter lock               //
   ////////////////////////////////////////////////////////////////////////////
 
@@ -576,14 +638,34 @@ public:
     PyThreadState* tstate_;
   };
 
+
   ////////////////////////////////////////////////////////////////////////////
-  // UserExceptionHandled is thrown when we've handled a user exception     //
+  // PyUnlockingCdrStream unlocks the interpreter lock around blocking calls//
   ////////////////////////////////////////////////////////////////////////////
 
-  class UserExceptionHandled {
+  class PyUnlockingCdrStream : public cdrStreamAdapter {
   public:
-    UserExceptionHandled() { }
-    ~UserExceptionHandled() { }
+    PyUnlockingCdrStream(cdrStream& stream)
+      : cdrStreamAdapter(stream)
+    {
+    }
+
+    ~PyUnlockingCdrStream() { }
+
+    // Override virtual functions in cdrStreamAdapter
+    void put_octet_array(const _CORBA_Octet* b, int size,
+			 omni::alignment_t align=omni::ALIGN_1);
+    void get_octet_array(_CORBA_Octet* b,int size,
+			 omni::alignment_t align=omni::ALIGN_1);
+    void skipInput(_CORBA_ULong size);
+
+    void copy_to(cdrStream&, int size, omni::alignment_t align=omni::ALIGN_1);
+
+    void fetchInputData(omni::alignment_t,size_t);
+    _CORBA_Boolean reserveOutputSpaceForPrimitiveType(omni::alignment_t align,
+						      size_t required);
+    _CORBA_Boolean maybeReserveOutputSpace(omni::alignment_t align,
+					   size_t required);
   };
 
 };
