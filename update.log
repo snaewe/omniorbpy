@@ -1,3 +1,14 @@
+Fri Jun 16 18:29:50 BST 2000 dpg1
+=================================
+
+- When creating an object reference with target type A, when the
+  object claims to be B, but A and B are unrelated, now creates a
+  reference of type A, where before it would be B.
+
+modules/omni28/pyObjectRef.cc
+modules/omni30/pyObjectRef.cc
+
+
 Mon Jun 12 16:35:27 BST 2000 dpg1
 =================================
 

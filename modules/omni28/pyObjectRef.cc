@@ -32,6 +32,11 @@
 // $Id$
 
 // $Log$
+// Revision 1.12  2000/06/16 17:33:18  dpg1
+// When creating an object reference with target type A, when the object
+// claims to be B, but A and B are unrelated, now creates a reference of
+// type A, where before it would be B.
+//
 // Revision 1.11  2000/03/24 16:48:58  dpg1
 // Local calls now have proper pass-by-value semantics.
 // Lots of little stability improvements.
@@ -143,12 +148,39 @@ omniPy::createPyCorbaObjRef(const char*             targetRepoId,
   // Try to find objref class for most derived type:
   objrefClass = PyDict_GetItemString(pyomniORBobjrefMap, (char*)actualRepoId);
 
-  if (!objrefClass && targetRepoId) {
-    // No objref class for the most derived type -- try to find one for
-    // the target type:
-    objrefClass     = PyDict_GetItemString(pyomniORBobjrefMap,
-					   (char*)targetRepoId);
-    fullTypeUnknown = 1;
+  if (targetRepoId &&
+      strcmp(targetRepoId, actualRepoId)) {
+
+    // targetRepoId is not plain CORBA::Object, and is different from
+    // actualRepoId
+
+    if (objrefClass) {
+      // We've got an objref class for the most derived type. Is it a
+      // subclass of the target type?
+      PyObject* targetClass = PyDict_GetItemString(pyomniORBobjrefMap,
+						   (char*)targetRepoId);
+
+      if (!PyClass_IsSubclass(objrefClass, targetClass)) {
+	// Actual type is not derived from the target. Surprisingly
+	// enough, this is valid -- the repoId in an object reference
+	// is not necessarily that of the most derived type for the
+	// object. If we are expecting interface A, and actually get
+	// unrelated B, the object might actually have interface C,
+	// derived from both A and B.
+	//
+	// In this situation, we must create an object reference of
+	// the target type, not the object's claimed type.
+	objrefClass     = targetClass;
+	fullTypeUnknown = 1;
+      }
+    }
+    else {
+      // No objref class for the most derived type -- try to find one for
+      // the target type:
+      objrefClass     = PyDict_GetItemString(pyomniORBobjrefMap,
+					     (char*)targetRepoId);
+      fullTypeUnknown = 1;
+    }
   }
   if (!objrefClass) {
     // No target type, or stub code bug:
