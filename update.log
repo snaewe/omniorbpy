@@ -1,3 +1,11 @@
+Sun Sep 22 00:15:23 BST 2002 dgrisby
+====================================
+
+- Correct SSL paths.
+
+modules/sslTP/dir.mk
+
+
 Wed Sep 18 00:55:40 BST 2002 dgrisby
 ====================================
 

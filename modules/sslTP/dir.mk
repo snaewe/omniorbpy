@@ -16,7 +16,7 @@ DIR_CPPFLAGS += $(patsubst %,-I%/include,$(OMNIORB_ROOT))
 DIR_CPPFLAGS += $(patsubst %,-I%/include/omniORB4/internal,$(OMNIORB_ROOT))
 DIR_CPPFLAGS += $(patsubst %,-I%/include/omniORB4/internal,$(IMPORT_TREES))
 DIR_CPPFLAGS += -I../include
-
+DIR_CPPFLAGS += $(OPEN_SSL_CPPFLAGS)
 
 
 #############################################################################
@@ -203,7 +203,7 @@ all:: $(lib)
 $(lib): $(OBJS)
 	(set -x; \
 	 $(RM) $@; \
-	 libs="$(OMNIORB_SSL_LIB) $(PYLIB)"; \
+	 libs="$(OMNIORB_SSL_LIB) $(OMNIORB_LIB) $(PYLIB)"; \
 	 $(CXXLINK) -out:$@ -DLL $(CXXLINKOPTIONS) $(IMPORT_LIBRARY_FLAGS) $(PYLIBPATH) $(OBJS) $$libs; \
 	)
 
