@@ -28,6 +28,12 @@
 
 // $Id$
 // $Log$
+// Revision 1.6  2000/08/21 10:20:20  dpg1
+// Merge from omnipy1_develop for 1.1 release
+//
+// Revision 1.5.2.1  2000/08/21 09:10:48  dpg1
+// Merge omniidl long long support from omniORB 3
+//
 // Revision 1.5  2000/03/03 17:41:37  dpg1
 // Major reorganisation to support omniORB 3.0 as well as 2.8.
 //
@@ -72,6 +78,12 @@ _CORBA_WChar* idl_wstrcat(_CORBA_WChar* a, const _CORBA_WChar* b);
 #ifdef NO_STRCASECMP
 int strcasecmp(const char* s1, const char* s2);
 #endif
+
+
+// Versions of strtoul and strtod which work with the type sizes in use
+
+IdlIntLiteral   idl_strtoul(const char* text, int base);
+IdlFloatLiteral idl_strtod (const char* text);
 
 
 #endif // _idlutil_h_

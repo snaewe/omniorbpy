@@ -30,6 +30,12 @@
 // $Id$
 
 // $Log$
+// Revision 1.38  2000/08/21 10:20:21  dpg1
+// Merge from omnipy1_develop for 1.1 release
+//
+// Revision 1.37.2.1  2000/08/14 16:10:32  dpg1
+// Missed out some explicit casts to (char*) for string constants.
+//
 // Revision 1.37  2000/06/27 15:12:21  dpg1
 // Change error message for version clash
 //
@@ -294,7 +300,7 @@ extern "C" {
   static PyObject*
   omnipy_coreVersion(PyObject* self, PyObject* args)
   {
-    static char* cv = OMNIORB_VERSION_STRING;
+    static char* cv = (char*)OMNIORB_VERSION_STRING;
 
     if (!PyArg_ParseTuple(args, (char*)"")) return 0;
     return Py_BuildValue((char*)"s", cv);

@@ -28,6 +28,12 @@
 
 // $Id$
 // $Log$
+// Revision 1.6  2000/08/21 10:20:20  dpg1
+// Merge from omnipy1_develop for 1.1 release
+//
+// Revision 1.5.2.1  2000/08/21 09:10:48  dpg1
+// Merge omniidl long long support from omniORB 3
+//
 // Revision 1.5  2000/03/03 17:41:37  dpg1
 // Major reorganisation to support omniORB 3.0 as well as 2.8.
 //
@@ -109,3 +115,58 @@ int strcasecmp(const char* s1, const char* s2)
   else                                  return 1;
 }
 #endif
+
+
+#ifdef HAS_LongLong
+
+#  ifdef __WIN32__
+
+IdlIntLiteral
+idl_strtoul(const char* text, int base)
+{
+  IdlIntLiteral ull;
+  switch (base) {
+  case 8:
+    sscanf(text, "%I64o", &ull);
+    break;
+  case 10:
+    sscanf(text, "%I64d", &ull);
+    break;
+  case 16:
+    sscanf(text, "%I64x", &ull);
+    break;
+  default:
+    abort();
+  }
+  return ull;
+}
+
+#  else
+
+IdlIntLiteral
+idl_strtoul(const char* text, int base)
+{
+  return strtoull(text, 0, base);
+}
+
+#  endif
+
+#else
+
+// No long long support
+
+IdlIntLiteral
+idl_strtoul(const char* text, int base)
+{
+  return strtoul(text, 0, base);
+}
+
+#endif
+
+
+IdlFloatLiteral
+idl_strtod(const char* text)
+{
+  // *** Should cope with long double
+  return strtod(text,0);
+}

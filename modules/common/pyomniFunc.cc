@@ -29,6 +29,15 @@
 
 // $Id$
 // $Log$
+// Revision 1.2  2000/08/21 10:20:22  dpg1
+// Merge from omnipy1_develop for 1.1 release
+//
+// Revision 1.1.2.2  2000/08/18 11:40:01  dpg1
+// New omniORB.traceLevel function
+//
+// Revision 1.1.2.1  2000/08/14 16:10:32  dpg1
+// Missed out some explicit casts to (char*) for string constants.
+//
 // Revision 1.1  2000/06/12 15:36:08  dpg1
 // Support for exception handler functions. Under omniORB 3, local
 // operation dispatch modified so exceptions handlers are run.
@@ -63,7 +72,7 @@ static CORBA::Boolean transientEH(void* cookie, CORBA::ULong retries,
   {
     omnipyThreadCache::lock _t;
     PyObject* pyex = omniPy::createPySystemException(ex);
-    r = PyObject_CallFunction(pyfn, "OiN", pycookie, retries, pyex);
+    r = PyObject_CallFunction(pyfn, (char*)"OiN", pycookie, retries, pyex);
     
     if (!r) {
       if (omniORB::trace(1)) {
@@ -107,7 +116,7 @@ static CORBA::Boolean commFailureEH(void* cookie, CORBA::ULong retries,
   {
     omnipyThreadCache::lock _t;
     PyObject* pyex = omniPy::createPySystemException(ex);
-    r = PyObject_CallFunction(pyfn, "OiN", pycookie, retries, pyex);
+    r = PyObject_CallFunction(pyfn, (char*)"OiN", pycookie, retries, pyex);
     
     if (!r) {
       if (omniORB::trace(1)) {
@@ -150,7 +159,7 @@ static CORBA::Boolean systemEH(void* cookie, CORBA::ULong retries,
   {
     omnipyThreadCache::lock _t;
     PyObject* pyex = omniPy::createPySystemException(ex);
-    r = PyObject_CallFunction(pyfn, "OiN", pycookie, retries, pyex);
+    r = PyObject_CallFunction(pyfn, (char*)"OiN", pycookie, retries, pyex);
     
     if (!r) {
       if (omniORB::trace(1)) {
@@ -208,14 +217,14 @@ extern "C" {
 
       RAISE_PY_BAD_PARAM_IF(!objref);
 
-      PyObject* tuple = Py_BuildValue("OO", pyfn, pycookie);
-      PyObject_SetAttrString(pyobjref, "__omni_transient", tuple);
+      PyObject* tuple = Py_BuildValue((char*)"OO", pyfn, pycookie);
+      PyObject_SetAttrString(pyobjref, (char*)"__omni_transient", tuple);
       omniORB::installTransientExceptionHandler(objref, (void*)tuple,
 						transientEH);
     }
     else {
       Py_XDECREF(transientEHtuple);
-      transientEHtuple = Py_BuildValue("OO", pyfn, pycookie);
+      transientEHtuple = Py_BuildValue((char*)"OO", pyfn, pycookie);
       OMNIORB_ASSERT(transientEHtuple);
       omniORB::installTransientExceptionHandler((void*)transientEHtuple,
 						transientEH);
@@ -255,14 +264,14 @@ extern "C" {
 
       RAISE_PY_BAD_PARAM_IF(!objref);
 
-      PyObject* tuple = Py_BuildValue("OO", pyfn, pycookie);
-      PyObject_SetAttrString(pyobjref, "__omni_commfailure", tuple);
+      PyObject* tuple = Py_BuildValue((char*)"OO", pyfn, pycookie);
+      PyObject_SetAttrString(pyobjref, (char*)"__omni_commfailure", tuple);
       omniORB::installCommFailureExceptionHandler(objref, (void*)tuple,
 						  commFailureEH);
     }
     else {
       Py_XDECREF(commFailureEHtuple);
-      commFailureEHtuple = Py_BuildValue("OO", pyfn, pycookie);
+      commFailureEHtuple = Py_BuildValue((char*)"OO", pyfn, pycookie);
       OMNIORB_ASSERT(commFailureEHtuple);
       omniORB::installCommFailureExceptionHandler((void*)commFailureEHtuple,
 						  commFailureEH);
@@ -303,20 +312,45 @@ extern "C" {
 
       RAISE_PY_BAD_PARAM_IF(!objref);
 
-      PyObject* tuple = Py_BuildValue("OO", pyfn, pycookie);
-      PyObject_SetAttrString(pyobjref, "__omni_systemex", tuple);
+      PyObject* tuple = Py_BuildValue((char*)"OO", pyfn, pycookie);
+      PyObject_SetAttrString(pyobjref, (char*)"__omni_systemex", tuple);
       omniORB::installSystemExceptionHandler(objref, (void*)tuple,
 					     systemEH);
     }
     else {
       Py_XDECREF(systemEHtuple);
-      systemEHtuple = Py_BuildValue("OO", pyfn, pycookie);
+      systemEHtuple = Py_BuildValue((char*)"OO", pyfn, pycookie);
       OMNIORB_ASSERT(systemEHtuple);
       omniORB::installSystemExceptionHandler((void*)systemEHtuple,
 					     systemEH);
     }
     Py_INCREF(Py_None);
     return Py_None;
+  }
+
+  static char traceLevel_doc [] =
+  "traceLevel(int) -> None\n"
+  "traceLevel()    -> int\n"
+  "\n"
+  "Set or get the omniORB debug trace level.\n";
+
+  static PyObject* pyomni_traceLevel(PyObject* self, PyObject* args)
+  {
+    if (PyTuple_GET_SIZE(args) == 0) {
+      return PyInt_FromLong(omniORB::traceLevel);
+    }
+    else if (PyTuple_GET_SIZE(args) == 1) {
+      PyObject* pytl = PyTuple_GET_ITEM(args, 0);
+
+      if (PyInt_Check(pytl)) {
+	omniORB::traceLevel = PyInt_AS_LONG(pytl);
+	Py_INCREF(Py_None);
+	return Py_None;
+      }
+    }
+    PyErr_SetString(PyExc_TypeError,
+		    (char*)"Operation requires a single integer argument");
+    return 0;
   }
 
   static PyMethodDef pyomni_methods[] = {
@@ -331,6 +365,10 @@ extern "C" {
     {(char*)"installSystemExceptionHandler",
      pyomni_installSystemExceptionHandler,
      METH_VARARGS, system_doc},
+
+    {(char*)"traceLevel",
+     pyomni_traceLevel,
+     METH_VARARGS, traceLevel_doc},
 
     {NULL,NULL}
   };

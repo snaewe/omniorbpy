@@ -109,9 +109,6 @@ libname = _omniidlmodule.so
 soname = $(libname).$(IDLMODULE_MAJOR)
 lib = $(soname).$(IDLMODULE_MINOR)
 
-DIR_CPPFLAGS += -I/usr/local/include
-
-
 ifeq ($(notdir $(CXX)),CC)
 
 CXXOPTIONS   += -Kpic
@@ -169,13 +166,13 @@ ifdef Win32Platform
 
 DIR_CPPFLAGS += -DMSDOS -DOMNIIDL_EXECUTABLE
 
-PYPREFIX1 := $(shell $(PYTHON) -c 'import sys; sys.stdout.write(sys.prefix)')
-PYPREFIX  := $(subst Program Files,progra~1,$(PYPREFIX1))
+PYPREFIX1 := "$(shell $(PYTHON) -c 'import sys,string; sys.stdout.write(string.lower(sys.prefix))')"
+PYPREFIX  := $(subst program files,progra~1,$(subst \,/,$(PYPREFIX1)))
 PYINCDIR  := $(PYPREFIX)/include
-PYLIBDIR  := $(PYPREFIX)/libs
+PYLIBDIR  := $(PYPREFIX)/libs $(PYPREFIX)/lib/x86_win32
 
-DIR_CPPFLAGS += -I"$(PYINCDIR)" -I"$(PYINCDIR)/python1.5"
-CXXLINKOPTIONS += -libpath:"$(PYLIBDIR)"
+DIR_CPPFLAGS += -I$(PYINCDIR) -I$(PYINCDIR)/python1.5
+CXXLINKOPTIONS += $(patsubst %,-libpath:%,$(PYLIBDIR))
 
 omniidl = $(patsubst %,$(BinPattern),omniidl)
 
@@ -278,7 +275,6 @@ endif
 #   Make rules for Digital Unix                                             #
 #############################################################################
 
-# WARNING!  These make rules are untested
 
 ifdef OSF1
 ifeq ($(notdir $(CXX)),cxx)
@@ -318,10 +314,12 @@ endif
 #   Make rules for HPUX                                                     #
 #############################################################################
 
-# WARNING!  These make rules are untested
-
 ifdef HPUX
 ifeq ($(notdir $(CXX)),aCC)
+
+# Note: the python installation must be built to load C++ shared library
+#       this usually means that the main function of the python executable
+#       is compiled and linked with aCC.
 
 DIR_CPPFLAGS += +Z
 
@@ -351,6 +349,31 @@ export:: $(lib)
           $(RM) $(libname); \
           ln -s $(soname) $(libname); \
          )
+
+# The alternative is to build omniidl as an executable by linking in the
+# python runtime library. Comment out the above and uncomment the following
+# if this is preferable.
+#
+#
+# PYLIBDIR := $(PYPREFIX)/lib
+#
+# DIR_CPPFLAGS += -DOMNIIDL_EXECUTABLE
+# CXXLINKOPTIONS += -L$(PYLIBDIR)
+#
+#
+# omniidl = $(patsubst %,$(BinPattern),omniidl)
+#
+# all:: $(omniidl)
+#
+# export:: $(omniidl)
+# 	@$(ExportExecutable)
+#
+# clean::
+# 	$(RM) $(omniidl)
+#
+# $(omniidl): $(OBJS) $(PYOBJS)
+# 	@(libs="-lpython1.5 -lpthread"; $(CXXExecutable))
+
 
 endif
 endif
@@ -400,8 +423,6 @@ endif
 #############################################################################
 #   Make rules for SGI Irix 6.2                                             #
 #############################################################################
-
-# WARNING!  These make rules are untested
 
 ifdef IRIX
 ifeq ($(notdir $(CXX)),CC)

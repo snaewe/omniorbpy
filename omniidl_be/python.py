@@ -28,6 +28,15 @@
 
 # $Id$
 # $Log$
+# Revision 1.28  2000/08/21 10:20:19  dpg1
+# Merge from omnipy1_develop for 1.1 release
+#
+# Revision 1.27.2.2  2000/08/07 09:19:24  dpg1
+# Long long support
+#
+# Revision 1.27.2.1  2000/07/18 15:31:29  dpg1
+# Bug with inheritance from typedef
+#
 # Revision 1.27  2000/07/12 14:32:13  dpg1
 # New no_package option to omniidl backend
 #
@@ -702,6 +711,8 @@ class PythonVisitor:
         if len(node.inherits()) > 0:
             inheritl = []
             for i in node.inherits():
+                while isinstance(i, idlast.Declarator):
+                    i = i.alias().aliasType()
                 inheritl.append(dotName(fixupScopedName(i.scopedName())))
             
             inherits = "(" + string.join(inheritl, ", ") + ")"
@@ -765,6 +776,8 @@ class PythonVisitor:
         if len(node.inherits()) > 0:
             inheritl = []
             for i in node.inherits():
+                while isinstance(i, idlast.Declarator):
+                    i = i.alias().aliasType()
                 sn = fixupScopedName(i.scopedName())
                 inheritl.append(dotName(sn[:-1] + ["_objref_" + sn[-1]]))
                 
@@ -820,6 +833,8 @@ class PythonVisitor:
         if len(node.inherits()) > 0:
             inheritl = []
             for i in node.inherits():
+                while isinstance(i, idlast.Declarator):
+                    i = i.alias().aliasType()
                 sn = fixupScopedName(i.scopedName())
                 methods = methods + " + " + \
                           dotName(sn[:-1] + ["_objref_" + sn[-1]]) + \
@@ -836,6 +851,8 @@ class PythonVisitor:
         if len(node.inherits()) > 0:
             inheritl = []
             for i in node.inherits():
+                while isinstance(i, idlast.Declarator):
+                    i = i.alias().aliasType()
                 fsn = fixupScopedName(i.scopedName())
                 dsn = dotName(fsn)
                 ssn = skeletonModuleName(dsn)
@@ -1384,12 +1401,12 @@ ttdMap = {
     idltype.tk_octet:      "omniORB.tcInternal.tv_octet",
     idltype.tk_any:        "omniORB.tcInternal.tv_any",
     idltype.tk_TypeCode:   "omniORB.tcInternal.tv_TypeCode",
-    idltype.tk_Principal:  "omniORB.tcInternal.tv_Principal"
+    idltype.tk_Principal:  "omniORB.tcInternal.tv_Principal",
+    idltype.tk_longlong:   "omniORB.tcInternal.tv_longlong",
+    idltype.tk_ulonglong:  "omniORB.tcInternal.tv_ulonglong"
 }
 
 unsupportedMap = {
-    idltype.tk_longlong:   "long long",
-    idltype.tk_ulonglong:  "unsigned long long",
     idltype.tk_longdouble: "long double",
     idltype.tk_wchar:      "wchar",
     idltype.tk_wstring:    "wstring",

@@ -28,6 +28,12 @@
 
 // $Id$
 // $Log$
+// Revision 1.4  2000/08/21 10:20:21  dpg1
+// Merge from omnipy1_develop for 1.1 release
+//
+// Revision 1.3.2.1  2000/08/14 14:39:10  dpg1
+// IDL dumping now properly escapes string and char constants
+//
 // Revision 1.3  2000/03/03 17:41:39  dpg1
 // Major reorganisation to support omniORB 3.0 as well as 2.8.
 //
@@ -83,6 +89,8 @@ private:
   int indent_;
   void printIndent();
   void printScopedName(const ScopedName* sn);
+  void printString(const char* str);
+  void printChar(const char c);
 };
 
 

@@ -1,3 +1,174 @@
+Mon Aug 21 11:08:38 BST 2000 dpg1
+=================================
+
+- Update bugfixes
+
+bugfixes.xml
+bugfixes.xsl
+
+
+Mon Aug 21 10:41:16 BST 2000 dpg1
+=================================
+
+- omniORBpy 1.1 release
+
+doc/tex/omniORBpy.tex
+external_merge/ReleaseNote
+external_merge/THIS_IS_OMNIORBPY_1_0  -- deleted
+external_merge/THIS_IS_OMNIORBPY_1_1  -- new
+external_merge/doc/omniORBpy.pdf
+external_merge/doc/omniORBpy.ps
+external_merge/doc/omniORBpy/index.html
+
+
+Mon Aug 21 10:09:31 BST 2000 dpg1
+=================================
+
+- Merge omniidl long long support from omniORB 3
+
+omniidl/cxx/CORBA_basetypes.h
+omniidl/cxx/CORBA_sysdep.h
+omniidl/cxx/dir.mk
+omniidl/cxx/idl.ll
+omniidl/cxx/idlast.cc
+omniidl/cxx/idlexpr.cc
+omniidl/cxx/idlpython.cc
+omniidl/cxx/idlutil.cc
+omniidl/cxx/idlutil.h
+omniidl/cxx/lex.yy.cc
+
+- Typo in omniidl.idltype
+
+omniidl/python/omniidl/idltype.py
+
+
+Fri Aug 18 12:37:50 BST 2000 dpg1
+=================================
+
+- New omniORB.traceLevel function
+
+modules/common/pyomniFunc.cc
+
+- Document new traceLevel function and omniORB.LOCATION_FORWARD; add
+  mysteriously missing omniORBpy.bib.
+
+doc/tex/omniORBpy.bib   -- new
+doc/tex/omniORBpy.tex
+external_merge/doc/omniORBpy.pdf
+external_merge/doc/omniORBpy.ps
+external_merge/doc/omniORBpy/index.html
+external_merge/doc/omniORBpy/omniORBpy002.html
+external_merge/doc/omniORBpy/omniORBpy003.html
+external_merge/doc/omniORBpy/omniORBpy005.html
+external_merge/doc/omniORBpy/omniORBpy006.html
+external_merge/doc/omniORBpy/omniORBpy007.html
+external_merge/doc/omniORBpy/omniORBpy009.html
+
+
+Thu Aug 17 09:41:58 BST 2000 dpg1
+=================================
+
+- Fix possible obscure assertion failure with unexpected user
+  exception containing a member named "minor".
+
+modules/common/pyExceptions.cc
+
+- Updates for long long were broken on platforms without it
+
+modules/common/pyMarshal.cc
+modules/common/pyTypeCode.cc
+
+- Support for omniORB.LOCATION_FORWARD exception
+
+modules/omni30/pyServant.cc
+python/omniORB/CORBA.py
+python/omniORB/__init__.py
+
+
+Mon Aug 14 17:08:04 BST 2000 dpg1
+=================================
+
+- Error message now says "Could not open..." rather than "Could not
+  find..." when Python imports fail.
+
+omniidl/cxx/idlpython.cc
+omniidl/python/scripts/omniidlrun.py
+
+- Missed out some explicit casts to (char*) for string constants.
+
+modules/common/pyomniFunc.cc
+modules/omni28/omnipy.cc
+modules/omni28/pyServant.cc
+
+
+Mon Aug  7 10:18:32 BST 2000 dpg1
+=================================
+
+- Long long support
+
+modules/dir.mk
+modules/common/pyMarshal.cc
+modules/common/pyTypeCode.cc
+omniidl_be/python.py
+python/omniORB/CORBA.py
+python/omniORB/tcInternal.py
+
+
+Tue Aug  1 12:21:35 BST 2000 dpg1
+=================================
+
+- Better comment handling for structs and unions
+
+omniidl/cxx/idl.yy
+omniidl/cxx/y.tab.cc
+
+
+Tue Aug  1 10:38:56 BST 2000 dpg1
+=================================
+
+- IDL compiler no longer complains about inheriting an operation into
+  an interface with the same name
+
+omniidl/cxx/idlscope.cc
+
+
+Wed Jul 26 17:01:36 BST 2000 dpg1
+=================================
+
+- Fix potential segfault in passing an invalid sequence/array of
+  unsigned long in a local call.
+
+modules/common/pyMarshal.cc
+
+
+Wed Jul 26 11:46:16 BST 2000 dpg1
+=================================
+
+- omniidl front-end incorrect error report when inheriting typedef to
+  forward declared interface
+
+omniidl/cxx/idlast.cc
+
+
+Wed Jul 19 18:21:28 BST 2000 dpg1
+=================================
+
+- omniidl complains if a name which differs only in case is found
+  during name look-up
+
+omniidl/cxx/idlscope.cc
+
+
+Tue Jul 18 15:58:27 BST 2000 dpg1
+=================================
+
+- Bug with inheritance from typedef
+
+bugfixes.xml           -- new
+bugfixes.xsl           -- new
+omniidl_be/python.py
+
+
 Fri Jul 14 13:57:50 BST 2000 dpg1
 =================================
 

@@ -31,6 +31,12 @@
 # $Id$
 
 # $Log$
+# Revision 1.25  2000/08/21 10:20:19  dpg1
+# Merge from omnipy1_develop for 1.1 release
+#
+# Revision 1.24.2.1  2000/08/17 08:46:06  dpg1
+# Support for omniORB.LOCATION_FORWARD exception
+#
 # Revision 1.24  2000/07/12 14:33:10  dpg1
 # Support for Interface Repository stubs
 #
@@ -109,7 +115,7 @@
 # Initial revision
 #
 
-import sys, types, string, imp, os, os.path, tempfile
+import sys, types, string, imp, os, os.path, tempfile, exceptions
 
 try:
     import threading
@@ -278,6 +284,8 @@ Make stubs for the Interface Repository appear in the CORBA module"""
 #   installSystemExceptionHandler()
 
 from _omnipy.omni_func import *
+
+# More public things at the end
 
 
 # Private things
@@ -750,6 +758,39 @@ keywordMapping = {
     "try":      "_try",
     "while":    "_while"
     }
+
+
+# More public things, which depend on the CORBA module
+
+# LOCATION_FORWARD exception, only avaiable with omniORB 3 up
+if _coreVersion != "2.8.0":
+    class LOCATION_FORWARD (exceptions.Exception):
+        """LOCATION_FORWARD(objref)
+
+This exception may be thrown inside any operation implementation. It
+causes the ORB the return a LOCATION_FORWARD message to the caller, so
+the invocation is retried on the given object reference."""
+
+        _NP_RepositoryId = "omniORB.LOCATION_FORWARD" # Not really a CORBA type
+
+        def __init__(self, objref):
+            if not isinstance(objref, CORBA.Object):
+                raise CORBA.BAD_PARAM(0,CORBA.COMPLETED_NO)
+            
+            self._forward = objref
+
+        def __str__(self):
+            return "Location forward exception"
+
+else:
+    class LOCATION_FORWARD (exceptions.Exception):
+        """LOCATION_FORWARD(objref)
+
+The LOCATION_FORWARD exception is not supported with omniORB 2.8.0."""
+
+        def __init__(self, objref):
+            raise CORBA.NO_IMPLEMENT(0,CORBA.COMPLETED_NO)
+
 
 
 # Register this module and the threading module with omnipy:

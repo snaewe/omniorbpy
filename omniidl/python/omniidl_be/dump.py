@@ -28,6 +28,12 @@
 
 # $Id$
 # $Log$
+# Revision 1.9  2000/08/21 10:20:19  dpg1
+# Merge from omnipy1_develop for 1.1 release
+#
+# Revision 1.8.2.1  2000/08/14 14:39:11  dpg1
+# IDL dumping now properly escapes string and char constants
+#
 # Revision 1.8  2000/03/03 17:41:29  dpg1
 # Major reorganisation to support omniORB 3.0 as well as 2.8.
 #
@@ -107,17 +113,20 @@ interface @id@;""", id = node.identifier())
 
     def visitConst(self, node):
         node.constType().accept(self)
-        type  = self.__result_type
-        if node.constType().kind() == idltype.tk_enum:
+        type = self.__result_type
+
+        if node.constKind() == idltype.tk_enum:
             value = "::" + idlutil.ccolonName(node.value().scopedName())
-        elif node.constType().kind() == idltype.tk_string:
-            value = '"' + node.value() + '"'
+        elif node.constKind() == idltype.tk_string:
+            value = '"' + repr(node.value())[1:-1] + '"'
+        elif node.constKind() == idltype.tk_char:
+            value = "'" + repr(node.value())[1:-1] + "'"
         else:
             value = str(node.value())
         
         self.st.out("""\
 const @type@ @id@ = @value@;""",
-               type=type, id=node.identifier(), value=value)
+                    type=type, id=node.identifier(), value=value)
 
 
     def visitTypedef(self, node):
@@ -226,6 +235,8 @@ union @id@ switch (@stype@) {""",
                 else:
                     if l.labelKind() == idltype.tk_enum:
                         lv = "::" + idlutil.ccolonName(l.value().scopedName())
+                    elif l.labelKind() == idltype.tk_char:
+                        lv = "'" + repr(l.value())[1:-1] + "'"
                     else:
                         lv = str(l.value())
                         

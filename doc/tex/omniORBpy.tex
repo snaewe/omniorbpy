@@ -157,7 +157,7 @@
 \vfill
 
 { \Huge
-The omniORBpy version 1.0\\[4mm]
+The omniORBpy version 1.1\\[4mm]
 User's Guide
 }
 
@@ -175,12 +175,20 @@ AT\&T Laboratories Cambridge\\
 
 \vfill
 \vfill
-June 2000
+August 2000
 \vfill
 
 \end{center}
 
 \clearpage
+
+{\Large \bf Changes and Additions, August 2000}
+\begin{itemize}
+\item New \code{omniORB.LOCATION\_FORWARD} exception.
+\item New \op{omniORB.traceLevel} function
+\end{itemize}
+
+\vspace{\baselineskip}
 
 {\Large \bf Changes and Additions, June 2000}
 \begin{itemize}
@@ -2340,7 +2348,12 @@ $ example_echo_srv.py -ORBtraceLevel 5
 
 %$ To fix Emacs' syntax highlighting
 
-\noindent At the moment, the following trace levels are defined:
+\noindent You can also inspect or modify the trace level at run-time.
+A call to \code{omniORB.\dsc{}traceLevel(}\textit{level}\code{)} sets
+the level; calling the function with no argument returns the current
+level.
+
+At the moment, the following trace levels are defined:
 
 \vspace{\baselineskip}
 
@@ -2630,6 +2643,22 @@ omniORB.installSystemExceptionHandler(cookie, function [, object])
 \noindent In both cases, the call-back function has the same signature
 as for \code{TRANSIENT} handlers.
 
+
+
+\section{Location forwarding}
+\label{sec:locationForward}
+
+Any CORBA operation invocation can return a \code{LOCATION\_FORWARD}
+message to the caller, indicating that it should retry the invocation
+on a new object reference. The standard allows ServantManagers to
+trigger \code{LOCATION\_FORWARD}s by raising the
+\code{PortableServer::ForwardRequest} exception, but it does not
+provide a similar mechanism for normal servants. omniORBpy provides
+the \code{omniORB.\dsc{}LOCATION\_FORWARD} exception for this
+purpose. The exception object is initialised with the target object
+reference. It can be thrown by any operation
+implementation. \code{omniORB.LOCATION\_FORWARD} is not supported on
+omniORB 2.8.0.
 
 
 

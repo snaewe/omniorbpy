@@ -28,7 +28,13 @@
 
 // $Id$
 // $Log$
-// Revision 1.15  2000/06/09 11:20:46  dpg1
+// Revision 1.16  2000/08/21 10:20:21  dpg1
+// Merge from omnipy1_develop for 1.1 release
+//
+// Revision 1.15.2.1  2000/08/01 11:27:44  dpg1
+// Comments were incorrectly attached to struct members.
+//
+// Revision 1.9.2.4  2000/06/09 11:20:47  dpg1
 // Last fix put __omni_pragma line numbers off by one...
 //
 // Revision 1.9.2.3  2000/06/08 14:58:19  dpg1
@@ -1064,15 +1070,15 @@ struct_header:
     ;
 
 member_list:
-    member { $$ = $1; }
-  | member_list member {
+    member pragmas_opt { $$ = $1; }
+  | member_list member pragmas_opt {
       if ($1) { $1->append($2); $$ = $1; }
       else $$ = $2;
     }
     ;
 
 member:
-    type_spec declarators ';' pragmas_opt {
+    type_spec declarators ';' {
       $$ = new Member(currentFile, yylineno, mainFile,
 		      $1->type(), $1->constr(), $2);
       delete $1;
@@ -1123,15 +1129,15 @@ switch_body:
     ;
 
 case_plus:
-    case { $$ = $1; }
-  | case_plus case {
+    case pragmas_opt { $$ = $1; }
+  | case_plus case pragmas_opt {
       $1->append($2);
       $$ = $1;
     }
     ;
 
 case:
-    case_label_plus element_spec ';' pragmas_opt {
+    case_label_plus element_spec ';' {
       $2->finishConstruction($1);
       $$ = $2;
     }

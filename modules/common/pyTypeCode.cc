@@ -31,6 +31,15 @@
 // $Id$
 
 // $Log$
+// Revision 1.12  2000/08/21 10:20:22  dpg1
+// Merge from omnipy1_develop for 1.1 release
+//
+// Revision 1.11.2.2  2000/08/17 08:44:09  dpg1
+// Updates for long long were broken on platforms without it
+//
+// Revision 1.11.2.1  2000/08/07 09:19:23  dpg1
+// Long long support
+//
 // Revision 1.11  2000/05/11 11:58:24  dpg1
 // Throw system exceptions with OMNIORB_THROW.
 //
@@ -230,6 +239,10 @@ r_alignedSizeTypeCode(CORBA::ULong msgsize, PyObject* d_o,
     case CORBA::tk_any:
     case CORBA::tk_TypeCode:
     case CORBA::tk_Principal:
+#ifdef HAS_LongLong
+    case CORBA::tk_longlong:
+    case CORBA::tk_ulonglong:
+#endif
       // Nothing more to be sent
       break;
 
@@ -334,6 +347,11 @@ r_alignedSizeTypeCode(CORBA::ULong msgsize, PyObject* d_o,
 	case CORBA::tk_ulong:
 	case CORBA::tk_enum:
 	  dsize = 4; dalign = omni::ALIGN_4; break;
+#ifdef HAS_LongLong
+	case CORBA::tk_longlong:
+	case CORBA::tk_ulonglong:
+	  dsize = 8; dalign = omni::ALIGN_8; break;
+#endif
 	default:
 	  OMNIORB_THROW(BAD_TYPECODE, 0, CORBA::COMPLETED_NO);
 	}
@@ -571,6 +589,10 @@ r_marshalTypeCode(NetBufferedStream&   stream,
     case CORBA::tk_any:
     case CORBA::tk_TypeCode:
     case CORBA::tk_Principal:
+#ifdef HAS_LongLong
+    case CORBA::tk_longlong:
+    case CORBA::tk_ulonglong:
+#endif
       // Nothing more to be sent
       //      cout << "simple: " << tk << endl;
       break;
@@ -963,6 +985,10 @@ r_marshalTypeCode(MemBufferedStream&   stream,
     case CORBA::tk_any:
     case CORBA::tk_TypeCode:
     case CORBA::tk_Principal:
+#ifdef HAS_LongLong
+    case CORBA::tk_longlong:
+    case CORBA::tk_ulonglong:
+#endif
       // Nothing more to be sent
       //      cout << "simple: " << tk << endl;
       break;
@@ -1338,6 +1364,10 @@ r_unmarshalTypeCode(NetBufferedStream& stream, OffsetDescriptorMap& odm)
   case CORBA::tk_any:
   case CORBA::tk_TypeCode:
   case CORBA::tk_Principal:
+#ifdef HAS_LongLong
+  case CORBA::tk_longlong:
+  case CORBA::tk_ulonglong:
+#endif
     {
       //      cout << "simple: " << tk << endl;
       d_o = PyInt_FromLong(tk); odm.add(d_o, tc_offset);
@@ -1820,6 +1850,10 @@ r_unmarshalTypeCode(MemBufferedStream& stream, OffsetDescriptorMap& odm)
   case CORBA::tk_any:
   case CORBA::tk_TypeCode:
   case CORBA::tk_Principal:
+#ifdef HAS_LongLong
+  case CORBA::tk_longlong:
+  case CORBA::tk_ulonglong:
+#endif
     {
       //      cout << "simple: " << tk << endl;
       d_o = PyInt_FromLong(tk); odm.add(d_o, tc_offset);

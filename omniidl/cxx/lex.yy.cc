@@ -835,6 +835,12 @@ char *yytext;
 
 // $Id$
 // $Log$
+// Revision 1.19  2000/08/21 10:20:20  dpg1
+// Merge from omnipy1_develop for 1.1 release
+//
+// Revision 1.18.2.1  2000/08/21 09:10:48  dpg1
+// Merge omniidl long long support from omniORB 3
+//
 // Revision 1.18  2000/06/09 11:20:47  dpg1
 // Last fix put __omni_pragma line numbers off by one...
 //
@@ -1441,11 +1447,7 @@ YY_RULE_SETUP
 #line 200 "/home/dpg1/omni/cvs/ins/omni/src/tool/omniidl/cxx/idl.ll"
 {
   errno = 0;
-#ifdef HAS_LongLong
-  sscanf(yytext, "%Lu", &yylval.int_literal_val);
-#else
-  yylval.int_literal_val = strtoul(yytext, 0, 10);
-#endif
+  yylval.int_literal_val = idl_strtoul(yytext, 10);
   if (errno == ERANGE) {
     IdlError(currentFile, yylineno,
 	     "Integer literal `%s' is too big", yytext);
@@ -1458,11 +1460,7 @@ YY_RULE_SETUP
 #line 214 "/home/dpg1/omni/cvs/ins/omni/src/tool/omniidl/cxx/idl.ll"
 {
   errno = 0;
-#ifdef HAS_LongLong
-  sscanf(yytext, "%Lo", &yylval.int_literal_val);
-#else
-  yylval.int_literal_val = strtoul(yytext, 0, 8);
-#endif
+  yylval.int_literal_val = idl_strtoul(yytext, 8);
   if (errno == ERANGE) {
     IdlError(currentFile, yylineno,
 	     "Integer literal `%s' is too big", yytext);
@@ -1475,11 +1473,7 @@ YY_RULE_SETUP
 #line 228 "/home/dpg1/omni/cvs/ins/omni/src/tool/omniidl/cxx/idl.ll"
 {
   errno = 0;
-#ifdef HAS_LongLong
-  int r = sscanf(yytext, "%Lx", &yylval.int_literal_val);
-#else
-  yylval.int_literal_val = strtoul(yytext, 0, 16);
-#endif
+  yylval.int_literal_val = idl_strtoul(yytext, 16);
   if (errno == ERANGE) {
     IdlError(currentFile, yylineno,
 	     "Integer literal `%s' is too big", yytext);
@@ -1590,7 +1584,7 @@ YY_RULE_SETUP
 {
   // Only deal with floats in INITIAL state, so version pragmas don't
   // get interpreted as floats.
-  yylval.float_literal_val = strtod(yytext, 0);
+  yylval.float_literal_val = idl_strtod(yytext);
   return FLOATING_PT_LITERAL;
 }
 	YY_BREAK
@@ -1598,15 +1592,15 @@ case 68:
 YY_RULE_SETUP
 #line 313 "/home/dpg1/omni/cvs/ins/omni/src/tool/omniidl/cxx/idl.ll"
 {
-  yylval.float_literal_val = strtod(yytext, 0);
+  yylval.float_literal_val = idl_strtod(yytext);
   return FLOATING_PT_LITERAL;
 }
 	YY_BREAK
 case 69:
 YY_RULE_SETUP
-#line 318 "/home/dpg1/omni/cvs/ins/omni/src/tool/omniidl/cxx/idl.ll"
+#line 312 "/local/dpg1/omni/31/src/tool/omniidl/cxx/idl.ll"
 {
-  yylval.float_literal_val = strtod(yytext, 0);
+  yylval.float_literal_val = idl_strtod(yytext);
   return FLOATING_PT_LITERAL;
 }
 	YY_BREAK
@@ -2746,7 +2740,7 @@ char escapeToChar(char* s) {
 _CORBA_UShort octalToWChar(char* s) {
   unsigned long ret = strtoul(s+1, 0, 8);
 
-  if (ret > 255) {
+  if (ret > 255) { // This really is meant to be 255
     IdlError(currentFile, yylineno, "Octal character value `%s' too big", s);
   }
 

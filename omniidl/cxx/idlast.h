@@ -28,6 +28,12 @@
 
 // $Id$
 // $Log$
+// Revision 1.15  2000/08/21 10:20:21  dpg1
+// Merge from omnipy1_develop for 1.1 release
+//
+// Revision 1.14.2.1  2000/08/04 11:50:19  dpg1
+// Updates for AIX with xlC
+//
 // Revision 1.14  2000/06/08 14:36:18  dpg1
 // Comments and pragmas are now objects rather than plain strings, so
 // they can have file,line associated with them.
@@ -78,6 +84,7 @@
 
 #include <stdio.h>
 
+extern "C" int yyparse();
 class Decl;
 
 // Pragma class stores a list of pragmas:
