@@ -29,6 +29,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.2.4  2000/12/04 18:58:02  dpg1
+// Fix bug with TypeCode indirections.
+//
 // Revision 1.1.2.3  2000/11/06 17:10:09  dpg1
 // Update to cdrStream interface
 //
@@ -145,7 +148,7 @@ private:
 #define MARSHAL_PYSTRING(_stream, _pystring) { \
   CORBA::ULong _slen = PyString_GET_SIZE(_pystring) + 1; \
   _slen >>= _stream; \
-  if (_slen > 1) { \
+  if (_slen > 0) { \
     char* _str = PyString_AS_STRING(_pystring); \
     _stream.put_octet_array((const CORBA::Octet*)((const char*)_str), _slen); \
   } \
@@ -162,9 +165,9 @@ r_marshalTypeCode(cdrStream&           stream,
   if (omniORB::useTypeCodeIndirections && dom.lookup(d_o, tc_offset)) {
 
     CORBA::ULong tk_ind = 0xffffffff;
-    CORBA::Long  offset = tc_offset - stream.currentOutputPtr();
-
     tk_ind >>= stream;
+
+    CORBA::Long  offset = tc_offset - stream.currentOutputPtr();
     offset >>= stream;
   }
   else {
@@ -524,11 +527,11 @@ r_marshalTypeCode(cdrStream&           stream,
 
 
 
-// Macro to unmarshal a PyString from a Mem or NetBufferedStream:
+// Macro to unmarshal a PyString from a cdrStream
 #define UNMARSHAL_PYSTRING(_stream, _pystring) { \
-  CORBA::String_member _str_tmp; \
-  _str_tmp <<= _stream; \
-  _pystring = PyString_FromString(_str_tmp._ptr); \
+  CORBA::ULong _len; _len <<= stream; \
+  _pystring = PyString_FromStringAndSize(0, _len - 1); \
+  _stream.get_octet_array((_CORBA_Octet*)PyString_AS_STRING(_pystring), _len);\
 }
 
 PyObject*
@@ -605,7 +608,23 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
 	// Static knowledge of the structure
 	Py_INCREF(d_o);
 	Py_DECREF(repoId);
-	//?? Is is worth checking the TypeCodes for equivalence?
+
+	// We could unmarshal the whole TypeCode and check it for
+	// equivalence, but we don't bother. We still have to recurse
+	// into the TypeCode in case there are later indirections into
+	// it.
+
+	odm.add(d_o, tc_offset);
+	OffsetDescriptorMap eodm(odm, tc_offset + 8);
+
+	UNMARSHAL_PYSTRING(encap, t_o); Py_DECREF(t_o); // Name
+	CORBA::ULong cnt; cnt <<= encap;
+
+	for (CORBA::ULong i=0; i < cnt; i++) {
+	  // Member name and type
+	  UNMARSHAL_PYSTRING(encap, t_o); Py_DECREF(t_o);
+	  t_o = r_unmarshalTypeCode(encap, eodm); Py_DECREF(t_o);
+	}
       }
       else {
 	// Don't know this structure
@@ -645,7 +664,7 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
 
 	// Create class object:
 	// *** Could be made faster by finding the createUnknownStruct
-	// function only once, and manually building the argument typle
+	// function only once, and manually building the argument tuple
 	t_o = PyObject_GetAttrString(omniPy::pyomniORBmodule,
 				     (char*)"createUnknownStruct");
 	OMNIORB_ASSERT(t_o && PyFunction_Check(t_o));
@@ -673,7 +692,32 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
 	// Static knowledge of the union
 	Py_INCREF(d_o);
 	Py_DECREF(repoId);
-	//?? Is is worth checking the TypeCodes for equivalence?
+
+	// We could unmarshal the whole TypeCode and check it for
+	// equivalence, but we don't bother. We still have to recurse
+	// into the TypeCode in case there are later indirections into
+	// it.
+
+	odm.add(d_o, tc_offset);
+	OffsetDescriptorMap eodm(odm, tc_offset + 8);
+
+	UNMARSHAL_PYSTRING(encap, t_o); Py_DECREF(t_o); // Name
+	PyObject* discriminant = r_unmarshalTypeCode(encap, eodm);
+
+	CORBA::Long  def_used; def_used <<= encap;
+	CORBA::ULong cnt;      cnt      <<= encap;
+
+	for (CORBA::ULong i=0; i<cnt; i++) {
+	  // Label value
+	  t_o = omniPy::unmarshalPyObject(encap, discriminant); Py_DECREF(t_o);
+
+	  // Member name
+	  UNMARSHAL_PYSTRING(encap, t_o); Py_DECREF(t_o);
+
+	  // Member type
+	  t_o = r_unmarshalTypeCode(encap, eodm); Py_DECREF(t_o);
+	}
+	Py_DECREF(discriminant);
       }
       else {
 	// Don't know this union
@@ -771,7 +815,6 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
 	// Static knowledge of the enum
 	Py_INCREF(d_o);
 	Py_DECREF(repoId);
-	//?? Is is worth checking the TypeCodes for equivalence?
       }
       else {
 	// Don't know this enum
@@ -865,6 +908,11 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
 	// Static knowledge of the alias
 	Py_INCREF(d_o);
 	Py_DECREF(repoId);
+
+	odm.add(d_o, tc_offset);
+	OffsetDescriptorMap eodm(odm, tc_offset + 8);
+	UNMARSHAL_PYSTRING(encap, t_o); Py_DECREF(t_o); // name
+	t_o = r_unmarshalTypeCode(encap, eodm); Py_DECREF(t_o);
       }
       else {
 	OffsetDescriptorMap eodm(odm, tc_offset + 8);
@@ -872,8 +920,8 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
 	d_o = PyTuple_New(4); odm.add(d_o, tc_offset);
 	PyTuple_SET_ITEM(d_o, 0, PyInt_FromLong(tk));
 	PyTuple_SET_ITEM(d_o, 1, repoId);
-
-	// repoId and name
+	
+	// name
 	UNMARSHAL_PYSTRING(encap, t_o); PyTuple_SET_ITEM(d_o, 2, t_o);
 
 	// TypeCode
@@ -896,7 +944,18 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
 	// Static knowledge of the exception
 	Py_INCREF(d_o);
 	Py_DECREF(repoId);
-	//?? Is is worth checking the TypeCodes for equivalence?
+
+	odm.add(d_o, tc_offset);
+	OffsetDescriptorMap eodm(odm, tc_offset + 8);
+
+	UNMARSHAL_PYSTRING(encap, t_o); Py_DECREF(t_o); // name
+	CORBA::ULong cnt; cnt <<= encap;
+
+	for (CORBA::ULong i=0; i < cnt; i++) {
+	  // Member name and type
+	  UNMARSHAL_PYSTRING(encap, t_o); Py_DECREF(t_o);
+	  t_o = r_unmarshalTypeCode(encap, eodm); Py_DECREF(t_o);
+	}
       }
       else {
 	// Don't know this exception
@@ -935,8 +994,8 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
 	}
 
 	// Create class object:
-	// *** Could be made faster by finding the createUnknownStruct
-	// function only once, and manually building the argument typle
+	// *** Could be made faster by finding the createUnknownUserException
+	// function only once, and manually building the argument tuple
 	t_o = PyObject_GetAttrString(omniPy::pyomniORBmodule,
 				     (char*)"createUnknownUserException");
 	OMNIORB_ASSERT(t_o && PyFunction_Check(t_o));
@@ -953,7 +1012,7 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
 
   case 0xffffffff:
     {
-      CORBA::ULong position, offset;
+      CORBA::Long position, offset;
 
       offset  <<= stream;
       position  = tc_offset + 4 + offset;
