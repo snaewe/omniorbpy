@@ -1,3 +1,18 @@
+Tue Sep 19 10:22:39 BST 2000 dpg1
+=================================
+
+- More paranoid about clearing Python error status
+
+src/lib/omniORBpy/modules/common/pyomniFunc.cc
+src/lib/omniORBpy/modules/omni30/pyServant.cc
+
+- Rename Scope::Entry::Kind to Scope::Entry::EntryKind to avoid
+  compiler bugs.
+
+src/lib/omniORBpy/omniidl/cxx/idlscope.cc
+src/lib/omniORBpy/omniidl/cxx/idlscope.h
+
+
 Mon Sep 11 15:12:38 BST 2000 dpg1
 =================================
 
