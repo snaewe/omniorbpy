@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.15  1999/12/02 17:35:57  dpg1
+// _narrow, _is_a, _is_equivalent weren't unlocking the interpreter.
+//
 // Revision 1.14  1999/11/25 11:21:37  dpg1
 // Proper support for server-side _is_a().
 //
@@ -510,6 +513,21 @@ protected:
 };
 
 
+////////////////////////////////////////////////////////////////////////////
+// InterpreterUnlocker releases the Python interpreter lock               //
+////////////////////////////////////////////////////////////////////////////
+
+class InterpreterUnlocker {
+public:
+  InterpreterUnlocker() {
+    tstate_ = PyEval_SaveThread();
+  }
+  ~InterpreterUnlocker() {
+    PyEval_RestoreThread(tstate_);
+  }
+private:
+  PyThreadState* tstate_;
+};
 
 
 _CORBA_MODULE_END
