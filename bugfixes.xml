@@ -8,6 +8,20 @@
 
 <buglist version="1.3">
 
+<bug id="5" date="Fri May 18 15:19:46 BST 2001" user="dpg1">
+
+  <summary>OverflowError with unsigned long / long long
+  constants</summary>
+  <reported>Carl Bray</reported>
+  <link
+  href="http://www.uk.research.att.com/omniORB/archives/2001-05/0183.html"/>
+  <text>
+  Due to a change in str() between Python 1.5.2 and Python 2.x,
+  constants mapped to Python long integers would be missing the 'L'
+  suffix when using Python 2.x.
+  </text>
+</bug>
+
 <bug id="4" date="Fri May 11 17:22:00 BST 2001" user="dpg1">
 
   <summary>TypeCode.get_compact_typecode() broken</summary>

@@ -1,3 +1,11 @@
+Fri May 18 15:19:46 BST 2001 dpg1
+=================================
+
+- Python long int constants fail on Python 2.x.
+
+omniidl_be/python.py
+
+
 Thu May 17 15:01:57 BST 2001 dpg1
 =================================
 

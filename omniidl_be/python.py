@@ -28,6 +28,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.27.2.7  2001/05/18 14:30:53  dpg1
+# Python long int constants fail on Python 2.x.
+#
 # Revision 1.27.2.6  2001/04/23 13:53:08  dpg1
 # Cosmetic output change.
 #
@@ -1590,6 +1593,10 @@ def valueToString(val, kind, scope=[]):
 
     elif kind == idltype.tk_long and val == -2147483647 - 1:
         return "-2147483647 - 1"
+
+    elif type(val) is type(1L):
+        return repr(val)
+
     else:
         return str(val)
 
