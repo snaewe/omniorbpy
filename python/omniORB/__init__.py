@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.24  2000/07/12 14:33:10  dpg1
+# Support for Interface Repository stubs
+#
 # Revision 1.23  2000/06/28 10:49:07  dpg1
 # Incorrect comment removed.
 #
@@ -259,6 +262,13 @@ no concurrency control: "addWThreadHook()" must be called before the
 runtime creates any "WorkerThread"s.
 """
     WorkerThread.hooks.append(hook)
+
+
+def importIRStubs():
+    """importIRStubs() -> None
+
+Make stubs for the Interface Repository appear in the CORBA module"""
+    import omniORB.ir_idl
 
 
 # Import omniORB API functions. This provides:
@@ -745,4 +755,9 @@ keywordMapping = {
 # Register this module and the threading module with omnipy:
 import omniORB, omniORB.PortableServer
 _omnipy.registerPyObjects(omniORB)
+
+# Import the Interface Repository stubs if necessary
+if os.environ.has_key("OMNIORBPY_IMPORT_IR_STUBS"):
+    import omniORB.ir_idl
+
 del omniORB
