@@ -9,6 +9,7 @@ ifeq ($(PYTHON),)
 PYTHON = python
 endif
 
+
 SUBDIRS = cccp
 
 all::
@@ -136,8 +137,8 @@ CXXOPTIONS += -fPIC
 $(lib): $(OBJS) $(PYOBJS)
 	(set -x; \
 	$(RM) $@; \
-	$(CXXLINK) $(CXXLINKOPTIONS) -shared -o $@ -Wl-soname,$(soname) $(IMPORT_LIBRARY_FLAGS) $(OMNIORB2_LIB_NODYN_DEPEND)\
-	 $(filter-out $(LibSuffixPattern),$^) $(OMNIORB2_LIB_NODYN)\
+	$(CXXLINK) $(CXXLINKOPTIONS) -shared -o $@ -Wl-soname,$(soname) $(IMPORT_LIBRARY_FLAGS) \
+	 $(filter-out $(LibSuffixPattern),$^) \
 	)
 
 endif
@@ -324,7 +325,7 @@ ifeq ($(notdir $(CXX)),aCC)
 
 DIR_CPPFLAGS += +Z
 
-libname = _omniidlmodule.so
+libname = _omniidlmodule.sl
 soname = $(libname).$(IDLMODULE_MAJOR)
 lib = $(soname).$(IDLMODULE_MINOR)
 
