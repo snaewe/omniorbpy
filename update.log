@@ -1,3 +1,11 @@
+Tue Feb 19 14:03:11 GMT 2002 dpg1
+=================================
+
+- _omnipymodule works better if it's linked with omniORB...
+
+src/lib/omniORBpy/modules/dir.mk
+
+
 Tue Feb 19 13:46:31 GMT 2002 dpg1
 =================================
 

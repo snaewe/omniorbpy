@@ -95,7 +95,8 @@ shlib := $(shell $(SharedLibraryFullName) $(namespec))
 DIR_CPPFLAGS += $(SHAREDLIB_CPPFLAGS)
 
 $(shlib): $(OBJS)
-	@(namespec="$(namespec)"; $(MakeCXXSharedLibrary))
+	@(namespec="$(namespec)"; extralibs="$(OMNIORB_LIB_NODYN)";\
+          $(MakeCXXSharedLibrary))
 
 all:: $(shlib)
 
