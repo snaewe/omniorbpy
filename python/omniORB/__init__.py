@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.12  1999/11/12 16:49:18  dpg1
+# Stupid bug introduced with last change.
+#
 # Revision 1.11  1999/11/12 15:53:48  dpg1
 # New functions omniORB.importIDL() and omniORB.importIDLString().
 #
@@ -507,4 +510,3 @@ keywordMapping = {
 import omniORB, omniORB.PortableServer
 _omnipy.registerPyObjects(omniORB, threading)
 del omniORB
-del sys, types, string, imp, os, tempfile, threading
