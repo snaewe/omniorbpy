@@ -28,6 +28,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.16  1999/12/15 11:32:42  dpg1
+# -Wbinline option added.
+#
 # Revision 1.15  1999/12/09 14:12:55  dpg1
 # invokeOp() calls now on a single line. typedef now generates a class
 # to be passed to CORBA.id().
@@ -90,7 +93,9 @@ module_directory = ""
 
 cpp_args = ["-D__OMNIIDL_PYTHON__"]
 usage_string = """\
-  -Wbstdout       Send generated stubs to stdout rather than a file"""
+  -Wbstdout       Send generated stubs to stdout rather than a file
+  -Wbinline       Output stubs for #included files in line with the main file\
+"""
 
 #""" Uncomment this line to get syntax highlighting on the output strings
 
@@ -422,9 +427,10 @@ omniORB.registerType(@ename@._NP_RepositoryId, _d_@ename@, _tc_@ename@)"""
 
 imported_files   = {}
 exported_modules = {}
+output_inline    = 0
 
 def run(tree, args):
-    global main_idl_file, imported_files, exported_modules
+    global main_idl_file, imported_files, exported_modules, output_inline
 
     imported_files.clear()
     exported_modules.clear()
@@ -434,6 +440,8 @@ def run(tree, args):
     for arg in args:
         if arg == "stdout":
             use_stdout = 1
+        elif arg == "inline":
+            output_inline = 1
         else:
             print "Warning: python back-end does not understand argument:", \
                   arg
@@ -475,7 +483,7 @@ class PythonVisitor:
     def handleImported(self, node):
         global imported_files
 
-        if node.mainFile():
+        if node.mainFile() or output_inline:
             return 0
         else:
             ifilename = outputFileName(node.file())
@@ -511,8 +519,7 @@ class PythonVisitor:
     # Module
     #
     def visitModule(self, node):
-        if not node.mainFile():
-            self.handleImported(node)
+        if self.handleImported(node):
             imodname = dotName(node.scopedName())
             self.st.out(open_imported_module_name, imodname=imodname)
 
@@ -520,14 +527,14 @@ class PythonVisitor:
 
         sname = dotName(node.scopedName())
 
-        if node.mainFile():
+        if node.mainFile() or output_inline:
             self.st.out(module_start, sname=sname, filename=node.file())
 
         parentmodname = self.modname
         self.modname  = dotName(node.scopedName())
 
         ags = self.at_global_scope
-        if self.at_global_scope:
+        if ags:
             self.currentScope = ["_0_" + node.identifier()]
         else:
             self.currentScope.append(node.identifier())
@@ -544,7 +551,7 @@ class PythonVisitor:
         self.at_global_scope = ags
         self.modname         = parentmodname
 
-        if node.mainFile():
+        if node.mainFile() or output_inline:
             exported_modules[sname] = 1
             self.st.out(module_end, modname=parentmodname, sname=sname)
 
@@ -1324,8 +1331,7 @@ def valueToString(val, kind, scope=[]):
         return str(val)
 
 def outputFileName(idlname):
-    ret = string.replace(os.path.basename(idlname), ".", "_")
-    return ret
+    return string.replace(os.path.basename(idlname), ".", "_")
 
 def checkStubDir(path):
     """Check the given path for use as a stub directory
