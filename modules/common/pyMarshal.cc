@@ -5,6 +5,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.3  1999/07/29 14:19:57  dpg1
+// Various fixes.
+//
 // Revision 1.2  1999/07/19 15:46:01  dpg1
 // Any support, various fixes.
 //
@@ -140,17 +143,14 @@ omniPy::alignedSize(CORBA::ULong msgsize,
   case CORBA::tk_objref: // repoId, name
     {
       assert(tup);
-      t_o = PyTuple_GET_ITEM(d_o, 1);
-      assert(PyString_Check(t_o));
 
       CORBA::Object_ptr obj = (CORBA::Object_ptr)getTwin(a_o);
 
       if (!obj) throw CORBA::BAD_PARAM();
 
-      msgsize = CORBA::AlignedObjRef(obj,
-				     PyString_AS_STRING(t_o),
-				     PyString_GET_SIZE(t_o) + 1,
-				     msgsize);
+      const char* repoId = obj->PR_getobj()->NP_IRRepositoryId();
+
+      msgsize = CORBA::AlignedObjRef(obj, repoId, strlen(repoId) + 1, msgsize);
     }
     break;
 
@@ -421,6 +421,10 @@ omniPy::alignedSize(CORBA::ULong msgsize,
       assert(tup);
       if (!PyInstance_Check(a_o)) throw CORBA::BAD_PARAM();
 
+      // repoId string:
+      msgsize  = omni::align_to(msgsize, omni::ALIGN_4);
+      msgsize += 4 + PyString_GET_SIZE(PyTuple_GET_ITEM(d_o, 2)) + 1;
+
       PyObject* sdict = ((PyInstanceObject*)a_o)->in_dict;
 
       // As with structs, the descriptor tuple has twice the number of
@@ -613,14 +617,10 @@ omniPy::marshalPyObject(NetBufferedStream& stream,
 
   case CORBA::tk_objref: // repoId, name
     {
-      t_o = PyTuple_GET_ITEM(d_o, 1);
-
       CORBA::Object_ptr obj = (CORBA::Object_ptr)getTwin(a_o);
+      const char* repoId    = obj->PR_getobj()->NP_IRRepositoryId();
 
-      CORBA::MarshalObjRef(obj,
-			   PyString_AS_STRING(t_o),
-			   PyString_GET_SIZE(t_o) + 1,
-			   stream);
+      CORBA::MarshalObjRef(obj, repoId, strlen(repoId) + 1, stream);
     }
     break;
 
@@ -805,6 +805,18 @@ omniPy::marshalPyObject(NetBufferedStream& stream,
 
   case CORBA::tk_except: // class, repoId, exc name, name, descriptor, ...
     {
+      PyObject*    t_o  = PyTuple_GET_ITEM(d_o, 2);
+      CORBA::ULong slen = PyString_GET_SIZE(t_o) + 1;
+      slen >>= stream;
+
+      if (slen > 1) {
+	char* str = PyString_AS_STRING(t_o);
+	stream.put_char_array((const CORBA::Char*)((const char*)str), slen);
+      }
+      else {
+	CORBA::Char('\0') >>= stream;
+      }
+
       PyObject* sdict = ((PyInstanceObject*)a_o)->in_dict;
       int       cnt   = (PyTuple_GET_SIZE(d_o) - 4) / 2;
 
@@ -988,14 +1000,10 @@ omniPy::marshalPyObject(MemBufferedStream& stream,
 
   case CORBA::tk_objref: // repoId, name
     {
-      t_o = PyTuple_GET_ITEM(d_o, 1);
-
       CORBA::Object_ptr obj = (CORBA::Object_ptr)getTwin(a_o);
+      const char* repoId    = obj->PR_getobj()->NP_IRRepositoryId();
 
-      CORBA::MarshalObjRef(obj,
-			   PyString_AS_STRING(t_o),
-			   PyString_GET_SIZE(t_o) + 1,
-			   stream);
+      CORBA::MarshalObjRef(obj, repoId, strlen(repoId) + 1, stream);
     }
     break;
 
@@ -1180,6 +1188,18 @@ omniPy::marshalPyObject(MemBufferedStream& stream,
 
   case CORBA::tk_except: // class, repoId, exc name, name, descriptor, ...
     {
+      PyObject*    t_o  = PyTuple_GET_ITEM(d_o, 2);
+      CORBA::ULong slen = PyString_GET_SIZE(t_o) + 1;
+      slen >>= stream;
+
+      if (slen > 1) {
+	char* str = PyString_AS_STRING(t_o);
+	stream.put_char_array((const CORBA::Char*)((const char*)str), slen);
+      }
+      else {
+	CORBA::Char('\0') >>= stream;
+      }
+
       PyObject* sdict = ((PyInstanceObject*)a_o)->in_dict;
       int       cnt   = (PyTuple_GET_SIZE(d_o) - 4) / 2;
 
@@ -1357,14 +1377,20 @@ omniPy::unmarshalPyObject(NetBufferedStream& stream,
   case CORBA::tk_objref: // repoId, name
     {
       assert(tup);
-      t_o                   = PyTuple_GET_ITEM(d_o, 1);
-      assert(PyString_Check(t_o));
+      t_o = PyTuple_GET_ITEM(d_o, 1);
 
-      char*  targetRepoId   = PyString_AS_STRING(t_o);
+      const char* targetRepoId;
 
-      CORBA::Object_ptr obj = CORBA::UnMarshalObjRef(targetRepoId,
-						     stream);
-      r_o = createPyCorbaObject(targetRepoId, obj);
+      if (t_o == Py_None)
+	targetRepoId = 0;
+      else {
+	assert(PyString_Check(t_o));
+	targetRepoId = PyString_AS_STRING(t_o);
+      }
+
+      CORBA::Object_ptr obj = omniPy::UnMarshalObjRef(targetRepoId,
+						      stream);
+      r_o = createPyCorbaObjRef(targetRepoId, obj);
     }
     break;
 
@@ -1586,6 +1612,14 @@ omniPy::unmarshalPyObject(NetBufferedStream& stream,
   case CORBA::tk_except: // class, repoId, exc name, name, descriptor, ...
     {
       assert(tup);
+
+      // Throw away the repoId. By the time we get here, we already
+      // know it.
+      { 
+	CORBA::String_member str_tmp;
+	str_tmp <<= stream;
+      }
+
       PyObject* strclass = PyTuple_GET_ITEM(d_o, 1);
       assert(PyClass_Check(strclass));
 
@@ -1766,14 +1800,20 @@ omniPy::unmarshalPyObject(MemBufferedStream& stream,
   case CORBA::tk_objref: // repoId, name
     {
       assert(tup);
-      t_o                   = PyTuple_GET_ITEM(d_o, 1);
-      assert(PyString_Check(t_o));
+      t_o = PyTuple_GET_ITEM(d_o, 1);
 
-      char*  targetRepoId   = PyString_AS_STRING(t_o);
+      const char* targetRepoId;
 
-      CORBA::Object_ptr obj = CORBA::UnMarshalObjRef(targetRepoId,
-						     stream);
-      r_o = createPyCorbaObject(targetRepoId, obj);
+      if (t_o == Py_None)
+	targetRepoId = 0;
+      else {
+	assert(PyString_Check(t_o));
+	targetRepoId = PyString_AS_STRING(t_o);
+      }
+
+      CORBA::Object_ptr obj = omniPy::UnMarshalObjRef(targetRepoId,
+						      stream);
+      r_o = createPyCorbaObjRef(targetRepoId, obj);
     }
     break;
 
@@ -1995,6 +2035,14 @@ omniPy::unmarshalPyObject(MemBufferedStream& stream,
   case CORBA::tk_except: // class, repoId, exc name, name, descriptor, ...
     {
       assert(tup);
+
+      // Throw away the repoId. By the time we get here, we already
+      // know it.
+      { 
+	CORBA::String_member str_tmp;
+	str_tmp <<= stream;
+      }
+
       PyObject* strclass = PyTuple_GET_ITEM(d_o, 1);
       assert(PyClass_Check(strclass));
 
