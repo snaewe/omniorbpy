@@ -1,3 +1,16 @@
+Tue Jan 25 11:43:42 GMT 2005 dgrisby
+====================================
+
+- Merge from omnipy2_develop; set RPM version.
+
+contrib/RPMs/omniORBpy.spec
+modules/pyExceptions.cc
+modules/pyServant.cc
+modules/pyThreadCache.cc
+modules/pyThreadCache.h
+python/omniORB/__init__.py
+
+
 Mon Jan 17 15:18:36 GMT 2005 dgrisby
 ====================================
 

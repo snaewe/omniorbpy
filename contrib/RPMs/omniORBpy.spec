@@ -1,7 +1,7 @@
 Summary:  Python Language Mapping for omniORB
 Name:     omniORBpy
-Version:  2.5
-Release:  1
+Version:  3.0
+Release:  0.1
 License:  GPL / LGPL
 Group:    System/Libraries
 Source0:  %{name}-%{version}.tar.gz
