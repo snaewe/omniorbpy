@@ -145,7 +145,12 @@ instance:<BR>
 <BR>
 <PRE>
 $ example_echo_srv.py -ORBtraceLevel 5
-</PRE>At the moment, the following trace levels are defined:<BR>
+</PRE>You can also inspect or modify the trace level at run-time.
+A call to <TT>omniORB.traceLevel(</TT><I>level</I><TT>)</TT> sets
+the level; calling the function with no argument returns the current
+level.<BR>
+<BR>
+At the moment, the following trace levels are defined:<BR>
 <BR>
 <TABLE CELLSPACING=2 CELLPADDING=0>
 <TR><TD VALIGN=top ALIGN=left NOWRAP>&nbsp;</TD>
@@ -404,7 +409,21 @@ omniORB.installSystemExceptionHandler(cookie, function [, object])
 as for <TT>TRANSIENT</TT> handlers.<BR>
 <BR>
 <A NAME="toc31"></A>
-<H2>6.10&nbsp;&nbsp; Dynamic importing of IDL</H2>
+<H2>6.10&nbsp;&nbsp; Location forwarding</H2>
+<A NAME="sec:locationForward"></A>Any CORBA operation invocation can return a <TT>LOCATION_FORWARD</TT>
+message to the caller, indicating that it should retry the invocation
+on a new object reference. The standard allows ServantManagers to
+trigger <TT>LOCATION_FORWARD</TT>s by raising the
+<TT>PortableServer::ForwardRequest</TT> exception, but it does not
+provide a similar mechanism for normal servants. omniORBpy provides
+the <TT>omniORB.LOCATION_FORWARD</TT> exception for this
+purpose. The exception object is initialised with the target object
+reference. It can be thrown by any operation
+implementation. <TT>omniORB.LOCATION_FORWARD</TT> is not supported on
+omniORB 2.8.0.<BR>
+<BR>
+<A NAME="toc32"></A>
+<H2>6.11&nbsp;&nbsp; Dynamic importing of IDL</H2>
 <A NAME="sec:importIDL"></A>omniORBpy is usually used with pre-generated stubs. Since Python is a
 dynamic language, however, it is possible to compile and import new
 stubs at run-time.<BR>
