@@ -55,7 +55,7 @@ idlc = $(patsubst %,$(BinPattern),idlc)
 #############################################################################
 
 ifdef UnixPlatform
-CXXDEBUGFLAGS = -g
+#CXXDEBUGFLAGS = -g
 PYPREFIX := $(shell $(PYTHON) -c 'import sys; print sys.exec_prefix')
 PYINCDIR := $(PYPREFIX)/include
 DIR_CPPFLAGS += -I$(PYINCDIR)
