@@ -180,12 +180,19 @@ Apasphere Ltd.\\}
 
 \vfill
 \vfill
-November 2002
+July 2004
 \vfill
 
 \end{center}
 
 \clearpage
+
+{\Large \bf Changes and Additions, July 2004}
+\begin{itemize}
+\item Minor updates.
+\end{itemize}
+
+\vspace{\baselineskip}
 
 {\Large \bf Changes and Additions, November 2002}
 \begin{itemize}
@@ -1499,6 +1506,14 @@ level 40     & dump complete contents of each giop message\\
 messages are output.
 
 
+\confopt{traceExceptions}{0}
+
+If the \code{traceExceptions} parameter is set true, all system
+exceptions are logged as they are thrown, along with details about
+where the exception is thrown from. This parameter is enabled by
+default if the traceLevel is set to 10 or more.
+
+
 \confopt{traceInvocations}{0}
 
 If the \code{traceInvocations} parameter is set true, all local and
@@ -2066,7 +2081,7 @@ can set the arguments to be used for all calls using the
 \op{omniORB.omniidlArguments} function.
 
 Both import functions return a tuple containing the names of the
-Python modules which have been imported. The modules themselves can be
+Python modules that have been imported. The modules themselves can be
 accessed through \code{sys.modules}. For example:
 
 \begin{idllisting}
@@ -2096,6 +2111,15 @@ module M3 {
 'Hello'
 \end{pylisting}
 
+Note that each time \op{importIDL} or \op{importIDLString} is called,
+the IDL definitions are compiled and imported into the associated
+Python declarations. The new declarations overwrite any old ones with
+the same names. This can cause confusing situations where different
+modules see different definitions of the same objects. Although the
+objects appear identical, they are not, and comparisons within
+applications and within omniORBpy unexpectedly fail. You should not
+use these functions in more than one module to import the same IDL
+files.
 
 
 \section{C++ API}

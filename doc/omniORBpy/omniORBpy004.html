@@ -117,6 +117,15 @@ error stream. The following levels are defined:<BR>
 The trace level is cumulative, so at level 40, all trace
 messages are output.<BR>
 <BR>
+<TT>traceExceptions</TT> &nbsp;&nbsp; <I>default</I> =
+ <TT>0</TT><BR>
+<BR>
+<BR>
+If the <TT>traceExceptions</TT> parameter is set true, all system
+exceptions are logged as they are thrown, along with details about
+where the exception is thrown from. This parameter is enabled by
+default if the traceLevel is set to 10 or more.<BR>
+<BR>
 <TT>traceInvocations</TT> &nbsp;&nbsp; <I>default</I> =
  <TT>0</TT><BR>
 <BR>
@@ -686,7 +695,7 @@ can set the arguments to be used for all calls using the
 <TT>omniORB.omniidlArguments()</TT> function.<BR>
 <BR>
 Both import functions return a tuple containing the names of the
-Python modules which have been imported. The modules themselves can be
+Python modules that have been imported. The modules themselves can be
 accessed through <TT>sys.modules</TT>. For example:
 <PRE>
 // test.idl
@@ -712,6 +721,16 @@ From Python:
 &gt;&gt;&gt; sys.modules["_GlobalIDL"].s
 'Hello'
 </PRE>
+Note that each time <TT>importIDL()</TT> or <TT>importIDLString()</TT> is called,
+the IDL definitions are compiled and imported into the associated
+Python declarations. The new declarations overwrite any old ones with
+the same names. This can cause confusing situations where different
+modules see different definitions of the same objects. Although the
+objects appear identical, they are not, and comparisons within
+applications and within omniORBpy unexpectedly fail. You should not
+use these functions in more than one module to import the same IDL
+files.<BR>
+<BR>
 <A NAME="toc22"></A>
 <H2><A NAME="htoc56">4.10</A>&nbsp;&nbsp;C++ API</H2>
 omniORBpy has a C++ API that can be used by programs that embed Python
