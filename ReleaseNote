@@ -4,7 +4,7 @@ Release Notes for omniORBpy 0.1
 This is the first pre-release of Python bindings for omniORB.
 
 The bindings adhere to the proposed IDL to Python mapping which you
-may find at ftp://ftp.omg.org/pub/docs/orbos/98-08-02.pdf. There are a
+may find at ftp://ftp.omg.org/pub/docs/orbos/99-08-02.pdf. There are a
 number of errors in the mapping document, which are outlined below.
 
 omniORBpy is currently available for Linux and Solaris, and should be
