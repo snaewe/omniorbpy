@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.18  2003/03/14 15:28:43  dgrisby
+// Use Python 1.5.2 sequence length function.
+//
 // Revision 1.1.2.17  2003/03/12 11:17:03  dgrisby
 // Registration of external pseudo object creation functions.
 //
@@ -233,8 +236,8 @@ PyObject*
 omniPy::createPyPseudoObjRef(const CORBA::Object_ptr objref)
 {
   {
-    CORBA::ORB_var orb = CORBA::ORB::_narrow(objref);
-    if (!CORBA::is_nil(orb)) {
+    CORBA::ORB_var orbp = CORBA::ORB::_narrow(objref);
+    if (!CORBA::is_nil(orbp)) {
       OMNIORB_ASSERT(omniPy::orb);
       return PyObject_GetAttrString(omniPy::pyomniORBmodule, (char*)"orb");
     }
@@ -262,7 +265,7 @@ omniPy::createPyPseudoObjRef(const CORBA::Object_ptr objref)
       Py_XDECREF(fnlist);
       break;
     }
-    int len = PySequence_Size(fnlist);
+    int len = PySequence_Length(fnlist);
     for (int i=0; i < len; i++) {
       PyObject* pyf = PySequence_GetItem(fnlist, i);
       if (!PyCObject_Check(pyf)) {
