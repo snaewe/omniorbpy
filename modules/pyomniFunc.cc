@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.13  2003/10/28 13:59:44  dgrisby
+// myIPAddresses function.
+//
 // Revision 1.1.2.12  2003/09/01 09:53:39  dgrisby
 // Avoid deadlock in dummy thread deletion.
 //
@@ -69,6 +72,8 @@
 
 #include <omnipy.h>
 #include <pyThreadCache.h>
+#include <omniORB4/giopEndpoint.h>
+
 
 OMNI_USING_NAMESPACE(omni);
 
@@ -685,6 +690,33 @@ extern "C" {
     return Py_None;
   }
 
+  static char myIPAddresses_doc [] =
+  "myIPAddresses()\n"
+  "\n"
+  "Return a list of IP address strings for this host. Returns an empty list\n"
+  "if called before the ORB is initialised.\n";
+
+  static PyObject* pyomni_myIPAddresses(PyObject* self, PyObject* args)
+  {
+    if (!PyArg_ParseTuple(args, (char*)""))
+      return 0;
+
+    const omnivector<const char*>* ifaddrs
+      = omni::giopTransportImpl::getInterfaceAddress("giop:tcp");
+
+    PyObject* pyaddrs = PyList_New(ifaddrs->size());
+
+    omnivector<const char*>::const_iterator i;
+    int j;
+
+    for (i = ifaddrs->begin(), j=0; i != ifaddrs->end(); i++, j++) {
+      PyList_SetItem(pyaddrs, j, PyString_FromString(*i));
+    }
+
+    return pyaddrs;
+  }
+
+
   static PyMethodDef pyomni_methods[] = {
     {(char*)"installTransientExceptionHandler",
      pyomni_installTransientExceptionHandler,
@@ -733,6 +765,10 @@ extern "C" {
     {(char*)"setClientThreadCallTimeout",
      pyomni_setClientThreadCallTimeout,
      METH_VARARGS, setClientThreadCallTimeout_doc},
+
+    {(char*)"myIPAddresses",
+     pyomni_myIPAddresses,
+     METH_VARARGS, myIPAddresses_doc},
 
     {NULL,NULL}
   };
