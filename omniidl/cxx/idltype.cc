@@ -28,6 +28,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.8  2000/03/06 10:39:52  dpg1
+// Typo in string constant.
+//
 // Revision 1.7  2000/03/03 17:41:37  dpg1
 // Major reorganisation to support omniORB 3.0 as well as 2.8.
 //
@@ -60,7 +63,7 @@ kindAsString() const
   case tk_short:              return "short";
   case tk_long:               return "long";
   case tk_ushort:             return "unsigned short";
-  case tk_ulong:              return "undigned long";
+  case tk_ulong:              return "unsigned long";
   case tk_float:              return "float";
   case tk_double:             return "double";
   case tk_boolean:            return "boolean";
