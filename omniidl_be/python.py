@@ -28,13 +28,16 @@
 
 # $Id$
 # $Log$
+# Revision 1.2  1999/11/01 20:19:55  dpg1
+# Support for union switch types declared inside the switch statement.
+#
 # Revision 1.1  1999/11/01 16:40:11  dpg1
 # First revision with new front-end.
 #
 
 """omniORB Python bindings"""
 
-import idlast, idltype, idlutil, output
+from omniidl import idlast, idltype, idlutil, output
 import sys, string, types, os.path, keyword
 
 # Configuration defaults:
@@ -193,12 +196,10 @@ __name__ = "@modname@"\
 """
 
 constant_at_module_scope = """\
-@modname@.@cname@ = @value@    # const\
-"""
+@modname@.@cname@ = @value@"""
 
 constant = """\
-@cname@ = @value@    # const\
-"""
+@cname@ = @value@"""
 
 typedef_at_module_scope = """\
 
@@ -287,22 +288,28 @@ _tc_@sname@ = omniORB.tcInternal.createTypeCode(_d_@sname@)
 omniORB.registerType(@sname@._NP_RepositoryId, _d_@sname@, _tc_@sname@)"""
 
 
-recursive_union_descr = """
+recursive_union_descr_at_module_scope = """
 # Recursive union @uname@
 @modname@._d_@uname@ = (omniORB.tcInternal.tv__indirect, ["@repoId@"])"""
 
-union_class_and_descriptor_at_module_scope = """\
+recursive_union_descr = """
+# Recursive union @uname@
+_d_@uname@ = (omniORB.tcInternal.tv__indirect, ["@repoId@"])"""
 
+union_class = """
 # union @uname@
 class @uname@ (omniORB.Union):
-    _NP_RepositoryId = "@repoId@"
+    _NP_RepositoryId = "@repoId@"\
+"""
+
+union_descriptor_at_module_scope = """
+@modname@.@uname@ = @uname@
 
 @uname@._m_to_d = {@m_to_d@}
 @uname@._d_to_m = {@d_to_m@}
 @uname@._def_m  = @def_m@
 @uname@._def_d  = @def_d@
 
-@modname@.@uname@ = @uname@
 @modname@._m_@uname@  = (@m_un@)
 @modname@._d_@uname@  = (omniORB.tcInternal.tv_union, @uname@, @uname@._NP_RepositoryId, "@uname@", @stype@, @defpos@, @modname@._m_@uname@, @m_def@, {@d_map@})"""
 
@@ -314,12 +321,7 @@ union_register_at_module_scope = """\
 omniORB.registerType(@uname@._NP_RepositoryId, @modname@._d_@uname@, @modname@._tc_@uname@)
 del @uname@"""
 
-union_class_and_descriptor = """\
-
-# union @uname@
-class @uname@ (omniORB.Union):
-    _NP_RepositoryId = "@repoId@"
-
+union_descriptor = """
 @uname@._m_to_d = {@m_to_d@}
 @uname@._d_to_m = {@d_to_m@}
 @uname@._def_m  = @def_m@
@@ -412,7 +414,8 @@ class PythonVisitor:
     #
     def visitAST(self, node):
         self.at_module_scope = 1
-        self.currentScope    = []
+        self.at_global_scope = 1
+        self.currentScope    = ["_GlobalIDL"]
         self.modname         = "_GlobalIDL"
 
         self.st.out(module_start, sname="_GlobalIDL", filename=node.file())
@@ -446,13 +449,24 @@ class PythonVisitor:
 
         parentmodname = self.modname
         self.modname  = dotName(node.scopedName())
-        self.currentScope.append(node.identifier())
+
+        ags = self.at_global_scope
+        if self.at_global_scope:
+            self.currentScope = [node.identifier()]
+        else:
+            self.currentScope.append(node.identifier())
+
+        self.at_global_scope = 0
 
         for n in node.definitions():
             n.accept(self)
 
-        self.currentScope.pop()
-        self.modname = parentmodname
+        if ags:
+            self.currentScope = ["_GlobalIDL"]
+        else:
+            self.currentScope.pop()
+        self.at_global_scope = ags
+        self.modname         = parentmodname
 
         exported_modules[sname] = 1
 
@@ -671,18 +685,11 @@ class PythonVisitor:
 
         cname = mangle(node.identifier())
 
-        if (node.constType().kind() == idltype.tk_string) or \
-           (node.constType().kind() == idltype.tk_char) :
-            value = '"' + escapifyString(node.value()) + '"'
-
-        elif node.constType().kind() == idltype.tk_enum:
-            if self.at_module_scope:
-                value = valueToString(node.value(), [])
-            else:
-                value = valueToString(node.value(), self.currentScope)
+        if self.at_module_scope:
+            value = valueToString(node.value(), node.constType().kind(), [])
         else:
-            value = str(node.value())
-
+            value = valueToString(node.value(), node.constType().kind(),
+                                  self.currentScope)
         if self.at_module_scope:
             self.st.out(constant_at_module_scope,
                         cname   = cname,
@@ -848,7 +855,7 @@ class PythonVisitor:
                     mdescl.append(\
                         typeAndDeclaratorToDescriptor(mem.memberType(),
                                                       decl,
-                                                      currentScope))
+                                                      self.currentScope))
         if len(mnamel) > 0:
             mnames = ", " + string.join(mnamel, ", ")
 
@@ -879,10 +886,30 @@ class PythonVisitor:
         stype = typeToDescriptor(node.switchType(), self.currentScope)
 
         if node.recursive():
-            self.st.out(recursive_union_descr,
-                        uname   = uname,
-                        repoId  = node.repoId(),
-                        modname = self.modname)
+            if self.at_module_scope:
+                self.st.out(recursive_union_descr_at_module_scope,
+                            uname   = uname,
+                            repoId  = node.repoId(),
+                            modname = self.modname)
+            else:
+                self.st.out(recursive_union_descr,
+                            uname   = uname,
+                            repoId  = node.repoId(),
+                            modname = self.modname)
+
+        self.st.out(union_class, uname=uname, repoId=node.repoId())
+
+        if node.constrType():
+            self.st.inc_indent()
+            ams = self.at_module_scope
+            self.at_module_scope = 0
+            self.currentScope.append(node.identifier())
+            
+            node.switchType().decl().accept(self)
+
+            self.currentScope.pop()
+            self.at_module_scope = ams
+            self.st.dec_indent()
 
         def_m    = "None"
         def_d    = "None"
@@ -924,7 +951,8 @@ class PythonVisitor:
             for label in case.labels():
                 if label.default():
                     def_m  = '"' + cname + '"'
-                    def_d  = valueToString(label.value(), self.currentScope)
+                    def_d  = valueToString(label.value(), label.labelKind(),
+                                           self.currentScope)
                     defpos = str(i)
                     if self.at_module_scope:
                         m_def  = self.modname + "._m_" + uname + \
@@ -935,7 +963,8 @@ class PythonVisitor:
                     m_un_l.append('(-1, "' + cname + '", ' +\
                                   ctype + ')')
                 else:
-                    slabel = valueToString(label.value(), self.currentScope)
+                    slabel = valueToString(label.value(), label.labelKind(),
+                                           self.currentScope)
 
                     m_to_d_l.append('"' + cname + '": ' + slabel)
                     d_to_m_l.append(slabel + ': "' + cname + '"')
@@ -957,9 +986,8 @@ class PythonVisitor:
         d_map  = string.join(d_map_l,  ", ")
 
         if self.at_module_scope:
-            self.st.out(union_class_and_descriptor_at_module_scope,
+            self.st.out(union_descriptor_at_module_scope,
                         uname   = uname,
-                        repoId  = node.repoId(),
                         m_to_d  = m_to_d,
                         d_to_m  = d_to_m,
                         def_m   = def_m,
@@ -980,9 +1008,8 @@ class PythonVisitor:
                         uname   = uname,
                         modname = self.modname)
         else:
-            self.st.out(union_class_and_descriptor,
+            self.st.out(union_descriptor,
                         uname   = uname,
-                        repoId  = node.repoId(),
                         m_to_d  = m_to_d,
                         d_to_m  = d_to_m,
                         def_m   = def_m,
@@ -1136,7 +1163,7 @@ def typeToDescriptor(tspec, from_scope=[], is_typedef=0):
               str(tspec.digits()) + ", " + str(tspec.scale()) + ")"
 
     elif tspec.kind() == idltype.tk_alias:
-        sn = tspec.scopedName()
+        sn = fixupScopedName(tspec.scopedName())
         if is_typedef:
             ret = dotName(sn[:-1] + ["_ad_" + sn[-1]], from_scope)
         else:
@@ -1186,19 +1213,18 @@ def mangle(name):
 def fixupScopedName(scopedName):
     """Add _GlobalIDL to the front of a ScopedName if necessary"""
 
-    if len(scopedName) == 1 or \
-       not isinstance(idlast.findDecl([scopedName[0]]), idlast.Module):
+    if not isinstance(idlast.findDecl([scopedName[0]]), idlast.Module):
         scopedName = ["_GlobalIDL"] + scopedName
     return scopedName
 
-def escapifyString(str):
-    # ***
-    return str
-
-def valueToString(val, scope=[]):
-    if isinstance(val, idlast.Enumerator):
+def valueToString(val, kind, scope=[]):
+    if kind == idltype.tk_enum:
         return dotName(fixupScopedName(val.scopedName()), scope)
-    elif val == -2147483647 - 1:
+
+    elif kind == idltype.tk_string or kind == idltype.tk_char:
+        return '"' + idlutil.escapifyString(val) + '"'
+
+    elif kind == idltype.tk_long and val == -2147483647 - 1:
         return "-2147483647 - 1"
     else:
         return str(val)
