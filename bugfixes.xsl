@@ -81,8 +81,9 @@
           <ul><li>Update from <a href="../cvs.html">CVS</a> in the
                   <code>"omnipy1_develop"</code> branch.</li>
 
-              <li>Apply <a href="ftp://ftp.uk.research.att.com/pub/omniORB/omniORBpy/omniORBpy_1_3_bugfixes.patch">this
-                  patch</a> to the omniORBpy 1.3 distribution.</li>
+              <li>Apply <a href="ftp://ftp.uk.research.att.com/pub/omniORB/omniORBpy/omniORBpy_1_4_bugfixes.patch">this
+                  patch</a> to the omniORBpy <xsl:value-of
+                  select="@version"/> distribution.</li>
 
               <li>Download the latest <a
               href="ftp://ftp.uk.research.att.com/pub/omniORB/omniORBpy_snapshots/">source
@@ -92,6 +93,7 @@
           <p>
           The bugs pages for earlier versions can be found here:
           <ul> 
+              <li><a href="bugfixes13.html">omniORBpy 1.3</a></li>
               <li><a href="bugfixes12.html">omniORBpy 1.2</a></li>
               <li><a href="bugfixes11.html">omniORBpy 1.1</a></li>
               <li><a href="bugfixes10.html">omniORBpy 1.0</a></li>
@@ -115,7 +117,7 @@
     <td width="100%" colspan="3"> <hr color="#000080"/>
     <p align="center"><em><small>For comments, feedback, etc, please see
     the '<a href="../intouch.html">Keeping in touch</a>' page</small>.<br/>
-    <small>Copyright 2000 - AT&amp;T Laboratories
+    <small>Copyright 2001 - AT&amp;T Laboratories
     Cambridge</small></em></p>
     </td>
   </tr>

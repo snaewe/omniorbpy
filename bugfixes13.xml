@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+<?xml-stylesheet type="text/xml" href="bugfixes.xsl"?>
+
+<!-- The following bugs have been fixed since the omniORBpy 1.3     -->
+<!-- release. This file is transformed into html with bugfixes.xsl. -->
+
+<!-- Editors: make sure the content you add is well-formed XML.     -->
+
+<buglist version="1.3">
+
+<bug id="6" date="Tue Jun 12 11:19:56 BST 2001" user="dpg1">
+
+  <summary>Invalid generated code with complex IDL scoping</summary>
+  <reported>W. Eliot Kimber</reported>
+  <link
+  href="http://www.uk.research.att.com/omniORB/archives/2001-06/0085.html"/>
+  <text>
+  The omniidl back-end would generate invalid code for some complex
+  scoping cases.
+  </text>
+</bug>
+
+<bug id="5" date="Fri May 18 15:19:46 BST 2001" user="dpg1">
+
+  <summary>OverflowError with unsigned long / long long
+  constants</summary>
+  <reported>Carl Bray</reported>
+  <link
+  href="http://www.uk.research.att.com/omniORB/archives/2001-05/0183.html"/>
+  <text>
+  Due to a change in str() between Python 1.5.2 and Python 2.x,
+  constants mapped to Python long integers would be missing the 'L'
+  suffix when using Python 2.x.
+  </text>
+</bug>
+
+<bug id="4" date="Fri May 11 17:22:00 BST 2001" user="dpg1">
+
+  <summary>TypeCode.get_compact_typecode() broken</summary>
+  <reported>David Konerding</reported>
+  <text>
+  <code>get_compact_typecode()</code> had not been kept up-to-date
+  with the internal TypeCode interfaces.
+  </text>
+</bug>
+
+<bug id="3" date="Thu May  3 15:30:03 BST 2001" user="dpg1">
+
+  <summary>Deadlock when releasing object references</summary>
+  <reported>John Heintz</reported>
+  <link
+  href="http://www.uk.research.att.com/omniORB/archives/2001-05/0041.html"/>
+  <text>
+  Releasing object references can lock
+  <code>omni::internalLock</code>. Various places did this while
+  holding the Python interpreter lock, which could lead to deadlock
+  against threads holding <code>internalLock</code> and attempting to
+  lock the interpreter lock.
+  </text>
+</bug>
+
+<bug id="2" date="Mon Apr  9 12:40:02 BST 2001" user="dpg1">
+
+  <summary>BAD_TYPECODE exception with good TypeCode</summary>
+  <reported>Lars Immisch</reported>
+  <link
+  href="http://www.uk.research.att.com/omniORB/archives/2001-04/0061.html"/>
+  <text>
+  TypeCodes containing multiple references to a known enum could be
+  unmarshalled incorrectly, leading to a BAD_TYPECODE exception.
+  </text>
+</bug>
+
+<bug id="1" date="Mon Mar 19 11:33:37 GMT 2001" user="dpg1">
+
+  <summary>Invalid stub code for typedef to struct/union inside
+  interface</summary>
+  <reported>Jimmy Wilson</reported>
+  <link href="http://www.uk.research.att.com/omniORB/archives/2001-03/0119.html"/>
+  <text>
+  omniidl -bpython would generate invalid stub code for IDL like the
+  following:
+  <p/>
+  <pre>
+  interface I {
+    struct S {
+      long l;
+    };
+    typedef S T;
+  };
+  </pre>
+  </text>
+</bug>
+
+</buglist>

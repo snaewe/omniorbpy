@@ -1,3 +1,19 @@
+Mon Jun 18 10:31:10 BST 2001 dpg1
+=================================
+
+- 1.4 release.
+
+bugfixes.xml
+bugfixes.xsl
+bugfixes10.xml
+bugfixes11.xml
+bugfixes12.xml
+bugfixes13.xml                          -- new
+external_merge/ReleaseNote
+external_merge/THIS_IS_OMNIORBPY_1_3    -- deleted
+external_merge/THIS_IS_OMNIORBPY_1_4    -- new
+
+
 Tue Jun 12 11:19:56 BST 2001 dpg1
 =================================
 
