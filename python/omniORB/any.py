@@ -197,6 +197,7 @@ def _to_tc_value(data):
         id = "omni:%s:%08x" % (_idbase, _idcount)
         dl = [tcInternal.tv_struct, None, id, ""]
         ms = []
+        svals = []
         items = data.items()
         for (k,v) in items:
             if not isinstance(k, StringType):
@@ -206,16 +207,19 @@ def _to_tc_value(data):
             ms.append(k)
             dl.append(k)
             dl.append(t._d)
+            svals.append(v)
         cls   = omniORB.createUnknownStruct(id, ms)
         dl[1] = cls
         tc    = tcInternal.createTypeCode(tuple(dl))
-        svals = map(lambda x: x[1], items)
         value = apply(cls, svals)
         return tc, value
 
     elif isinstance(data, FixedType):
-        tc = tcInternal.createTypeCode((tcInternal.tv_fixed,
-                                        data.precision(), data.decimals()))
+        if data == CORBA.fixed(0):
+            tc = tcInternal.createTypeCode((tcInternal.tv_fixed, 1, 0))
+        else:
+            tc = tcInternal.createTypeCode((tcInternal.tv_fixed,
+                                            data.precision(), data.decimals()))
         return tc, data
 
     elif isinstance(data, CORBA.Any):

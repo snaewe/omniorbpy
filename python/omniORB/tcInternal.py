@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.10.2.8  2003/03/12 11:17:50  dgrisby
+# Any / TypeCode fixes.
+#
 # Revision 1.10.2.7  2003/03/07 11:56:04  dgrisby
 # Missing TypeCode creation functions.
 #
@@ -250,6 +253,10 @@ def createWStringTC(bound):
     return createTypeCode(d)
 
 def createFixedTC(digits, scale):
+    if digits < 1 or digits > 31 or scale > digits:
+        raise CORBA.BAD_PARAM(omniORB.BAD_PARAM_InvalidFixedPointLimits,
+                              CORBA.COMPLETED_NO)
+
     d = (tv_fixed, digits, scale)
     return createTypeCode(d)
 
