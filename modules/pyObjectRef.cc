@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.19  2003/07/28 15:44:21  dgrisby
+// Unlock interpreter during string_to_object.
+//
 // Revision 1.1.2.18  2003/03/14 15:28:43  dgrisby
 // Use Python 1.5.2 sequence length function.
 //
@@ -540,16 +543,17 @@ CORBA::Object_ptr
 omniPy::stringToObject(const char* uri)
 {
   CORBA::Object_ptr cxxobj;
-
-  cxxobj = omniURI::stringToObject(uri);
-
-  if (CORBA::is_nil(cxxobj) || cxxobj->_NP_is_pseudo()) {
-    return cxxobj;
-  }
-  omniObjRef* cxxobjref = cxxobj->_PR_getobj();
   omniObjRef* objref;
+
   {
     omniPy::InterpreterUnlocker _u;
+    cxxobj = omniURI::stringToObject(uri);
+
+    if (CORBA::is_nil(cxxobj) || cxxobj->_NP_is_pseudo()) {
+      return cxxobj;
+    }
+    omniObjRef* cxxobjref = cxxobj->_PR_getobj();
+
     objref = omniPy::createObjRef(CORBA::Object::_PD_repoId,
 				  cxxobjref->_getIOR(), 0, 0);
     CORBA::release(cxxobj);

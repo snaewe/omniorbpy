@@ -1,3 +1,11 @@
+Mon Jul 28 16:40:18 BST 2003 dgrisby
+====================================
+
+- Unlock interpreter during string_to_object.
+
+modules/pyObjectRef.cc
+
+
 Sun Jul 27 00:16:23 BST 2003 dgrisby
 ====================================
 
