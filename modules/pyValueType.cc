@@ -28,6 +28,9 @@
 //    ValueType support
 
 // $Log$
+// Revision 1.1.2.7  2005/01/06 23:22:27  dgrisby
+// Properly align output in valuetype marshalling.
+//
 // Revision 1.1.2.6  2004/03/24 22:28:50  dgrisby
 // TypeCodes / truncation for inherited state members were broken.
 //
@@ -441,6 +444,7 @@ real_marshalPyObjectValue(cdrValueChunkStream& stream,
       CORBA::Long bases = PyTuple_GET_SIZE(baseIds);
       bases >>= stream;
       for (CORBA::Long i=0; i<bases; i++) {
+	stream.alignOutput(omni::ALIGN_4);
 	PyObject* id = PyTuple_GET_ITEM(baseIds, i);
 	pos = tracker->addRepoIds(id, stream.currentOutputPtr());
 	if (pos != -1)
