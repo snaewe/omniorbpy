@@ -85,7 +85,9 @@ PYPREFIX  := $(shell python -c 'import sys; print sys.exec_prefix')
 PYVERSION := $(shell $(PYTHON) -c 'import sys; print sys.version[:3]')
 PYINCDIR  := $(PYPREFIX)/include
 PYINCFILE := "<python$(PYVERSION)/Python.h>"
-DIR_CPPFLAGS += -I$(PYINCDIR) -DPYTHON_INCLUDE=$(PYINCFILE)
+PYINCTHRD := "<python$(PYVERSION)/pythread.h>"
+DIR_CPPFLAGS += -I$(PYINCDIR) -DPYTHON_INCLUDE=$(PYINCFILE) -DPYTHON_THREAD_INC=$(PYINCTHRD)
+
 endif
 
 #############################################################################
@@ -198,7 +200,7 @@ PYLIBDIR  := $(PYPREFIX)/libs
 PYLIB     := python$(subst .,,$(PYVERSION)).lib
 
 DIR_CPPFLAGS += -I$(PYINCDIR) -I$(PYINCDIR)/python$(PYVERSION) \
-                -DPYTHON_INCLUDE="<Python.h>"
+                -DPYTHON_INCLUDE="<Python.h>" -DPYTHON_THREAD_INC="<pythread.h>
 
 PYLIBPATH = $(patsubst %,-libpath:%,$(PYLIBDIR))
 
