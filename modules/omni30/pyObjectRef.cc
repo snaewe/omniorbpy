@@ -4,6 +4,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.2  1999/09/20 14:55:04  dpg1
+// GCC 2.95 is more pedantic than egcs.
+//
 // Revision 1.1  1999/07/29 14:20:05  dpg1
 // Initial revision
 //
@@ -43,12 +46,13 @@ omniPy::createPyCorbaObjRef(const char*             targetRepoId,
   CORBA::Boolean fullTypeUnknown = 0;
 
   // Try to find objref class for most derived type:
-  objrefClass = PyDict_GetItemString(pyomniORBobjrefMap, actualRepoId);
+  objrefClass = PyDict_GetItemString(pyomniORBobjrefMap, (char*)actualRepoId);
 
   if (!objrefClass && targetRepoId) {
     // No objref class for the most derived type -- try to find one for
     // the target type:
-    objrefClass     = PyDict_GetItemString(pyomniORBobjrefMap, targetRepoId);
+    objrefClass     = PyDict_GetItemString(pyomniORBobjrefMap,
+					   (char*)targetRepoId);
     fullTypeUnknown = 1;
   }
   if (!objrefClass) {

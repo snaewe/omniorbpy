@@ -5,6 +5,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.8  1999/09/20 14:55:37  dpg1
+// GCC 2.95 is more pedantic than egcs.
+//
 // Revision 1.7  1999/07/29 14:20:44  dpg1
 // Oneway support. Exception handling modified.
 //
@@ -92,7 +95,7 @@ omniPy::Py_OmniProxyCallDesc::userException(GIOP_C&     giop_client,
   PyEval_RestoreThread(tstate_);
   tstate_ = 0;
 
-  PyObject* d_o = PyDict_GetItemString(exc_d_, repoId);
+  PyObject* d_o = PyDict_GetItemString(exc_d_, (char*)repoId);
 
   if (d_o) { // class, repoId, exc name, name, descriptor, ...
 

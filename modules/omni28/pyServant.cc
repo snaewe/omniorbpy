@@ -5,6 +5,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.2  1999/09/20 14:56:12  dpg1
+// GCC 2.95 is more pedantic than egcs.
+//
 // Revision 1.1  1999/07/29 14:20:49  dpg1
 // Initial revision
 //
@@ -106,11 +109,11 @@ Py_Servant::dispatch(GIOP_S&        giop_server,
 {
   int i;
 
-  cout << "dispatch()..." << endl;
+  //  cout << "dispatch()..." << endl;
 
   lockWithNewThreadState _t;
 
-  PyObject* desc = PyDict_GetItemString(opdict_, op);
+  PyObject* desc = PyDict_GetItemString(opdict_, (char*)op);
 
   if (!desc) return 0; // Unknown operation name
 
@@ -144,7 +147,7 @@ Py_Servant::dispatch(GIOP_S&        giop_server,
   giop_server.RequestReceived();
 
   // Do the up-call
-  PyObject* method = PyObject_GetAttrString(pyservant_, op);
+  PyObject* method = PyObject_GetAttrString(pyservant_, (char*)op);
 
   if (!method) {
     cerr << "Couldn't find method called " << op << "!" << endl;
@@ -202,7 +205,7 @@ Py_Servant::dispatch(GIOP_S&        giop_server,
     // An exception of some sort was thrown
     PyObject *etype, *evalue, *etraceback;
 
-    cout << "Exception..." << endl;
+    //    cout << "Exception..." << endl;
 
     PyErr_Fetch(&etype, &evalue, &etraceback);
 
@@ -214,7 +217,7 @@ Py_Servant::dispatch(GIOP_S&        giop_server,
     if (!(evalue && PyInstance_Check(evalue)))
       throw CORBA::UNKNOWN(0,CORBA::COMPLETED_NO);
 
-    cout << "Exception may be one we know..." << endl;
+    //    cout << "Exception may be one we know..." << endl;
 
     PyObject* erepoId = PyObject_GetAttrString(evalue, "_NP_RepositoryId");
 
@@ -230,7 +233,7 @@ Py_Servant::dispatch(GIOP_S&        giop_server,
       PyObject* edesc = PyDict_GetItem(exc_d, erepoId);
 
       if (edesc) {
-	cout << "User exception. marshalling..." << endl;
+	//	cout << "User exception. marshalling..." << endl;
 	CORBA::ULong msgsize = GIOP_S::ReplyHeaderSize();
 	msgsize = omniPy::alignedSize(msgsize, edesc, evalue);
 	giop_server.InitialiseReply(GIOP::USER_EXCEPTION, msgsize);

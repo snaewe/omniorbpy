@@ -3,6 +3,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.2  1999/09/20 14:54:19  dpg1
+// GCC 2.95 is more pedantic than egcs.
+//
 // Revision 1.1  1999/07/29 14:18:58  dpg1
 // Initial revision
 //
@@ -16,7 +19,7 @@ void
 omniPy::handleSystemException(const CORBA::SystemException& ex)
 {
   PyObject* excc = PyDict_GetItemString(pyCORBAsysExcMap,
-					ex.NP_RepositoryId());
+					(char*)ex.NP_RepositoryId());
 
   PyObject* exca = Py_BuildValue("(ii)", ex.minor(), ex.completed());
   PyObject* exci = PyEval_CallObject(excc, exca);
