@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.20  2000/04/03 11:02:51  dpg1
+// Error report if a method does not exist on upcall.
+//
 // Revision 1.19  2000/04/03 09:18:59  dpg1
 // Missed a few places which should have changed in 1.17.
 //
@@ -447,6 +450,11 @@ Py_omniServant::_dispatch(GIOP_S& giop_s)
 					    (char*)giop_s.operation());
 
   if (!method) {
+    if (omniORB::trace(1)) {
+      omniORB::logger l;
+      l << "Python servant for `" << repoId_ << "' has no method named `"
+	<< giop_s.operation() << "'.\n";
+    }
     PyErr_Clear();
     Py_DECREF(argtuple);
     throw CORBA::NO_IMPLEMENT(0,CORBA::COMPLETED_NO);
@@ -511,12 +519,14 @@ Py_omniServant::_dispatch(GIOP_S& giop_s)
       erepoId = PyObject_GetAttrString(evalue, (char*)"_NP_RepositoryId");
 
     if (!erepoId) {
-      omniORB::log << "omniORBpy: *** Warning: caught an unexpected "
-		   << "exception during up-call.\n"
-		   << "omniORBPy: Traceback follows:\n";
-      omniORB::log.flush();
-      PyErr_Restore(etype, evalue, etraceback);
-      PyErr_Print();
+      if (omniORB::trace(1)) {
+	{
+	  omniORB::logger l;
+	  l << "Caught an unexpected Python exception during up-call.\n";
+	}
+	PyErr_Restore(etype, evalue, etraceback);
+	PyErr_Print();
+      }
       throw CORBA::UNKNOWN(0,CORBA::COMPLETED_MAYBE);
     }
 
@@ -558,6 +568,12 @@ Py_omniServant::local_dispatch(const char* op,
 {
   PyObject* method = PyObject_GetAttrString(pyservant_, (char*)op);
   if (!method) {
+    if (omniORB::trace(1)) {
+      omniORB::logger l;
+      l << "Python servant for `" << repoId_ << "' has no method named `"
+	<< op << "'.\n";
+    }
+    PyErr_Clear();
     CORBA::NO_IMPLEMENT ex;
     return omniPy::handleSystemException(ex);
   }
@@ -638,12 +654,14 @@ Py_omniServant::local_dispatch(const char* op,
 	erepoId = PyObject_GetAttrString(evalue, (char*)"_NP_RepositoryId");
 
       if (!erepoId) {
-	omniORB::log << "omniORBpy: *** Warning: caught an unexpected "
-		     << "exception during up-call.\n"
-		     << "omniORBPy: Traceback follows:\n";
-	omniORB::log.flush();
-	PyErr_Restore(etype, evalue, etraceback);
-	PyErr_Print();
+	if (omniORB::trace(1)) {
+	  {
+	    omniORB::logger l;
+	    l << "Caught an unexpected Python exception during up-call.\n";
+	  }
+	  PyErr_Restore(etype, evalue, etraceback);
+	  PyErr_Print();
+	}
 	CORBA::UNKNOWN ex(0,CORBA::COMPLETED_MAYBE);
 	return omniPy::handleSystemException(ex);
       }
