@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.17  2003/03/12 11:17:03  dgrisby
+// Registration of external pseudo object creation functions.
+//
 // Revision 1.1.2.16  2002/08/02 13:33:49  dgrisby
 // C++ API didn't allow ORB to be passed from C++ to Python, and required
 // Python to have imported omniORB.
@@ -85,6 +88,7 @@
 //
 
 #include <omnipy.h>
+#include <omniORBpy.h>
 
 // Internal omniORB interfaces
 #include <objectTable.h>
@@ -248,6 +252,35 @@ omniPy::createPyPseudoObjRef(const CORBA::Object_ptr objref)
     PortableServer::Current_var pc = PortableServer::Current::_narrow(objref);
     if (!CORBA::is_nil(pc)) return createPyPOACurrentObject(pc);
   }
+  do {
+    // No built in converter. Try the list of registered external functions
+    PyObject* fnlist = PyObject_GetAttrString(omniPy::py_omnipymodule,
+					      (char*)"pseudoFns");
+    if (!fnlist || !PySequence_Check(fnlist)) {
+      PyErr_Clear();
+      omniORB::logs(1, "WARNING: _omnipy.pseudoFns is not a sequence.");
+      Py_XDECREF(fnlist);
+      break;
+    }
+    int len = PySequence_Size(fnlist);
+    for (int i=0; i < len; i++) {
+      PyObject* pyf = PySequence_GetItem(fnlist, i);
+      if (!PyCObject_Check(pyf)) {
+	omniORB::logs(1, "WARNING: Entry in _omnipy.pseudoFns "
+		      "is not a PyCObject.");
+	continue;
+      }
+      omniORBpyPseudoFn f = (omniORBpyPseudoFn)PyCObject_AsVoidPtr(pyf);
+      PyObject* ret = f(objref);
+      if (ret) {
+	Py_DECREF(fnlist);
+	return ret;
+      }
+    }
+    Py_DECREF(fnlist);
+
+  } while (0);
+
   try {
     // Use OMNIORB_THROW to get a nice trace message
     OMNIORB_THROW(INV_OBJREF, INV_OBJREF_NoPythonTypeForPseudoObj,

@@ -45,7 +45,7 @@
 //      omniORBpyAPI* api    = (omniORBpyAPI*)PyCObject_AsVoidPtr(pyapi);
 //      Py_DECREF(pyapi);
 //
-// Obviously, you MUST NOT modify the functions pointers!
+// Obviously, you MUST NOT modify the function pointers!
 //
 // This arrangement of things means you do not have to link to the
 // _omnipymodule library to be able to use the API.
@@ -68,5 +68,17 @@ struct omniORBpyAPI {
   omniORBpyAPI();
   // Constructor for the singleton. Sets up the function pointers.
 };
+
+
+// Extensions to omniORB / omniORBpy may create their own pseudo
+// object reference types. To provide a Python mapping for these, a
+// function must be provided that takes a CORBA::Object_ptr and
+// returns a suitable PyObject. Functions are registered by appending
+// PyCObjects to the list _omnipy.pseudoFns. The CObjects must contain
+// pointers to functions with this signature:
+
+typedef PyObject* (*omniORBpyPseudoFn)(const CORBA::Object_ptr);
+
+
 
 #endif // _omniORBpy_h_

@@ -31,6 +31,9 @@
 #define _omnipy_h_
 
 // $Log$
+// Revision 1.2.4.20  2003/03/12 11:17:02  dgrisby
+// Registration of external pseudo object creation functions.
+//
 // Revision 1.2.4.19  2002/11/27 00:18:25  dgrisby
 // Per thread / per objref timeouts.
 //
@@ -139,7 +142,8 @@ public:
   // Global pointers to Python objects                                      //
   ////////////////////////////////////////////////////////////////////////////
 
-  static PyObject* pyCORBAmodule;      // The CORBA module
+  static PyObject* py_omnipymodule;    // _omnipy module
+  static PyObject* pyCORBAmodule;      // CORBA module
   static PyObject* pyCORBAsysExcMap;   //  The system exception map
   static PyObject* pyCORBAAnyClass;    //  Any class
   static PyObject* pyCORBAContextClass;//  Context class

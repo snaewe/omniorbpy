@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.20  2003/03/12 11:17:02  dgrisby
+// Registration of external pseudo object creation functions.
+//
 // Revision 1.1.2.19  2002/05/26 00:55:36  dgrisby
 // C++ API to convert object references to/from Python.
 //
@@ -107,6 +110,7 @@ OMNI_USING_NAMESPACE(omni)
 
 PyInterpreterState* omniPy::pyInterpreter;
 
+PyObject* omniPy::py_omnipymodule;	// The _omnipy extension
 PyObject* omniPy::pyCORBAmodule;	// The CORBA module
 PyObject* omniPy::pyCORBAsysExcMap;	//  The system exception map
 PyObject* omniPy::pyCORBAAnyClass;	//  Any class
@@ -845,6 +849,7 @@ OMNIORB_FOR_EACH_SYS_EXCEPTION(DO_CALL_DESC_SYSTEM_EXCEPTON)
     PyDict_SetItemString(d, (char*)"system_exceptions", excs);
     Py_DECREF(excs);
 
+    omniPy::py_omnipymodule = m;
     omniPy::initORBFunc(d);
     omniPy::initPOAFunc(d);
     omniPy::initPOAManagerFunc(d);
@@ -854,6 +859,11 @@ OMNIORB_FOR_EACH_SYS_EXCEPTION(DO_CALL_DESC_SYSTEM_EXCEPTON)
     // Set up the C++ API singleton
     PyObject* api = PyCObject_FromVoidPtr((void*)&omniPy::cxxAPI, 0);
     PyDict_SetItemString(d, (char*)"API", api);
+
+    // Create an empty list for extrernal modules to register
+    // additional pseudo object creation functions.
+    PyObject* pseudolist = PyList_New(0);
+    PyDict_SetItemString(d, (char*)"pseudoFns", pseudolist);
 
     omniInitialiser::install(&the_omni_python_initialiser);
   }
