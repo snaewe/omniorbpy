@@ -1,3 +1,12 @@
+Tue Mar  2 15:39:42 GMT 2004 dgrisby
+====================================
+
+- Support persistent server id.
+
+modules/pyObjectRef.cc
+modules/pyomniFunc.cc
+
+
 Mon Feb 16 13:55:02 GMT 2004 dgrisby
 ====================================
 

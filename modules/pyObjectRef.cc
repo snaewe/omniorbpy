@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.20  2004/03/02 15:33:57  dgrisby
+// Support persistent server id.
+//
 // Revision 1.1.2.19  2003/07/28 15:44:21  dgrisby
 // Unlock interpreter during string_to_object.
 //
@@ -343,6 +346,35 @@ omniPy::createObjRef(const char*    	targetRepoId,
     id->gainRef(objref);
   }
 
+  if (orbParameters::persistentId.length()) {
+    // Check to see if we need to re-write the IOR.
+
+    omniIOR::IORExtraInfoList& extra = ior->getIORInfo()->extraInfo();
+
+    for (CORBA::ULong index = 0; index < extra.length(); index++) {
+
+      if (extra[index]->compid == IOP::TAG_OMNIORB_PERSISTENT_ID)
+
+	if (!id->inThisAddressSpace()) {
+
+	  omniORB::logs(15, "Re-write local persistent object reference.");
+
+	  omniObjRef* new_objref;
+	  {
+	    omni_optional_lock sync(*internalLock, locked, locked);
+
+	    omniIOR* new_ior = new omniIOR(ior->repositoryID(),
+					   id->key(), id->keysize());
+
+	    new_objref = createObjRef(targetRepoId, new_ior,
+				      1, 0, type_verified);
+	  }
+	  releaseObjRef(objref);
+	  objref = new_objref;
+	}
+      break;
+    }
+  }
   return objref;
 }
 
