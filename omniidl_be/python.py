@@ -28,6 +28,10 @@
 
 # $Id$
 # $Log$
+# Revision 1.5  1999/11/02 12:17:26  dpg1
+# Top-level module name now has a prefix of _0_ to avoid clashes with
+# names of nested declarations.
+#
 # Revision 1.4  1999/11/02 10:54:01  dpg1
 # Two small bugs in union generation.
 #
@@ -72,6 +76,7 @@ file_start = """\
 
 import omniORB, _omnipy
 from omniORB import CORBA, PortableServer
+_0_CORBA = CORBA
 
 _omnipy.checkVersion(0,1, __file__)
 """
@@ -84,8 +89,8 @@ module_start = """
 # Start of module @sname@
 #
 __name__ = "@sname@"
-@sname@     = omniORB.openModule("@sname@",     "@filename@")
-POA_@sname@ = omniORB.openModule("POA_@sname@", "@filename@")
+_0_@sname@     = omniORB.openModule("@sname@",     "@filename@")
+_0_POA_@sname@ = omniORB.openModule("POA_@sname@", "@filename@")
 """
 
 module_end = """
@@ -99,21 +104,21 @@ import_idl_file = """\
 import @ifilename@"""
 
 open_imported_module_name = """\
-@imodname@     = omniORB.openModule("@imodname@")
-POA_@imodname@ = omniORB.openModule("POA_@imodname@")"""
+_0_@imodname@     = omniORB.openModule("@imodname@")
+_0_POA_@imodname@ = omniORB.openModule("POA_@imodname@")"""
 
 forward_interface = """\
 
 # interface @ifid@;
-@modname@._d_@ifid@ = (omniORB.tcInternal.tv_objref, "@repoId@", "@ifid@")"""
+_0_@modname@._d_@ifid@ = (omniORB.tcInternal.tv_objref, "@repoId@", "@ifid@")"""
 
 
 interface_class = """\
 
 # interface @ifid@
-@modname@._d_@ifid@ = (omniORB.tcInternal.tv_objref, "@repoId@", "@ifid@")
+_0_@modname@._d_@ifid@ = (omniORB.tcInternal.tv_objref, "@repoId@", "@ifid@")
 class @ifid@ @inherits@:
-    _NP_RepositoryId = @modname@._d_@ifid@[1]
+    _NP_RepositoryId = _0_@modname@._d_@ifid@[1]
 
     def __init__(self):
         raise RuntimeError("Cannot construct objects of this type.")
@@ -122,9 +127,9 @@ class @ifid@ @inherits@:
 """
 
 interface_descriptor = """
-@modname@.@ifid@ = @ifid@
-@modname@._tc_@ifid@ = omniORB.tcInternal.createTypeCode(@modname@._d_@ifid@)
-omniORB.registerType(@ifid@._NP_RepositoryId, @modname@._d_@ifid@, @modname@._tc_@ifid@)"""
+_0_@modname@.@ifid@ = @ifid@
+_0_@modname@._tc_@ifid@ = omniORB.tcInternal.createTypeCode(_0_@modname@._d_@ifid@)
+omniORB.registerType(@ifid@._NP_RepositoryId, _0_@modname@._d_@ifid@, _0_@modname@._tc_@ifid@)"""
 
 callables_header = """
 # @ifid@ operations and attributes"""
@@ -159,31 +164,31 @@ objref_object_init = """\
 objref_attribute_get = """
     def _get_@attr@(self, *args):
         return _omnipy.invokeOp(self, "_get_@attr@",
-                                @modname@.@ifid@._d__get_@attr@,
+                                _0_@modname@.@ifid@._d__get_@attr@,
                                 args)"""
 objref_attribute_set = """
     def _set_@attr@(self, *args):
         return _omnipy.invokeOp(self, "_set_@attr@",
-                                @modname@.@ifid@._d__set_@attr@,
+                                _0_@modname@.@ifid@._d__set_@attr@,
                                 args)"""
 objref_operation = """
     def @opname@(self, *args):
         return _omnipy.invokeOp(self, "@opname@",
-                                @modname@.@ifid@._d_@opname@,
+                                _0_@modname@.@ifid@._d_@opname@,
                                 args)"""
 objref_methods = """
     __methods__ = @methods@"""
 
 objref_register = """
 omniORB.registerObjref(@ifid@._NP_RepositoryId, _objref_@ifid@)
-@modname@._objref_@ifid@ = _objref_@ifid@
+_0_@modname@._objref_@ifid@ = _objref_@ifid@
 del @ifid@, _objref_@ifid@"""
 
 skeleton_class = """
 # @ifid@ skeleton
 __name__ = "POA_@modname@"
 class @ifid@ (@inherits@):
-    _NP_RepositoryId = @modname@.@ifid@._NP_RepositoryId
+    _NP_RepositoryId = _0_@modname@.@ifid@._NP_RepositoryId
 
     def __del__(self):
         if _omnipy is not None:
@@ -196,13 +201,13 @@ skeleton_inheritmap = """\
     _op_d.update(@inheritclass@._op_d)"""
 
 skeleton_end = """
-POA_@modname@.@ifid@ = @ifid@
+_0_POA_@modname@.@ifid@ = @ifid@
 del @ifid@
 __name__ = "@modname@"\
 """
 
 constant_at_module_scope = """\
-@modname@.@cname@ = @value@"""
+_0_@modname@.@cname@ = @value@"""
 
 constant = """\
 @cname@ = @value@"""
@@ -210,9 +215,9 @@ constant = """\
 typedef_at_module_scope = """\
 
 # typedef ... @tdname@
-@modname@._d_@tdname@  = @desc@
-@modname@._ad_@tdname@ = (omniORB.tcInternal.tv_alias, "@repoId@", "@tdname@", @tddesc@)
-@modname@._tc_@tdname@ = omniORB.tcInternal.createTypeCode(@modname@._ad_@tdname@)"""
+_0_@modname@._d_@tdname@  = @desc@
+_0_@modname@._ad_@tdname@ = (omniORB.tcInternal.tv_alias, "@repoId@", "@tdname@", @tddesc@)
+_0_@modname@._tc_@tdname@ = omniORB.tcInternal.createTypeCode(_0_@modname@._ad_@tdname@)"""
 
 typedef = """\
 
@@ -223,7 +228,7 @@ _tc_@tdname@ = omniORB.tcInternal.createTypeCode(_ad_@tdname@)"""
 
 recursive_struct_descr = """
 # Recursive struct @sname@
-@modname@._d_@sname@ = (omniORB.tcInternal.tv__indirect, ["@repoId@"])"""
+_0_@modname@._d_@sname@ = (omniORB.tcInternal.tv__indirect, ["@repoId@"])"""
 
 struct_class = """
 # struct @sname@
@@ -239,15 +244,15 @@ struct_init_member = """\
 
 struct_descriptor_at_module_scope = """\
 
-@modname@.@sname@ = @sname@
-@modname@._d_@sname@  = (omniORB.tcInternal.tv_struct, @sname@, @sname@._NP_RepositoryId, "@sname@"@mdescs@)"""
+_0_@modname@.@sname@ = @sname@
+_0_@modname@._d_@sname@  = (omniORB.tcInternal.tv_struct, @sname@, @sname@._NP_RepositoryId, "@sname@"@mdescs@)"""
 
 struct_indirect_at_module_scope = """\
-omniORB.tcInternal.insertIndirections(@modname@._d_@sname@)"""
+omniORB.tcInternal.insertIndirections(_0_@modname@._d_@sname@)"""
 
 struct_register_at_module_scope = """\
-@modname@._tc_@sname@ = omniORB.tcInternal.createTypeCode(@modname@._d_@sname@)
-omniORB.registerType(@sname@._NP_RepositoryId, @modname@._d_@sname@, @modname@._tc_@sname@)
+_0_@modname@._tc_@sname@ = omniORB.tcInternal.createTypeCode(_0_@modname@._d_@sname@)
+omniORB.registerType(@sname@._NP_RepositoryId, _0_@modname@._d_@sname@, _0_@modname@._tc_@sname@)
 del @sname@"""
 
 struct_descriptor = """\
@@ -262,8 +267,8 @@ _tc_@sname@ = omniORB.tcInternal.createTypeCode(_d_@sname@)
 omniORB.registerType(@sname@._NP_RepositoryId, _d_@sname@, _tc_@sname@)"""
 
 struct_module_descriptors = """
-@modname@._d_@sname@  = _d_@sname@
-@modname@._tc_@sname@ = _tc_@sname@
+_0_@modname@._d_@sname@  = _d_@sname@
+_0_@modname@._tc_@sname@ = _tc_@sname@
 del @sname@, _d_@sname@, _tc_@sname@"""
 
 exception_class = """\
@@ -281,10 +286,10 @@ exception_init_member = """\
 
 exception_descriptor_at_module_scope = """\
 
-@modname@.@sname@ = @sname@
-@modname@._d_@sname@  = (omniORB.tcInternal.tv_except, @sname@, @sname@._NP_RepositoryId, "@sname@"@mdescs@)
-@modname@._tc_@sname@ = omniORB.tcInternal.createTypeCode(@modname@._d_@sname@)
-omniORB.registerType(@sname@._NP_RepositoryId, @modname@._d_@sname@, @modname@._tc_@sname@)
+_0_@modname@.@sname@ = @sname@
+_0_@modname@._d_@sname@  = (omniORB.tcInternal.tv_except, @sname@, @sname@._NP_RepositoryId, "@sname@"@mdescs@)
+_0_@modname@._tc_@sname@ = omniORB.tcInternal.createTypeCode(_0_@modname@._d_@sname@)
+omniORB.registerType(@sname@._NP_RepositoryId, _0_@modname@._d_@sname@, _0_@modname@._tc_@sname@)
 del @sname@"""
 
 exception_descriptor = """\
@@ -296,7 +301,7 @@ omniORB.registerType(@sname@._NP_RepositoryId, _d_@sname@, _tc_@sname@)"""
 
 recursive_union_descr_at_module_scope = """
 # Recursive union @uname@
-@modname@._d_@uname@ = (omniORB.tcInternal.tv__indirect, ["@repoId@"])"""
+_0_@modname@._d_@uname@ = (omniORB.tcInternal.tv__indirect, ["@repoId@"])"""
 
 recursive_union_descr = """
 # Recursive union @uname@
@@ -309,22 +314,22 @@ class @uname@ (omniORB.Union):
 """
 
 union_descriptor_at_module_scope = """
-@modname@.@uname@ = @uname@
+_0_@modname@.@uname@ = @uname@
 
 @uname@._m_to_d = {@m_to_d@}
 @uname@._d_to_m = {@d_to_m@}
 @uname@._def_m  = @def_m@
 @uname@._def_d  = @def_d@
 
-@modname@._m_@uname@  = (@m_un@,)
-@modname@._d_@uname@  = (omniORB.tcInternal.tv_union, @uname@, @uname@._NP_RepositoryId, "@uname@", @stype@, @defpos@, @modname@._m_@uname@, @m_def@, {@d_map@})"""
+_0_@modname@._m_@uname@  = (@m_un@,)
+_0_@modname@._d_@uname@  = (omniORB.tcInternal.tv_union, @uname@, @uname@._NP_RepositoryId, "@uname@", @stype@, @defpos@, _0_@modname@._m_@uname@, @m_def@, {@d_map@})"""
 
 union_indirect_at_module_scope = """\
-omniORB.tcInternal.insertIndirections(@modname@._d_@uname@)"""
+omniORB.tcInternal.insertIndirections(_0_@modname@._d_@uname@)"""
 
 union_register_at_module_scope = """\
-@modname@._tc_@uname@ = omniORB.tcInternal.createTypeCode(@modname@._d_@uname@)
-omniORB.registerType(@uname@._NP_RepositoryId, @modname@._d_@uname@, @modname@._tc_@uname@)
+_0_@modname@._tc_@uname@ = omniORB.tcInternal.createTypeCode(_0_@modname@._d_@uname@)
+omniORB.registerType(@uname@._NP_RepositoryId, _0_@modname@._d_@uname@, _0_@modname@._tc_@uname@)
 del @uname@"""
 
 union_descriptor = """
@@ -349,14 +354,14 @@ enum_start = """
 """
 
 enum_item_at_module_scope = """\
-@modname@.@item@ = omniORB.EnumItem("@item@", @eval@)"""
+_0_@modname@.@item@ = omniORB.EnumItem("@item@", @eval@)"""
 
 enum_object_and_descriptor_at_module_scope = """\
-@modname@.@ename@ = omniORB.Enum("@repoId@", (@eitems@))
+_0_@modname@.@ename@ = omniORB.Enum("@repoId@", (@eitems@))
 
-@modname@._d_@ename@  = (omniORB.tcInternal.tv_enum, @modname@.@ename@._NP_RepositoryId, "@ename@", @modname@.@ename@._items)
-@modname@._tc_@ename@ = omniORB.tcInternal.createTypeCode(@modname@._d_@ename@)
-omniORB.registerType(@modname@.@ename@._NP_RepositoryId, @modname@._d_@ename@, @modname@._tc_@ename@)"""
+_0_@modname@._d_@ename@  = (omniORB.tcInternal.tv_enum, _0_@modname@.@ename@._NP_RepositoryId, "@ename@", _0_@modname@.@ename@._items)
+_0_@modname@._tc_@ename@ = omniORB.tcInternal.createTypeCode(_0_@modname@._d_@ename@)
+omniORB.registerType(_0_@modname@.@ename@._NP_RepositoryId, _0_@modname@._d_@ename@, _0_@modname@._tc_@ename@)"""
 
 enum_item = """\
 @item@ = omniORB.EnumItem("@item@", @eval@)"""
@@ -421,7 +426,7 @@ class PythonVisitor:
     def visitAST(self, node):
         self.at_module_scope = 1
         self.at_global_scope = 1
-        self.currentScope    = ["_GlobalIDL"]
+        self.currentScope    = ["_0__GlobalIDL"]
         self.modname         = "_GlobalIDL"
 
         self.st.out(module_start, sname="_GlobalIDL", filename=node.file())
@@ -459,7 +464,7 @@ class PythonVisitor:
 
         ags = self.at_global_scope
         if self.at_global_scope:
-            self.currentScope = [node.identifier()]
+            self.currentScope = ["_0_" + node.identifier()]
         else:
             self.currentScope.append(node.identifier())
 
@@ -477,7 +482,8 @@ class PythonVisitor:
 
         exported_modules[sname] = 1
 
-        self.st.out(module_end, modname=parentmodname, sname=sname)
+        if node.mainFile():
+            self.st.out(module_end, modname=parentmodname, sname=sname)
 
     #
     # Forward interface
@@ -637,8 +643,7 @@ class PythonVisitor:
         if len(node.inherits()) > 0:
             inheritl = []
             for i in node.inherits():
-                poasn = fixupScopedName(i.scopedName())[:]
-                poasn[0] = "POA_" + poasn[0]
+                poasn = fixupScopedName(i.scopedName(), "_0_POA_")
                 inheritl.append(dotName(poasn))
                 
             inherits = string.join(inheritl, ", ")
@@ -659,20 +664,20 @@ class PythonVisitor:
                 for attr in c.identifiers():
 
                     methodl.append('"_get_' + attr + '": ' + \
-                                   self.modname + '.' + ifid + '.' + \
-                                   '_d__get_' + attr)
+                                   '_0_' + self.modname + '.' + \
+                                   ifid + '.' + '_d__get_' + attr)
 
                     if not c.readonly():
 
                         methodl.append('"_set_' + attr + '": ' + \
-                                       self.modname + '.' + ifid + '.' + \
-                                       '_d__set_' + attr)
+                                       '_0_' + self.modname + '.' + \
+                                       ifid + '.' + '_d__set_' + attr)
 
             else: # Operation
                 opname = mangle(c.identifier())
                 
-                methodl.append('"' + opname + '": ' + self.modname + '.' + \
-                               ifid + '.' + '_d_' + opname)
+                methodl.append('"' + opname + '": ' + '_0_' + self.modname + \
+                               '.' + ifid + '.' + '_d_' + opname)
 
         methodmap = "{" + string.join(methodl, ", ") + "}"
 
@@ -965,7 +970,7 @@ class PythonVisitor:
                     if self.at_module_scope:
                         def_d  = valueToString(label.value(),
                                                label.labelKind(), [])
-                        m_def  = self.modname + "._m_" + uname + \
+                        m_def  = "_0_" + self.modname + "._m_" + uname + \
                                  "[" + defpos + "]"
                     else:
                         def_d  = valueToString(label.value(),
@@ -991,7 +996,7 @@ class PythonVisitor:
                                   ctype + ')')
 
                     if self.at_module_scope:
-                        d_map_l.append(slabel + ': ' + self.modname + \
+                        d_map_l.append(slabel + ': ' + '_0_' + self.modname + \
                                        "._m_" + uname + "[" + str(i) + "]")
                     else:
                         d_map_l.append(slabel + ': ' + "_m_" + \
@@ -1229,11 +1234,13 @@ def mangle(name):
     if keyword.iskeyword(name): return "_" + name
     return name
 
-def fixupScopedName(scopedName):
-    """Add _GlobalIDL to the front of a ScopedName if necessary"""
+def fixupScopedName(scopedName, prefix="_0_"):
+    """Add a prefix and _GlobalIDL to the front of a ScopedName if necessary"""
 
-    if not isinstance(idlast.findDecl([scopedName[0]]), idlast.Module):
-        scopedName = ["_GlobalIDL"] + scopedName
+    if isinstance(idlast.findDecl([scopedName[0]]), idlast.Module):
+        scopedName = [prefix + scopedName[0]] + scopedName[1:]
+    else:
+        scopedName = [prefix + "_GlobalIDL"] + scopedName
     return scopedName
 
 def valueToString(val, kind, scope=[]):
