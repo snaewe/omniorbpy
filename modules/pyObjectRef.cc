@@ -31,6 +31,10 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.4  2001/01/10 12:00:07  dpg1
+// Release the Python interpreter lock when doing potentially blocking
+// stream calls.
+//
 // Revision 1.1.2.3  2000/12/04 18:57:23  dpg1
 // Fix deadlock when trying to lock omniORB internal lock while holding
 // the Python interpreter lock.
@@ -482,7 +486,6 @@ omniPy::stringToObject(const char* uri)
 CORBA::Object_ptr
 omniPy::UnMarshalObjRef(const char* repoId, cdrStream& s)
 {
-  omniPy::InterpreterUnlocker _u;
   CORBA::String_var           id;
   IOP::TaggedProfileList_var  profiles;
 
@@ -496,6 +499,8 @@ omniPy::UnMarshalObjRef(const char* repoId, cdrStream& s)
     return CORBA::Object::_nil();
   }
   else {
+    omniPy::InterpreterUnlocker _u;
+
     // It is possible that we reach here with the id string = '\0'.
     // That is alright because the actual type of the object will be
     // verified using _is_a() at the first invocation on the object.
