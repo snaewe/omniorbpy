@@ -1,3 +1,15 @@
+Thu Sep 25 14:15:24 BST 2003 dgrisby
+====================================
+
+- Ensure command line arguments are strings.
+
+modules/omnipy.cc
+
+- Report unexpected user exceptions.
+
+modules/pyExceptions.cc
+
+
 Fri Sep 19 15:28:19 BST 2003 dgrisby
 ====================================
 

@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.11  2003/09/25 13:17:16  dgrisby
+// Report unexpected user exceptions.
+//
 // Revision 1.1.2.10  2003/08/28 12:13:57  dgrisby
 // Properly report unknown user exception, rather than system exception.
 //
@@ -140,6 +143,11 @@ omniPy::produceSystemException(PyObject* eobj, PyObject* erepoId)
 
 #undef THROW_SYSTEM_EXCEPTION_IF_MATCH
 
+  if (omniORB::trace(1)) {
+    omniORB::logger l;
+    l << "Caught an unexpected CORBA exception during up-call: "
+      << PyString_AS_STRING(erepoId) << "\n";
+  }
   Py_DECREF(erepoId);
   if (m && c && v)
     OMNIORB_THROW(UNKNOWN, UNKNOWN_SystemException, CORBA::COMPLETED_MAYBE);
