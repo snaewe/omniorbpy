@@ -24,7 +24,7 @@
 #   
 #   Pretty circular gauges in Tk
 
-import math, time, string
+import math, time, string, operator
 from Tkinter import *
 
 SCALEFONT = "-*-helvetica-bold-r-*-*-*-120-*-*-*-*-*-*"
@@ -261,11 +261,7 @@ class Gauge :
         return map(lambda p, x=x, y=y: (p[0]+x,p[1]+y), points)
 
     def flattenPoints(self, points):
-        l = []
-        for p in points:
-            l.extend(list(p))
-        return l
-
+        return list(reduce(operator.add, points))
 
 
 class Compass(Gauge):
