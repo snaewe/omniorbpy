@@ -398,3 +398,40 @@ export:: $(lib)
 
 endif
 endif
+
+#############################################################################
+#   Make rules for Digital Unix                                             #
+#############################################################################
+
+ifdef OSF1
+ifeq ($(notdir $(CXX)),cxx)
+
+libname = _omnipymodule.so
+soname  = $(libname).$(OMNIPY_MAJOR)
+lib     = $(soname).$(OMNIPY_MINOR)
+
+all:: $(lib)
+
+$(lib): $(OBJS)
+	(set -x; \
+         $(RM) $@; \
+         ld -shared -soname $(soname) -set_version $(soname) -o $@ $(IMPORT_LIBRARY_FLAGS) \
+         $(filter-out $(LibSuffixPattern),$^) $(OMNIORB_LIB_NODYN) -lcxxstd -lcxx -lexc -lots -lc \
+        )
+
+
+clean::
+	$(RM) $(lib)
+
+export:: $(lib)
+	@$(ExportLibrary)
+	@(set -x; \
+          cd $(EXPORT_TREE)/$(LIBDIR); \
+          $(RM) $(soname); \
+          ln -s $(lib) $(soname); \
+          $(RM) $(libname); \
+          ln -s $(soname) $(libname); \
+         )
+
+endif
+endif

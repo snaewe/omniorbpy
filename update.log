@@ -1,3 +1,12 @@
+Mon Apr  9 16:50:38 BST 2001 dpg1
+=================================
+
+- Bring up-to-date with omnipy1_develop.
+
+modules/dir.mk
+modules/pyTypeCode.cc
+
+
 Mon Apr  9 16:19:04 BST 2001 dpg1
 =================================
 
@@ -6,8 +15,8 @@ Mon Apr  9 16:19:04 BST 2001 dpg1
 modules/dir.mk
 modules/omnipy.cc
 modules/omnipy.h
-modules/pyFixed.cc
-modules/pyFixed.h
+modules/pyFixed.cc     -- new
+modules/pyFixed.h      -- new
 modules/pyMarshal.cc
 modules/pyomniFunc.cc
 omniidl_be/python.py
