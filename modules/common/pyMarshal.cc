@@ -30,6 +30,10 @@
 // $Id$
 
 // $Log$
+// Revision 1.23.2.1  2000/07/26 16:11:10  dpg1
+// Fix potential segfault in passing an invalid sequence/array of
+// unsigned long in a local call.
+//
 // Revision 1.23  2000/06/27 15:13:11  dpg1
 // New copyObjRefArgument() function
 //
@@ -4281,12 +4285,9 @@ omniPy::copyArgument(PyObject*               d_o,
 		  continue;
 		}
 #endif
-		else {
-		  Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-		  valid = 0;
-		  continue;
-		}
 	      }
+	      Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
+	      valid = 0;
 	    }
 	    break;
 
@@ -4423,12 +4424,9 @@ omniPy::copyArgument(PyObject*               d_o,
 		  continue;
 		}
 #endif
-		else {
-		  Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-		  valid = 0;
-		  continue;
-		}
 	      }
+	      Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
+	      valid = 0;
 	    }
 	    break;
 
@@ -4639,12 +4637,9 @@ omniPy::copyArgument(PyObject*               d_o,
 		  continue;
 		}
 #endif
-		else {
-		  Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-		  valid = 0;
-		  continue;
-		}
 	      }
+	      Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
+	      valid = 0;
 	    }
 	    break;
 
@@ -4781,12 +4776,9 @@ omniPy::copyArgument(PyObject*               d_o,
 		  continue;
 		}
 #endif
-		else {
-		  Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
-		  valid = 0;
-		  continue;
-		}
 	      }
+	      Py_INCREF(Py_None); PyList_SET_ITEM(r_o, i, Py_None);
+	      valid = 0;
 	    }
 	    break;
 
