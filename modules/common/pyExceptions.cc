@@ -31,6 +31,10 @@
 // $Id$
 
 // $Log$
+// Revision 1.9  2000/06/12 15:36:08  dpg1
+// Support for exception handler functions. Under omniORB 3, local
+// operation dispatch modified so exceptions handlers are run.
+//
 // Revision 1.8  2000/05/11 11:58:24  dpg1
 // Throw system exceptions with OMNIORB_THROW.
 //
@@ -81,11 +85,30 @@ omniPy::handleSystemException(const CORBA::SystemException& ex)
     // If we couldn't create the exception object, there will be a
     // suitable error set already
     PyErr_SetObject(excc, exci);
-    Py_DECREF(exci); // *** Find out why I don't need to Py_DECREF(excc)
+    Py_DECREF(exci);
   }
   return 0;
 }
 
+PyObject*
+omniPy::createPySystemException(const CORBA::SystemException& ex)
+{
+#ifdef OMNIORBPY_FOR_28
+  PyObject* excc = PyDict_GetItemString(pyCORBAsysExcMap,
+					(char*)ex.NP_RepositoryId());
+#else
+  int dummy;
+  PyObject* excc = PyDict_GetItemString(pyCORBAsysExcMap,
+					(char*)ex._NP_repoId(&dummy));
+#endif
+  OMNIORB_ASSERT(excc);
+
+  PyObject* exca = Py_BuildValue((char*)"(ii)", ex.minor(), ex.completed());
+  PyObject* exci = PyEval_CallObject(excc, exca);
+  Py_DECREF(exca);
+
+  return exci;
+}
 
 
 void

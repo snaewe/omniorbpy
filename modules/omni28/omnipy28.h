@@ -30,6 +30,10 @@
 // $Id$
 
 // $Log$
+// Revision 1.22  2000/06/12 15:36:08  dpg1
+// Support for exception handler functions. Under omniORB 3, local
+// operation dispatch modified so exceptions handlers are run.
+//
 // Revision 1.21  2000/05/11 11:58:25  dpg1
 // Throw system exceptions with OMNIORB_THROW.
 //
@@ -228,6 +232,7 @@ public:
   static void initORBFunc       (PyObject* d);
   static void initPOAFunc       (PyObject* d);
   static void initPOAManagerFunc(PyObject* d);
+  static void initomniFunc      (PyObject* d);
 
 
   ////////////////////////////////////////////////////////////////////////////
@@ -239,6 +244,10 @@ public:
   //   return handleSystemException(ex).
   static
   PyObject* handleSystemException(const CORBA::SystemException& ex);
+
+  // Create a new Python object for the given system exception
+  static
+  PyObject* createPySystemException(const CORBA::SystemException& ex);
 
   // Throw a C++ system exception equivalent to the given Python exception
   static

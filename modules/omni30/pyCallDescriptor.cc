@@ -30,6 +30,10 @@
 // $Id$
 
 // $Log$
+// Revision 1.17  2000/06/12 15:36:08  dpg1
+// Support for exception handler functions. Under omniORB 3, local
+// operation dispatch modified so exceptions handlers are run.
+//
 // Revision 1.16  2000/05/11 11:58:25  dpg1
 // Throw system exceptions with OMNIORB_THROW.
 //
@@ -156,6 +160,19 @@ omniPy::Py_omniCallDescriptor::userException(GIOP_C&     giop_client,
 }
 
 
+class reacquireLockInScope {
+public:
+  inline reacquireLockInScope(omniPy::Py_omniCallDescriptor* pycd)
+    : pycd_(pycd) { pycd->reacquireInterpreterLock(); }
+
+  inline ~reacquireLockInScope() {
+    pycd_->releaseInterpreterLock();
+  }
+private:
+  omniPy::Py_omniCallDescriptor* pycd_;
+};
+
+
 void
 omniPy::Py_localCallBackFunction(omniCallDescriptor* cd, omniServant* svnt)
 {
@@ -163,11 +180,13 @@ omniPy::Py_localCallBackFunction(omniCallDescriptor* cd, omniServant* svnt)
   Py_omniServant*        pyos =
     (Py_omniServant*)svnt->_ptrToInterface("Py_omniServant");
 
-  pycd->reacquireInterpreterLock();
-
-  pycd->result_ = pyos->local_dispatch(pycd->op(),
-				       pycd->in_d_,  pycd->in_l_,
-				       pycd->out_d_, pycd->out_l_,
-				       pycd->exc_d_, pycd->args_);
-  pycd->releaseInterpreterLock();
+  {
+    // local_dispatch() can throw CORBA system exceptions, hence the
+    // helper class
+    reacquireLockInScope _l(pycd);
+    pycd->result_ = pyos->local_dispatch(pycd->op(),
+					 pycd->in_d_,  pycd->in_l_,
+					 pycd->out_d_, pycd->out_l_,
+					 pycd->exc_d_, pycd->args_);
+  }
 }

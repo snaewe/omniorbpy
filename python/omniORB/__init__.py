@@ -31,6 +31,10 @@
 # $Id$
 
 # $Log$
+# Revision 1.21  2000/06/12 15:36:09  dpg1
+# Support for exception handler functions. Under omniORB 3, local
+# operation dispatch modified so exceptions handlers are run.
+#
 # Revision 1.20  2000/06/02 14:25:51  dpg1
 # orb.run() now properly exits when the ORB is shut down
 #
@@ -109,6 +113,7 @@ Error: your Python executable was not built with thread support.
 
 import _omnipy
 
+_coreVersion = _omnipy.coreVersion()
 
 # Public functions
 
@@ -118,7 +123,7 @@ def coreVersion():
 Return a string containing the version number of the omniORB core, of
 the form major.minor.micro. Versions from 3.0.0 up support the full
 POA functionality."""
-    return _omnipy.coreVersion()
+    return _coreVersion
 
 
 _omniidl_args = []
@@ -248,6 +253,10 @@ no concurrency control: "addWThreadHook()" must be called before the
 runtime creates any "WorkerThread"s.
 """
     WorkerThread.hooks.append(hook)
+
+
+# Import omniORB API functions
+from _omnipy.omni_func import *
 
 
 # Private things

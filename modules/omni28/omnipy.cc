@@ -30,6 +30,10 @@
 // $Id$
 
 // $Log$
+// Revision 1.36  2000/06/12 15:36:08  dpg1
+// Support for exception handler functions. Under omniORB 3, local
+// operation dispatch modified so exceptions handlers are run.
+//
 // Revision 1.35  2000/05/26 15:33:31  dpg1
 // Python thread states are now cached. Operation dispatch time is
 // roughly halved!
@@ -820,5 +824,6 @@ OMNIORB_FOR_EACH_SYS_EXCEPTION(DO_CALL_DESC_SYSTEM_EXCEPTON)
     omniPy::initORBFunc(d);
     omniPy::initPOAFunc(d);
     omniPy::initPOAManagerFunc(d);
+    omniPy::initomniFunc(d);
   }
 }

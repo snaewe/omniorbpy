@@ -43,7 +43,8 @@ CXXSRCS = $(VERSIONDIR)/omnipy.cc \
           common/pyExceptions.cc \
           common/pyMarshal.cc \
           common/pyTypeCode.cc \
-          common/pyThreadCache.cc
+          common/pyThreadCache.cc \
+          common/pyomniFunc.cc
 
 OBJS =    $(VERSIONDIR)/omnipy.o \
           $(VERSIONDIR)/pyORBFunc.o \
@@ -55,7 +56,8 @@ OBJS =    $(VERSIONDIR)/omnipy.o \
           common/pyExceptions.o \
           common/pyMarshal.o \
           common/pyTypeCode.o \
-          common/pyThreadCache.o
+          common/pyThreadCache.o \
+          common/pyomniFunc.o
 
 
 

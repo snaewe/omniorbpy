@@ -1,3 +1,21 @@
+Mon Jun 12 16:35:27 BST 2000 dpg1
+=================================
+
+- Support for exception handler functions. Under omniORB 3, local
+  operation dispatch modified so exceptions handlers are run.
+
+modules/dir.mk
+modules/common/pyExceptions.cc
+modules/common/pyomniFunc.cc        -- new
+modules/omni28/omnipy.cc
+modules/omni28/omnipy28.h
+modules/omni30/omnipy.cc
+modules/omni30/omnipy30.h
+modules/omni30/pyCallDescriptor.cc
+modules/omni30/pyServant.cc
+python/omniORB/__init__.py
+
+
 Fri Jun  9 12:01:25 BST 2000 dpg1
 =================================
 
