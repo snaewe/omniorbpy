@@ -29,6 +29,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.2.2  2000/08/18 11:40:01  dpg1
+// New omniORB.traceLevel function
+//
 // Revision 1.1.2.1  2000/08/14 16:10:32  dpg1
 // Missed out some explicit casts to (char*) for string constants.
 //
@@ -322,6 +325,31 @@ extern "C" {
     return Py_None;
   }
 
+  static char traceLevel_doc [] =
+  "traceLevel(int) -> None\n"
+  "traceLevel()    -> int\n"
+  "\n"
+  "Set or get the omniORB debug trace level.\n";
+
+  static PyObject* pyomni_traceLevel(PyObject* self, PyObject* args)
+  {
+    if (PyTuple_GET_SIZE(args) == 0) {
+      return PyInt_FromLong(omniORB::traceLevel);
+    }
+    else if (PyTuple_GET_SIZE(args) == 1) {
+      PyObject* pytl = PyTuple_GET_ITEM(args, 0);
+
+      if (PyInt_Check(pytl)) {
+	omniORB::traceLevel = PyInt_AS_LONG(pytl);
+	Py_INCREF(Py_None);
+	return Py_None;
+      }
+    }
+    PyErr_SetString(PyExc_TypeError,
+		    (char*)"Operation requires a single integer argument");
+    return 0;
+  }
+
   static PyMethodDef pyomni_methods[] = {
     {(char*)"installTransientExceptionHandler",
      pyomni_installTransientExceptionHandler,
@@ -334,6 +362,10 @@ extern "C" {
     {(char*)"installSystemExceptionHandler",
      pyomni_installSystemExceptionHandler,
      METH_VARARGS, system_doc},
+
+    {(char*)"traceLevel",
+     pyomni_traceLevel,
+     METH_VARARGS, traceLevel_doc},
 
     {NULL,NULL}
   };
