@@ -30,6 +30,10 @@
 // $Id$
 
 // $Log$
+// Revision 1.4  2000/04/27 11:04:00  dpg1
+// Support for ORB core Interoperable Naming Service changes.
+// Add shutdown() and destroy() operations.
+//
 // Revision 1.3  2000/03/17 15:57:07  dpg1
 // Correct, and more consistent handling of invalid strings in
 // string_to_object().
@@ -62,19 +66,13 @@ extern "C" {
     OMNIORB_ASSERT(orb);
 
     if (!s || strlen(s) == 0) {
-      CORBA::MARSHAL ex;
+      CORBA::INV_OBJREF ex;
       return omniPy::handleSystemException(ex);
     }
     CORBA::Object_ptr objref;
 
     try {
-      omniObjRef* ooref;
-      omniPy::stringToObject(ooref, s);
-      if (ooref)
-	objref = (CORBA::Object_ptr)
-	  (ooref->_ptrToObjRef(CORBA::Object::_PD_repoId));
-      else
-	objref = CORBA::Object::_nil();
+      objref = omniPy::stringToObject(s);
     }
     OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
     return omniPy::createPyCorbaObjRef(0, objref);
@@ -146,10 +144,10 @@ extern "C" {
     CORBA::ORB_ptr orb = (CORBA::ORB_ptr)omniPy::getTwin(pyorb, ORB_TWIN);
     OMNIORB_ASSERT(orb);
 
-    CORBA::Object_ptr objref;
+    CORBA::Object_ptr cxxobj;
 
     try {
-      objref = orb->resolve_initial_references(id);
+      cxxobj = orb->resolve_initial_references(id);
     }
     catch (CORBA::ORB::InvalidName& ex) {
       PyObject* excc = PyObject_GetAttrString(pyorb, (char*)"InvalidName");
@@ -159,8 +157,59 @@ extern "C" {
       return 0;
     }
     OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
-    return omniPy::createPyCorbaObjRef(0, objref);
+
+    omniObjRef* cxxref = cxxobj->_PR_getobj();
+    omniObjRef* pyref  = omniPy::createObjRef(cxxref->_mostDerivedRepoId(),
+					      CORBA::Object::_PD_repoId,
+					      cxxref->_iopProfiles(),
+					      0, 0);
+    CORBA::release(cxxobj);
+
+    CORBA::Object_ptr result =
+      (CORBA::Object_ptr)pyref->_ptrToObjRef(CORBA::Object::_PD_repoId);
+
+    return omniPy::createPyCorbaObjRef(0, result);
   }
+
+  static PyObject*
+  pyORB_shutdown(PyObject* self, PyObject* args)
+  {
+    PyObject* pyorb;
+    int       wait;
+
+    if (!PyArg_ParseTuple(args, (char*)"Oi", &pyorb, &wait)) return NULL;
+
+    CORBA::ORB_ptr orb = (CORBA::ORB_ptr)omniPy::getTwin(pyorb, ORB_TWIN);
+    OMNIORB_ASSERT(orb);
+
+    try {
+      orb->shutdown(wait);
+    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
+
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
+
+  static PyObject*
+  pyORB_destroy(PyObject* self, PyObject* args)
+  {
+    PyObject* pyorb;
+
+    if (!PyArg_ParseTuple(args, (char*)"O", &pyorb)) return NULL;
+
+    CORBA::ORB_ptr orb = (CORBA::ORB_ptr)omniPy::getTwin(pyorb, ORB_TWIN);
+    OMNIORB_ASSERT(orb);
+
+    try {
+      orb->destroy();
+    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
+
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
+
 
   ////////////////////////////////////////////////////////////////////////////
   // Python method table                                                    //
@@ -173,6 +222,8 @@ extern "C" {
                                 pyORB_list_initial_services,     METH_VARARGS},
     {(char*)"resolve_initial_references",
                                 pyORB_resolve_initial_references,METH_VARARGS},
+    {(char*)"shutdown",         pyORB_shutdown,                  METH_VARARGS},
+    {(char*)"destroy",          pyORB_destroy,                   METH_VARARGS},
     {NULL,NULL}
   };
 }
