@@ -3,6 +3,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.2  1999/07/29 14:16:03  dpg1
+# Server side support.
+#
 # Revision 1.1  1999/07/19 15:53:26  dpg1
 # Initial revision
 #
@@ -16,18 +19,18 @@ orb_lock = threading.Lock()
 orb      = None
 
 
-# Maps for proxy object classes and IDL-defined types:
+# Maps for object reference classes and IDL-defined types:
 
 map_lock = threading.Lock()
 
-proxyObjectMapping = {}
-typeMapping        = {}
-typeCodeMapping    = {}
+objrefMapping   = {}
+typeMapping     = {}
+typeCodeMapping = {}
 
 
-def registerProxy(repoId, proxy):
+def registerObjref(repoId, objref):
     map_lock.acquire()
-    proxyObjectMapping[repoId] = proxy
+    objrefMapping[repoId] = objref
     map_lock.release()
 
 def registerType(repoId, desc, tc):
@@ -257,6 +260,37 @@ sysExceptionMapping = {
     "IDL:omg.org/CORBA/WRONG_TRANSACTION":      CORBA.WRONG_TRANSACTION
     }
 
+# Reserved word mapping:
+keywordMapping = {
+    "access":   "_access",
+    "and":      "_and",
+    "assert":   "_assert",
+    "break":    "_break",
+    "class":    "_class",
+    "continue": "_continue",
+    "def":      "_def",
+    "del":      "_del",
+    "elif":     "_elif",
+    "else":     "_else",
+    "except":   "_except",
+    "finally":  "_finally",
+    "for":      "_for",
+    "from":     "_from",
+    "global":   "_global",
+    "if":       "_if",
+    "import":   "_import",
+    "in":       "_in",
+    "is":       "_is",
+    "lambda":   "_lambda",
+    "not":      "_not",
+    "or":       "_or",
+    "pass":     "_pass",
+    "print":    "_print",
+    "raise":    "_raise",
+    "return":   "_return",
+    "try":      "_try",
+    "while":    "_while"
+    }
 
 
 # Register this module with omnipy:
