@@ -1,3 +1,13 @@
+Wed Feb 23 18:55:33 GMT 2005 dgrisby
+====================================
+
+- Last fix did not cope with an omniORB thread having an id of a
+  previous Python thread.
+
+modules/pyThreadCache.cc
+modules/pyThreadCache.h
+
+
 Tue Feb 22 10:58:25 GMT 2005 dgrisby
 ====================================
 

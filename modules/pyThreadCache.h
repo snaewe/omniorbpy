@@ -31,6 +31,10 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.5  2005/02/23 18:58:29  dgrisby
+// Last fix did not cope with an omniORB thread having an id of a
+// previous Python thread.
+//
 // Revision 1.1.2.4  2005/02/22 11:02:37  dgrisby
 // On Python >= 2.3, the thread state cache could incorrectly cache
 // thread state for a thread that had exited, and a new one started with
@@ -53,6 +57,17 @@
 #include PYTHON_THREAD_INC
 #endif
 
+// Python 2.3 introduced functions to get and released the Python
+// interpreter lock, and create thread state as necessary.
+// Unfortunately, they are too inefficient since we would end up
+// creating and destroying thread states (and Python threading.Thread
+// objects) on every call. Even more unfortunately, we can't ignore
+// the new functions and use our own scheme, because there are (debug)
+// assertions in Python to check that the thread state is what is
+// expected. So, we have to jump through all sorts of hoops to play
+// nice, and it's still slower than the equivalent code in Python <=
+// 2.2...
+
 
 class omnipyThreadCache {
 public:
@@ -63,17 +78,21 @@ public:
   static void shutdown();
 
   struct CacheNode {
-    long           id;
-    PyThreadState* threadState;
-    PyObject*      workerThread;
+    long             id;
+    PyThreadState*   threadState;
+    PyObject*        workerThread;
 
-    CORBA::Boolean used;
-    CORBA::Boolean can_scavenge;
-    CORBA::Boolean reused_state;
-    int            active;
+    CORBA::Boolean   used;
+    CORBA::Boolean   can_scavenge;
+    CORBA::Boolean   reused_state;
+    int              active;
 
-    CacheNode*     next;
-    CacheNode**    back;
+#if PY_VERSION_HEX >= 0x02030000
+    PyGILState_STATE gilstate;
+#endif
+
+    CacheNode*       next;
+    CacheNode**      back;
   };
 
   // Fixed-size open hash table of cacheNodes
@@ -88,20 +107,31 @@ public:
   class lock {
   public:
     inline lock() {
-      long id    = PyThread_get_thread_ident();
-      cacheNode_ = acquireNode(id);
-      PyEval_AcquireLock();
-      oldstate_  = PyThreadState_Swap(cacheNode_->threadState);
+#if PY_VERSION_HEX >= 0x02030000
+      PyThreadState* tstate = PyGILState_GetThisThreadState();
+      if (tstate) {
+	cacheNode_ = 0;
+	PyEval_AcquireLock();
+	PyThreadState_Swap(tstate);
+      }
+      else
+#endif
+      {
+	long id    = PyThread_get_thread_ident();
+	cacheNode_ = acquireNode(id);
+	PyEval_AcquireLock();
+	PyThreadState_Swap(cacheNode_->threadState);
+      }
     }
 
     inline ~lock() {
-      PyThreadState_Swap(oldstate_);
+      PyThreadState_Swap(0);
       PyEval_ReleaseLock();
-      releaseNode(cacheNode_);
+      if (cacheNode_)
+	releaseNode(cacheNode_);
     }
   private:
-    CacheNode*     cacheNode_;
-    PyThreadState* oldstate_;
+    CacheNode* cacheNode_;
   };
 
 
@@ -117,12 +147,6 @@ public:
       if (cn) {
 	cn->used = 1;
 	cn->active++;
-#if PY_VERSION_HEX >= 0x02030000
-	if (cn->reused_state) {
-	  cn->threadState = PyGILState_GetThisThreadState();
-	  OMNIORB_ASSERT(cn->threadState);
-	}
-#endif
 	return cn;
       }
     }
@@ -137,5 +161,5 @@ public:
 
   static CacheNode* addNewNode(long id, unsigned int hash);
 
-  static void threadExit();
+  static void threadExit(CacheNode* cn);
 };
