@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.9  1999/11/08 11:43:35  dpg1
+// Changes for NT support.
+//
 // Revision 1.8  1999/10/01 11:07:20  dpg1
 // Error reporting if up-call raises an unexpected exception.
 //
@@ -73,9 +76,9 @@ class lockWithNewThreadState {
 public:
   lockWithNewThreadState() {
     // Create thread state
-    omniPy::pyInterpreterLock.lock();
+    omniPy::pyInterpreterLock->lock();
     newstate_ = PyThreadState_New(omniPy::pyInterpreter);
-    omniPy::pyInterpreterLock.unlock();
+    omniPy::pyInterpreterLock->unlock();
 
     // Acquire global interpreter lock
     PyEval_AcquireLock();
@@ -109,9 +112,9 @@ public:
     // lock. Python really ought to do some concurrency control on the
     // PyInterpreterState structure.
 
-    omniPy::pyInterpreterLock.lock();
+    omniPy::pyInterpreterLock->lock();
     PyThreadState_Delete(newstate_);
-    omniPy::pyInterpreterLock.unlock();
+    omniPy::pyInterpreterLock->unlock();
 
     PyEval_ReleaseLock();
   }

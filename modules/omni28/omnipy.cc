@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.21  1999/11/08 11:43:35  dpg1
+// Changes for NT support.
+//
 // Revision 1.20  1999/10/15 17:07:23  dpg1
 // Narrow now properly returns nil if the object is not of the right
 // type.
@@ -99,23 +102,40 @@
 // Initial revision
 //
 
+#ifdef __WIN32__
+#define DLL_EXPORT _declspec(dllexport)
+#else
+#define DLL_EXPORT
+#endif
 
 #include <omnipy.h>
-
-#include <iostream.h>
-
-
-////////////////////////////////////////////////////////////////////////////
-// The global Python interpreter state                                    //
-////////////////////////////////////////////////////////////////////////////
-
-PyInterpreterState* omniPy::pyInterpreter;
-omni_mutex          omniPy::pyInterpreterLock;
 
 
 ////////////////////////////////////////////////////////////////////////////
 // Global pointers to Python objects                                      //
 ////////////////////////////////////////////////////////////////////////////
+
+#if defined(HAS_Cplusplus_Namespace) && defined(_MSC_VER)
+// MSVC++ does not give the variables external linkage otherwise. It's a bug.
+namespace omniPy {
+
+PyInterpreterState* pyInterpreter;
+omni_mutex*         pyInterpreterLock;
+
+PyObject* pyCORBAmodule;	// The CORBA module
+PyObject* pyCORBAsysExcMap;	//  The system exception map
+PyObject* pyCORBAAnyClass;	//  Any class
+PyObject* pyomniORBmodule;	// The omniORB module
+PyObject* pyomniORBobjrefMap;	//  The objref class map
+PyObject* pyomniORBtypeMap;     //  The repoId to descriptor mapping
+PyObject* pyomniORBwordMap;     //  Reserved word map
+PyObject* pyCreateTypeCode;	// Function to create a TypeCode object
+PyObject* pyDummyThreadClass;   // threading module dummy thread class
+}
+
+#else
+PyInterpreterState* omniPy::pyInterpreter;
+omni_mutex*         omniPy::pyInterpreterLock;
 
 PyObject* omniPy::pyCORBAmodule;	// The CORBA module
 PyObject* omniPy::pyCORBAsysExcMap;	//  The system exception map
@@ -127,6 +147,7 @@ PyObject* omniPy::pyomniORBwordMap;     //  Reserved word map
 PyObject* omniPy::pyCreateTypeCode;	// Function to create a TypeCode object
 PyObject* omniPy::pyDummyThreadClass;   // threading module dummy
                                         //  thread class
+#endif
 
 
 // Things visible to Python:
@@ -891,10 +912,12 @@ extern "C" {
     {NULL,NULL}
   };
 
-  void init_omnipy()
+  void DLL_EXPORT init_omnipy()
   {
     // Make sure Python is running multi-threaded
     PyEval_InitThreads();
+
+    omniPy::pyInterpreterLock = new omni_mutex;
 
     PyObject *m  = Py_InitModule("_omnipy", omnipy_methods);
     PyObject *d = PyModule_GetDict(m);

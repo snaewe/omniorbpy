@@ -23,8 +23,18 @@ DIR_CPPFLAGS = $(patsubst %,-I%/src/lib/omniORB2/orbcore,$(IMPORT_TREES)) \
                -DOMNIPY_MAJOR=$(OMNIPY_MAJOR) -DOMNIPY_MINOR=$(OMNIPY_MINOR)
 
 
-CXXDEBUGFLAGS = -g
+#############################################################################
+#   Make variables for Unix platforms                                       #
+#############################################################################
 
+ifdef UnixPlatform
+CXXDEBUGFLAGS = -g
+DIR_CPPFLAGS += -I/usr/local/include/python1.5 -I/usr/include/python1.5
+endif
+
+#############################################################################
+#   Make rules for Linux                                                    #
+#############################################################################
 
 ifdef Linux
 
@@ -58,6 +68,10 @@ export:: $(lib)
 endif
 
 
+#############################################################################
+#   Make rules for Solaris 2.x                                              #
+#############################################################################
+
 ifdef SunOS
 
 CXXOPTIONS += -Kpic -I/usr/local/include
@@ -90,3 +104,41 @@ export:: $(lib)
          )
 endif
 
+
+#############################################################################
+#   Make rules for Windows                                                  #
+#############################################################################
+
+ifdef Win32Platform
+
+DIR_CPPFLAGS += -I"c:\progra~1/Python/include"
+PYLIBPATH = -libpath:"c:\progra~1\Python\libs"
+
+implib = _omnipy.lib
+lib = $(patsubst %.lib,%.pyd,$(implib))
+
+all:: $(lib)
+
+$(lib): $(OBJS)
+	(if egrep '^ *static *omni_mutex *objectTableLock' $(OMNI_TREE)/include/omniORB2/omniInternal.h; then \
+           echo -e '\n\n\n\a'; \
+	   echo '*** ERROR !!! ***'; \
+	   echo; \
+	   echo 'Your $(OMNI_TREE)/include/omniORB2/omniInternal.h file needs to be patched.'; \
+	   echo; \
+           echo 'Please check-out the latest omni2_8_develop branch from CVS.'; \
+           echo 'See http://www.uk.research.att.com/omniORB/cvs.html for details.'; \
+           echo; \
+           exit 1; \
+         fi; \
+	 set -x; \
+	 $(RM) $@; \
+	 libs="$(CORBA_LIB) python15.lib"; \
+	 $(CXXLINK) -out:$@ -DLL $(CXXLINKOPTIONS) $(IMPORT_LIBRARY_FLAGS) $(PYLIBPATH) $(OBJS) $$libs; \
+	)
+
+export:: $(lib)
+	@$(ExportLibrary)
+
+
+endif

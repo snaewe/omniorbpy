@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.11  1999/11/08 11:43:35  dpg1
+// Changes for NT support.
+//
 // Revision 1.10  1999/09/29 15:46:50  dpg1
 // lockWithNewThreadState now creates a dummy threading.Thread object so
 // threading doesn't get upset that it's not there. Very dependent on the
@@ -71,7 +74,7 @@
 #define _omnipy_h_
 
 #include <iostream.h>
-#include <python1.5/Python.h>
+#include <Python.h>
 
 #include <omniORB2/CORBA.h>
 #include <omniORB2/proxyCall.h>
@@ -194,7 +197,7 @@ remTwin(PyObject* obj, char* name)
 ////////////////////////////////////////////////////////////////////////////
 
 _CORBA_MODULE_VAR PyInterpreterState* pyInterpreter;
-_CORBA_MODULE_VAR omni_mutex          pyInterpreterLock;
+_CORBA_MODULE_VAR omni_mutex*         pyInterpreterLock;
 
 ////////////////////////////////////////////////////////////////////////////
 // Global pointers to Python objects                                      //
