@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.16  2001/12/10 18:10:37  dpg1
+// Segfault with narrow on pseudo object.
+//
 // Revision 1.1.2.15  2001/09/24 10:48:25  dpg1
 // Meaningful minor codes.
 //
@@ -726,19 +729,23 @@ OMNIORB_FOR_EACH_SYS_EXCEPTION(DO_CALL_DESC_SYSTEM_EXCEPTON)
     RAISE_PY_BAD_PARAM_IF(!cxxsource, BAD_PARAM_WrongPythonType);
 
     CORBA::Boolean    isa;
-    CORBA::Object_ptr cxxdest;
+    CORBA::Object_ptr cxxdest = 0;
 
     try {
       omniPy::InterpreterUnlocker ul;
       isa = cxxsource->_is_a(repoId);
 
       if (isa) {
-	omniObjRef* oosource = cxxsource->_PR_getobj();
-	omniObjRef* oodest   = omniPy::createObjRef(repoId,
-						    oosource->_getIOR(),
-						    0, 0, 1);
-	cxxdest =
-	  (CORBA::Object_ptr)(oodest->_ptrToObjRef(CORBA::Object::_PD_repoId));
+	if (!cxxsource->_NP_is_pseudo()) {
+	  omniObjRef* oosource = cxxsource->_PR_getobj();
+	  omniObjRef* oodest   = omniPy::createObjRef(repoId,
+						      oosource->_getIOR(),
+						      0, 0, 1);
+	  cxxdest = (CORBA::Object_ptr)
+	                   (oodest->_ptrToObjRef(CORBA::Object::_PD_repoId));
+	}
+	else
+	  cxxdest = CORBA::Object::_duplicate(cxxsource);
       }
     }
     OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
