@@ -184,3 +184,41 @@ export:: $(lib)
 	@$(ExportLibrary)
 
 endif
+
+
+
+#############################################################################
+#   Make rules for FreeBSD                                                    #
+#############################################################################
+
+ifdef FreeBSD
+
+CXXOPTIONS += -fPIC
+
+libname = _omnipymodule.so
+soname  = $(libname).$(OMNIPY_MAJOR)
+lib     = $(soname).$(OMNIPY_MINOR)
+
+$(lib): $(OBJS)
+       (set -x; \
+       $(RM) $@; \
+       $(CXXLINK) $(CXXLINKOPTIONS) -shared -o $@ -Wl,-soname,$(soname) $(IMPOR
+T_LIBRARY_FLAGS) $(OMNIORB2_LIB_NODYN_DEPEND)\
+        $(filter-out $(LibSuffixPattern),$^) $(OMNIORB2_LIB)\
+       )
+
+all:: $(lib)
+
+clean::
+       $(RM) $(lib)
+
+export:: $(lib)
+       @$(ExportLibrary)
+       @(set -x; \
+          cd $(EXPORT_TREE)/$(LIBDIR); \
+          $(RM) $(soname); \
+          ln -s $(lib) $(soname); \
+          $(RM) $(libname); \
+          ln -s $(soname) $(libname); \
+         )
+endif
