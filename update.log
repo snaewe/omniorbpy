@@ -1,3 +1,14 @@
+Wed Feb 14 15:10:33 GMT 2001 dpg1
+=================================
+
+- Fix bug using repoId strings after deletion.
+
+modules/omni30/omnipy30.h
+modules/omni30/pyObjectRef.cc
+modules/omni30/pyPOAFunc.cc
+modules/omni30/pyServant.cc
+
+
 Thu Jan 18 11:45:43 GMT 2001 dpg1
 =================================
 

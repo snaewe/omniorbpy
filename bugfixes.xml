@@ -8,6 +8,16 @@
 
 <buglist version="1.2">
 
+<bug id="8" date="Wed Feb 14 15:10:33 GMT 2001" user="dpg1">
+
+  <summary>Occasional odd object references</summary>
+  <text>
+  POA functions like id_to_reference() would occasionally return base
+  CORBA.Object rather than the most derived type. This was due to
+  using a freed repository id string.
+  </text>
+</bug>
+
 <bug id="7" date="Thu Jan 18 11:45:43 GMT 2001" user="dpg1">
 
   <summary>Crash when marshalling CORBA::Object TypeCode</summary>

@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.24.2.6  2001/02/14 15:22:20  dpg1
+// Fix bug using repoId strings after deletion.
+//
 // Revision 1.24.2.5  2000/11/29 17:11:19  dpg1
 // Fix deadlock when trying to lock omniORB internal lock while holding
 // the Python interpreter lock.
@@ -385,7 +388,8 @@ PyObject*
 omniPy::
 Py_omniServant::py_this()
 {
-  CORBA::Object_ptr objref, lobjref;
+  CORBA::Object_var objref;
+  CORBA::Object_ptr lobjref;
   {
     omniPy::InterpreterUnlocker _u;
     objref  = (CORBA::Object_ptr)_do_this(CORBA::Object::_PD_repoId);
