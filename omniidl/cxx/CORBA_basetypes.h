@@ -28,6 +28,9 @@
 
 /*
  $Log$
+ Revision 1.4.2.1  2000/08/21 09:10:45  dpg1
+ Merge omniidl long long support from omniORB 3
+
  Revision 1.4  2000/03/03 17:41:41  dpg1
  Major reorganisation to support omniORB 3.0 as well as 2.8.
 
@@ -103,8 +106,8 @@ typedef unsigned int              _CORBA_ULong;
 #endif
 
 #ifdef HAS_LongLong
-typedef long long                  _CORBA_LongLong;
-typedef unsigned long long         _CORBA_ULongLong;
+typedef _CORBA_LONGLONG_DECL      _CORBA_LongLong;
+typedef _CORBA_ULONGLONG_DECL     _CORBA_ULongLong;
 #endif
 
 
@@ -117,7 +120,7 @@ typedef float                     _CORBA_Float;
 typedef double                    _CORBA_Double;
 
 #ifdef HAS_LongDouble
-typedef long double               _CORBA_LongDouble;
+typedef _CORBA_LONGDOUBLE_DECL    _CORBA_LongDouble;
 #endif
 
 #else	// VMS float test
@@ -173,7 +176,7 @@ public:
 //  Assume long double type is compatible with the CORBA standard.
 
 #ifdef HAS_LongDouble
-typedef long double               _CORBA_LongDouble;
+typedef _CORBA_LONGDOUBLE_DECL    _CORBA_LongDouble;
 #endif
 
 #endif   // VMS float test
@@ -185,8 +188,10 @@ extern void _CORBA_marshal_error();
 extern _CORBA_Boolean _CORBA_use_nil_ptr_as_nil_objref();
 extern void _CORBA_null_string_ptr(_CORBA_Boolean);
 extern void _CORBA_invoked_nil_pseudo_ref();
+extern void _CORBA_invoked_nil_objref();
 extern _CORBA_Boolean
 _CORBA_use_nil_ptr_as_nil_pseudo_objref(const char* objType);
 extern void _CORBA_bad_param_freebuf();
+
 
 #endif // __CORBA_BASETYPES_H__

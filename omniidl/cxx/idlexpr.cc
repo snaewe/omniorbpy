@@ -28,6 +28,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.6.2.1  2000/08/21 09:10:47  dpg1
+// Merge omniidl long long support from omniORB 3
+//
 // Revision 1.6  2000/03/03 17:41:39  dpg1
 // Major reorganisation to support omniORB 3.0 as well as 2.8.
 //
@@ -191,8 +194,18 @@ _CORBA_Fixed FixedExpr::evalAsFixed() {
 
 // Float
 _CORBA_Float FloatExpr::evalAsFloat() {
+
+#ifndef _MSC_VER
+  // Use direct initialisation except for MS Visual C++, which allegedly
+  // does not work properly with types involving built-in types. To
+  // play it safe, use copy initialisation instead.
+  _CORBA_Float    f(value_);
+  IdlFloatLiteral g(f);
+#else
   _CORBA_Float    f = value_;
   IdlFloatLiteral g = f;
+#endif
+
   if (f != g)
     IdlWarning(file(), line(), "Loss of precision converting literal "
 	       "floating point value to float");
@@ -510,7 +523,7 @@ _CORBA_LongLong ConstExpr::evalAsLongLong() {
   case IdlType::tk_longlong: r = c_->constAsLongLong(); break;
   case IdlType::tk_ulonglong: {
     _CORBA_ULongLong z = c_->constAsULongLong();
-    r = z; p = (z <= 0x7fffffffffffffffLL);
+    r = z; p = (z <= _CORBA_LONGLONG_CONST(0x7fffffffffffffff));
     break;
   }
   default:
