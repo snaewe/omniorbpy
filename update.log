@@ -1,3 +1,25 @@
+Mon Dec  4 18:55:21 GMT 2000 dpg1
+=================================
+
+- Some references to python changed to $(PYTHON)
+
+modules/dir.mk
+
+- Fix deadlock when trying to lock omniORB internal lock while holding
+  the Python interpreter lock.
+
+modules/omnipy.h
+modules/pyORBFunc.cc
+modules/pyObjectRef.cc
+modules/pyPOAFunc.cc
+modules/pyPOAManagerFunc.cc
+modules/pyServant.cc
+
+- Fix bug with TypeCode indirections.
+
+modules/pyTypeCode.cc
+
+
 Tue Nov 28 14:48:48 GMT 2000 dpg1
 =================================
 
