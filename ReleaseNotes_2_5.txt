@@ -1,9 +1,15 @@
-RELEASE NOTES for omniORBpy 2.4
+RELEASE NOTES for omniORBpy 2.5
 ===============================
 
-This is omniORBpy 2.4. It is a stable release.
+This is omniORBpy 2.5. It is a stable release.
 
 See README for building instructions.
+
+
+New features since omniORBpy 2.4
+--------------------------------
+
+ - Bug fixes.
 
 
 New features since omniORBpy 2.3
