@@ -28,6 +28,9 @@
 //    ValueType support
 
 // $Log$
+// Revision 1.1.2.3  2003/09/26 15:57:07  dgrisby
+// Refactor repoId handling.
+//
 // Revision 1.1.2.2  2003/07/10 22:15:02  dgrisby
 // Fix locking issues (merge from omnipy2_develop).
 //
@@ -353,13 +356,32 @@ real_marshalPyObjectValue(cdrValueChunkStream& stream,
   }
 
   // Determine whether to send repoId(s)
-  PyObject* bases = PyTuple_GET_ITEM(d_o, 5);
-  if (bases == Py_None) {
+  PyObject* baseIds = 0;
 
-    if (derived || tracker->inTruncatable()) {
-      // Nested inside a truncatable value, we always send the repoId
-      // in case the receiver truncates, then has a later indirection.
+  if (derived) {
+    baseIds = PyTuple_GET_ITEM(d_o, 5);
+
+    if (baseIds == Py_None) {
       tag |= REPOID_SINGLE;
+    }
+    else {
+      tag |= REPOID_LIST;
+    }
+  }
+  else {
+    // Not a derived value.
+
+    if (tracker->inTruncatable()) {
+      // Nested inside a truncatable value, we always send the repoId(s)
+      // in case the receiver truncates, then has a later indirection.
+      baseIds = PyTuple_GET_ITEM(d_o, 5);
+
+      if (baseIds == Py_None) {
+	tag |= REPOID_SINGLE;
+      }
+      else {
+	tag |= REPOID_LIST;
+      }
     }
     else {
       // RMI: repository ids must always be sent
@@ -369,27 +391,25 @@ real_marshalPyObjectValue(cdrValueChunkStream& stream,
       }
     }
   }
-  else {
-    tag |= REPOID_LIST;
-  }
 
   // Start the value header
   stream.startOutputValueHeader(tag);
 
   // Marshal repoId(s) if necessary
   if ((tag & REPOID_MASK) == REPOID_LIST) {
-    PyObject* ids = PyTuple_GET_ITEM(d_o, 5);
 
-    CORBA::Long pos = tracker->addRepoIds(ids, stream.currentOutputPtr());
+    OMNIORB_ASSERT(baseIds && baseIds != Py_None);
+
+    CORBA::Long pos = tracker->addRepoIds(baseIds, stream.currentOutputPtr());
 
     if (pos != -1) {
       marshalIndirection(stream, pos);
     }
     else {
-      CORBA::Long bases = PyTuple_GET_SIZE(ids);
+      CORBA::Long bases = PyTuple_GET_SIZE(baseIds);
       bases >>= stream;
       for (CORBA::Long i=0; i<bases; i++) {
-	PyObject* id = PyTuple_GET_ITEM(ids, i);
+	PyObject* id = PyTuple_GET_ITEM(baseIds, i);
 	pos = tracker->addRepoIds(id, stream.currentOutputPtr());
 	if (pos != -1)
 	  marshalIndirection(stream, pos);
@@ -417,7 +437,7 @@ real_marshalPyObjectValue(cdrValueChunkStream& stream,
 
   int i, j;
 
-  if (bases != Py_None)
+  if ((tag & REPOID_MASK) == REPOID_LIST)
     tracker->startTruncatable();
 
   for (i=0,j=7; i < members; i++, j+=3) {
@@ -428,7 +448,7 @@ real_marshalPyObjectValue(cdrValueChunkStream& stream,
     omniPy::marshalPyObject(stream, PyTuple_GET_ITEM(d_o, j+1), value);
   }
 
-  if (bases != Py_None)
+  if ((tag & REPOID_MASK) == REPOID_LIST)
     tracker->endTruncatable();
 
   stream.endOutputValue();
@@ -514,12 +534,21 @@ marshalPyObjectValueBox(cdrStream& stream, PyObject* d_o, PyObject* a_o)
 
   CORBA::Long tag = 0x7fffff00;
 
+  PyObject* repoId = PyTuple_GET_ITEM(d_o, 2);
+
   // ValueBoxes are only sent chunked if they're nested inside chunked values.
   if (cstreamp)
     tag |= CHUNKED;
 
-  if (tracker->inTruncatable())
+  if (tracker->inTruncatable()) {
     tag |= REPOID_SINGLE;
+  }
+  else {
+    const char* id = PyString_AS_STRING(repoId);
+    if (id[0] == 'R' && id[1] == 'M' && id[2] == 'I' && id[3] == ':') {
+      tag |= REPOID_SINGLE;
+    }
+  }
 
   if (cstreamp)
     cstreamp->startOutputValueHeader(tag);
@@ -527,9 +556,7 @@ marshalPyObjectValueBox(cdrStream& stream, PyObject* d_o, PyObject* a_o)
     tag >>= stream;
 
   if (tag & REPOID_SINGLE) {
-    PyObject* repoId = PyTuple_GET_ITEM(d_o, 2);
-    CORBA::Long pos = tracker->addRepoIds(repoId,
-					  stream.currentOutputPtr());
+    CORBA::Long pos = tracker->addRepoIds(repoId, stream.currentOutputPtr());
     if (pos != -1)
       marshalIndirection(stream, pos);
     else
@@ -619,13 +646,12 @@ real_unmarshalPyObjectValue(cdrStream& stream, cdrValueChunkStream* cstreamp,
   // Read any repoIds
 
   if ((tag & REPOID_MASK) == REPOID_LIST) {
-    stream.alignInput(omni::ALIGN_4);
     PyObject* repoIds;
 
     CORBA::ULong count;
     count <<= stream;
 
-    CORBA::Long pos = stream.currentInputPtr();
+    CORBA::Long idpos = stream.currentInputPtr();
 
     if (count == 0xffffffff) { // Indirection
       CORBA::Long offset;
@@ -635,7 +661,7 @@ real_unmarshalPyObjectValue(cdrStream& stream, cdrValueChunkStream* cstreamp,
 	OMNIORB_THROW(MARSHAL, MARSHAL_InvalidIndirection,
 		      (CORBA::CompletionStatus)stream.completion());
       }
-      repoIds = tracker->lookup(pos + offset,
+      repoIds = tracker->lookup(idpos + offset,
 				(CORBA::CompletionStatus)stream.completion());
     }
     else {
@@ -653,7 +679,7 @@ real_unmarshalPyObjectValue(cdrStream& stream, cdrValueChunkStream* cstreamp,
 	PyTuple_SET_ITEM(repoIds, i, repoId);
       }
     }
-    tracker->add(repoIds, pos - 4);
+    tracker->add(repoIds, idpos - 4);
 
     for (i=0; i < PyTuple_GET_SIZE(repoIds); i++) {
       repoId  = PyTuple_GET_ITEM(repoIds, i);
