@@ -1,3 +1,11 @@
+Wed Nov 19 16:52:09 GMT 2003 dgrisby
+====================================
+
+- Extern package option to omniidl backend. Thanks Rene Jager.
+
+omniidl_be/python.py
+
+
 Wed Nov 19 14:20:40 GMT 2003 dgrisby
 ====================================
 
