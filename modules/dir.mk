@@ -137,7 +137,7 @@ $(lib): $(OBJS)
 	)
 
 export:: $(lib)
-	@$(ExportLibrary)
+	@$(ExportExecutable)
 
 
 endif
