@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.15  2005/01/13 16:55:26  dgrisby
+// Normalize exceptions thrown from extensions. Thanks Scott Yang.
+//
 // Revision 1.1.2.14  2004/04/30 16:39:35  dgrisby
 // Log CORBA exceptions with Python tracebacks. Thanks Luke Deller.
 //
@@ -197,6 +200,7 @@ omniPy::handlePythonException()
   PyObject *etype, *evalue, *etraceback;
   PyObject *erepoId = 0;
   PyErr_Fetch(&etype, &evalue, &etraceback);
+  PyErr_NormalizeException(&etype, &evalue, &etraceback);
   OMNIORB_ASSERT(etype);
 
   if (evalue && PyInstance_Check(evalue))

@@ -1,3 +1,16 @@
+Thu Jan 13 16:53:31 GMT 2005 dgrisby
+====================================
+
+- Fix possible deadlock in user exception deletion.
+
+modules/pyServant.cc
+
+- Normalize exceptions thrown from extensions. Thanks Scott Yang.
+
+modules/pyExceptions.cc
+modules/pyServant.cc
+
+
 Tue Jan  4 14:49:45 GMT 2005 dgrisby
 ====================================
 
