@@ -12,11 +12,11 @@
 
 
 import sys, time
-from omniORB import CORBA, PortableServer, POA_PortableServer
+from omniORB import CORBA, PortableServer, PortableServer__POA
 
-import _GlobalIDL, POA__GlobalIDL
+import _GlobalIDL, _GlobalIDL__POA
 
-class Echo_i (POA__GlobalIDL.Echo):
+class Echo_i (_GlobalIDL__POA.Echo):
     def __init__(self):
         print "Echo_i created."
 
@@ -27,7 +27,7 @@ class Echo_i (POA__GlobalIDL.Echo):
         print "echoString() called with message:", mesg
         return mesg
 
-class ServantActivator_i (POA_PortableServer.ServantActivator):
+class ServantActivator_i (PortableServer__POA.ServantActivator):
     def incarnate(self, oid, poa):
         print "incarnate(): oid:", oid, "poa:", poa._get_the_name()
         ei = Echo_i()
@@ -47,7 +47,8 @@ poaManager.activate()
 # Create a child POA with the right policies for a ServantActivator
 ps = [poa.create_id_assignment_policy(PortableServer.USER_ID),
       poa.create_servant_retention_policy(PortableServer.RETAIN),
-      poa.create_request_processing_policy(PortableServer.USE_SERVANT_MANAGER)]
+      poa.create_request_processing_policy(PortableServer.USE_SERVANT_MANAGER),
+      poa.create_lifespan_policy(PortableServer.PERSISTENT)]
 
 child = poa.create_POA("MyPOA", poaManager, ps)
 

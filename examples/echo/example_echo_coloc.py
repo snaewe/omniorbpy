@@ -3,11 +3,11 @@
 import sys
 from omniORB import CORBA, PortableServer
 
-# Import the skeletons for the global module
-import _GlobalIDL, _GlobalIDL__POA
+# Import the stubs and skeletons for the Example module
+import Example, Example__POA
 
 # Define an implementation of the Echo interface
-class Echo_i (_GlobalIDL__POA.Echo):
+class Echo_i (Example__POA.Echo):
     def echoString(self, mesg):
         print "echoString() called with message:", mesg
         return mesg
@@ -24,14 +24,13 @@ ei = Echo_i()
 # Create an object reference, and implicitly activate the object
 eo = ei._this()
 
-# Print out the IOR
-print orb.object_to_string(eo)
-
 # Activate the POA
 poaManager = poa._get_the_POAManager()
 poaManager.activate()
 
-# Everything is running now, but if this thread drops out of the end
-# of the file, the process will exit. orb.run() just blocks until the
-# ORB is shut down
-orb.run()
+# Call the object's echoString() operation
+
+message = "Hello"
+result  = eo.echoString(message)
+
+print "I said '%s'. The object said '%s'." % (message,result)

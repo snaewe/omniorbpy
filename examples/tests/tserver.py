@@ -2,9 +2,9 @@
 
 import sys, time
 from omniORB import CORBA, PortableServer
-import TypeTest, POA_TypeTest
+import TypeTest, TypeTest__POA
 
-class I_i (POA_TypeTest.I):
+class I_i (TypeTest__POA.I):
 
     def simple1 (self): return
     def simple2 (self): return

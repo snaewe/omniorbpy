@@ -29,11 +29,11 @@ import sys, threading, time
 import gauge
 
 from omniORB import CORBA
-import _GlobalIDL, POA__GlobalIDL
+import _GlobalIDL, _GlobalIDL__POA
 
 BGCOLOUR = "dark green"
 
-class weatherInfo_i (POA__GlobalIDL.weatherInfo):
+class weatherInfo_i (_GlobalIDL__POA.weatherInfo):
 
     def __init__(self, gui):
         self.gui = gui

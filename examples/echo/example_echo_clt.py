@@ -16,9 +16,17 @@ orb = CORBA.ORB_init(sys.argv, CORBA.ORB_ID)
 ior = sys.argv[1]
 
 # Convert the IOR to an object reference
-object = orb.string_to_object(ior)
+obj = orb.string_to_object(ior)
+
+# Narrow reference to an Example::Echo object
+eo = obj._narrow(Example.Echo)
+
+if eo is None:
+    print "Object reference is not an Example::Echo"
+    sys.exit(1)
 
 # Invoke the echoString operation
 message = "Hello from Python"
-result  = object.echoString(message)
-print "I said '" + result + "'. The object said '" + result + "'"
+result  = eo.echoString(message)
+
+print "I said '%s'. The object said '%s'." % (message,result)

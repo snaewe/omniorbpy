@@ -2,9 +2,9 @@
 
 import sys
 from omniORB import CORBA, PortableServer
-import PerfTest, POA_PerfTest
+import PerfTest, PerfTest__POA
 
-class I_i (POA_PerfTest.I):
+class I_i (PerfTest__POA.I):
 
     def op0(self,l): return l
     def op1(self,a): return a

@@ -12,11 +12,11 @@
 # in the local, as well as the remote, case.
 
 import sys, time
-from omniORB import CORBA, PortableServer, POA_PortableServer
+from omniORB import CORBA, PortableServer, PortableServer__POA
 
-import _GlobalIDL, POA__GlobalIDL
+import _GlobalIDL, _GlobalIDL__POA
 
-class Echo_i (POA__GlobalIDL.Echo):
+class Echo_i (_GlobalIDL__POA.Echo):
     def __init__(self):
         print "Echo_i created."
 
@@ -27,7 +27,7 @@ class Echo_i (POA__GlobalIDL.Echo):
         print "echoString() called with message:", mesg
         return mesg
 
-class ServantLocator_i (POA_PortableServer.ServantLocator):
+class ServantLocator_i (PortableServer__POA.ServantLocator):
     def preinvoke(self, oid, poa, operation):
         print "preinvoke(): oid:", oid, "poa:", poa._get_the_name()
         ei = Echo_i()

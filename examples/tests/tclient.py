@@ -2,7 +2,7 @@
 
 import sys, time
 from omniORB import CORBA, PortableServer
-import TypeTest, POA_TypeTest
+import TypeTest, TypeTest__POA
 
 
 failed = []
@@ -47,7 +47,7 @@ def tdone():
 op_called = 0
 j_deleted = 0
 
-class J_i (POA_TypeTest.J):
+class J_i (TypeTest__POA.J):
     def __init__(self):
         global op_called, j_deleted
         op_called = j_deleted = 0
