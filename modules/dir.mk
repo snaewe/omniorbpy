@@ -287,21 +287,22 @@ soname  = $(libname).$(OMNIPY_MAJOR)
 lib     = $(soname).$(OMNIPY_MINOR)
 
 $(lib): $(OBJS)
-       (set -x; \
+	(set -x; \
        $(RM) $@; \
-       $(CXXLINK) $(CXXLINKOPTIONS) -shared -o $@ -Wl,-soname,$(soname) $(IMPOR
-T_LIBRARY_FLAGS) \
+       $(CXXLINK) $(CXXLINKOPTIONS) $(CORBA_LIB_NO_DYN) $(OMNITHREAD_LIB_NODYN) \
+       -shared -o $@ -Wl,-soname,$(soname) \
+       $(IMPORT_LIBRARY_FLAGS) \
         $(filter-out $(LibSuffixPattern),$^) $(OMNIORB_LIB)\
        )
 
 all:: $(lib)
 
 clean::
-       $(RM) $(lib)
+	$(RM) $(lib)
 
 export:: $(lib)
-       @$(ExportLibrary)
-       @(set -x; \
+	@$(ExportLibrary)
+	@(set -x; \
           cd $(EXPORT_TREE)/$(LIBDIR); \
           $(RM) $(soname); \
           ln -s $(lib) $(soname); \
