@@ -42,7 +42,8 @@ CXXSRCS = $(VERSIONDIR)/omnipy.cc \
 	  $(VERSIONDIR)/pyServant.cc \
           common/pyExceptions.cc \
           common/pyMarshal.cc \
-          common/pyTypeCode.cc
+          common/pyTypeCode.cc \
+          common/pyThreadCache.cc
 
 OBJS =    $(VERSIONDIR)/omnipy.o \
           $(VERSIONDIR)/pyORBFunc.o \
@@ -53,7 +54,9 @@ OBJS =    $(VERSIONDIR)/omnipy.o \
 	  $(VERSIONDIR)/pyServant.o \
           common/pyExceptions.o \
           common/pyMarshal.o \
-          common/pyTypeCode.o
+          common/pyTypeCode.o \
+          common/pyThreadCache.o
+
 
 
 DIR_CPPFLAGS += $(patsubst %,-I%/src/lib/omniORB2,$(IMPORT_TREES))

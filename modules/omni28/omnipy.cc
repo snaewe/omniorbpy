@@ -30,6 +30,10 @@
 // $Id$
 
 // $Log$
+// Revision 1.35  2000/05/26 15:33:31  dpg1
+// Python thread states are now cached. Operation dispatch time is
+// roughly halved!
+//
 // Revision 1.34  2000/04/27 11:04:35  dpg1
 // Catch exceptions thrown by ORB_init().
 //
@@ -151,6 +155,7 @@
 #endif
 
 #include <omnipy.h>
+#include <common/pyThreadCache.h>
 
 
 ////////////////////////////////////////////////////////////////////////////
@@ -443,6 +448,9 @@ extern "C" {
     delete [] argv;
 
     omniPy::setTwin(pyorb, orb, ORB_TWIN);
+
+    // Initialise the thread state cache
+    omnipyThreadCache::init();
 
     Py_INCREF(Py_None);
     return Py_None;

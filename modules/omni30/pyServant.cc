@@ -30,6 +30,10 @@
 // $Id$
 
 // $Log$
+// Revision 1.23  2000/05/26 15:33:32  dpg1
+// Python thread states are now cached. Operation dispatch time is
+// roughly halved!
+//
 // Revision 1.22  2000/05/11 11:58:25  dpg1
 // Throw system exceptions with OMNIORB_THROW.
 //
@@ -105,68 +109,7 @@
 
 
 #include <omnipy.h>
-
-
-// Helper class to create a Python ThreadState object and grab the
-// Python interpreter lock, then release the lock and delete the
-// object when it goes out of scope.
-
-class lockWithNewThreadState {
-public:
-  lockWithNewThreadState() {
-    // Create thread state
-    omniPy::pyInterpreterLock->lock();
-    newstate_ = PyThreadState_New(omniPy::pyInterpreter);
-    omniPy::pyInterpreterLock->unlock();
-
-    // Acquire global interpreter lock
-    PyEval_AcquireLock();
-    oldstate_ = PyThreadState_Swap(newstate_);
-
-    // Create a threading.Thread object, so the threading module is
-    // happy.
-    worker_thread_ = PyEval_CallObject(omniPy::pyWorkerThreadClass,
-				       omniPy::pyEmptyTuple);
-    // If the user hits Ctrl-C during the above call, it will
-    // fail. There's not much we can do except carry on without the
-    // Thread object...
-  }
-
-  ~lockWithNewThreadState() {
-    // Delete worker thread
-    if (worker_thread_) {
-      PyObject* argtuple = PyTuple_New(1);
-      PyTuple_SET_ITEM(argtuple, 0, worker_thread_);
-
-      PyObject* tmp = PyEval_CallObject(omniPy::pyWorkerThreadDel, argtuple);
-      Py_XDECREF(tmp);
-      Py_DECREF(argtuple);
-    }
-
-    // Return to the previous thread state
-    PyThreadState_Swap(oldstate_);
-
-    // We would like to release the interpreter lock here, before
-    // deleting the ThreadState struct. Unfortunately, if we do that
-    // the Python program may end before we get to do the delete. In
-    // that situation, we might call Delete() while Python is clearing
-    // up its interpreter state, leading to a segfault. So we have to
-    // delete the ThreadState first, then release the interpreter
-    // lock. Python really ought to do some concurrency control on the
-    // PyInterpreterState structure.
-
-    omniPy::pyInterpreterLock->lock();
-    PyThreadState_Delete(newstate_);
-    omniPy::pyInterpreterLock->unlock();
-
-    PyEval_ReleaseLock();
-  }
-
-private:
-  PyThreadState*   newstate_;
-  PyThreadState*   oldstate_;
-  PyObject*        worker_thread_;
-};
+#include <common/pyThreadCache.h>
 
 
 // Implementation classes for ServantManagers and AdapterActivator
@@ -310,7 +253,7 @@ Py_omniServant::Py_omniServant(PyObject* pyservant, PyObject* opdict,
 omniPy::
 Py_omniServant::~Py_omniServant()
 {
-  lockWithNewThreadState _t;
+  omnipyThreadCache::lock _t;
   omniPy::remTwin(pyservant_, SERVANT_TWIN);
   Py_DECREF(pyservant_);
   Py_DECREF(opdict_);
@@ -348,7 +291,7 @@ Py_omniServant::_is_a(const char* logical_type_id)
   else if (!strcmp(logical_type_id, CORBA::Object::_PD_repoId))
     return 1;
   else {
-    lockWithNewThreadState _t;
+    omnipyThreadCache::lock _t;
     PyObject* pyisa = PyObject_CallMethod(omniPy::pyomniORBmodule,
 					  (char*)"static_is_a", (char*)"Os",
 					  pyskeleton_, logical_type_id);
@@ -366,7 +309,7 @@ PortableServer::POA_ptr
 omniPy::
 Py_omniServant::_default_POA()
 {
-  lockWithNewThreadState _t;
+  omnipyThreadCache::lock _t;
   PyObject* pyPOA = PyObject_CallMethod(pyservant_, (char*)"_default_POA", 0);
 
   if (pyPOA) {
@@ -417,7 +360,7 @@ omniPy::
 Py_omniServant::_dispatch(GIOP_S& giop_s)
 {
   int i;
-  lockWithNewThreadState _t;
+  omnipyThreadCache::lock _t;
 
   PyObject* desc = PyDict_GetItemString(opdict_, (char*)giop_s.operation());
 
@@ -703,8 +646,8 @@ Py_omniServant::local_dispatch(const char* op,
       PyObject* excc = PyDict_GetItem(pyCORBAsysExcMap, erepoId);
       if (excc) {
 	PyObject *pyminor, *pycompl;
-	pyminor = PyObject_GetAttrString(evalue, "minor");
-	pycompl = PyObject_GetAttrString(evalue, "completed");
+	pyminor = PyObject_GetAttrString(evalue, (char*)"minor");
+	pycompl = PyObject_GetAttrString(evalue, (char*)"completed");
 	OMNIORB_ASSERT(pyminor && PyInt_Check(pyminor));
 	OMNIORB_ASSERT(pycompl && PyInstance_Check(pycompl));
 	PyObject* exca = Py_BuildValue((char*)"(NN)", pyminor, pycompl);
@@ -746,7 +689,7 @@ Py_ServantActivator::Py_ServantActivator(PyObject*   pysa,
 
 Py_ServantActivator::~Py_ServantActivator()
 {
-  lockWithNewThreadState _t;
+  omnipyThreadCache::lock _t;
   Py_DECREF(pysa_);
 }
 
@@ -755,7 +698,7 @@ Py_ServantActivator::incarnate(const PortableServer::ObjectId& oid,
 			       PortableServer::POA_ptr         poa)
 {
   PyObject *method, *argtuple, *pyservant;
-  lockWithNewThreadState _t;
+  omnipyThreadCache::lock _t;
 
   method = PyObject_GetAttrString(pysa_, (char*)"incarnate");
   if (!method) {
@@ -837,7 +780,7 @@ Py_ServantActivator::etherealize(const PortableServer::ObjectId& oid,
 				 CORBA::Boolean          remaining_activations)
 {
   PyObject *method, *argtuple, *result;
-  lockWithNewThreadState _t;
+  omnipyThreadCache::lock _t;
 
   omniPy::Py_omniServant* pyos;
   pyos = (omniPy::Py_omniServant*)serv->_ptrToInterface("Py_omniServant");
@@ -907,7 +850,7 @@ Py_ServantLocator::Py_ServantLocator(PyObject*   pysl,
 
 Py_ServantLocator::~Py_ServantLocator()
 {
-  lockWithNewThreadState _t;
+  omnipyThreadCache::lock _t;
   Py_DECREF(pysl_);
 }
 
@@ -918,7 +861,7 @@ Py_ServantLocator::preinvoke(const PortableServer::ObjectId& oid,
 			     void*&                          cookie)
 {
   PyObject *method, *argtuple, *rettuple, *pyservant, *pycookie;
-  lockWithNewThreadState _t;
+  omnipyThreadCache::lock _t;
 
   method = PyObject_GetAttrString(pysl_, (char*)"preinvoke");
   if (!method) {
@@ -1015,7 +958,7 @@ Py_ServantLocator::postinvoke(const PortableServer::ObjectId& oid,
 			      PortableServer::Servant         serv)
 {
   PyObject *method, *argtuple, *result;
-  lockWithNewThreadState _t;
+  omnipyThreadCache::lock _t;
 
   omniPy::Py_omniServant* pyos;
   pyos = (omniPy::Py_omniServant*)serv->_ptrToInterface("Py_omniServant");
@@ -1085,7 +1028,7 @@ Py_AdapterActivator::Py_AdapterActivator(PyObject*   pyaa,
 
 Py_AdapterActivator::~Py_AdapterActivator()
 {
-  lockWithNewThreadState _t;
+  omnipyThreadCache::lock _t;
   Py_DECREF(pyaa_);
 }
 
@@ -1094,7 +1037,7 @@ Py_AdapterActivator::unknown_adapter(PortableServer::POA_ptr parent,
 				     const char*             name)
 {
   PyObject *method, *argtuple, *pyresult;
-  lockWithNewThreadState _t;
+  omnipyThreadCache::lock _t;
 
   method = PyObject_GetAttrString(pyaa_, (char*)"unknown_adapter");
   if (!method) {

@@ -29,6 +29,10 @@
 
 // $Id$
 // $Log$
+// Revision 1.12  2000/05/26 15:33:32  dpg1
+// Python thread states are now cached. Operation dispatch time is
+// roughly halved!
+//
 // Revision 1.11  2000/05/24 11:11:24  dpg1
 // POA functions now properly release servant references when exceptions
 // are thrown.
@@ -1009,7 +1013,7 @@ extern "C" {
     }
     catch (PortableServer::POA::WrongPolicy& ex) {
       PyObject* pyPOA = PyObject_GetAttrString(omniPy::pyPortableServerModule,
-					       "POA");
+					       (char*)"POA");
       OMNIORB_ASSERT(pyPOA);
       raisePOAException(pyPOA, "WrongPolicy");
       Py_DECREF(pyPOA);

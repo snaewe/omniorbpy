@@ -30,6 +30,10 @@
 // $Id$
 
 // $Log$
+// Revision 1.5  2000/05/26 15:33:31  dpg1
+// Python thread states are now cached. Operation dispatch time is
+// roughly halved!
+//
 // Revision 1.4  2000/04/27 11:04:50  dpg1
 // Add shutdown() and destroy() operations.
 //
@@ -47,6 +51,7 @@
 
 
 #include <omnipy.h>
+#include <common/pyThreadCache.h>
 
 
 extern "C" {
@@ -180,7 +185,9 @@ extern "C" {
     OMNIORB_ASSERT(orb);
 
     try {
+      omniPy::InterpreterUnlocker _u;
       CORBA::BOA::getBOA()->impl_shutdown();
+      omnipyThreadCache::shutdown();
     }
     OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
 
@@ -199,7 +206,9 @@ extern "C" {
     OMNIORB_ASSERT(orb);
 
     try {
+      omniPy::InterpreterUnlocker _u;
       orb->NP_destroy();
+      omnipyThreadCache::shutdown();
     }
     OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
 

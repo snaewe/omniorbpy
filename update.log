@@ -1,3 +1,28 @@
+Fri May 26 16:31:14 BST 2000 dpg1
+=================================
+
+- Python thread states are now cached. Operation dispatch time is
+  roughly halved!
+
+modules/dir.mk
+modules/common/pyThreadCache.cc  -- new
+modules/common/pyThreadCache.h   -- new
+modules/omni28/omnipy.cc
+modules/omni28/pyORBFunc.cc
+modules/omni28/pyServant.cc
+modules/omni30/omnipy.cc
+modules/omni30/pyORBFunc.cc
+modules/omni30/pyPOAFunc.cc
+modules/omni30/pyServant.cc
+
+- Performance test now tests single long value, as well as
+  sequences/arrays.
+
+examples/tests/PerfTest.idl
+examples/tests/pclient.py
+examples/tests/pserver.py
+
+
 Thu May 25 17:05:55 BST 2000 dpg1
 =================================
 
