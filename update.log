@@ -1,3 +1,12 @@
+Mon Jul 10 19:41:53 BST 2000 dpg1
+=================================
+
+- Remove partial IR stubs. Add TypeCodes for System Exceptions.
+
+examples/tests/tclient.py
+python/omniORB/CORBA.py
+
+
 Fri Jun 30 15:05:25 BST 2000 dpg1
 =================================
 

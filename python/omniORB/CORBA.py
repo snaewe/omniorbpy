@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.27  2000/07/10 18:44:26  dpg1
+# Remove partial IR stubs. Add TypeCodes for System Exceptions.
+#
 # Revision 1.26  2000/06/27 15:09:01  dpg1
 # Fix to _is_a(). CORBA.Object registered in the objref map.
 #
@@ -678,97 +681,154 @@ def is_nil(obj):
 #                                                                           #
 #############################################################################
 
+# Note that we do not include the majority of the IfR declarations
+# here, because that would cause lots of bloat. Code which requires it
+# should compile ir.idl and manually import ir_idl.
+
 # typedef string Identifier
-_d_Identifier  = (tcInternal.tv_string, 0)
-_ad_Identifier = (tcInternal.tv_alias,
-                  "IDL:omg.org/CORBA/Identifier:1.0",
-                  "Identifier", _d_Identifier)
+class Identifier:
+    _NP_RepositoryId = "IDL:omg.org/CORBA/Identifier:1.0"
+    def __init__(self):
+        raise RuntimeError("Cannot construct objects of this type.")
+_d_Identifier  = (tcInternal.tv_string,0)
+_ad_Identifier = (tcInternal.tv_alias, Identifier._NP_RepositoryId, "Identifier", (tcInternal.tv_string,0))
 _tc_Identifier = tcInternal.createTypeCode(_ad_Identifier)
-omniORB.registerType(_ad_Identifier[1], _ad_Identifier, _tc_Identifier)
-
-# typedef string ScopedName
-_d_ScopedName  = (tcInternal.tv_string, 0)
-_ad_ScopedName = (tcInternal.tv_alias,
-                  "IDL:omg.org/CORBA/ScopedName:1.0",
-                  "ScopedName", _d_ScopedName)
-_tc_ScopedName = tcInternal.createTypeCode(_ad_ScopedName)
-omniORB.registerType(_ad_ScopedName[1], _ad_ScopedName, _tc_ScopedName)
-
-# typedef string RepositoryId
-_d_RepositoryId  = (tcInternal.tv_string, 0)
-_ad_RepositoryId = (tcInternal.tv_alias,
-                    "IDL:omg.org/CORBA/RepositoryId:1.0",
-                    "RepositoryId", _d_RepositoryId)
-_tc_RepositoryId = tcInternal.createTypeCode(_ad_RepositoryId)
-omniORB.registerType(_ad_RepositoryId[1], _ad_RepositoryId, _tc_RepositoryId)
-
-# interface IDLType;
-_d_IDLType = (tcInternal.tv_objref,
-              "IDL:omg.org/CORBA/IDLType:2.3",
-              "IDLType")
+omniORB.registerType(Identifier._NP_RepositoryId, _ad_Identifier, _tc_Identifier)
 
 
-# struct StructMember
-class StructMember:
-    _NP_RepositoryId = "IDL:omg.org/CORBA/StructMember:1.0"
+#############################################################################
+#                                                                           #
+# TypeCodes for System Exceptions                                           #
+#                                                                           #
+#############################################################################
 
-    def __init__(self, name, type, type_def):
-        self.name     = name
-        self.type     = type
-        self.type_def = type_def
+_d_completion_status  = (tcInternal.tv_enum, completion_status._NP_RepositoryId, "completion_status", completion_status._items)
+_tc_completion_status = tcInternal.createTypeCode(_d_completion_status)
+omniORB.registerType(completion_status._NP_RepositoryId, _d_completion_status, _tc_completion_status)
 
-_d_StructMember  = (tcInternal.tv_struct, StructMember,
-                    StructMember._NP_RepositoryId, "StructMember",
-                    "name",     _d_Identifier,
-                    "type",     _d_TypeCode,
-                    "type_def", _d_IDLType)
-_tc_StructMember = tcInternal.createTypeCode(_d_StructMember)
-omniORB.registerType(StructMember._NP_RepositoryId, _d_StructMember,
-                     _tc_StructMember)
+# Strings to put in the descriptors, so all descriptors share the same
+# strings.
+_minor     = "minor"
+_completed = "completed"
 
-# typedef sequence <StructMember> StructMemberSeq;
-_d_StructMemberSeq  = (omniORB.tcInternal.tv_sequence, _d_StructMember, 0)
-_ad_StructMemberSeq = (omniORB.tcInternal.tv_alias,
-                       "IDL:omg.org/CORBA/StructMemberSeq:1.0",
-                       "StructMemberSeq", _d_StructMemberSeq)
-_tc_StructMemberSeq = omniORB.tcInternal.createTypeCode(_ad_StructMemberSeq)
-omniORB.registerType(_ad_StructMemberSeq[1], _ad_StructMemberSeq,
-                     _tc_StructMemberSeq)
+_d_UNKNOWN  = (tcInternal.tv_except, UNKNOWN, UNKNOWN._NP_RepositoryId, "UNKNOWN", _minor, tcInternal.tv_long, _completed, _d_completion_status)
+_tc_UNKNOWN = tcInternal.createTypeCode(_d_UNKNOWN)
+omniORB.registerType(UNKNOWN._NP_RepositoryId, _d_UNKNOWN, _tc_UNKNOWN)
 
-# struct UnionMember
-class UnionMember:
-    _NP_RepositoryId = "IDL:omg.org/CORBA/UnionMember:1.0"
+_d_BAD_PARAM  = (tcInternal.tv_except, BAD_PARAM, BAD_PARAM._NP_RepositoryId, "BAD_PARAM", _minor, tcInternal.tv_long, _completed, _d_completion_status)
+_tc_BAD_PARAM = tcInternal.createTypeCode(_d_BAD_PARAM)
+omniORB.registerType(BAD_PARAM._NP_RepositoryId, _d_BAD_PARAM, _tc_BAD_PARAM)
 
-    def __init__(self, name, label, type, type_def):
-        self.name     = name
-        self.label    = label
-        self.type     = type
-        self.type_def = type_def
+_d_NO_MEMORY  = (tcInternal.tv_except, NO_MEMORY, NO_MEMORY._NP_RepositoryId, "NO_MEMORY", _minor, tcInternal.tv_long, _completed, _d_completion_status)
+_tc_NO_MEMORY = tcInternal.createTypeCode(_d_NO_MEMORY)
+omniORB.registerType(NO_MEMORY._NP_RepositoryId, _d_NO_MEMORY, _tc_NO_MEMORY)
 
-_d_UnionMember  = (tcInternal.tv_struct, UnionMember,
-                   UnionMember._NP_RepositoryId, "UnionMember",
-                   "name",     _d_Identifier,
-                   "label",    _d_any,
-                   "type",     _d_TypeCode,
-                   "type_def", _d_IDLType)
-_tc_UnionMember = tcInternal.createTypeCode(_d_UnionMember)
-omniORB.registerType(UnionMember._NP_RepositoryId, _d_UnionMember,
-                     _tc_UnionMember)
+_d_IMP_LIMIT  = (tcInternal.tv_except, IMP_LIMIT, IMP_LIMIT._NP_RepositoryId, "IMP_LIMIT", _minor, tcInternal.tv_long, _completed, _d_completion_status)
+_tc_IMP_LIMIT = tcInternal.createTypeCode(_d_IMP_LIMIT)
+omniORB.registerType(IMP_LIMIT._NP_RepositoryId, _d_IMP_LIMIT, _tc_IMP_LIMIT)
 
-# typedef sequence <UnionMember> UnionMemberSeq;
-_d_UnionMemberSeq  = (omniORB.tcInternal.tv_sequence, _d_UnionMember, 0)
-_ad_UnionMemberSeq = (omniORB.tcInternal.tv_alias,
-                      "IDL:omg.org/CORBA/UnionMemberSeq:1.0",
-                      "UnionMemberSeq", _d_UnionMemberSeq)
-_tc_UnionMemberSeq = omniORB.tcInternal.createTypeCode(_ad_UnionMemberSeq)
-omniORB.registerType(_ad_UnionMemberSeq[1], _ad_UnionMemberSeq,
-                     _tc_UnionMemberSeq)
+_d_COMM_FAILURE  = (tcInternal.tv_except, COMM_FAILURE, COMM_FAILURE._NP_RepositoryId, "COMM_FAILURE", _minor, tcInternal.tv_long, _completed, _d_completion_status)
+_tc_COMM_FAILURE = tcInternal.createTypeCode(_d_COMM_FAILURE)
+omniORB.registerType(COMM_FAILURE._NP_RepositoryId, _d_COMM_FAILURE, _tc_COMM_FAILURE)
 
-# typedef sequence <Identifier> EnumMemberSeq;
-_d_EnumMemberSeq  = (omniORB.tcInternal.tv_sequence, _d_Identifier, 0)
-_ad_EnumMemberSeq = (omniORB.tcInternal.tv_alias,
-                     "IDL:omg.org/CORBA/EnumMemberSeq:1.0",
-                     "EnumMemberSeq", _d_EnumMemberSeq)
-_tc_EnumMemberSeq = omniORB.tcInternal.createTypeCode(_ad_EnumMemberSeq)
-omniORB.registerType(_ad_EnumMemberSeq[1], _ad_EnumMemberSeq,
-                     _tc_EnumMemberSeq)
+_d_INV_OBJREF  = (tcInternal.tv_except, INV_OBJREF, INV_OBJREF._NP_RepositoryId, "INV_OBJREF", _minor, tcInternal.tv_long, _completed, _d_completion_status)
+_tc_INV_OBJREF = tcInternal.createTypeCode(_d_INV_OBJREF)
+omniORB.registerType(INV_OBJREF._NP_RepositoryId, _d_INV_OBJREF, _tc_INV_OBJREF)
+
+_d_OBJECT_NOT_EXIST  = (tcInternal.tv_except, OBJECT_NOT_EXIST, OBJECT_NOT_EXIST._NP_RepositoryId, "OBJECT_NOT_EXIST", _minor, tcInternal.tv_long, _completed, _d_completion_status)
+_tc_OBJECT_NOT_EXIST = tcInternal.createTypeCode(_d_OBJECT_NOT_EXIST)
+omniORB.registerType(OBJECT_NOT_EXIST._NP_RepositoryId, _d_OBJECT_NOT_EXIST, _tc_OBJECT_NOT_EXIST)
+
+_d_NO_PERMISSION  = (tcInternal.tv_except, NO_PERMISSION, NO_PERMISSION._NP_RepositoryId, "NO_PERMISSION", _minor, tcInternal.tv_long, _completed, _d_completion_status)
+_tc_NO_PERMISSION = tcInternal.createTypeCode(_d_NO_PERMISSION)
+omniORB.registerType(NO_PERMISSION._NP_RepositoryId, _d_NO_PERMISSION, _tc_NO_PERMISSION)
+
+_d_INTERNAL  = (tcInternal.tv_except, INTERNAL, INTERNAL._NP_RepositoryId, "INTERNAL", _minor, tcInternal.tv_long, _completed, _d_completion_status)
+_tc_INTERNAL = tcInternal.createTypeCode(_d_INTERNAL)
+omniORB.registerType(INTERNAL._NP_RepositoryId, _d_INTERNAL, _tc_INTERNAL)
+
+_d_MARSHAL  = (tcInternal.tv_except, MARSHAL, MARSHAL._NP_RepositoryId, "MARSHAL", _minor, tcInternal.tv_long, _completed, _d_completion_status)
+_tc_MARSHAL = tcInternal.createTypeCode(_d_MARSHAL)
+omniORB.registerType(MARSHAL._NP_RepositoryId, _d_MARSHAL, _tc_MARSHAL)
+
+_d_INITIALIZE  = (tcInternal.tv_except, INITIALIZE, INITIALIZE._NP_RepositoryId, "INITIALIZE", _minor, tcInternal.tv_long, _completed, _d_completion_status)
+_tc_INITIALIZE = tcInternal.createTypeCode(_d_INITIALIZE)
+omniORB.registerType(INITIALIZE._NP_RepositoryId, _d_INITIALIZE, _tc_INITIALIZE)
+
+_d_NO_IMPLEMENT  = (tcInternal.tv_except, NO_IMPLEMENT, NO_IMPLEMENT._NP_RepositoryId, "NO_IMPLEMENT", _minor, tcInternal.tv_long, _completed, _d_completion_status)
+_tc_NO_IMPLEMENT = tcInternal.createTypeCode(_d_NO_IMPLEMENT)
+omniORB.registerType(NO_IMPLEMENT._NP_RepositoryId, _d_NO_IMPLEMENT, _tc_NO_IMPLEMENT)
+
+_d_BAD_TYPECODE  = (tcInternal.tv_except, BAD_TYPECODE, BAD_TYPECODE._NP_RepositoryId, "BAD_TYPECODE", _minor, tcInternal.tv_long, _completed, _d_completion_status)
+_tc_BAD_TYPECODE = tcInternal.createTypeCode(_d_BAD_TYPECODE)
+omniORB.registerType(BAD_TYPECODE._NP_RepositoryId, _d_BAD_TYPECODE, _tc_BAD_TYPECODE)
+
+_d_BAD_OPERATION  = (tcInternal.tv_except, BAD_OPERATION, BAD_OPERATION._NP_RepositoryId, "BAD_OPERATION", _minor, tcInternal.tv_long, _completed, _d_completion_status)
+_tc_BAD_OPERATION = tcInternal.createTypeCode(_d_BAD_OPERATION)
+omniORB.registerType(BAD_OPERATION._NP_RepositoryId, _d_BAD_OPERATION, _tc_BAD_OPERATION)
+
+_d_NO_RESOURCES  = (tcInternal.tv_except, NO_RESOURCES, NO_RESOURCES._NP_RepositoryId, "NO_RESOURCES", _minor, tcInternal.tv_long, _completed, _d_completion_status)
+_tc_NO_RESOURCES = tcInternal.createTypeCode(_d_NO_RESOURCES)
+omniORB.registerType(NO_RESOURCES._NP_RepositoryId, _d_NO_RESOURCES, _tc_NO_RESOURCES)
+
+_d_NO_RESPONSE  = (tcInternal.tv_except, NO_RESPONSE, NO_RESPONSE._NP_RepositoryId, "NO_RESPONSE", _minor, tcInternal.tv_long, _completed, _d_completion_status)
+_tc_NO_RESPONSE = tcInternal.createTypeCode(_d_NO_RESPONSE)
+omniORB.registerType(NO_RESPONSE._NP_RepositoryId, _d_NO_RESPONSE, _tc_NO_RESPONSE)
+
+_d_PERSIST_STORE  = (tcInternal.tv_except, PERSIST_STORE, PERSIST_STORE._NP_RepositoryId, "PERSIST_STORE", _minor, tcInternal.tv_long, _completed, _d_completion_status)
+_tc_PERSIST_STORE = tcInternal.createTypeCode(_d_PERSIST_STORE)
+omniORB.registerType(PERSIST_STORE._NP_RepositoryId, _d_PERSIST_STORE, _tc_PERSIST_STORE)
+
+_d_BAD_INV_ORDER  = (tcInternal.tv_except, BAD_INV_ORDER, BAD_INV_ORDER._NP_RepositoryId, "BAD_INV_ORDER", _minor, tcInternal.tv_long, _completed, _d_completion_status)
+_tc_BAD_INV_ORDER = tcInternal.createTypeCode(_d_BAD_INV_ORDER)
+omniORB.registerType(BAD_INV_ORDER._NP_RepositoryId, _d_BAD_INV_ORDER, _tc_BAD_INV_ORDER)
+
+_d_TRANSIENT  = (tcInternal.tv_except, TRANSIENT, TRANSIENT._NP_RepositoryId, "TRANSIENT", _minor, tcInternal.tv_long, _completed, _d_completion_status)
+_tc_TRANSIENT = tcInternal.createTypeCode(_d_TRANSIENT)
+omniORB.registerType(TRANSIENT._NP_RepositoryId, _d_TRANSIENT, _tc_TRANSIENT)
+
+_d_FREE_MEM  = (tcInternal.tv_except, FREE_MEM, FREE_MEM._NP_RepositoryId, "FREE_MEM", _minor, tcInternal.tv_long, _completed, _d_completion_status)
+_tc_FREE_MEM = tcInternal.createTypeCode(_d_FREE_MEM)
+omniORB.registerType(FREE_MEM._NP_RepositoryId, _d_FREE_MEM, _tc_FREE_MEM)
+
+_d_INV_IDENT  = (tcInternal.tv_except, INV_IDENT, INV_IDENT._NP_RepositoryId, "INV_IDENT", _minor, tcInternal.tv_long, _completed, _d_completion_status)
+_tc_INV_IDENT = tcInternal.createTypeCode(_d_INV_IDENT)
+omniORB.registerType(INV_IDENT._NP_RepositoryId, _d_INV_IDENT, _tc_INV_IDENT)
+
+_d_INV_FLAG  = (tcInternal.tv_except, INV_FLAG, INV_FLAG._NP_RepositoryId, "INV_FLAG", _minor, tcInternal.tv_long, _completed, _d_completion_status)
+_tc_INV_FLAG = tcInternal.createTypeCode(_d_INV_FLAG)
+omniORB.registerType(INV_FLAG._NP_RepositoryId, _d_INV_FLAG, _tc_INV_FLAG)
+
+_d_INTF_REPOS  = (tcInternal.tv_except, INTF_REPOS, INTF_REPOS._NP_RepositoryId, "INTF_REPOS", _minor, tcInternal.tv_long, _completed, _d_completion_status)
+_tc_INTF_REPOS = tcInternal.createTypeCode(_d_INTF_REPOS)
+omniORB.registerType(INTF_REPOS._NP_RepositoryId, _d_INTF_REPOS, _tc_INTF_REPOS)
+
+_d_BAD_CONTEXT  = (tcInternal.tv_except, BAD_CONTEXT, BAD_CONTEXT._NP_RepositoryId, "BAD_CONTEXT", _minor, tcInternal.tv_long, _completed, _d_completion_status)
+_tc_BAD_CONTEXT = tcInternal.createTypeCode(_d_BAD_CONTEXT)
+omniORB.registerType(BAD_CONTEXT._NP_RepositoryId, _d_BAD_CONTEXT, _tc_BAD_CONTEXT)
+
+_d_OBJ_ADAPTER  = (tcInternal.tv_except, OBJ_ADAPTER, OBJ_ADAPTER._NP_RepositoryId, "OBJ_ADAPTER", _minor, tcInternal.tv_long, _completed, _d_completion_status)
+_tc_OBJ_ADAPTER = tcInternal.createTypeCode(_d_OBJ_ADAPTER)
+omniORB.registerType(OBJ_ADAPTER._NP_RepositoryId, _d_OBJ_ADAPTER, _tc_OBJ_ADAPTER)
+
+_d_DATA_CONVERSION  = (tcInternal.tv_except, DATA_CONVERSION, DATA_CONVERSION._NP_RepositoryId, "DATA_CONVERSION", _minor, tcInternal.tv_long, _completed, _d_completion_status)
+_tc_DATA_CONVERSION = tcInternal.createTypeCode(_d_DATA_CONVERSION)
+omniORB.registerType(DATA_CONVERSION._NP_RepositoryId, _d_DATA_CONVERSION, _tc_DATA_CONVERSION)
+
+_d_TRANSACTION_REQUIRED  = (tcInternal.tv_except, TRANSACTION_REQUIRED, TRANSACTION_REQUIRED._NP_RepositoryId, "TRANSACTION_REQUIRED", _minor, tcInternal.tv_long, _completed, _d_completion_status)
+_tc_TRANSACTION_REQUIRED = tcInternal.createTypeCode(_d_TRANSACTION_REQUIRED)
+omniORB.registerType(TRANSACTION_REQUIRED._NP_RepositoryId, _d_TRANSACTION_REQUIRED, _tc_TRANSACTION_REQUIRED)
+
+_d_TRANSACTION_ROLLEDBACK  = (tcInternal.tv_except, TRANSACTION_ROLLEDBACK, TRANSACTION_ROLLEDBACK._NP_RepositoryId, "TRANSACTION_ROLLEDBACK", _minor, tcInternal.tv_long, _completed, _d_completion_status)
+_tc_TRANSACTION_ROLLEDBACK = tcInternal.createTypeCode(_d_TRANSACTION_ROLLEDBACK)
+omniORB.registerType(TRANSACTION_ROLLEDBACK._NP_RepositoryId, _d_TRANSACTION_ROLLEDBACK, _tc_TRANSACTION_ROLLEDBACK)
+
+_d_INVALID_TRANSACTION  = (tcInternal.tv_except, INVALID_TRANSACTION, INVALID_TRANSACTION._NP_RepositoryId, "INVALID_TRANSACTION", _minor, tcInternal.tv_long, _completed, _d_completion_status)
+_tc_INVALID_TRANSACTION = tcInternal.createTypeCode(_d_INVALID_TRANSACTION)
+omniORB.registerType(INVALID_TRANSACTION._NP_RepositoryId, _d_INVALID_TRANSACTION, _tc_INVALID_TRANSACTION)
+
+_d_WRONG_TRANSACTION  = (tcInternal.tv_except, WRONG_TRANSACTION, WRONG_TRANSACTION._NP_RepositoryId, "WRONG_TRANSACTION", _minor, tcInternal.tv_long, _completed, _d_completion_status)
+_tc_WRONG_TRANSACTION = tcInternal.createTypeCode(_d_WRONG_TRANSACTION)
+omniORB.registerType(WRONG_TRANSACTION._NP_RepositoryId, _d_WRONG_TRANSACTION, _tc_WRONG_TRANSACTION)
+
+del _minor, _completed

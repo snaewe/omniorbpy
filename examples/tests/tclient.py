@@ -1427,7 +1427,7 @@ def doTests(orb, poa, io):
     a = CORBA.Any(TypeTest._tc_S1,
                   TypeTest.S1(1, 2, 3, 4, 5.6, 7.8, 1, "a", 9))
     r = io.any1(a)
-    if a.value().c == 3:
+    if r.value().c == 3:
         tresult("+")
     else:
         ok = 0
@@ -1460,6 +1460,11 @@ def doTests(orb, poa, io):
     del ji, jo
     r = None
     poa.deactivate_object(id)
+
+    a = CORBA.Any(CORBA._tc_IMP_LIMIT,
+                  CORBA.IMP_LIMIT(12345,CORBA.COMPLETED_YES))
+    r = io.any1(a)
+    tresult(str(r.value()))
 
     if ok: tpass()
     else:  tfail()
