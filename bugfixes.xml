@@ -8,6 +8,18 @@
 
 <buglist>
 
+<bug id="6" date="Thu Sep 21 11:53:11 BST 2000" user="dpg1">
+
+  <summary>Race condition in C++ servant deletion</summary>
+  <reported>Gary Pennington</reported>
+  <link	href="http://www.uk.research.att.com/omniORB/archives/2000-09/0063.html"/>
+  <text>
+  A race condition in reference counting meant that a thread would
+  occasionally attempt to use a C++ servant object while another
+  thread was in the process of deleting it.
+  </text>
+</bug>
+
 <bug id="5" date="Wed Sep  6 12:13:30 BST 2000" user="dpg1">
 
   <summary>Support for Python 1.6 and 2.0b1</summary>

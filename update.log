@@ -1,3 +1,13 @@
+Thu Sep 21 11:53:11 BST 2000 dpg1
+=================================
+
+- Fix race condition in Py_omniServant deletion.
+
+modules/omni30/omnipy30.h
+modules/omni30/pyPOAFunc.cc
+modules/omni30/pyServant.cc
+
+
 Tue Sep 19 12:24:15 BST 2000 dpg1
 =================================
 
