@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.28.2.15  2002/06/11 20:21:31  dgrisby
+# Missed out wchar, wstring TypeCodes.
+#
 # Revision 1.28.2.14  2002/05/27 01:02:37  dgrisby
 # Fix bug with scope lookup in generated code. Fix TypeCode clean-up bug.
 #
@@ -373,6 +376,9 @@ TC_longlong = _tc_longlong = tcInternal.createTypeCode(tcInternal.tv_longlong)
 TC_ulonglong= _tc_ulonglong= tcInternal.createTypeCode(tcInternal.tv_ulonglong)
 TC_longdouble = _tc_longdouble \
             = tcInternal.createTypeCode(tcInternal.tv_longdouble)
+TC_wchar    = _tc_wchar    = tcInternal.createTypeCode(tcInternal.tv_wchar)
+TC_wstring  = _tc_wstring \
+            = tcInternal.createTypeCode((tcInternal.tv_wstring,0))
 
 # id() function returns the repository ID of an object
 def id(obj):

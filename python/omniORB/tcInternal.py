@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.10.2.6  2002/06/11 20:21:31  dgrisby
+# Missed out wchar, wstring TypeCodes.
+#
 # Revision 1.10.2.5  2002/05/27 01:02:37  dgrisby
 # Fix bug with scope lookup in generated code. Fix TypeCode clean-up bug.
 #
@@ -389,23 +392,11 @@ class TypeCode_base (CORBA.TypeCode):
 class TypeCode_empty (TypeCode_base):
     def __init__(self, desc):
         if type(desc) is not types.IntType: raise CORBA.INTERNAL()
-        if desc != tv_null       and \
-           desc != tv_void       and \
-           desc != tv_short      and \
-           desc != tv_long       and \
-           desc != tv_ushort     and \
-           desc != tv_ulong      and \
-           desc != tv_float      and \
-           desc != tv_double     and \
-           desc != tv_boolean    and \
-           desc != tv_char       and \
-           desc != tv_octet      and \
-           desc != tv_any        and \
-           desc != tv_TypeCode   and \
-           desc != tv_Principal  and \
-           desc != tv_longlong   and \
-           desc != tv_ulonglong  and \
-           desc != tv_longdouble:      raise CORBA.INTERNAL()
+        if desc not in [ tv_null, tv_void, tv_short, tv_long, tv_ushort,
+                         tv_ulong, tv_float, tv_double, tv_boolean, tv_char,
+                         tv_octet, tv_any, tv_TypeCode, tv_Principal,
+                         tv_longlong, tv_ulonglong, tv_longdouble, tv_wchar ]:
+            raise CORBA.INTERNAL()
 
         self._d = desc
         self._k = CORBA.TCKind._item(desc)
