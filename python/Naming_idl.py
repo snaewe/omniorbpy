@@ -51,10 +51,16 @@ _0_POA_CosNaming = omniORB.openModule("POA_CosNaming", "Naming.idl")
 
 
 # typedef ... Istring
+class Istring:
+    _NP_RepositoryId = "IDL:omg.org/CosNaming/Istring:1.0"
+    def __init__(self):
+        raise RuntimeError("Cannot construct objects of this type.")
+_0_CosNaming.Istring = Istring
 _0_CosNaming._d_Istring  = (omniORB.tcInternal.tv_string,0)
-_0_CosNaming._ad_Istring = (omniORB.tcInternal.tv_alias, "IDL:omg.org/CosNaming/Istring:1.0", "Istring", (omniORB.tcInternal.tv_string,0))
+_0_CosNaming._ad_Istring = (omniORB.tcInternal.tv_alias, Istring._NP_RepositoryId, "Istring", (omniORB.tcInternal.tv_string,0))
 _0_CosNaming._tc_Istring = omniORB.tcInternal.createTypeCode(_0_CosNaming._ad_Istring)
-omniORB.registerType(_0_CosNaming._ad_Istring[1], _0_CosNaming._ad_Istring, _0_CosNaming._tc_Istring)
+omniORB.registerType(Istring._NP_RepositoryId, _0_CosNaming._ad_Istring, _0_CosNaming._tc_Istring)
+del Istring
 
 # struct NameComponent
 class NameComponent:
@@ -71,10 +77,16 @@ omniORB.registerType(NameComponent._NP_RepositoryId, _0_CosNaming._d_NameCompone
 del NameComponent
 
 # typedef ... Name
+class Name:
+    _NP_RepositoryId = "IDL:omg.org/CosNaming/Name:1.0"
+    def __init__(self):
+        raise RuntimeError("Cannot construct objects of this type.")
+_0_CosNaming.Name = Name
 _0_CosNaming._d_Name  = (omniORB.tcInternal.tv_sequence, _0_CosNaming._d_NameComponent, 0)
-_0_CosNaming._ad_Name = (omniORB.tcInternal.tv_alias, "IDL:omg.org/CosNaming/Name:1.0", "Name", (omniORB.tcInternal.tv_sequence, _0_CosNaming._d_NameComponent, 0))
+_0_CosNaming._ad_Name = (omniORB.tcInternal.tv_alias, Name._NP_RepositoryId, "Name", (omniORB.tcInternal.tv_sequence, _0_CosNaming._d_NameComponent, 0))
 _0_CosNaming._tc_Name = omniORB.tcInternal.createTypeCode(_0_CosNaming._ad_Name)
-omniORB.registerType(_0_CosNaming._ad_Name[1], _0_CosNaming._ad_Name, _0_CosNaming._tc_Name)
+omniORB.registerType(Name._NP_RepositoryId, _0_CosNaming._ad_Name, _0_CosNaming._tc_Name)
+del Name
 
 # enum BindingType
 _0_CosNaming.nobject = omniORB.EnumItem("nobject", 0)
@@ -100,10 +112,16 @@ omniORB.registerType(Binding._NP_RepositoryId, _0_CosNaming._d_Binding, _0_CosNa
 del Binding
 
 # typedef ... BindingList
+class BindingList:
+    _NP_RepositoryId = "IDL:omg.org/CosNaming/BindingList:1.0"
+    def __init__(self):
+        raise RuntimeError("Cannot construct objects of this type.")
+_0_CosNaming.BindingList = BindingList
 _0_CosNaming._d_BindingList  = (omniORB.tcInternal.tv_sequence, _0_CosNaming._d_Binding, 0)
-_0_CosNaming._ad_BindingList = (omniORB.tcInternal.tv_alias, "IDL:omg.org/CosNaming/BindingList:1.0", "BindingList", (omniORB.tcInternal.tv_sequence, _0_CosNaming._d_Binding, 0))
+_0_CosNaming._ad_BindingList = (omniORB.tcInternal.tv_alias, BindingList._NP_RepositoryId, "BindingList", (omniORB.tcInternal.tv_sequence, _0_CosNaming._d_Binding, 0))
 _0_CosNaming._tc_BindingList = omniORB.tcInternal.createTypeCode(_0_CosNaming._ad_BindingList)
-omniORB.registerType(_0_CosNaming._ad_BindingList[1], _0_CosNaming._ad_BindingList, _0_CosNaming._tc_BindingList)
+omniORB.registerType(BindingList._NP_RepositoryId, _0_CosNaming._ad_BindingList, _0_CosNaming._tc_BindingList)
+del BindingList
 
 # interface BindingIterator;
 _0_CosNaming._d_BindingIterator = (omniORB.tcInternal.tv_objref, "IDL:omg.org/CosNaming/BindingIterator:1.0", "BindingIterator")
@@ -212,54 +230,34 @@ class _objref_NamingContext (CORBA.Object):
         CORBA.Object.__init__(self)
 
     def bind(self, *args):
-        return _omnipy.invokeOp(self, "bind",
-                                _0_CosNaming.NamingContext._d_bind,
-                                args)
+        return _omnipy.invokeOp(self, "bind", _0_CosNaming.NamingContext._d_bind, args)
 
     def rebind(self, *args):
-        return _omnipy.invokeOp(self, "rebind",
-                                _0_CosNaming.NamingContext._d_rebind,
-                                args)
+        return _omnipy.invokeOp(self, "rebind", _0_CosNaming.NamingContext._d_rebind, args)
 
     def bind_context(self, *args):
-        return _omnipy.invokeOp(self, "bind_context",
-                                _0_CosNaming.NamingContext._d_bind_context,
-                                args)
+        return _omnipy.invokeOp(self, "bind_context", _0_CosNaming.NamingContext._d_bind_context, args)
 
     def rebind_context(self, *args):
-        return _omnipy.invokeOp(self, "rebind_context",
-                                _0_CosNaming.NamingContext._d_rebind_context,
-                                args)
+        return _omnipy.invokeOp(self, "rebind_context", _0_CosNaming.NamingContext._d_rebind_context, args)
 
     def resolve(self, *args):
-        return _omnipy.invokeOp(self, "resolve",
-                                _0_CosNaming.NamingContext._d_resolve,
-                                args)
+        return _omnipy.invokeOp(self, "resolve", _0_CosNaming.NamingContext._d_resolve, args)
 
     def unbind(self, *args):
-        return _omnipy.invokeOp(self, "unbind",
-                                _0_CosNaming.NamingContext._d_unbind,
-                                args)
+        return _omnipy.invokeOp(self, "unbind", _0_CosNaming.NamingContext._d_unbind, args)
 
     def new_context(self, *args):
-        return _omnipy.invokeOp(self, "new_context",
-                                _0_CosNaming.NamingContext._d_new_context,
-                                args)
+        return _omnipy.invokeOp(self, "new_context", _0_CosNaming.NamingContext._d_new_context, args)
 
     def bind_new_context(self, *args):
-        return _omnipy.invokeOp(self, "bind_new_context",
-                                _0_CosNaming.NamingContext._d_bind_new_context,
-                                args)
+        return _omnipy.invokeOp(self, "bind_new_context", _0_CosNaming.NamingContext._d_bind_new_context, args)
 
     def destroy(self, *args):
-        return _omnipy.invokeOp(self, "destroy",
-                                _0_CosNaming.NamingContext._d_destroy,
-                                args)
+        return _omnipy.invokeOp(self, "destroy", _0_CosNaming.NamingContext._d_destroy, args)
 
     def list(self, *args):
-        return _omnipy.invokeOp(self, "list",
-                                _0_CosNaming.NamingContext._d_list,
-                                args)
+        return _omnipy.invokeOp(self, "list", _0_CosNaming.NamingContext._d_list, args)
 
     __methods__ = ["bind", "rebind", "bind_context", "rebind_context", "resolve", "unbind", "new_context", "bind_new_context", "destroy", "list"] + CORBA.Object.__methods__
 
@@ -315,19 +313,13 @@ class _objref_BindingIterator (CORBA.Object):
         CORBA.Object.__init__(self)
 
     def next_one(self, *args):
-        return _omnipy.invokeOp(self, "next_one",
-                                _0_CosNaming.BindingIterator._d_next_one,
-                                args)
+        return _omnipy.invokeOp(self, "next_one", _0_CosNaming.BindingIterator._d_next_one, args)
 
     def next_n(self, *args):
-        return _omnipy.invokeOp(self, "next_n",
-                                _0_CosNaming.BindingIterator._d_next_n,
-                                args)
+        return _omnipy.invokeOp(self, "next_n", _0_CosNaming.BindingIterator._d_next_n, args)
 
     def destroy(self, *args):
-        return _omnipy.invokeOp(self, "destroy",
-                                _0_CosNaming.BindingIterator._d_destroy,
-                                args)
+        return _omnipy.invokeOp(self, "destroy", _0_CosNaming.BindingIterator._d_destroy, args)
 
     __methods__ = ["next_one", "next_n", "destroy"] + CORBA.Object.__methods__
 

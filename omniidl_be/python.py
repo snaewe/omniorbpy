@@ -28,6 +28,10 @@
 
 # $Id$
 # $Log$
+# Revision 1.15  1999/12/09 14:12:55  dpg1
+# invokeOp() calls now on a single line. typedef now generates a class
+# to be passed to CORBA.id().
+#
 # Revision 1.14  1999/12/07 15:35:14  dpg1
 # Bug in currentScope handling.
 #
@@ -197,19 +201,13 @@ objref_object_init = """\
 
 objref_attribute_get = """
     def _get_@attr@(self, *args):
-        return _omnipy.invokeOp(self, "_get_@attr@",
-                                _0_@modname@.@ifid@._d__get_@attr@,
-                                args)"""
+        return _omnipy.invokeOp(self, "_get_@attr@", _0_@modname@.@ifid@._d__get_@attr@, args)"""
 objref_attribute_set = """
     def _set_@attr@(self, *args):
-        return _omnipy.invokeOp(self, "_set_@attr@",
-                                _0_@modname@.@ifid@._d__set_@attr@,
-                                args)"""
+        return _omnipy.invokeOp(self, "_set_@attr@", _0_@modname@.@ifid@._d__set_@attr@, args)"""
 objref_operation = """
     def @opname@(self, *args):
-        return _omnipy.invokeOp(self, "@opname@",
-                                _0_@modname@.@ifid@._d_@opname@,
-                                args)"""
+        return _omnipy.invokeOp(self, "@opname@", _0_@modname@.@ifid@._d_@opname@, args)"""
 objref_methods = """
     __methods__ = @methods@"""
 
@@ -250,18 +248,28 @@ constant = """\
 typedef_at_module_scope = """\
 
 # typedef ... @tdname@
+class @tdname@:
+    _NP_RepositoryId = "@repoId@"
+    def __init__(self):
+        raise RuntimeError("Cannot construct objects of this type.")
+_0_@modname@.@tdname@ = @tdname@
 _0_@modname@._d_@tdname@  = @desc@
-_0_@modname@._ad_@tdname@ = (omniORB.tcInternal.tv_alias, "@repoId@", "@tdname@", @tddesc@)
+_0_@modname@._ad_@tdname@ = (omniORB.tcInternal.tv_alias, @tdname@._NP_RepositoryId, "@tdname@", @tddesc@)
 _0_@modname@._tc_@tdname@ = omniORB.tcInternal.createTypeCode(_0_@modname@._ad_@tdname@)
-omniORB.registerType(_0_@modname@._ad_@tdname@[1], _0_@modname@._ad_@tdname@, _0_@modname@._tc_@tdname@)"""
+omniORB.registerType(@tdname@._NP_RepositoryId, _0_@modname@._ad_@tdname@, _0_@modname@._tc_@tdname@)
+del @tdname@"""
 
 typedef = """\
 
 # typedef ... @tdname@
+class @tdname@:
+    _NP_RepositoryId = "@repoId@"
+    def __init__(self):
+        raise RuntimeError("Cannot construct objects of this type.")
 _d_@tdname@  = @desc@
-_ad_@tdname@ = (omniORB.tcInternal.tv_alias, "@repoId@", "@tdname@", @tddesc@)
+_ad_@tdname@ = (omniORB.tcInternal.tv_alias, @tdname@._NP_RepositoryId, "@tdname@", @tddesc@)
 _tc_@tdname@ = omniORB.tcInternal.createTypeCode(_ad_@tdname@)
-omniORB.registerType(_ad_@tdname@[1], _ad_@tdname@, _tc_@tdname@)"""
+omniORB.registerType(@tdname@._NP_RepositoryId, _ad_@tdname@, _tc_@tdname@)"""
 
 recursive_struct_descr = """
 # Recursive struct @sname@
