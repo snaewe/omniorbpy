@@ -1,10 +1,7 @@
-Release Notes for omniORBpy 1.0 pre 3  (29 June 2000)
-=====================================
+Release Notes for omniORBpy 1.0  (14 July 2000)
+===============================
 
-This is the release candidate for omniORBpy 1.0. The purpose of
-producing this pre-release is to give our users a chance to check if
-there are any problems remaining before we release 1.0. So please give
-it a try and report any problems ASAP.
+This is omniORBpy 1.0, a robust high-performance CORBA ORB for Python.
 
 The bindings adhere to the standard IDL to Python mapping which you
 may find at http://www.omg.org/cgi-bin/doc?ptc/00-04-08.
@@ -13,9 +10,9 @@ may find at http://www.omg.org/cgi-bin/doc?ptc/00-04-08.
 ----------------------------------------------------------------------
                                WARNING!
 
-The mapping for server-side skeletons has changed in this pre-release.
-Server-side code written for previous omniORBpy pre-releases MUST be
-updated to work with this pre-release.
+The mapping for server-side skeletons has changed since pre-release 2.
+Server-side code written for omniORBpy before pre-release 3 MUST be
+updated to work with omniORBpy 1.0.
 
 This unfortunate state of affairs is due to an internal contradiction
 in drafts of the Python mapping. See below for full details.
@@ -29,7 +26,7 @@ functionality is available; with omniORB 2.8 many POA functions are
 not supported.
 
 omniORBpy is currently available for Linux, Solaris, and Windows NT.
-It has been ported to a number of other Unix flavours by outside
+It has been ported to a number of other operating systems by outside
 contributors.
 
 It is a good idea to subscribe to the omniORB mailing list. See
@@ -42,6 +39,10 @@ Duncan Grisby,
                                          dgrisby@uk.research.att.com
 
 
+Summary of changes from pre-release 3
+-------------------------------------
+
+- A few small tweaks.
 
 
 Summary of changes from pre-release 2
