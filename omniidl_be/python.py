@@ -28,6 +28,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.29.2.3  2000/11/22 14:43:58  dpg1
+# Support code set conversion and wchar/wstring.
+#
 # Revision 1.29.2.2  2000/11/01 15:29:01  dpg1
 # Support for forward-declared structs and unions
 # RepoIds in indirections are now resolved at the time of use
@@ -1462,13 +1465,12 @@ ttdMap = {
     idltype.tk_TypeCode:   "omniORB.tcInternal.tv_TypeCode",
     idltype.tk_Principal:  "omniORB.tcInternal.tv_Principal",
     idltype.tk_longlong:   "omniORB.tcInternal.tv_longlong",
-    idltype.tk_ulonglong:  "omniORB.tcInternal.tv_ulonglong"
+    idltype.tk_ulonglong:  "omniORB.tcInternal.tv_ulonglong",
+    idltype.tk_wchar:      "omniORB.tcInternal.tv_wchar"
 }
 
 unsupportedMap = {
     idltype.tk_longdouble: "long double",
-    idltype.tk_wchar:      "wchar",
-    idltype.tk_wstring:    "wstring",
     idltype.tk_fixed:      "fixed",
     idltype.tk_value:      "valuetype",
     idltype.tk_value_box:  "value box",
@@ -1566,6 +1568,9 @@ def valueToString(val, kind, scope=[]):
 
     elif kind == idltype.tk_string or kind == idltype.tk_char:
         return '"' + idlutil.escapifyString(val) + '"'
+
+    elif kind == idltype.tk_wstring or kind == idltype.tk_wchar:
+        return 'u"' + idlutil.escapifyWString(val) + '"'
 
     elif kind == idltype.tk_long and val == -2147483647 - 1:
         return "-2147483647 - 1"

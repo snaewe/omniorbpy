@@ -29,6 +29,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.2.4  2000/11/22 14:43:58  dpg1
+// Support code set conversion and wchar/wstring.
+//
 // Revision 1.1.2.3  2000/11/06 17:10:08  dpg1
 // Update to cdrStream interface
 //
@@ -42,6 +45,12 @@
 
 
 #include <omnipy.h>
+
+#ifdef Py_UNICODEOBJECT_H
+#  include <codeSetUtil.h>
+#  define PY_HAS_UNICODE
+#endif
+
 
 #if defined(__DECCXX)
 // EDG based compaq cxx is having a problem with taking the address of static
@@ -89,7 +98,8 @@ sequenceOptimisedType(PyObject* desc)
 
     return !(tk == CORBA::tk_any ||
 	     tk == CORBA::tk_TypeCode ||
-	     tk == CORBA::tk_Principal);
+	     tk == CORBA::tk_Principal ||
+	     tk == CORBA::tk_wchar);
   }
   return 0;
 }
@@ -1059,14 +1069,38 @@ static void
 validateTypeWChar(PyObject* d_o, PyObject* a_o,
 		  CORBA::CompletionStatus compstatus)
 {
+#ifdef PY_HAS_UNICODE
+  if (!(PyUnicode_Check(a_o) && (PyUnicode_GET_SIZE(a_o) == 1)))
+    VT_THROW_BAD_PARAM;
+#else
   OMNIORB_THROW(NO_IMPLEMENT, 0, compstatus);
+#endif
 }
 
 static void
 validateTypeWString(PyObject* d_o, PyObject* a_o,
 		  CORBA::CompletionStatus compstatus)
-{
+{ // max_length
+#ifdef PY_HAS_UNICODE
+  PyObject* t_o = PyTuple_GET_ITEM(d_o, 1);
+  OMNIORB_ASSERT(PyInt_Check(t_o));
+
+  CORBA::ULong max_len = PyInt_AS_LONG(t_o);
+
+  if (!PyUnicode_Check(a_o)) VT_THROW_BAD_PARAM;
+
+  CORBA::ULong len = PyString_GET_SIZE(a_o);
+
+  if (max_len > 0 && len > max_len) VT_THROW_BAD_PARAM;
+
+  // Annoyingly, we have to scan the string to check there are no
+  // nulls
+  Py_UNICODE* str = PyUnicode_AS_UNICODE(a_o);
+  for (CORBA::ULong i=0; i<len; i++)
+    if (str[i] == 0) VT_THROW_BAD_PARAM;
+#else
   OMNIORB_THROW(NO_IMPLEMENT, 0, compstatus);
+#endif
 }
 
 static void
@@ -1250,7 +1284,7 @@ marshalPyObjectBoolean(cdrStream& stream, PyObject* d_o, PyObject* a_o)
 static void
 marshalPyObjectChar(cdrStream& stream, PyObject* d_o, PyObject* a_o)
 {
-  char *str = PyString_AS_STRING(a_o);
+  char* str = PyString_AS_STRING(a_o);
   stream.marshalChar(str[0]);
 }
 
@@ -1386,18 +1420,9 @@ marshalPyObjectEnum(cdrStream& stream, PyObject* d_o, PyObject* a_o)
 static void
 marshalPyObjectString(cdrStream& stream, PyObject* d_o, PyObject* a_o)
 { // max_length
-
-  CORBA::ULong slen = PyString_GET_SIZE(a_o) + 1;
-
-  slen >>= stream;
-
-  if (slen > 1) {
-    char* str = PyString_AS_STRING(a_o);
-    stream.put_octet_array((const CORBA::Octet*)((const char*)str), slen);
-  }
-  else {
-    stream.marshalChar('\0');
-  }
+  cdrStream::ncs_c->marshalString(stream, stream.TCS_C(), 0,
+				  PyString_GET_SIZE(a_o),
+				  PyString_AS_STRING(a_o));
 }
 
 static void
@@ -1422,7 +1447,8 @@ marshalPyObjectSequence(cdrStream& stream, PyObject* d_o, PyObject* a_o)
       len = PyString_GET_SIZE(a_o);
       len >>= stream;
       CORBA::Char *l = (CORBA::Char*)PyString_AS_STRING(a_o);
-      stream.put_octet_array((const CORBA::Octet*)l, len);
+      for (i=0; i<len; i++)
+	stream.marshalChar(l[i]);
     }
     else if (PyList_Check(a_o)) {
       len = PyList_GET_SIZE(a_o);
@@ -1708,7 +1734,8 @@ marshalPyObjectArray(cdrStream& stream, PyObject* d_o, PyObject* a_o)
     else if (etk == CORBA::tk_char) {
       len = PyString_GET_SIZE(a_o);
       CORBA::Octet *l = (CORBA::Octet*)PyString_AS_STRING(a_o);
-      stream.put_octet_array(l, len);
+      for (i=0; i<len; i++)
+	stream.marshalChar(l[i]);
     }
     else if (PyList_Check(a_o)) {
       len = PyList_GET_SIZE(a_o);
@@ -1985,13 +2012,8 @@ marshalPyObjectExcept(cdrStream& stream, PyObject* d_o, PyObject* a_o)
   CORBA::ULong slen = PyString_GET_SIZE(t_o) + 1;
   slen >>= stream;
 
-  if (slen > 1) {
-    char* str = PyString_AS_STRING(t_o);
-    stream.put_octet_array((const CORBA::Octet*)((const char*)str), slen);
-  }
-  else {
-    stream.marshalChar('\0');
-  }
+  char* str = PyString_AS_STRING(t_o);
+  stream.put_octet_array((const CORBA::Octet*)((const char*)str), slen);
 
   PyObject* sdict = ((PyInstanceObject*)a_o)->in_dict;
   int       cnt   = (PyTuple_GET_SIZE(d_o) - 4) / 2;
@@ -2050,13 +2072,27 @@ marshalPyObjectLongDouble(cdrStream& stream, PyObject* d_o, PyObject* a_o)
 static void
 marshalPyObjectWChar(cdrStream& stream, PyObject* d_o, PyObject* a_o)
 {
+#ifdef PY_HAS_UNICODE
+  if (!stream.TCS_W()) OMNIORB_THROW(BAD_PARAM, 0, CORBA::COMPLETED_NO);
+  Py_UNICODE* str = PyUnicode_AS_UNICODE(a_o);
+  stream.TCS_W()->marshalWChar(stream, str[0]);
+#else
   OMNIORB_ASSERT(0);
+#endif
 }
 
 static void
 marshalPyObjectWString(cdrStream& stream, PyObject* d_o, PyObject* a_o)
 {
+#ifdef PY_HAS_UNICODE
+  if (!stream.TCS_W()) OMNIORB_THROW(BAD_PARAM, 0, CORBA::COMPLETED_NO);
+  Py_UNICODE* str = PyUnicode_AS_UNICODE(a_o);
+  stream.TCS_W()->marshalWString(stream,
+				 PyUnicode_GET_SIZE(a_o),
+				 (const omniCodeSet::UniChar*)str);
+#else
   OMNIORB_ASSERT(0);
+#endif
 }
 
 static void
@@ -2218,12 +2254,11 @@ unmarshalPyObjectBoolean(cdrStream& stream, PyObject* d_o)
 static PyObject*
 unmarshalPyObjectChar(cdrStream& stream, PyObject* d_o)
 {
-  CORBA::Char c = stream.unmarshalChar();
-  char* str     = new char[2];
-  str[0]        = c;
-  str[1]        = '\0';
-  PyObject* r_o = PyString_FromStringAndSize(str, 1);
-  delete [] str;
+  CORBA::Char c   = stream.unmarshalChar();
+  PyObject*   r_o = PyString_FromStringAndSize(0, 1);
+  char*       str = PyString_AS_STRING(r_o);
+  str[0]          = c;
+  str[1]          = '\0';
   return r_o;
 }
 
@@ -2410,22 +2445,13 @@ unmarshalPyObjectString(cdrStream& stream, PyObject* d_o)
   OMNIORB_ASSERT(PyInt_Check(t_o));
 
   CORBA::ULong max_len = PyInt_AS_LONG(t_o);
-  CORBA::ULong len;
-  len <<= stream;
 
-  if (max_len > 0 && len > max_len)
-    OMNIORB_THROW(MARSHAL, 0, CORBA::COMPLETED_NO);
+  char* s;
+  CORBA::ULong len =
+    cdrStream::ncs_c->unmarshalString(stream, stream.TCS_C(), max_len, s);
 
-  if (!stream.checkInputOverrun(1,len))
-    OMNIORB_THROW(MARSHAL,0, CORBA::COMPLETED_NO);
-
-  PyObject*    r_o = PyString_FromStringAndSize(0, len - 1);
-  CORBA::Octet* c  = (CORBA::Octet*)PyString_AS_STRING(r_o);
-  stream.get_octet_array(c, len);
-
-  if (c[len - 1] != '\0')
-    OMNIORB_THROW(MARSHAL, 0, CORBA::COMPLETED_NO);
-
+  PyObject* r_o = PyString_FromStringAndSize(s, len);
+  _CORBA_String_helper::free(s);
   return r_o;
 }
 
@@ -2466,8 +2492,10 @@ unmarshalPyObjectSequence(cdrStream& stream, PyObject* d_o)
 	OMNIORB_THROW(MARSHAL,0, CORBA::COMPLETED_NO);
 
       r_o = PyString_FromStringAndSize(0, len);
-      CORBA::Octet* c = (CORBA::Octet*)PyString_AS_STRING(r_o);
-      stream.get_octet_array(c, len);
+      CORBA::Char* c = (CORBA::Char*)PyString_AS_STRING(r_o);
+
+      for (i=0; i<len; i++) c[i] = stream.unmarshalChar();
+
       return r_o;
     }
     else {
@@ -2664,8 +2692,10 @@ unmarshalPyObjectArray(cdrStream& stream, PyObject* d_o)
 	OMNIORB_THROW(MARSHAL,0, CORBA::COMPLETED_NO);
 
       r_o = PyString_FromStringAndSize(0, len);
-      CORBA::Octet* c = (CORBA::Octet*)PyString_AS_STRING(r_o);
-      stream.get_octet_array(c, len);
+      CORBA::Char* c = (CORBA::Char*)PyString_AS_STRING(r_o);
+
+      for (i=0; i<len; i++) c[i] = stream.unmarshalChar();
+
       return r_o;
     }
     else {
@@ -2845,10 +2875,8 @@ unmarshalPyObjectExcept(cdrStream& stream, PyObject* d_o)
   // Throw away the repoId. By the time we get here, we already
   // know it.
   // *** Should maybe check to see if it's what we're expecting
-  { 
-    CORBA::String_member str_tmp;
-    str_tmp <<= stream;
-  }
+  CORBA::ULong len; len <<= stream;
+  stream.skipInput(len);
 
   PyObject* strclass = PyTuple_GET_ITEM(d_o, 1);
   OMNIORB_ASSERT(PyClass_Check(strclass));
@@ -2909,15 +2937,44 @@ unmarshalPyObjectLongDouble(cdrStream& stream, PyObject* d_o)
 static PyObject*
 unmarshalPyObjectWChar(cdrStream& stream, PyObject* d_o)
 {
+#ifdef PY_HAS_UNICODE
+  if (!stream.TCS_W()) OMNIORB_THROW(BAD_PARAM, 0, CORBA::COMPLETED_NO);
+
+  Py_UNICODE  c   = stream.TCS_W()->unmarshalWChar(stream);
+  PyObject*   r_o = PyUnicode_FromUnicode(0, 1);
+  Py_UNICODE* str = PyUnicode_AS_UNICODE(r_o);
+  str[0]          = c;
+  str[1]          = 0;
+  return r_o;
+#else
   OMNIORB_THROW(NO_IMPLEMENT, 0, CORBA::COMPLETED_NO);
   return 0;
+#endif
 }
 
 static PyObject*
 unmarshalPyObjectWString(cdrStream& stream, PyObject* d_o)
-{
+{ // max_length
+
+#ifdef PY_HAS_UNICODE
+  if (!stream.TCS_W()) OMNIORB_THROW(BAD_PARAM, 0, CORBA::COMPLETED_NO);
+
+  PyObject* t_o = PyTuple_GET_ITEM(d_o, 1);
+
+  OMNIORB_ASSERT(PyInt_Check(t_o));
+
+  CORBA::ULong max_len = PyInt_AS_LONG(t_o);
+
+  omniCodeSet::UniChar* us;
+  CORBA::ULong len = stream.TCS_W()->unmarshalWString(stream, max_len, us);
+
+  PyObject* r_o = PyUnicode_FromUnicode((Py_UNICODE*)us, len);
+  omniCodeSetUtil::freeU(us);
+  return r_o;
+#else
   OMNIORB_THROW(NO_IMPLEMENT, 0, CORBA::COMPLETED_NO);
   return 0;
+#endif
 }
 
 static PyObject*
@@ -4446,14 +4503,46 @@ static PyObject*
 copyArgumentWChar(PyObject* d_o, PyObject* a_o,
 		  CORBA::CompletionStatus compstatus)
 {
+#ifdef PY_HAS_UNICODE
+  if (PyUnicode_Check(a_o) && (PyUnicode_GET_SIZE(a_o) == 1)) {
+    Py_INCREF(a_o); return a_o;
+  }
+  else
+    return setPyBadParam(compstatus);
+#else
   return setPyNoImplement(compstatus);
+#endif
 }
 
 static PyObject*
 copyArgumentWString(PyObject* d_o, PyObject* a_o,
 		    CORBA::CompletionStatus compstatus)
-{
+{ // max_length
+#ifdef PY_HAS_UNICODE
+  PyObject* t_o = PyTuple_GET_ITEM(d_o, 1);
+  OMNIORB_ASSERT(PyInt_Check(t_o));
+
+  CORBA::ULong max_len = PyInt_AS_LONG(t_o);
+
+  if (!PyUnicode_Check(a_o)) return setPyBadParam(compstatus);
+
+  CORBA::ULong len = PyUnicode_GET_SIZE(a_o);
+
+  if (max_len > 0 && len > max_len) return setPyBadParam(compstatus);
+
+  // Annoyingly, we have to scan the string to check there are no
+  // nulls
+  Py_UNICODE* str = PyUnicode_AS_UNICODE(a_o);
+  for (CORBA::ULong i=0; i<len; i++)
+    if (str[i] == 0) return setPyBadParam(compstatus);
+
+  // After all that, we don't actually have to copy the string,
+  // since they're immutable
+  Py_INCREF(a_o);
+  return a_o;
+#else
   return setPyNoImplement(compstatus);
+#endif
 }
 
 static PyObject*

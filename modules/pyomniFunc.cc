@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.3  2000/11/22 14:43:58  dpg1
+// Support code set conversion and wchar/wstring.
+//
 // Revision 1.1.2.2  2000/11/06 17:07:17  dpg1
 // maxTcpConnectionPerServer function
 //
@@ -384,6 +387,41 @@ extern "C" {
     return 0;
   }
 
+  static char nativeCharCodeSet_doc [] =
+  "nativeCharCodeSet(string) -> None\n"
+  "nativeCharCodeSet()       -> string\n"
+  "\n"
+  "Set or get the native code set used for char and string.\n";
+
+  static PyObject* pyomni_nativeCharCodeSet(PyObject* self, PyObject* args)
+  {
+    if (PyTuple_GET_SIZE(args) == 0) {
+      const char* ncs = omniORB::nativeCharCodeSet();
+      if (ncs)
+	return PyString_FromString((char*)ncs);
+      else {
+	Py_INCREF(Py_None);
+	return Py_None;
+      }
+    }
+    else if (PyTuple_GET_SIZE(args) == 1) {
+      PyObject* pyncs = PyTuple_GET_ITEM(args, 0);
+
+      if (PyString_Check(pyncs)) {
+	try {
+	  omniORB::nativeCharCodeSet(PyString_AS_STRING(pyncs));
+	}
+	OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
+
+        Py_INCREF(Py_None);
+	return Py_None;
+      }
+    }
+    PyErr_SetString(PyExc_TypeError,
+		    (char*)"Operation requires a single integer argument");
+    return 0;
+  }
+
   static PyMethodDef pyomni_methods[] = {
     {(char*)"installTransientExceptionHandler",
      pyomni_installTransientExceptionHandler,
@@ -404,6 +442,10 @@ extern "C" {
     {(char*)"maxTcpConnectionPerServer",
      pyomni_maxTcpConnectionPerServer,
      METH_VARARGS, maxTcpConnectionPerServer_doc},
+
+    {(char*)"nativeCharCodeSet",
+     pyomni_nativeCharCodeSet,
+     METH_VARARGS, nativeCharCodeSet_doc},
 
     {NULL,NULL}
   };

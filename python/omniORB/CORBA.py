@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.28.2.3  2000/11/22 14:43:58  dpg1
+# Support code set conversion and wchar/wstring.
+#
 # Revision 1.28.2.2  2000/11/01 15:29:01  dpg1
 # Support for forward-declared structs and unions
 # RepoIds in indirections are now resolved at the time of use
@@ -697,6 +700,22 @@ def is_nil(obj):
     if isinstance(obj, Object):
         return 0
     raise BAD_PARAM()
+
+
+#############################################################################
+#                                                                           #
+# Wide character things (only for Pythons with Unicode support)             #
+#                                                                           #
+#############################################################################
+
+try:
+    wstr = unichr
+    word = ord
+except NameError:
+    def wstr(c):
+        raise NO_IMPLEMENT(0, COMPLETED_NO)
+    def word(c):
+        raise NO_IMPLEMENT(0, COMPLETED_NO)
 
 
 #############################################################################
