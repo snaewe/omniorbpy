@@ -7,7 +7,7 @@ Group:    System/Libraries
 Source0:  %{name}-%{version}.tar.gz
 Prefix:   /usr
 URL:      http://omniorb.sourceforge.net/
-Requires: omniORB = 4.0.5
+Requires: omniORB = 4.1.0
 BuildRequires: omniORB-devel python
 Buildroot: %{_tmppath}/%{name}-%{version}-root
 
