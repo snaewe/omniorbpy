@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.24  2000/05/16 10:43:24  dpg1
+# Add TC_foo names for TypeCode constants.
+#
 # Revision 1.23  2000/04/27 11:05:26  dpg1
 # Add perform_work(), work_pending(), shutdown(), and destroy() operations.
 #
@@ -360,23 +363,25 @@ import tcInternal
 _d_TypeCode = tcInternal.tv_TypeCode
 
 
-# TypeCodes of basic types:
+# TypeCodes of basic types. The CORBA mapping says the TypeCode
+# constants should start TC, but omniORBpy previously used _tc, so we
+# support both:
 
-_tc_null      = tcInternal.createTypeCode(tcInternal.tv_null)
-_tc_void      = tcInternal.createTypeCode(tcInternal.tv_void)
-_tc_short     = tcInternal.createTypeCode(tcInternal.tv_short)
-_tc_long      = tcInternal.createTypeCode(tcInternal.tv_long)
-_tc_ushort    = tcInternal.createTypeCode(tcInternal.tv_ushort)
-_tc_ulong     = tcInternal.createTypeCode(tcInternal.tv_ulong)
-_tc_float     = tcInternal.createTypeCode(tcInternal.tv_float)
-_tc_double    = tcInternal.createTypeCode(tcInternal.tv_double)
-_tc_boolean   = tcInternal.createTypeCode(tcInternal.tv_boolean)
-_tc_char      = tcInternal.createTypeCode(tcInternal.tv_char)
-_tc_octet     = tcInternal.createTypeCode(tcInternal.tv_octet)
-_tc_any       = tcInternal.createTypeCode(tcInternal.tv_any)
-_tc_TypeCode  = tcInternal.createTypeCode(tcInternal.tv_TypeCode)
-_tc_Principal = tcInternal.createTypeCode(tcInternal.tv_Principal)
-_tc_string    = tcInternal.createTypeCode((tcInternal.tv_string,0))
+TC_null     = _tc_null     = tcInternal.createTypeCode(tcInternal.tv_null)
+TC_void     = _tc_void     = tcInternal.createTypeCode(tcInternal.tv_void)
+TC_short    = _tc_short    = tcInternal.createTypeCode(tcInternal.tv_short)
+TC_long     = _tc_long     = tcInternal.createTypeCode(tcInternal.tv_long)
+TC_ushort   = _tc_ushort   = tcInternal.createTypeCode(tcInternal.tv_ushort)
+TC_ulong    = _tc_ulong    = tcInternal.createTypeCode(tcInternal.tv_ulong)
+TC_float    = _tc_float    = tcInternal.createTypeCode(tcInternal.tv_float)
+TC_double   = _tc_double   = tcInternal.createTypeCode(tcInternal.tv_double)
+TC_boolean  = _tc_boolean  = tcInternal.createTypeCode(tcInternal.tv_boolean)
+TC_char     = _tc_char     = tcInternal.createTypeCode(tcInternal.tv_char)
+TC_octet    = _tc_octet    = tcInternal.createTypeCode(tcInternal.tv_octet)
+TC_any      = _tc_any      = tcInternal.createTypeCode(tcInternal.tv_any)
+TC_TypeCode = _tc_TypeCode = tcInternal.createTypeCode(tcInternal.tv_TypeCode)
+TC_Principal= _tc_Principal= tcInternal.createTypeCode(tcInternal.tv_Principal)
+TC_string   = _tc_string  = tcInternal.createTypeCode((tcInternal.tv_string,0))
 
 
 # id() function returns the repository ID of an object

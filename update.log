@@ -1,3 +1,12 @@
+Tue May 16 11:41:52 BST 2000 dpg1
+=================================
+
+- TypeCode constants for basic types are now available with names
+  TC_foo as well as _tc_foo.
+
+python/omniORB/CORBA.py
+
+
 Thu May 11 12:55:49 BST 2000 dpg1
 =================================
 
