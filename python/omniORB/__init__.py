@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.15  2000/01/04 16:14:27  dpg1
+# Clear out byte-compiled files created by importIDL()
+#
 # Revision 1.14  2000/01/04 15:29:40  dpg1
 # Fixes to modules generated within a package.
 #
@@ -137,8 +140,20 @@ sys.modules."""
     pipe    = os.popen("omniidl -q -bpython -Wbstdout,inline " + \
                        argstr + " " + idlname)
     try:
-        m = imp.load_module(modname, pipe, "", (".idl", "r", imp.PY_SOURCE))
+        tempname  = tempfile.mktemp()
+        tempnamec = tempname + "c"
+        while os.path.exists(tempnamec):
+            tempname  = tempfile.mktemp()
+            tempnamec = tempname + "c"
+
+        m = imp.load_module(modname, pipe, tempname,
+                            (".idl", "r", imp.PY_SOURCE))
     finally:
+        # Get rid of byte-compiled file
+        if os.path.isfile(tempnamec):
+            os.remove(tempnamec)
+
+        # Close the pipe
         if pipe.close() is not None:
             del sys.modules[modname]
             raise ImportError("Error spawning omniidl")
