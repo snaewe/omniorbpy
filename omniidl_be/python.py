@@ -28,6 +28,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.29.2.9  2001/12/04 12:17:08  dpg1
+# Incorrect generated code for fixed constants.
+#
 # Revision 1.29.2.8  2001/08/29 11:57:16  dpg1
 # Const fixes.
 #
@@ -1645,6 +1648,9 @@ def valueToString(val, kind, scope=[]):
 
     elif kind in [idltype.tk_float, idltype.tk_double, idltype.tk_longdouble]:
         return idlutil.reprFloat(val)
+
+    elif kind == idltype.tk_fixed:
+        return "CORBA.fixed('" + val + "')"
 
     else:
         return str(val)
