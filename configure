@@ -2962,7 +2962,7 @@ PROCESSOR_NAME=$processor_name
 ac_config_files="$ac_config_files mk/beforeauto.mk mk/afterauto.mk"
 
 
-ac_config_files="$ac_config_files GNUmakefile examples/embed/GNUmakefile modules/GNUmakefile omniidl_be/GNUmakefile python/CosNaming/GNUmakefile python/CosNaming__POA/GNUmakefile python/GNUmakefile python/omniORB/GNUmakefile"
+ac_config_files="$ac_config_files GNUmakefile examples/embed/GNUmakefile modules/GNUmakefile omniidl_be/GNUmakefile python/CosNaming/GNUmakefile python/CosNaming__POA/GNUmakefile python/GNUmakefile python/omniORB/GNUmakefile include/GNUmakefile"
 
 
 cat >confcache <<\_ACEOF
@@ -3472,6 +3472,7 @@ do
   "python/CosNaming__POA/GNUmakefile" ) CONFIG_FILES="$CONFIG_FILES python/CosNaming__POA/GNUmakefile" ;;
   "python/GNUmakefile" ) CONFIG_FILES="$CONFIG_FILES python/GNUmakefile" ;;
   "python/omniORB/GNUmakefile" ) CONFIG_FILES="$CONFIG_FILES python/omniORB/GNUmakefile" ;;
+  "include/GNUmakefile" ) CONFIG_FILES="$CONFIG_FILES include/GNUmakefile" ;;
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}
    { (exit 1); exit 1; }; };;

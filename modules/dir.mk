@@ -21,7 +21,8 @@ CXXSRCS = omnipy.cc \
           pyThreadCache.cc \
           pyomniFunc.cc \
 	  pyFixed.cc \
-          pyContext.cc
+          pyContext.cc \
+          cxxAPI.cc
 
 OBJS =    omnipy.o \
           pyORBFunc.o \
@@ -37,7 +38,8 @@ OBJS =    omnipy.o \
           pyThreadCache.o \
           pyomniFunc.o \
 	  pyFixed.o \
-	  pyContext.o
+	  pyContext.o \
+          cxxAPI.o
 
 
 DIR_CPPFLAGS += $(patsubst %,-I%/include,$(OMNIORB_ROOT))

@@ -22,6 +22,48 @@ DIR_CPPFLAGS += -I$(PYINCDIR) -DPYTHON_INCLUDE=$(PYINCFILE)
 endif
 
 
+ifeq ($(platform),autoconf)
+
+namespec := _embedmodule _ 1 0
+
+SharedLibraryFullNameTemplate = $$1$$2.$(SHAREDLIB_SUFFIX).$$3.$$4
+SharedLibrarySoNameTemplate   = $$1$$2.$(SHAREDLIB_SUFFIX).$$3
+SharedLibraryLibNameTemplate  = $$1$$2.$(SHAREDLIB_SUFFIX)
+
+ifdef PythonLibraryPlatformLinkFlagsTemplate
+SharedLibraryPlatformLinkFlagsTemplate = $(PythonLibraryPlatformLinkFlagsTemplate)
+endif
+
+shlib := $(shell $(SharedLibraryFullName) $(namespec))
+
+DIR_CPPFLAGS += $(SHAREDLIB_CPPFLAGS)
+
+$(shlib): $(OBJS) $(CORBA_STATIC_STUB_OBJS) $(CORBA_LIB_DEPEND)
+	@(namespec="$(namespec)"; extralibs="$(OMNIORB_LIB_NODYN)";\
+          $(MakeCXXSharedLibrary))
+
+all:: $(shlib)
+
+export:: $(shlib)
+	@(namespec="$(namespec)"; $(ExportSharedLibrary))
+
+ifdef INSTALLTARGET
+install:: $(shlib)
+	@(dir="$(INSTALLPYEXECDIR)"; namespec="$(namespec)"; \
+          $(ExportSharedLibraryToDir))
+endif
+
+clean::
+	$(RM) *.o
+	(dir=.; $(CleanSharedLibrary))
+
+veryclean::
+	$(RM) *.o
+	(dir=.; $(CleanSharedLibrary))
+
+
+else
+
 #############################################################################
 #   Make rules for Linux                                                    #
 #############################################################################
@@ -46,5 +88,7 @@ export:: $(lib)
 
 clean::
 	$(RM) $(lib)
+
+endif
 
 endif

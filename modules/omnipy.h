@@ -31,6 +31,9 @@
 #define _omnipy_h_
 
 // $Log$
+// Revision 1.2.4.18  2002/05/26 00:55:36  dgrisby
+// C++ API to convert object references to/from Python.
+//
 // Revision 1.2.4.17  2002/03/18 12:40:38  dpg1
 // Support overriding _non_existent.
 //
@@ -87,6 +90,7 @@
 #include <exceptiondefs.h>
 #include <objectTable.h>
 #include <orbParameters.h>
+#include <omniORBpy.h>
 #include "omnipy_sysdep.h"
 
 
@@ -171,6 +175,14 @@ public:
   ////////////////////////////////////////////////////////////////////////////
 
   static CORBA::ORB_ptr orb;
+
+
+  ////////////////////////////////////////////////////////////////////////////
+  // C++ API objrect                                                        //
+  ////////////////////////////////////////////////////////////////////////////
+
+  static omniORBpyAPI cxxAPI;
+
 
   ////////////////////////////////////////////////////////////////////////////
   // Twin object handling                                                   //

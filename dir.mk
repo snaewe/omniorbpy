@@ -7,6 +7,7 @@ export::
 	@$(MakeSubdirs)
 
 ifdef INSTALLTARGET
+SUBDIRS += include
 install::
 	@$(MakeSubdirs)
 endif

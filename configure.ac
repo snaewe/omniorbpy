@@ -124,6 +124,7 @@ AC_CONFIG_FILES(
                 python/CosNaming__POA/GNUmakefile
                 python/GNUmakefile
                 python/omniORB/GNUmakefile
+		include/GNUmakefile
                )
 
 AC_OUTPUT

@@ -26,8 +26,7 @@ poaManager.activate()
 
 # Test 1: Python calls C++
 
-ior = _embed.getIOR()
-obj = orb.string_to_object(ior)
+obj = _embed.getObjRef(orb)
 eo  = obj._narrow(_GlobalIDL.Echo)
 
 if eo is None:
@@ -49,7 +48,6 @@ ior = orb.object_to_string(eo)
 
 print "\nC++ calling Python..."
 
-_embed.putIOR(ior)
-
+_embed.putObjRef(eo)
 
 print "\nTest done"
