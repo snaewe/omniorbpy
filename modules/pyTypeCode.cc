@@ -29,6 +29,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.4.3  2003/11/06 12:00:35  dgrisby
+// ValueType TypeCode support; track ORB core changes.
+//
 // Revision 1.1.4.2  2003/05/20 17:10:24  dgrisby
 // Preliminary valuetype support.
 //
@@ -525,6 +528,116 @@ r_marshalTypeCode(cdrStream&           stream,
 	  // member type
 	  r_marshalTypeCode(encap, PyTuple_GET_ITEM(d_o, j++), edom);
 	}
+	// Send encapsulation
+	::operator>>=((CORBA::ULong)encap.bufSize(), stream);
+	stream.put_octet_array((CORBA::Octet*)encap.bufPtr(), encap.bufSize());
+      }
+      break;
+
+    case CORBA::tk_value:
+      {
+	dom.add(d_o, tc_offset);
+
+	cdrEncapsulationStream encap;
+	DescriptorOffsetMap edom(dom, tc_offset + 8);
+
+	// RepoId and name
+	t_o = PyTuple_GET_ITEM(d_o, 2); OMNIORB_ASSERT(PyString_Check(t_o));
+	omniPy::marshalRawPyString(encap, t_o);
+
+	t_o = PyTuple_GET_ITEM(d_o, 3); OMNIORB_ASSERT(PyString_Check(t_o));
+	omniPy::marshalRawPyString(encap, t_o);
+
+	// ValueModifier
+	t_o = PyTuple_GET_ITEM(d_o, 4);	OMNIORB_ASSERT(PyInt_Check(t_o));
+	CORBA::ValueModifier mod = PyInt_AS_LONG(t_o);
+	mod >>= encap;
+
+	// Concrete base
+	t_o = PyTuple_GET_ITEM(d_o, 6);
+	if (t_o == Py_None) {
+	  // No base.
+	  CORBA::ULong nulltk = CORBA::tk_null;
+	  nulltk >>= encap;
+	}
+	else {
+	  r_marshalTypeCode(encap, t_o, edom);
+	}
+
+	// Count
+	CORBA::ULong cnt = (PyTuple_GET_SIZE(d_o) - 7) / 3;
+	cnt >>= encap;
+
+	CORBA::ULong i, j, slen;
+	char* str;
+
+	for (i=0, j=7; i < cnt; i++) {
+	  // member name
+	  t_o = PyTuple_GET_ITEM(d_o, j++);
+	  OMNIORB_ASSERT(PyString_Check(t_o));
+
+	  str  = PyString_AS_STRING(t_o);
+	  slen = PyString_GET_SIZE(t_o) + 1;
+
+	  if (str[0] == '_') { --slen; ++str; }
+	  slen >>= encap;
+	  if (slen > 1) {
+	    encap.put_octet_array((const CORBA::Octet*)((const char*)str),
+				  slen);
+	  }
+	  // member type
+	  r_marshalTypeCode(encap, PyTuple_GET_ITEM(d_o, j++), edom);
+
+	  // member visiblity
+	  t_o = PyTuple_GET_ITEM(d_o, j++);
+	  OMNIORB_ASSERT(PyInt_Check(t_o));
+	  CORBA::UShort vis = PyInt_AS_LONG(t_o);
+	  vis >>= encap;
+	}
+	// Send encapsulation
+	::operator>>=((CORBA::ULong)encap.bufSize(), stream);
+	stream.put_octet_array((CORBA::Octet*)encap.bufPtr(), encap.bufSize());
+      }
+      break;
+
+    case CORBA::tk_value_box:
+      {
+	dom.add(d_o, tc_offset);
+
+	cdrEncapsulationStream encap;
+	DescriptorOffsetMap edom(dom, tc_offset + 8);
+
+	// RepoId and name
+	t_o = PyTuple_GET_ITEM(d_o, 2); OMNIORB_ASSERT(PyString_Check(t_o));
+	omniPy::marshalRawPyString(encap, t_o);
+
+	t_o = PyTuple_GET_ITEM(d_o, 3); OMNIORB_ASSERT(PyString_Check(t_o));
+	omniPy::marshalRawPyString(encap, t_o);
+
+	// Boxed type
+	t_o = PyTuple_GET_ITEM(d_o, 4);
+	r_marshalTypeCode(encap, t_o, edom);
+
+	// Send encapsulation
+	::operator>>=((CORBA::ULong)encap.bufSize(), stream);
+	stream.put_octet_array((CORBA::Octet*)encap.bufPtr(), encap.bufSize());
+      }
+      break;
+
+    case CORBA::tk_abstract_interface:
+      {
+	dom.add(d_o, tc_offset);
+
+	cdrEncapsulationStream encap;
+	DescriptorOffsetMap edom(dom, tc_offset + 8);
+
+	// RepoId and name
+	t_o = PyTuple_GET_ITEM(d_o, 2); OMNIORB_ASSERT(PyString_Check(t_o));
+	omniPy::marshalRawPyString(encap, t_o);
+
+	t_o = PyTuple_GET_ITEM(d_o, 3); OMNIORB_ASSERT(PyString_Check(t_o));
+	omniPy::marshalRawPyString(encap, t_o);
+
 	// Send encapsulation
 	::operator>>=((CORBA::ULong)encap.bufSize(), stream);
 	stream.put_octet_array((CORBA::Octet*)encap.bufPtr(), encap.bufSize());

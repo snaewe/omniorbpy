@@ -1,3 +1,13 @@
+Thu Nov  6 11:59:24 GMT 2003 dgrisby
+====================================
+
+- ValueType TypeCode support; track ORB core changes.
+
+modules/omnipy.cc
+modules/pyTypeCode.cc
+modules/pyValueType.cc
+
+
 Fri Sep 26 16:55:24 BST 2003 dgrisby
 ====================================
 

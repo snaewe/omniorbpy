@@ -28,6 +28,9 @@
 //    ValueType support
 
 // $Log$
+// Revision 1.1.2.4  2003/11/06 12:00:36  dgrisby
+// ValueType TypeCode support; track ORB core changes.
+//
 // Revision 1.1.2.3  2003/09/26 15:57:07  dgrisby
 // Refactor repoId handling.
 //
@@ -40,7 +43,6 @@
 
 #include <omnipy.h>
 #include <pyThreadCache.h>
-#include <valueTracker.h>
 
 OMNI_USING_NAMESPACE(omni)
 
