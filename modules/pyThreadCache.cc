@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.3  2001/09/20 10:13:03  dpg1
+// Avoid deadlock on exit due to new ORB core cleanup.
+//
 // Revision 1.1.2.2  2001/08/01 10:12:36  dpg1
 // Main thread policy.
 //
@@ -42,6 +45,9 @@
 #include <omnipy.h>
 #include "pyThreadCache.h"
 
+static int static_cleanup = 0;
+// Set true when static data is being destroyed. Used to make sure
+// Python things aren't used after they have gone away.
 
 omni_mutex*                    omnipyThreadCache::guard      = 0;
 const unsigned int             omnipyThreadCache::tableSize  = 67;
@@ -158,7 +164,7 @@ void
 omnipyThreadCache::
 threadExit()
 {
-  if (table) {
+  if (table && !static_cleanup) {
     long         id   = PyThread_get_thread_ident();
     unsigned int hash = id % tableSize; 
 
@@ -332,3 +338,11 @@ run_undetached(void*)
 
   return 0;
 }
+
+
+class _omnipy_cleapup_detector {
+public:
+  inline ~_omnipy_cleapup_detector() { static_cleanup = 1; }
+};
+
+static _omnipy_cleapup_detector _the_omnipy_cleapup_detector;

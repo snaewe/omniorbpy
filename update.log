@@ -1,3 +1,11 @@
+Thu Sep 20 11:11:55 BST 2001 dpg1
+=================================
+
+- Avoid deadlock on exit due to new ORB core cleanup.
+
+modules/pyThreadCache.cc
+
+
 Wed Aug 29 12:56:17 BST 2001 dpg1
 =================================
 
