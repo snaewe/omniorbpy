@@ -31,6 +31,10 @@
 // $Id$
 
 // $Log$
+// Revision 1.5  1999/09/29 09:53:23  dpg1
+// Workaround to Python's lack of concurrency control on its
+// PyInterpreterState.
+//
 // Revision 1.4  1999/09/24 09:22:02  dpg1
 // Added copyright notices.
 //
@@ -69,11 +73,21 @@ public:
 
   ~lockWithNewThreadState() {
     PyThreadState_Swap(oldstate_);
-    PyEval_ReleaseLock();
+
+    // We would like to release the interpreter lock here, before
+    // deleting the ThreadState struct. Unfortunately, if we do that
+    // the Python program may end before we get to do the delete. In
+    // that situation, we might call Delete() while Python is clearing
+    // up its interpreter state, leading to a segfault. So we have to
+    // delete the ThreadState first, then release the interpreter
+    // lock. Python really ought to do some concurrency control on the
+    // PyInterpreterState structure.
 
     omniPy::pyInterpreterLock.lock();
     PyThreadState_Delete(newstate_);
     omniPy::pyInterpreterLock.unlock();
+
+    PyEval_ReleaseLock();
   }
 
 private:
@@ -141,7 +155,7 @@ Py_Servant::dispatch(GIOP_S&        giop_server,
 {
   int i;
 
-  //  cout << "dispatch()..." << endl;
+  cout << "dispatch()..." << op << endl;
 
   lockWithNewThreadState _t;
 
@@ -231,13 +245,15 @@ Py_Servant::dispatch(GIOP_S&        giop_server,
     }
     Py_DECREF(result);
     giop_server.ReplyCompleted();
+
+    cout << "dispatch done: " << op << endl;
     return 1;
   }
   else {
     // An exception of some sort was thrown
     PyObject *etype, *evalue, *etraceback;
 
-    //    cout << "Exception..." << endl;
+    cout << "Exception..." << endl;
 
     PyErr_Fetch(&etype, &evalue, &etraceback);
 
