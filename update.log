@@ -1,3 +1,11 @@
+Thu Jun 28 17:39:13 BST 2001 dpg1
+=================================
+
+- Properly scope omniCodeSet for Unicode support.
+
+modules/pyMarshal.cc
+
+
 Fri Jun 22 11:26:40 BST 2001 dpg1
 =================================
 

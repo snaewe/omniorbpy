@@ -29,6 +29,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.2.8  2001/06/28 16:41:09  dpg1
+// Properly scope omniCodeSet for Unicode support.
+//
 // Revision 1.1.2.7  2001/05/14 12:47:21  dpg1
 // Fix memory leaks.
 //
@@ -2148,7 +2151,7 @@ marshalPyObjectWString(cdrStream& stream, PyObject* d_o, PyObject* a_o)
   Py_UNICODE* str = PyUnicode_AS_UNICODE(a_o);
   stream.TCS_W()->marshalWString(stream,
 				 PyUnicode_GET_SIZE(a_o),
-				 (const omniCodeSet::UniChar*)str);
+				 (const _OMNI_NS(omniCodeSet::UniChar)*)str);
 #else
   OMNIORB_ASSERT(0);
 #endif
@@ -2931,11 +2934,11 @@ unmarshalPyObjectWString(cdrStream& stream, PyObject* d_o)
 
   CORBA::ULong max_len = PyInt_AS_LONG(t_o);
 
-  omniCodeSet::UniChar* us;
+  _OMNI_NS(omniCodeSet::UniChar)* us;
   CORBA::ULong len = stream.TCS_W()->unmarshalWString(stream, max_len, us);
 
   PyObject* r_o = PyUnicode_FromUnicode((Py_UNICODE*)us, len);
-  omniCodeSetUtil::freeU(us);
+  _OMNI_NS(omniCodeSetUtil)::freeU(us);
   return r_o;
 #else
   OMNIORB_THROW(NO_IMPLEMENT, 0, CORBA::COMPLETED_NO);
