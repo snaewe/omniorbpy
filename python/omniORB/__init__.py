@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.8  1999/09/27 09:06:37  dpg1
+# Friendly error message if there is no thread support.
+#
 # Revision 1.7  1999/09/24 09:22:01  dpg1
 # Added copyright notices.
 #
@@ -54,7 +57,16 @@
 # Initial revision
 #
 
-import sys, threading, types, imp
+import sys, types, imp
+
+try:
+    import threading
+except ImportError:
+    print """
+Error: your Python executable was not built with thread support.
+       omniORBpy requires threads. Sorry.
+"""
+    raise ImportError("Python executable has no thread support")
 
 import _omnipy
 

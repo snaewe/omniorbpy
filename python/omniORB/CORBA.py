@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.9  1999/09/27 09:06:37  dpg1
+# Friendly error message if there is no thread support.
+#
 # Revision 1.8  1999/09/24 13:28:37  dpg1
 # RootPOA added to list_initial_services() list.
 #
@@ -58,10 +61,10 @@
 #
 
 
-import threading, types, exceptions
-
 import _omnipy
 import omniORB
+
+import threading, types, exceptions
 
 
 #############################################################################
