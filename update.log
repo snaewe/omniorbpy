@@ -1,3 +1,11 @@
+Fri Apr 16 16:57:12 BST 2004 dgrisby
+====================================
+
+- Make sure path to OpenSSL includes is set.
+
+mk/beforeauto.mk.in
+
+
 Mon Apr  5 10:17:47 BST 2004 dgrisby
 ====================================
 
