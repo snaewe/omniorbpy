@@ -1,3 +1,26 @@
+Fri Aug 18 12:37:50 BST 2000 dpg1
+=================================
+
+- New omniORB.traceLevel function
+
+modules/common/pyomniFunc.cc
+
+- Document new traceLevel function and omniORB.LOCATION_FORWARD; add
+  mysteriously missing omniORBpy.bib.
+
+doc/tex/omniORBpy.bib   -- new
+doc/tex/omniORBpy.tex
+external_merge/doc/omniORBpy.pdf
+external_merge/doc/omniORBpy.ps
+external_merge/doc/omniORBpy/index.html
+external_merge/doc/omniORBpy/omniORBpy002.html
+external_merge/doc/omniORBpy/omniORBpy003.html
+external_merge/doc/omniORBpy/omniORBpy005.html
+external_merge/doc/omniORBpy/omniORBpy006.html
+external_merge/doc/omniORBpy/omniORBpy007.html
+external_merge/doc/omniORBpy/omniORBpy009.html
+
+
 Thu Aug 17 09:41:58 BST 2000 dpg1
 =================================
 
