@@ -29,6 +29,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.12.2.5  2001/10/18 16:39:40  dpg1
+// Segfault with invalid policy list in create_POA().
+//
 // Revision 1.12.2.4  2001/05/03 15:25:02  dpg1
 // Various places released object references while holding the
 // interpreter lock. Object reference deletion locks omni::internalLock,
@@ -137,6 +140,8 @@ static
 CORBA::Policy_ptr createPolicyObject(PortableServer::POA_ptr poa,
 				     PyObject* pypolicy)
 {
+  if (!pypolicy) OMNIORB_THROW(BAD_PARAM, 0, CORBA::COMPLETED_NO);
+
   CORBA::Policy_ptr policy = 0;
 
   PyObject* pyptype  = PyObject_GetAttrString(pypolicy, (char*)"_policy_type");
@@ -230,7 +235,8 @@ extern "C" {
 			  &pyPOA, &name, &pyPM, &pypolicies))
       return 0;
 
-    RAISE_PY_BAD_PARAM_IF(!PySequence_Check(pypolicies));
+    RAISE_PY_BAD_PARAM_IF(!(PyList_Check(pypolicies) ||
+			    PyTuple_Check(pypolicies)));
 
     PortableServer::POA_ptr poa =
       (PortableServer::POA_ptr)omniPy::getTwin(pyPOA, POA_TWIN);
