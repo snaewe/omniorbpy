@@ -31,6 +31,10 @@
 # $Id$
 
 # $Log$
+# Revision 1.13  1999/11/25 14:01:45  dpg1
+# orb.run() now uses time.sleep() to sleep, rather than blocking in
+# impl_is_ready(). This means Python can interrupt the sleep.
+#
 # Revision 1.12  1999/11/10 16:08:21  dpg1
 # Some types weren't registered properly.
 #
@@ -74,7 +78,7 @@
 import _omnipy
 import omniORB
 
-import threading, types, exceptions
+import threading, types, exceptions, time
 
 
 #############################################################################
@@ -506,8 +510,9 @@ class ORB:
 
     def run(self):
         poa = self.resolve_initial_references("RootPOA")
-        _omnipy.implIsReady(poa, 0, 0)
-
+        _omnipy.implIsReady(poa, 0, 1)
+        while 1: # While loop will repeat every 68 years :-)
+            time.sleep(0x7fffffff)
 
     __methods__ = ["string_to_object", "object_to_string",
                    "list_initial_services", "resolve_initial_references",
