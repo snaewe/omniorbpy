@@ -1,3 +1,11 @@
+Thu Oct 31 11:24:31 GMT 2002 dgrisby
+====================================
+
+- Update PYTHONPATH info in README to talk about Autoconf builds.
+
+README
+
+
 Wed Oct 23 12:01:56 BST 2002 dgrisby
 ====================================
 

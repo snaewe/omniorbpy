@@ -65,19 +65,33 @@ simply do a gnumake export.
 Using omniORBpy
 ---------------
 
-To use omniORBpy, simply add two paths to your PYTHONPATH environment
-variable, like:
+To use omniORBpy, you need to add the directories containing omniORB
+to your PYTHONPATH. With an Autoconf build, if you specified the same
+installation prefix as was used for Python, you do not need to add
+anything to PYTHONPATH; if you used a different installation prefix,
+add this path:
+
+  export PYTHONPATH=$PYTHONPATH:$PREFIX/lib/pythonX.Y/site-packages
+
+replacing pythonX.Y with the version of Python you are using,
+e.g. python2.2
+
+With the non Autoconf build, you must add two directories to
+PYTHONPATH:
 
   export PYTHONPATH=$PYTHONPATH:$TOP/lib/python:$TOP/lib/$FARCH
 
 where $TOP is the root of your omniORB tree and $FARCH is the platform
-name you selected in config.mk.
+name you selected in config.mk. Windows uses semicolons instead of
+colons to separate path components:
 
-You should also have $TOP/bin/$FARCH in your PATH, so you can run the
-IDL compiler, omniidl.
+  set PYTHONPATH=%PYTHONPATH%;%TOP%\lib\python;%TOP%\lib\x86_win32
 
-omniORBpy requires Python version 1.5.2 or later. The Python
-interpreter must be compiled with thread support.
+
+You should also have the correct bin directory on your path so you can
+run the IDL compiler, omniidl. With Autoconf builds, it is in
+$PREFIX/bin ; otherwise it is in $TOP/bin/$FARCH.
+
 
 Full documentation, in a variety of formats, can be found in the doc
 directory.
