@@ -67,6 +67,12 @@ Thu Jul  3 14:48:17 BST 2003 dgrisby
 
 bugfixes-21.xml
 modules/pyCallDescriptor.cc
+Thu Aug  7 00:55:46 BST 2003 dgrisby
+====================================
+
+- This is the 2.2 release.
+
+
 Wed Aug  6 23:32:16 BST 2003 dgrisby
 ====================================
 
