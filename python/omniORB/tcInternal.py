@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.9.2.1  2000/08/07 09:19:24  dpg1
+# Long long support
+#
 # Revision 1.9  2000/01/31 10:51:41  dpg1
 # Fix to exception throwing.
 #
@@ -263,6 +266,9 @@ def createTypeCode(d, parent=None):
     elif k == tv_any:       return TypeCode_empty(d)
     elif k == tv_TypeCode:  return TypeCode_empty(d)
     elif k == tv_Principal: return TypeCode_empty(d)
+    elif k == tv_longlong:  return TypeCode_empty(d)
+    elif k == tv_ulonglong: return TypeCode_empty(d)
+    elif k == tv_longdouble:return TypeCode_empty(d)
     elif k == tv_string:    return TypeCode_string(d)
 
     elif k == tv_objref:
@@ -354,7 +360,7 @@ class TypeCode_base (CORBA.TypeCode):
 
 
 # Class for short, long, ushort, ulong, float, double, boolean, char,
-# octet, any, TypeCode, Principal:
+# octet, any, TypeCode, Principal, longlong, ulonglong, longdouble:
 
 class TypeCode_empty (TypeCode_base):
     def __init__(self, desc):
@@ -372,7 +378,10 @@ class TypeCode_empty (TypeCode_base):
            desc != tv_octet      and \
            desc != tv_any        and \
            desc != tv_TypeCode   and \
-           desc != tv_Principal: raise CORBA.INTERNAL()
+           desc != tv_Principal  and \
+           desc != tv_longlong   and \
+           desc != tv_ulonglong  and \
+           desc != tv_longdouble:      raise CORBA.INTERNAL()
 
         self._d = desc
         self._k = CORBA.TCKind._item(desc)
@@ -786,6 +795,9 @@ def r_getCompactDescriptor(d, seen, ind):
     elif k == tv_Principal: r = d
     elif k == tv_string:    r = d
     elif k == tv_objref:    r = d
+    elif k == tv_longlong:  r = d
+    elif k == tv_ulonglong: r = d
+    elif k == tv_longdouble:r = d
     
     elif k == tv_struct:
         c = list(d)

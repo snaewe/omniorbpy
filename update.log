@@ -1,3 +1,16 @@
+Mon Aug  7 10:18:32 BST 2000 dpg1
+=================================
+
+- Long long support
+
+src/lib/omniORBpy/modules/dir.mk
+src/lib/omniORBpy/modules/common/pyMarshal.cc
+src/lib/omniORBpy/modules/common/pyTypeCode.cc
+src/lib/omniORBpy/omniidl_be/python.py
+src/lib/omniORBpy/python/omniORB/CORBA.py
+src/lib/omniORBpy/python/omniORB/tcInternal.py
+
+
 Tue Aug  1 12:21:35 BST 2000 dpg1
 =================================
 

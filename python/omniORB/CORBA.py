@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.27.2.1  2000/08/07 09:19:24  dpg1
+# Long long support
+#
 # Revision 1.27  2000/07/10 18:44:26  dpg1
 # Remove partial IR stubs. Add TypeCodes for System Exceptions.
 #
@@ -390,8 +393,11 @@ TC_octet    = _tc_octet    = tcInternal.createTypeCode(tcInternal.tv_octet)
 TC_any      = _tc_any      = tcInternal.createTypeCode(tcInternal.tv_any)
 TC_TypeCode = _tc_TypeCode = tcInternal.createTypeCode(tcInternal.tv_TypeCode)
 TC_Principal= _tc_Principal= tcInternal.createTypeCode(tcInternal.tv_Principal)
-TC_string   = _tc_string  = tcInternal.createTypeCode((tcInternal.tv_string,0))
-
+TC_string   = _tc_string   =tcInternal.createTypeCode((tcInternal.tv_string,0))
+TC_longlong = _tc_longlong = tcInternal.createTypeCode(tcInternal.tv_longlong)
+TC_ulonglong= _tc_ulonglong= tcInternal.createTypeCode(tcInternal.tv_ulonglong)
+TC_longdouble = _tc_longdouble \
+            = tcInternal.createTypeCode(tcInternal.tv_longdouble)
 
 # id() function returns the repository ID of an object
 def id(obj):
@@ -612,7 +618,7 @@ class Object:
                    "_hash", "_narrow"]
 
 _d_Object  = (omniORB.tcInternal.tv_objref, Object._NP_RepositoryId, "Object")
-_tc_Object = omniORB.tcInternal.createTypeCode(_d_Object)
+TC_Object  = _tc_Object = omniORB.tcInternal.createTypeCode(_d_Object)
 omniORB.registerType(Object._NP_RepositoryId, _d_Object, _tc_Object)
 omniORB.registerObjref(Object._NP_RepositoryId, Object)
 
