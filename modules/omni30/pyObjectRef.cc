@@ -4,6 +4,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.4  1999/09/22 15:46:12  dpg1
+// Fake POA implemented.
+//
 // Revision 1.3  1999/09/20 16:01:54  dpg1
 // *** empty log message ***
 //
@@ -78,9 +81,9 @@ omniPy::createPyCorbaObjRef(const char*             targetRepoId,
 			 "_NP_RepositoryId", idstr);
   }
 
-  omniPy::setTwin(pyobjref, (CORBA::Object_ptr)objref);
+  omniPy::setTwin(pyobjref, (CORBA::Object_ptr)objref, OBJREF_TWIN);
 
-  cout << "Returning objref..." << endl;
+  //  cout << "Returning objref..." << endl;
 
   return pyobjref;
 }
@@ -218,7 +221,7 @@ omniPy::createObjRef(const char* mostDerivedRepoId,
       }
     }
     else {
-      cout << "Local Python object received by createObjRef()." << endl;
+      //      cout << "Local Python object received by createObjRef()." << endl;
       delete [] objkey;
       if (release)
 	delete profiles;

@@ -3,6 +3,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.5  1999/09/22 15:46:11  dpg1
+# Fake POA implemented.
+#
 # Revision 1.4  1999/09/13 15:13:09  dpg1
 # Module handling.
 # Any coercion (*** not fully tested).
@@ -390,6 +393,6 @@ keywordMapping = {
 
 
 # Register this module with omnipy:
-import omniORB
+import omniORB, omniORB.PortableServer
 _omnipy.registerPyObjects(omniORB)
 del omniORB

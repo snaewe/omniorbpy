@@ -3,6 +3,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.6  1999/09/22 15:46:11  dpg1
+# Fake POA implemented.
+#
 # Revision 1.5  1999/09/13 14:51:46  dpg1
 # Any coercion implemented. TypeCode() constructor now complies to
 # latest spec.
@@ -397,10 +400,11 @@ class ORB:
 
     def __init__(self, argv, orb_identifier):
         _omnipy.ORB_init(self, argv, orb_identifier)
-        print "ORB initialised."
+        self.__argv = argv
+        self.__poa  = None
 
-    def BOA_init(self, argv=[], boa_identifier = BOA_ID):
-        return BOA(self, argv, boa_identifier)
+#    def BOA_init(self, argv=[], boa_identifier = BOA_ID):
+#        return BOA(self, argv, boa_identifier)
 
     def string_to_object(self, ior):
         return _omnipy.stringToObject(self, ior)
@@ -412,6 +416,12 @@ class ORB:
         return _omnipy.listInitialServices(self)
 
     def resolve_initial_references(self, identifier):
+
+        if identifier == "RootPOA":
+            if self.__poa is None:
+                self.__poa = omniORB.PortableServer.POA(self, self.__argv)
+            return self.__poa
+
         return _omnipy.resolveInitialReferences(self, identifier)
 
     # TypeCode operations
@@ -445,13 +455,19 @@ class ORB:
     def create_recursive_tc(self, id):
         return tcInternal.createRecursiveTC(id)
 
-    __methods__ = ["BOA_init", "string_to_object", "object_to_string",
+    def run(self):
+        poa = self.resolve_initial_references("RootPOA")
+        _omnipy.implIsReady(poa, 0, 0)
+
+
+    __methods__ = ["string_to_object", "object_to_string",
                    "list_initial_services", "resolve_initial_references",
                    "create_struct_tc", "create_union_tc",
                    "create_enum_tc", "create_alias_tc",
                    "create_exception_tc", "create_interface_tc",
                    "create_string_tc", "create_sequence_tc",
-                   "create_array_tc", "create_recursive_tc"]
+                   "create_array_tc", "create_recursive_tc",
+                   "run"]
 
 
 #############################################################################
@@ -460,25 +476,25 @@ class ORB:
 #                                                                           #
 #############################################################################
 
-class BOA:
-    """
-    omnipy BOA object
+#  class BOA:
+#      """
+#      omnipy BOA object
 
-    Soon to be superceded by the POA...
-    """
+#      Soon to be superceded by the POA...
+#      """
 
-    def __init__(self, orb, argv, boa_identifier):
-        _omnipy.BOA_init(self, orb, argv, boa_identifier)
-        print "BOA initialised"
+#      def __init__(self, orb, argv, boa_identifier):
+#          _omnipy.BOA_init(self, orb, argv, boa_identifier)
+#          print "BOA initialised"
 
-    def obj_is_ready(self, obj):
-        _omnipy.objectIsReady(self, obj)
-        print "Object activated"
+#      def obj_is_ready(self, obj):
+#          _omnipy.objectIsReady(self, obj)
+#          print "Object activated"
 
-    def impl_is_ready(self, z=0, noblock=0):
-        _omnipy.implIsReady(self, z, noblock)
+#      def impl_is_ready(self, z=0, noblock=0):
+#          _omnipy.implIsReady(self, z, noblock)
 
-    __methods__ = ["obj_is_ready", "impl_is_ready"]
+#      __methods__ = ["obj_is_ready", "impl_is_ready"]
 
 
 #############################################################################

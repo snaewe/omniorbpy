@@ -5,6 +5,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.3  1999/09/22 15:46:12  dpg1
+// Fake POA implemented.
+//
 // Revision 1.2  1999/09/20 14:56:12  dpg1
 // GCC 2.95 is more pedantic than egcs.
 //
@@ -67,7 +70,7 @@ Py_Servant::Py_Servant(PyObject* pyservant, PyObject* opdict,
 omniPy::
 Py_Servant::~Py_Servant()
 {
-  cout << "Py_Servant destructor." << endl;
+  //  cout << "Py_Servant destructor." << endl;
   Py_DECREF(pyservant_);
   Py_DECREF(opdict_);
 }
