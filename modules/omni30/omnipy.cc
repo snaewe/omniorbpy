@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.19  1999/10/15 16:25:46  dpg1
+// Fixed refcounting bug with Python servants.
+//
 // Revision 1.18  1999/10/01 11:07:21  dpg1
 // Error reporting if up-call raises an unexpected exception.
 //
@@ -500,8 +503,6 @@ extern "C" {
 					PyString_AS_STRING(repoId));
     Py_DECREF(repoId);
     Py_DECREF(opdict);
-    //    Py_DECREF(pyboa);
-    Py_DECREF(pyservant);
 
     omniPy_objectIsReady(cxxservant);
 
