@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.16  2000/01/31 10:51:41  dpg1
+# Fix to exception throwing.
+#
 # Revision 1.15  2000/01/04 16:14:27  dpg1
 # Clear out byte-compiled files created by importIDL()
 #
@@ -333,7 +336,7 @@ class Union:
                 return self._v
             else:
                 if mem == self._def_m or self._m_to_d.has_key(mem):
-                    raise CORBA.BAD_PARAM
+                    raise CORBA.BAD_PARAM()
                 else:
                     raise AttributeError(mem)
         except KeyError:
@@ -341,7 +344,7 @@ class Union:
                 return self._v
             else:
                 if self._m_to_d.has_key(mem):
-                    raise CORBA.BAD_PARAM
+                    raise CORBA.BAD_PARAM()
                 else:
                     raise AttributeError(mem)
 

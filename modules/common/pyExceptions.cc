@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.5  2000/01/31 10:51:42  dpg1
+// Fix to exception throwing.
+//
 // Revision 1.4  1999/12/15 12:17:20  dpg1
 // Changes to compile with SunPro CC 5.0.
 //
@@ -69,16 +72,20 @@ omniPy::produceSystemException(PyObject* eobj, PyObject* erepoId)
 
   PyObject *a, *b;
 
-  a     = PyObject_GetAttrString(eobj, (char*)"minor");
-  assert(a && PyInt_Check(a));
-  minor = PyInt_AS_LONG(a);
-  Py_DECREF(a);
+  a = PyObject_GetAttrString(eobj, (char*)"minor");
+  if (a && PyInt_Check(a)) {
+    minor = PyInt_AS_LONG(a);
+    Py_DECREF(a);
 
-  a      = PyObject_GetAttrString(eobj, (char*)"completed"); assert(a);
-  b      = PyObject_GetAttrString(a,    (char*)"_v");
-  assert(b && PyInt_Check(b));
-  status = (CORBA::CompletionStatus)PyInt_AS_LONG(b);
-  Py_DECREF(a); Py_DECREF(b);
+    a = PyObject_GetAttrString(eobj, (char*)"completed"); assert(a);
+    b = PyObject_GetAttrString(a,    (char*)"_v"); assert(b && PyInt_Check(b));
+    status = (CORBA::CompletionStatus)PyInt_AS_LONG(b);
+    Py_DECREF(a); Py_DECREF(b);
+  }
+  else {
+    minor  = 0;
+    status = CORBA::COMPLETED_MAYBE;
+  }
 
   char* repoId = PyString_AS_STRING(erepoId);
 

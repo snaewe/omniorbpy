@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.17  2000/01/31 10:51:42  dpg1
+# Fix to exception throwing.
+#
 # Revision 1.16  2000/01/18 17:14:13  dpg1
 # Support for pickle
 #
@@ -600,7 +603,7 @@ class Object:
 
     def _get_interface(self):
         # ***
-        raise NO_IMPLEMENT
+        raise NO_IMPLEMENT()
     
     def _is_a(self, repoId):
         if omniORB.static_is_a(self.__class__, repoId): return TRUE

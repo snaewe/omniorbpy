@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.9  2000/01/31 10:51:41  dpg1
+# Fix to exception throwing.
+#
 # Revision 1.8  1999/11/02 10:38:31  dpg1
 # Last bug wasn't quite fixed.
 #
@@ -303,7 +306,7 @@ def createTypeCode(d, parent=None):
 
     elif k == tv__indirect: return createTypeCode(d[1][0], parent)
 
-    raise CORBA.INTERNAL
+    raise CORBA.INTERNAL()
 
 
 # TypeCode base interface
@@ -330,24 +333,24 @@ class TypeCode_base (CORBA.TypeCode):
         return self._k
     
     # Operations which are only available for some kinds:
-    def id(self):                       raise CORBA.TypeCode.BadKind
-    def name(self):                     raise CORBA.TypeCode.BadKind
-    def member_count(self):             raise CORBA.TypeCode.BadKind
-    def member_name(self, index):       raise CORBA.TypeCode.BadKind
-    def member_type(self, index):       raise CORBA.TypeCode.BadKind
-    def member_label(self, index):      raise CORBA.TypeCode.BadKind
+    def id(self):                       raise CORBA.TypeCode.BadKind()
+    def name(self):                     raise CORBA.TypeCode.BadKind()
+    def member_count(self):             raise CORBA.TypeCode.BadKind()
+    def member_name(self, index):       raise CORBA.TypeCode.BadKind()
+    def member_type(self, index):       raise CORBA.TypeCode.BadKind()
+    def member_label(self, index):      raise CORBA.TypeCode.BadKind()
 
-    def discriminator_type(self):       raise CORBA.TypeCode.BadKind
-    def default_index(self):            raise CORBA.TypeCode.BadKind
-    def length(self):                   raise CORBA.TypeCode.BadKind
-    def content_type(self):             raise CORBA.TypeCode.BadKind
+    def discriminator_type(self):       raise CORBA.TypeCode.BadKind()
+    def default_index(self):            raise CORBA.TypeCode.BadKind()
+    def length(self):                   raise CORBA.TypeCode.BadKind()
+    def content_type(self):             raise CORBA.TypeCode.BadKind()
 
     # Things for types we don't support:
-    def fixed_digits(self):             raise CORBA.TypeCode.BadKind
-    def fixed_scale(self):              raise CORBA.TypeCode.BadKind
-    def member_visibility(self, index): raise CORBA.TypeCode.BadKind
-    def type_modifier(self):            raise CORBA.TypeCode.BadKind
-    def concrete_base_type(self):       raise CORBA.TypeCode.BadKind
+    def fixed_digits(self):             raise CORBA.TypeCode.BadKind()
+    def fixed_scale(self):              raise CORBA.TypeCode.BadKind()
+    def member_visibility(self, index): raise CORBA.TypeCode.BadKind()
+    def type_modifier(self):            raise CORBA.TypeCode.BadKind()
+    def concrete_base_type(self):       raise CORBA.TypeCode.BadKind()
 
 
 # Class for short, long, ushort, ulong, float, double, boolean, char,
@@ -355,7 +358,7 @@ class TypeCode_base (CORBA.TypeCode):
 
 class TypeCode_empty (TypeCode_base):
     def __init__(self, desc):
-        if type(desc) is not types.IntType: raise CORBA.INTERNAL
+        if type(desc) is not types.IntType: raise CORBA.INTERNAL()
         if desc != tv_null       and \
            desc != tv_void       and \
            desc != tv_short      and \
@@ -369,7 +372,7 @@ class TypeCode_empty (TypeCode_base):
            desc != tv_octet      and \
            desc != tv_any        and \
            desc != tv_TypeCode   and \
-           desc != tv_Principal: raise CORBA.INTERNAL
+           desc != tv_Principal: raise CORBA.INTERNAL()
 
         self._d = desc
         self._k = CORBA.TCKind._item(desc)
@@ -380,7 +383,7 @@ class TypeCode_string (TypeCode_base):
     def __init__(self, desc):
         if type(desc) is not types.TupleType or \
            desc[0] != tv_string:
-            raise CORBA.INTERNAL
+            raise CORBA.INTERNAL()
         self._d = desc
         self._k = CORBA.tk_string
 
@@ -393,7 +396,7 @@ class TypeCode_objref (TypeCode_base):
     def __init__(self, desc):
         if type(desc) is not types.TupleType or \
            desc[0] != tv_objref:
-            raise CORBA.INTERNAL
+            raise CORBA.INTERNAL()
         self._d = desc
         self._k = CORBA.tk_objref
 
@@ -411,7 +414,7 @@ class TypeCode_struct (TypeCode_base):
     def __init__(self, desc, parent):
         if type(desc) is not types.TupleType or \
            desc[0] != tv_struct:
-            raise CORBA.INTERNAL
+            raise CORBA.INTERNAL()
         self._d = desc
         self._k = CORBA.tk_struct
         self._p = parent
@@ -431,12 +434,12 @@ class TypeCode_struct (TypeCode_base):
     def member_count(self):       return (len(self._d) - 4) / 2
     def member_name(self, index):
         off = index * 2 + 4
-        if index < 0 or off >= len(self._d): raise CORBA.TypeCode.Bounds
+        if index < 0 or off >= len(self._d): raise CORBA.TypeCode.Bounds()
         return self._d[off]
 
     def member_type(self, index):
         off = index * 2 + 5
-        if index < 0 or off >= len(self._d): raise CORBA.TypeCode.Bounds
+        if index < 0 or off >= len(self._d): raise CORBA.TypeCode.Bounds()
         if self._p is None and removeIndirections is not None:
             return createTypeCode(self._d[off], self)
         else:
@@ -447,7 +450,7 @@ class TypeCode_union (TypeCode_base):
     def __init__(self, desc, parent):
         if type(desc) is not types.TupleType or \
            desc[0] != tv_union:
-            raise CORBA.INTERNAL
+            raise CORBA.INTERNAL()
         self._d = desc
         self._k = CORBA.tk_union
         self._p = parent
@@ -467,18 +470,18 @@ class TypeCode_union (TypeCode_base):
     def member_count(self):        return len(self._d[6])
 
     def member_name(self, index):
-        if index < 0 or index >= len(self._d[6]): raise CORBA.TypeCode.Bounds
+        if index < 0 or index >= len(self._d[6]): raise CORBA.TypeCode.Bounds()
         return self._d[6][index][1]
     
     def member_type(self, index):
-        if index < 0 or index >= len(self._d[6]): raise CORBA.TypeCode.Bounds
+        if index < 0 or index >= len(self._d[6]): raise CORBA.TypeCode.Bounds()
         if self._p is None and removeIndirections is not None:
             return createTypeCode(self._d[6][index][2], self)
         else:
             return createTypeCode(self._d[6][index][2], self._p)
 
     def member_label(self, index):
-        if index < 0 or index >= len(self._d[6]): raise CORBA.TypeCode.Bounds
+        if index < 0 or index >= len(self._d[6]): raise CORBA.TypeCode.Bounds()
         if index == self._d[5]: return CORBA.Any(CORBA._tc_octet, 0)
         return CORBA.Any(createTypeCode(self._d[4]), self._d[6][index][0])
 
@@ -493,7 +496,7 @@ class TypeCode_enum (TypeCode_base):
     def __init__(self, desc):
         if type(desc) is not types.TupleType or \
            desc[0] != tv_enum:
-            raise CORBA.INTERNAL
+            raise CORBA.INTERNAL()
         self._d = desc
         self._k = CORBA.tk_enum
 
@@ -508,7 +511,7 @@ class TypeCode_enum (TypeCode_base):
     def member_count(self): return len(self._d[3])
 
     def member_name(self, index):
-        if index < 0 or index >= len(self._d[3]): raise CORBA.TypeCode.Bounds
+        if index < 0 or index >= len(self._d[3]): raise CORBA.TypeCode.Bounds()
         return self._d[3][index]._n
 
 # sequence:
@@ -516,7 +519,7 @@ class TypeCode_sequence (TypeCode_base):
     def __init__(self, desc, parent):
         if type(desc) is not types.TupleType or \
            desc[0] != tv_sequence:
-            raise CORBA.INTERNAL
+            raise CORBA.INTERNAL()
         self._d = desc
         self._k = CORBA.tk_sequence
         self._p = parent
@@ -543,7 +546,7 @@ class TypeCode_array (TypeCode_base):
     def __init__(self, desc, parent):
         if type(desc) is not types.TupleType or \
            desc[0] != tv_array:
-            raise CORBA.INTERNAL
+            raise CORBA.INTERNAL()
         self._d = desc
         self._k = CORBA.tk_array
         self._p = parent
@@ -566,7 +569,7 @@ class TypeCode_alias (TypeCode_base):
     def __init__(self, desc, parent):
         if type(desc) is not types.TupleType or \
            desc[0] != tv_alias:
-            raise CORBA.INTERNAL
+            raise CORBA.INTERNAL()
         self._d = desc
         self._k = CORBA.tk_alias
         self._p = parent
@@ -590,7 +593,7 @@ class TypeCode_except (TypeCode_base):
     def __init__(self, desc, parent):
         if type(desc) is not types.TupleType or \
            desc[0] != tv_except:
-            raise CORBA.INTERNAL
+            raise CORBA.INTERNAL()
         self._d = desc
         self._k = CORBA.tk_except
         self._p = parent
@@ -610,12 +613,12 @@ class TypeCode_except (TypeCode_base):
     def member_count(self):       return (len(self._d) - 4) / 2
     def member_name(self, index):
         off = index * 2 + 4
-        if index < 0 or off >= len(self._d): raise CORBA.TypeCode.Bounds
+        if index < 0 or off >= len(self._d): raise CORBA.TypeCode.Bounds()
         return self._d[off]
 
     def member_type(self, index):
         off = index * 2 + 5
-        if index < 0 or off >= len(self._d): raise CORBA.TypeCode.Bounds
+        if index < 0 or off >= len(self._d): raise CORBA.TypeCode.Bounds()
         if self._p is None and removeIndirections is not None:
             return createTypeCode(self._d[off], self)
         else:
@@ -759,7 +762,7 @@ def getCompactDescriptor(d):
         try:
             i[0] = seen[id(i[0])]
         except KeyError:
-            raise CORBA.BAD_TYPECODE
+            raise CORBA.BAD_TYPECODE()
 
     return r
 
@@ -840,7 +843,7 @@ def r_getCompactDescriptor(d, seen, ind):
         ind.append(l)
         r = (k, l)
 
-    else: raise CORBA.INTERNAL
+    else: raise CORBA.INTERNAL()
 
     seen[id(d)] = r
     return r
