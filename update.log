@@ -1,9 +1,21 @@
+Mon Feb 25 15:32:48 GMT 2002 dpg1
+=================================
+
+- Expose omniORB logger to Python.
+
+modules/pyomniFunc.cc
+
+- Get list of keywords from keyword module.
+
+python/omniORB/__init__.py
+
+
 Tue Feb 19 14:03:11 GMT 2002 dpg1
 =================================
 
 - _omnipymodule works better if it's linked with omniORB...
 
-src/lib/omniORBpy/modules/dir.mk
+modules/dir.mk
 
 
 Tue Feb 19 13:46:31 GMT 2002 dpg1
