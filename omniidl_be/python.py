@@ -28,6 +28,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.29.2.16  2003/04/25 15:45:16  dgrisby
+# Fix bug with enum members that clash with keywords.
+#
 # Revision 1.29.2.15  2003/04/16 13:07:59  dgrisby
 # Option to generate example implementations.
 #
@@ -521,7 +524,7 @@ enum_start = """
 """
 
 enum_item_at_module_scope = """\
-_0_@modname@.@item@ = omniORB.EnumItem("@item@", @eval@)"""
+_0_@modname@.@eitem@ = omniORB.EnumItem("@item@", @eval@)"""
 
 enum_object_and_descriptor_at_module_scope = """\
 _0_@modname@.@ename@ = omniORB.Enum("@repoId@", (@eitems@,))
@@ -531,7 +534,7 @@ _0_@modname@._tc_@ename@ = omniORB.tcInternal.createTypeCode(_0_@modname@._d_@en
 omniORB.registerType(_0_@modname@.@ename@._NP_RepositoryId, _0_@modname@._d_@ename@, _0_@modname@._tc_@ename@)"""
 
 enum_item = """\
-@item@ = omniORB.EnumItem("@item@", @eval@)"""
+@eitem@ = omniORB.EnumItem("@item@", @eval@)"""
 
 enum_object_and_descriptor = """\
 @ename@ = omniORB.Enum("@repoId@", (@eitems@,))
@@ -1552,17 +1555,19 @@ class PythonVisitor:
             if self.at_module_scope:
                 self.st.out(enum_item_at_module_scope,
                             item    = item.identifier(),
+                            eitem   = mangle(item.identifier()),
                             eval    = eval,
                             modname = self.modname)
             else:
                 self.st.out(enum_item,
                             item    = item.identifier(),
+                            eitem   = mangle(item.identifier()),
                             eval    = eval)
 
             if self.at_module_scope:
                 elist.append(dotName(fixupScopedName(item.scopedName())))
             else:
-                elist.append(item.identifier())
+                elist.append(mangle(item.identifier()))
 
             i = i + 1
 

@@ -1,3 +1,24 @@
+Fri Apr 25 16:11:06 BST 2003 dgrisby
+====================================
+
+- Bump version numbers forgotten in 2.1 release.
+
+mk/beforeauto.mk.in
+modules/dir.mk
+
+- Implement missing bidir policy.
+
+modules/pyPOAFunc.cc
+python/omniORB/BiDirPolicy.py    -- new
+python/omniORB/CORBA.py
+python/omniORB/PortableServer.py
+python/omniORB/dir.mk
+
+- Fix bug with enum members that clash with keywords.
+
+omniidl_be/python.py
+
+
 Wed Apr 16 12:48:05 BST 2003 dgrisby
 ====================================
 
