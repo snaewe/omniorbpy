@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.4.5  2004/02/16 10:14:17  dgrisby
+// Use stream based copy for local calls.
+//
 // Revision 1.1.4.4  2003/11/06 12:00:34  dgrisby
 // ValueType TypeCode support; track ORB core changes.
 //
@@ -581,7 +584,7 @@ extern "C" {
   omnipy_invoke(PyObject* self, PyObject* args)
   {
     // Arg format
-    //  (objref, op_name, (in_desc, out_desc, exc_desc [, ctxt]), args)
+    //  (objref, op_name, (in_desc,out_desc,exc_desc [, ctxt [,values]]), args)
     //
     //  exc_desc is a dictionary containing a mapping from repoIds to
     //  tuples of the form (exception class, marshal desc., param count)
@@ -605,10 +608,23 @@ extern "C" {
     out_d    = PyTuple_GET_ITEM(desc,1);
     exc_d    = PyTuple_GET_ITEM(desc,2);
 
-    if (PyTuple_GET_SIZE(desc) == 4)
+    int desclen = PyTuple_GET_SIZE(desc);
+
+    if (desclen >= 4) {
       ctxt_d = PyTuple_GET_ITEM(desc,3);
+      if (ctxt_d == Py_None)
+	ctxt_d = 0;
+    }
     else
       ctxt_d = 0;
+
+    CORBA::Boolean contains_values = 0;
+
+    if (desclen == 5) {
+      PyObject* v = PyTuple_GET_ITEM(desc,4);
+      if (v != Py_None)
+	contains_values = 1;
+    }
 
     op_args  = PyTuple_GET_ITEM(args,3);
 
@@ -634,6 +650,10 @@ extern "C" {
     omniPy::Py_omniCallDescriptor call_desc(op, op_len + 1, is_oneway,
 					    in_d, out_d, exc_d, ctxt_d,
 					    op_args, 0);
+
+    if (contains_values)
+      call_desc.containsValues(1);
+
     try {
       call_desc.releaseInterpreterLock();
       oobjref->_invoke(call_desc);

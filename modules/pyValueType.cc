@@ -28,6 +28,9 @@
 //    ValueType support
 
 // $Log$
+// Revision 1.1.2.5  2004/02/16 10:14:18  dgrisby
+// Use stream based copy for local calls.
+//
 // Revision 1.1.2.4  2003/11/06 12:00:36  dgrisby
 // ValueType TypeCode support; track ORB core changes.
 //
@@ -929,24 +932,16 @@ omniPy::
 copyArgumentValue(PyObject* d_o, PyObject* a_o,
 		  CORBA::CompletionStatus compstatus)
 {
-  // *** FIXME: braindead implementation
-  omniPy::validateType(d_o, a_o, CORBA::COMPLETED_NO, 0);
-  cdrMemoryStream ms(8192);
+  // *** This code does not actually copy the value. Normally
+  // valuetype arguments are not "copied" using this code. Instead,
+  // all the arguments are marshalled together to properly handle
+  // cross-references between arguments. This code is only used if the
+  // copyValuesInLocalCalls parameter is set false, meaning we have
+  // chosen to use the wrong copy semantics, so we might as well do
+  // the fastest thing.
 
-  omniPy::marshalPyObject(ms, d_o, a_o);
-  ms.rewindInputPtr();
-  {
-    omniPy::InterpreterUnlocker _u;
-    delete ms.valueTracker();
-    ms.valueTracker(0);
-  }
-  PyObject* r = omniPy::unmarshalPyObject(ms, d_o);
-  {
-    omniPy::InterpreterUnlocker _u;
-    delete ms.valueTracker();
-    ms.valueTracker(0);
-  }
-  return r;
+  Py_INCREF(a_o);
+  return a_o;
 }
 
 PyObject*
@@ -954,23 +949,9 @@ omniPy::
 copyArgumentValueBox(PyObject* d_o, PyObject* a_o,
 		     CORBA::CompletionStatus compstatus)
 {
-  // *** FIXME: braindead implementation
-  omniPy::validateType(d_o, a_o, CORBA::COMPLETED_NO, 0);
-  cdrMemoryStream ms(8192);
+  // Same comment as copyArgumentValue above.
 
-  omniPy::marshalPyObject(ms, d_o, a_o);
-  ms.rewindInputPtr();
-  {
-    omniPy::InterpreterUnlocker _u;
-    delete ms.valueTracker();
-    ms.valueTracker(0);
-  }
-  PyObject* r = omniPy::unmarshalPyObject(ms, d_o);
-  {
-    omniPy::InterpreterUnlocker _u;
-    delete ms.valueTracker();
-    ms.valueTracker(0);
-  }
-  return r;
+  Py_INCREF(a_o);
+  return a_o;
 }
 

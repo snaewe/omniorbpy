@@ -1,3 +1,13 @@
+Mon Feb 16 10:16:23 GMT 2004 dgrisby
+====================================
+
+- Use stream based copy for local calls.
+
+modules/omnipy.cc
+modules/pyValueType.cc
+omniidl_be/python.py
+
+
 Thu Nov  6 11:59:24 GMT 2003 dgrisby
 ====================================
 

@@ -28,6 +28,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.33.2.4  2004/02/16 10:14:18  dgrisby
+# Use stream based copy for local calls.
+#
 # Revision 1.33.2.3  2003/07/10 22:13:25  dgrisby
 # Abstract interface support.
 #
@@ -287,7 +290,7 @@ attribute_set_descriptor = """\
 @ifid@._d__set_@attr@ = ((@descr@,),(),None)"""
 
 operation_descriptor = """\
-@ifid@._d_@opname@ = (@inds@, @outds@, @excs@@ctxts@)"""
+@ifid@._d_@opname@ = (@inds@, @outds@, @excs@@options@)"""
 
 objref_class = """\
 
@@ -923,21 +926,27 @@ class PythonVisitor:
                                     attr=attr, descr=descr, ifid=ifid)
             else: # Operation
 
-                inds, outds, excs, ctxts = operationToDescriptors(c)
+                inds, outds, excs, ctxts, cv = operationToDescriptors(c)
+
+                options = ""
+
+                if cv:
+                    ctxts = ctxts or "None"
 
                 if ctxts:
-                    ctxts = ", " + ctxts
-                else:
-                    ctxts = ""
+                    options = ", " + ctxts
+
+                if cv:
+                    options = options + ", 1"
 
                 # Output the declaration
                 self.st.out(operation_descriptor,
-                            opname = mangle(c.identifier()),
-                            inds   = inds,
-                            outds  = outds,
-                            excs   = excs,
-                            ctxts  = ctxts,
-                            ifid   = ifid)
+                            opname  = mangle(c.identifier()),
+                            inds    = inds,
+                            outds   = outds,
+                            excs    = excs,
+                            options = options,
+                            ifid    = ifid)
 
         # Objref class
         if len(node.inherits()) > 0:
@@ -2005,23 +2014,29 @@ class DocstringVisitor (idlvisitor.AstVisitor):
 def operationToDescriptors(op):
     """Return the descriptors for an operation.
 
-    Returns a tuple containing (in descriptor, out descriptor,
-    exception map, context list)
+    Returns a tuple containing strings of (in descriptor, out
+    descriptor, exception map, context list, contains values)
     """
 
     indl  = []
     outdl = []
+    cv    = 0
 
     if op.returnType() is not None and \
        op.returnType().kind() != idltype.tk_void:
+
         outdl.append(typeToDescriptor(op.returnType()))
+        cv = idltype.containsValueType(op.returnType())
 
     # Make the lists of in and out parameters
     for p in op.parameters():
+
         if p.is_in():
             indl.append(typeToDescriptor(p.paramType()))
         if p.is_out():
             outdl.append(typeToDescriptor(p.paramType()))
+
+        cv = cv or idltype.containsValueType(p.paramType())
 
     # Fudge single-item lists so that single item tuples work
     if len(indl)  == 1: indl.append("")
@@ -2052,7 +2067,7 @@ def operationToDescriptors(op):
     else:
         ctxts = None
 
-    return inds, outds, excs, ctxts
+    return inds, outds, excs, ctxts, cv
 
 
 
