@@ -1,3 +1,24 @@
+Mon Aug 21 10:09:31 BST 2000 dpg1
+=================================
+
+- Merge omniidl long long support from omniORB 3
+
+omniidl/cxx/CORBA_basetypes.h
+omniidl/cxx/CORBA_sysdep.h
+omniidl/cxx/dir.mk
+omniidl/cxx/idl.ll
+omniidl/cxx/idlast.cc
+omniidl/cxx/idlexpr.cc
+omniidl/cxx/idlpython.cc
+omniidl/cxx/idlutil.cc
+omniidl/cxx/idlutil.h
+omniidl/cxx/lex.yy.cc
+
+- Typo in omniidl.idltype
+
+omniidl/python/omniidl/idltype.py
+
+
 Fri Aug 18 12:37:50 BST 2000 dpg1
 =================================
 
