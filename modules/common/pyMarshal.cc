@@ -31,6 +31,10 @@
 // $Id$
 
 // $Log$
+// Revision 1.13  2000/01/10 19:58:59  dpg1
+// Struct marshalling is more forgiving. BAD_PARAM exceptions instead of
+// assertion failures with incorrect data.
+//
 // Revision 1.12  1999/12/15 12:17:20  dpg1
 // Changes to compile with SunPro CC 5.0.
 //
@@ -167,15 +171,15 @@ omniPy::alignedSize(CORBA::ULong msgsize,
 
       // Size of TypeCode
       t_o             = PyDict_GetItemString(adict, (char*)"_t");
-      assert(t_o && PyInstance_Check(t_o));
+      if (!(t_o && PyInstance_Check(t_o))) throw CORBA::BAD_PARAM();
       PyObject* tdict = ((PyInstanceObject*)t_o)->in_dict;
       PyObject* desc  = PyDict_GetItemString(tdict, (char*)"_d");
-      assert(desc);
+      if (!desc) throw CORBA::BAD_PARAM();
       msgsize         = alignedSizeTypeCode(msgsize, desc);
 
       // Size of Any's contents
       t_o             = PyDict_GetItemString(adict, (char*)"_v");
-      assert(t_o);
+      if (!t_o) throw CORBA::BAD_PARAM();
       msgsize         = alignedSize(msgsize, desc, t_o);
     }
     break;
@@ -186,7 +190,7 @@ omniPy::alignedSize(CORBA::ULong msgsize,
 
       PyObject* tdict = ((PyInstanceObject*)a_o)->in_dict;
       t_o             = PyDict_GetItemString(tdict, (char*)"_d");
-      assert(t_o);
+      if (!t_o) throw CORBA::BAD_PARAM();
       msgsize         = alignedSizeTypeCode(msgsize, t_o);
     }
     break;
@@ -217,9 +221,6 @@ omniPy::alignedSize(CORBA::ULong msgsize,
   case CORBA::tk_struct: // class, repoId, struct name, name, descriptor, ...
     {
       assert(tup);
-      if (!PyInstance_Check(a_o)) throw CORBA::BAD_PARAM();
-
-      PyObject* sdict = ((PyInstanceObject*)a_o)->in_dict;
 
       // The descriptor tuple has twice the number of struct members,
       // plus 4 -- the typecode kind, the Python class, the repoId,
@@ -230,11 +231,31 @@ omniPy::alignedSize(CORBA::ULong msgsize,
       PyObject* value;
 
       int i, j;
-      for (i=0,j=4; i < cnt; i++) {
-	name    = PyTuple_GET_ITEM(d_o, j++);
-	assert(PyString_Check(name));
-	value   = PyDict_GetItem(sdict, name);
-	msgsize = alignedSize(msgsize, PyTuple_GET_ITEM(d_o, j++), value);
+
+      // Optimise for the fast case, where the object is a class
+      // instance with all attributes in its own dictionary
+      if (PyInstance_Check(a_o)) {
+
+	PyObject* sdict = ((PyInstanceObject*)a_o)->in_dict;
+
+	for (i=0,j=4; i < cnt; i++) {
+	  name    = PyTuple_GET_ITEM(d_o, j++); assert(PyString_Check(name));
+	  value   = PyDict_GetItem(sdict, name);
+	  if (!value) {
+	    // Not such a fast case after all
+	    value = PyObject_GetAttr(a_o, name);
+	    if (!value) throw CORBA::BAD_PARAM();
+	  }
+	  msgsize = alignedSize(msgsize, PyTuple_GET_ITEM(d_o, j++), value);
+	}
+      }
+      else {
+	for (i=0,j=4; i < cnt; i++) {
+	  name    = PyTuple_GET_ITEM(d_o, j++); assert(PyString_Check(name));
+	  value   = PyObject_GetAttr(a_o, name);
+	  if (!value) throw CORBA::BAD_PARAM();
+	  msgsize = alignedSize(msgsize, PyTuple_GET_ITEM(d_o, j++), value);
+	}
       }
     }
     break;
@@ -255,7 +276,7 @@ omniPy::alignedSize(CORBA::ULong msgsize,
 
       PyObject* discriminant = PyDict_GetItemString(udict, (char*)"_d");
       PyObject* value        = PyDict_GetItemString(udict, (char*)"_v");
-      assert(discriminant && value);
+      if (!(discriminant && value)) throw CORBA::BAD_PARAM();
 
       t_o = PyTuple_GET_ITEM(d_o, 4); // Discriminant descriptor
       msgsize = alignedSize(msgsize, t_o, discriminant);
@@ -721,7 +742,7 @@ omniPy::marshalPyObject(NetBufferedStream& stream,
     {
       //      cout << "about to marshal TypeCode..." << endl;
       PyObject* tdict = ((PyInstanceObject*)a_o)->in_dict;
-      t_o             = PyDict_GetItemString(tdict, (char*)"_d"); assert(t_o);
+      t_o             = PyDict_GetItemString(tdict, (char*)"_d");
       marshalTypeCode(stream, t_o);
       //      cout << "TypeCode marshalled." << endl;
     }
@@ -749,17 +770,29 @@ omniPy::marshalPyObject(NetBufferedStream& stream,
 
   case CORBA::tk_struct: // class, repoId, struct name, {name, descriptor}
     {
-      PyObject* sdict = ((PyInstanceObject*)a_o)->in_dict;
+      int i, j;
       int       cnt   = (PyTuple_GET_SIZE(d_o) - 4) / 2;
-
       PyObject* name;
       PyObject* value;
 
-      int i, j;
-      for (i=0,j=4; i < cnt; i++) {
-	name    = PyTuple_GET_ITEM(d_o, j++);
-	value   = PyDict_GetItem(sdict, name);
-	marshalPyObject(stream, PyTuple_GET_ITEM(d_o, j++), value);
+      if (PyInstance_Check(a_o)) {
+	PyObject* sdict = ((PyInstanceObject*)a_o)->in_dict;
+	for (i=0,j=4; i < cnt; i++) {
+	  name    = PyTuple_GET_ITEM(d_o, j++);
+	  value   = PyDict_GetItem(sdict, name);
+
+	  if (!value)
+	    value = PyObject_GetAttr(a_o, name);
+
+	  marshalPyObject(stream, PyTuple_GET_ITEM(d_o, j++), value);
+	}
+      }
+      else {
+	for (i=0,j=4; i < cnt; i++) {
+	  name    = PyTuple_GET_ITEM(d_o, j++);
+	  value   = PyObject_GetAttr(a_o, name);
+	  marshalPyObject(stream, PyTuple_GET_ITEM(d_o, j++), value);
+	}	
       }
     }
     break;
@@ -1127,7 +1160,7 @@ omniPy::marshalPyObject(MemBufferedStream& stream,
   case CORBA::tk_TypeCode:
     {
       PyObject* tdict = ((PyInstanceObject*)a_o)->in_dict;
-      t_o             = PyDict_GetItemString(tdict, (char*)"_d"); assert(t_o);
+      t_o             = PyDict_GetItemString(tdict, (char*)"_d");
       marshalTypeCode(stream, t_o);
     }
     break;
@@ -1154,17 +1187,29 @@ omniPy::marshalPyObject(MemBufferedStream& stream,
 
   case CORBA::tk_struct: // class, repoId, struct name, {name, descriptor}
     {
-      PyObject* sdict = ((PyInstanceObject*)a_o)->in_dict;
+      int i, j;
       int       cnt   = (PyTuple_GET_SIZE(d_o) - 4) / 2;
-
       PyObject* name;
       PyObject* value;
 
-      int i, j;
-      for (i=0,j=4; i < cnt; i++) {
-	name    = PyTuple_GET_ITEM(d_o, j++);
-	value   = PyDict_GetItem(sdict, name);
-	marshalPyObject(stream, PyTuple_GET_ITEM(d_o, j++), value);
+      if (PyInstance_Check(a_o)) {
+	PyObject* sdict = ((PyInstanceObject*)a_o)->in_dict;
+	for (i=0,j=4; i < cnt; i++) {
+	  name    = PyTuple_GET_ITEM(d_o, j++);
+	  value   = PyDict_GetItem(sdict, name);
+
+	  if (!value)
+	    value = PyObject_GetAttr(a_o, name);
+
+	  marshalPyObject(stream, PyTuple_GET_ITEM(d_o, j++), value);
+	}
+      }
+      else {
+	for (i=0,j=4; i < cnt; i++) {
+	  name    = PyTuple_GET_ITEM(d_o, j++);
+	  value   = PyObject_GetAttr(a_o, name);
+	  marshalPyObject(stream, PyTuple_GET_ITEM(d_o, j++), value);
+	}	
       }
     }
     break;
