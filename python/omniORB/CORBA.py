@@ -3,16 +3,18 @@
 # $Id$
 
 # $Log$
+# Revision 1.2  1999/07/19 15:47:05  dpg1
+# TypeCode and Any support.
+#
 # Revision 1.1  1999/06/08 16:21:52  dpg1
 # Initial revision
 #
 
 
-import threading
+import threading, types
 
 import _omnipy
 import omniORB
-import Enum
 
 
 #############################################################################
@@ -37,11 +39,13 @@ class Exception:
 
 # Completion status:
 
-COMPLETED_YES     = Enum.Item("COMPLETED_YES",   0)
-COMPLETED_NO      = Enum.Item("COMPLETED_NO",    1)
-COMPLETED_MAYBE   = Enum.Item("COMPLETED_MAYBE", 2)
-completion_status = Enum.Enum("IDL:omg.org/CORBA/completion_status:1.0",
-                              [COMPLETED_YES, COMPLETED_NO, COMPLETED_MAYBE])
+COMPLETED_YES     = omniORB.EnumItem("COMPLETED_YES",   0)
+COMPLETED_NO      = omniORB.EnumItem("COMPLETED_NO",    1)
+COMPLETED_MAYBE   = omniORB.EnumItem("COMPLETED_MAYBE", 2)
+completion_status = omniORB.Enum("IDL:omg.org/CORBA/completion_status:1.0",
+                                 (COMPLETED_YES,
+                                  COMPLETED_NO,
+                                  COMPLETED_MAYBE))
 
 class SystemException (Exception):
     def __init__(self, minor=0, completed=COMPLETED_NO):
@@ -212,70 +216,151 @@ class WRONG_TRANSACTION (SystemException):
     def __init__(self, minor=0, completed=COMPLETED_NO):
         SystemException.__init__(self, minor, completed)
 
-__sysExceptionMapping = {
-    "IDL:omg.org/CORBA/UNKNOWN":                UNKNOWN,
-    "IDL:omg.org/CORBA/BAD_PARAM":              BAD_PARAM,
-    "IDL:omg.org/CORBA/NO_MEMORY":              NO_MEMORY,
-    "IDL:omg.org/CORBA/IMP_LIMIT":              IMP_LIMIT,
-    "IDL:omg.org/CORBA/COMM_FAILURE":           COMM_FAILURE,
-    "IDL:omg.org/CORBA/INV_OBJREF":             INV_OBJREF,
-    "IDL:omg.org/CORBA/OBJECT_NOT_EXIST":       OBJECT_NOT_EXIST,
-    "IDL:omg.org/CORBA/NO_PERMISSION":          NO_PERMISSION,
-    "IDL:omg.org/CORBA/INTERNAL":               INTERNAL,
-    "IDL:omg.org/CORBA/MARSHAL":                MARSHAL,
-    "IDL:omg.org/CORBA/INITIALIZE":             INITIALIZE,
-    "IDL:omg.org/CORBA/NO_IMPLEMENT":           NO_IMPLEMENT,
-    "IDL:omg.org/CORBA/BAD_TYPECODE":           BAD_TYPECODE,
-    "IDL:omg.org/CORBA/BAD_OPERATION":          BAD_OPERATION,
-    "IDL:omg.org/CORBA/NO_RESOURCES":           NO_RESOURCES,
-    "IDL:omg.org/CORBA/NO_RESPONSE":            NO_RESPONSE,
-    "IDL:omg.org/CORBA/PERSIST_STORE":          PERSIST_STORE,
-    "IDL:omg.org/CORBA/BAD_INV_ORDER":          BAD_INV_ORDER,
-    "IDL:omg.org/CORBA/TRANSIENT":              TRANSIENT,
-    "IDL:omg.org/CORBA/FREE_MEM":               FREE_MEM,
-    "IDL:omg.org/CORBA/INV_IDENT":              INV_IDENT,
-    "IDL:omg.org/CORBA/INV_FLAG":               INV_FLAG,
-    "IDL:omg.org/CORBA/INTF_REPOS":             INTF_REPOS,
-    "IDL:omg.org/CORBA/BAD_CONTEXT":            BAD_CONTEXT,
-    "IDL:omg.org/CORBA/OBJ_ADAPTER":            OBJ_ADAPTER,
-    "IDL:omg.org/CORBA/DATA_CONVERSION":        DATA_CONVERSION,
-    "IDL:omg.org/CORBA/TRANSACTION_REQUIRED":   TRANSACTION_REQUIRED,
-    "IDL:omg.org/CORBA/TRANSACTION_ROLLEDBACK": TRANSACTION_ROLLEDBACK,
-    "IDL:omg.org/CORBA/INVALID_TRANSACTION":    INVALID_TRANSACTION,
-    "IDL:omg.org/CORBA/WRONG_TRANSACTION":      WRONG_TRANSACTION
-    }
+
+#############################################################################
+#                                                                           #
+# TypeCode                                                                  #
+#                                                                           #
+#############################################################################
+
+tk_null               = omniORB.EnumItem("CORBA.tk_null",               0)
+tk_void               = omniORB.EnumItem("CORBA.tk_void",               1)
+tk_short              = omniORB.EnumItem("CORBA.tk_short",              2)
+tk_long               = omniORB.EnumItem("CORBA.tk_long",               3)
+tk_ushort             = omniORB.EnumItem("CORBA.tk_ushort",             4)
+tk_ulong              = omniORB.EnumItem("CORBA.tk_ulong",              5)
+tk_float              = omniORB.EnumItem("CORBA.tk_float",              6)
+tk_double             = omniORB.EnumItem("CORBA.tk_double",             7)
+tk_boolean            = omniORB.EnumItem("CORBA.tk_boolean",            8)
+tk_char	              = omniORB.EnumItem("CORBA.tk_char",               9)
+tk_octet              = omniORB.EnumItem("CORBA.tk_octet",              10)
+tk_any	              = omniORB.EnumItem("CORBA.tk_any",        	11)
+tk_TypeCode           = omniORB.EnumItem("CORBA.tk_TypeCode",           12)
+tk_Principal          = omniORB.EnumItem("CORBA.tk_Principal",          13)
+tk_objref             = omniORB.EnumItem("CORBA.tk_objref",             14)
+tk_struct             = omniORB.EnumItem("CORBA.tk_struct",             15)
+tk_union              = omniORB.EnumItem("CORBA.tk_union",              16)
+tk_enum	              = omniORB.EnumItem("CORBA.tk_enum",               17)
+tk_string             = omniORB.EnumItem("CORBA.tk_string",             18)
+tk_sequence           = omniORB.EnumItem("CORBA.tk_sequence",           19)
+tk_array              = omniORB.EnumItem("CORBA.tk_array",              20)
+tk_alias              = omniORB.EnumItem("CORBA.tk_alias",              21)
+tk_except             = omniORB.EnumItem("CORBA.tk_except",             22)
+tk_longlong           = omniORB.EnumItem("CORBA.tk_longlong",           23)
+tk_ulonglong          = omniORB.EnumItem("CORBA.tk_ulonglong",          24)
+tk_longdouble         = omniORB.EnumItem("CORBA.tk_longdouble",         25)
+tk_wchar              = omniORB.EnumItem("CORBA.tk_wchar",              26)
+tk_wstring            = omniORB.EnumItem("CORBA.tk_wstring",            27)
+tk_fixed              = omniORB.EnumItem("CORBA.tk_fixed",              28)
+tk_value              = omniORB.EnumItem("CORBA.tk_value",              29)
+tk_value_box          = omniORB.EnumItem("CORBA.tk_value_box",          30)
+tk_native             = omniORB.EnumItem("CORBA.tk_native",             31)
+tk_abstract_interface = omniORB.EnumItem("CORBA.tk_abstract_interface", 32)
+
+TCKind        = omniORB.Enum("IDL:omg.org/CORBA/TCKind:1.0",
+                             (tk_null, tk_void, tk_short, tk_long, tk_ushort,
+                              tk_ulong, tk_float, tk_double, tk_boolean,
+                              tk_char, tk_octet, tk_any, tk_TypeCode,
+                              tk_Principal, tk_objref, tk_struct, tk_union,
+                              tk_enum, tk_string, tk_sequence, tk_array,
+                              tk_alias, tk_except, tk_longlong, tk_ulonglong,
+                              tk_longdouble, tk_wchar, tk_wstring, tk_fixed,
+                              tk_value, tk_value_box, tk_native,
+                              tk_abstract_interface))
+
+class TypeCode:
+    class Bounds (UserException):
+        pass
+    class BadKind (UserException):
+        pass
+
+    def __init__(self):
+        self._d = 0
+        self._k = tk_null
+
+    def equal(self, tc):
+        if self._d == tc._d: return TRUE
+        else:                return FALSE
+
+    def equivalent(self, tc):
+        return self.equal(tc)
+
+    def get_compact_typecode(self):
+        return self
+
+    def kind(self):
+        return self._k
+    
+    # Operations which are only available for some kinds:
+    def id(self):                       raise TypeCode.BadKind
+    def name(self):                     raise TypeCode.BadKind
+    def member_count(self):             raise TypeCode.BadKind
+    def member_name(self, index):       raise TypeCode.BadKind
+    def member_type(self, index):       raise TypeCode.BadKind
+
+    # member_label() differs from the normal TypeCode interface -- it
+    # returns the actual label value, not an Any containing the value.
+    # It's OK because TypeCode is PIDL.
+    def member_label(self, index):      raise TypeCode.BadKind
+
+    def discriminator_type(self):       raise TypeCode.BadKind
+    def default_index(self):            raise TypeCode.BadKind
+    def length(self):                   raise TypeCode.BadKind
+    def content_type(self):             raise TypeCode.BadKind
+
+    # Things for types we don't support:
+    def fixed_digits(self):             raise TypeCode.BadKind
+    def fixed_scale(self):              raise TypeCode.BadKind
+    def member_visibility(self, index): raise TypeCode.BadKind
+    def type_modifier(self):            raise TypeCode.BadKind
+    def concrete_base_type(self):       raise TypeCode.BadKind
+
+
+import tcInternal
+
+def typecode(t):
+    return tcInternal.typecode(t)
+
+
+# TypeCodes of basic types:
+
+_tc_null      = tcInternal.createTypeCode(tcInternal.tv_null)
+_tc_void      = tcInternal.createTypeCode(tcInternal.tv_void)
+_tc_short     = tcInternal.createTypeCode(tcInternal.tv_short)
+_tc_long      = tcInternal.createTypeCode(tcInternal.tv_long)
+_tc_ushort    = tcInternal.createTypeCode(tcInternal.tv_ushort)
+_tc_ulong     = tcInternal.createTypeCode(tcInternal.tv_ulong)
+_tc_float     = tcInternal.createTypeCode(tcInternal.tv_float)
+_tc_double    = tcInternal.createTypeCode(tcInternal.tv_double)
+_tc_boolean   = tcInternal.createTypeCode(tcInternal.tv_boolean)
+_tc_char      = tcInternal.createTypeCode(tcInternal.tv_char)
+_tc_octet     = tcInternal.createTypeCode(tcInternal.tv_octet)
+_tc_any       = tcInternal.createTypeCode(tcInternal.tv_any)
+_tc_TypeCode  = tcInternal.createTypeCode(tcInternal.tv_TypeCode)
+_tc_Principal = tcInternal.createTypeCode(tcInternal.tv_Principal)
+_tc_string    = tcInternal.createTypeCode((tcInternal.tv_string,0))
 
 
 #############################################################################
 #                                                                           #
-# TypeCodes                                                                 #
+# Any                                                                       #
 #                                                                           #
 #############################################################################
 
-tk_null      = 0
-tk_void      = 1
-tk_short     = 2
-tk_long      = 3
-tk_ushort    = 4
-tk_ulong     = 5
-tk_float     = 6
-tk_double    = 7
-tk_boolean   = 8
-tk_char	     = 9
-tk_octet     = 10
-tk_any	     = 11
-tk_TypeCode  = 12
-tk_Principal = 13
-tk_objref    = 14
-tk_struct    = 15
-tk_union     = 16
-tk_enum	     = 17
-tk_string    = 18
-tk_sequence  = 19
-tk_array     = 20
-tk_alias     = 21
-tk_except    = 22
-tk__indirect = 0xffffffff
+class Any:
+    def __init__(self, t, v):
+        if not isinstance(t, TypeCode):
+            raise TypeError("Argument 1 must be a TypeCode.")
+        self._t = t
+        self._v = v
+
+    def typecode(self):
+        return self._t
+
+    def value(self, coerce=None):
+        if coerce is None:
+            return self._v
+        raise NotImplementedError("Any coercion not yet supported.")
 
 
 
@@ -383,11 +468,42 @@ class Object:
         return _omnipy.narrow(self, dest._NP_RepositoryId)
 
 
+class _nil_Object (Object):
+    """ Class for all nil objects """
+
+    _NP_RepositoryId = ""
+
+    def __nonzero__(self):
+        return 0
+
+    def _is_a(self, repoId):
+        if repoId == "": return TRUE
+        return FALSE
+
+    def _non_existent(self):
+        return TRUE
+
+    def _is_equivalent(self, other_object):
+        if is_nil(other_object): return TRUE
+        return FALSE
+
+    def _hash(self, maximum):
+        return 0
+
+    def _narrow(self, dest):
+        return self
+
+
+Object._nil = _nil_Object()
 
 
 
+#############################################################################
+#                                                                           #
+# CORBA module functions                                                    #
+#                                                                           #
+#############################################################################
 
-
-# Register this module with omnipy:
-import CORBA, omniORB
-_omnipy.registerPyObjects(CORBA, omniORB)
+def is_nil(obj):
+    if isinstance(obj, _nil_Object): return TRUE
+    return FALSE
