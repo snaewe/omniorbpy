@@ -1,3 +1,20 @@
+Mon Jun 11 14:05:19 BST 2001 dpg1
+=================================
+
+- Support for PortableServer::Current.
+
+modules/dir.mk
+modules/omnipy.cc
+modules/omnipy.h
+modules/pyObjectRef.cc
+modules/pyPOACurrentFunc.cc         -- new
+python/omniORB/PortableServer.py
+
+- Unduplicate exception throwing code.
+
+modules/pyPOAManagerFunc.cc
+
+
 Fri Jun  1 12:07:45 BST 2001 dpg1
 =================================
 
