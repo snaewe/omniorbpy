@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.6  2001/08/01 10:12:36  dpg1
+// Main thread policy.
+//
 // Revision 1.1.2.5  2001/05/10 15:16:02  dpg1
 // Big update to support new omniORB 4 internals.
 //
@@ -48,10 +51,11 @@
 // Initial support for omniORB 4.
 //
 
-
 #include <omnipy.h>
 #include <pyThreadCache.h>
 #include <initialiser.h>
+#include <corbaOrb.h>
+#include <math.h>
 
 extern "C" {
 
@@ -182,6 +186,73 @@ extern "C" {
   }
 
   static PyObject*
+  pyORB_work_pending(PyObject* self, PyObject* args)
+  {
+    PyObject* pyorb;
+
+    if (!PyArg_ParseTuple(args, (char*)"O", &pyorb)) return NULL;
+
+    CORBA::ORB_ptr orb = (CORBA::ORB_ptr)omniPy::getTwin(pyorb, ORB_TWIN);
+    OMNIORB_ASSERT(orb);
+
+    CORBA::Boolean pending;
+
+    try {
+      omniPy::InterpreterUnlocker _u;
+      pending = orb->work_pending();
+    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
+
+    return PyInt_FromLong(pending);
+  }
+
+  static PyObject*
+  pyORB_perform_work(PyObject* self, PyObject* args)
+  {
+    PyObject* pyorb;
+
+    if (!PyArg_ParseTuple(args, (char*)"O", &pyorb)) return NULL;
+
+    CORBA::ORB_ptr orb = (CORBA::ORB_ptr)omniPy::getTwin(pyorb, ORB_TWIN);
+    OMNIORB_ASSERT(orb);
+
+    try {
+      omniPy::InterpreterUnlocker _u;
+      orb->perform_work();
+    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
+
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
+
+  static PyObject*
+  pyORB_run_timeout(PyObject* self, PyObject* args)
+  {
+    PyObject* pyorb;
+    double    timeout;
+
+    if (!PyArg_ParseTuple(args, (char*)"Od", &pyorb, &timeout)) return NULL;
+
+    CORBA::ORB_ptr orb = (CORBA::ORB_ptr)omniPy::getTwin(pyorb, ORB_TWIN);
+    OMNIORB_ASSERT(orb);
+
+    CORBA::Boolean shutdown;
+    
+    try {
+      omniPy::InterpreterUnlocker _u;
+      unsigned long s, ns;
+      s  = (unsigned long)floor(timeout);
+      ns = (unsigned long)((timeout - (double)s) * 1000000000.0);
+      omni_thread::get_time(&s, &ns, s, ns);
+      shutdown = ((omniOrbORB*)orb)->run_timeout(s, ns);
+    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
+
+    return PyInt_FromLong(shutdown);
+  }
+
+  static PyObject*
   pyORB_shutdown(PyObject* self, PyObject* args)
   {
     PyObject* pyorb;
@@ -234,6 +305,9 @@ extern "C" {
                                 pyORB_list_initial_services,     METH_VARARGS},
     {(char*)"resolve_initial_references",
                                 pyORB_resolve_initial_references,METH_VARARGS},
+    {(char*)"work_pending",     pyORB_work_pending,              METH_VARARGS},
+    {(char*)"perform_work",     pyORB_perform_work,              METH_VARARGS},
+    {(char*)"run_timeout",      pyORB_run_timeout,               METH_VARARGS},
     {(char*)"shutdown",         pyORB_shutdown,                  METH_VARARGS},
     {(char*)"destroy",          pyORB_destroy,                   METH_VARARGS},
     {NULL,NULL}

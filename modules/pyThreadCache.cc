@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.2  2001/08/01 10:12:36  dpg1
+// Main thread policy.
+//
 // Revision 1.1.2.1  2000/10/13 13:55:27  dpg1
 // Initial support for omniORB 4.
 //
@@ -308,18 +311,6 @@ run_undetached(void*)
       delete cn;
       cn = cnn;
     }
-  }
-
-  // Signal to Python threads blocked in orb.run() that the ORB has
-  // shut down
-  {
-    PyObject* pyorb = PyObject_GetAttrString(omniPy::pyomniORBmodule,
-					     (char*)"orb");
-    OMNIORB_ASSERT(pyorb);
-    PyObject* ret = PyObject_CallMethod(pyorb, (char*)"_has_shutdown",
-					(char*)"");
-    Py_XDECREF(ret);
-    Py_DECREF(pyorb);
   }
 
   // Remove this thread's Python state

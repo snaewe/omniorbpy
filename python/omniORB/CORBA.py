@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.28.2.8  2001/08/01 10:12:36  dpg1
+# Main thread policy.
+#
 # Revision 1.28.2.7  2001/06/15 10:59:27  dpg1
 # Apply fixes from omnipy1_develop.
 #
@@ -206,9 +209,9 @@ class UserException (Exception):
         if not self.__args:
             return "User exception with no members"
         elif len(self.__args) == 1:
-            return "User exception member: " + str(self.__args[0])
+            return "User exception: " + str(self.__args[0])
         else:
-            return "User exception members: " + str(self.__args)
+            return "User exception: " + str(self.__args)
 
     def __getitem__(self, i):
         return self.__args[i]
@@ -494,12 +497,10 @@ def ORB_init(argv=[], orb_identifier = ORB_ID):
 
 
 class ORB:
-    """ omnipy ORB object """
+    """omnipy ORB object"""
 
     def __init__(self, argv, orb_identifier):
         _omnipy.ORB_init(self, argv, orb_identifier)
-        self._omni_argv = argv # For omniORB 2.8 to initialise its BOA
-        self._shutdown = 0
 
     def string_to_object(self, ior):
         return _omnipy.orb_func.string_to_object(self, ior)
@@ -514,29 +515,37 @@ class ORB:
         return _omnipy.orb_func.resolve_initial_references(self, identifier)
 
     def work_pending(self):
-        return 0
+        return _omnipy.orb_func.work_pending(self)
 
     def perform_work(self):
-        return
+        _omnipy.orb_func.perform_work(self)
 
     def run(self):
-        omniORB.orb_lock.acquire()
-        while not self._shutdown:
-            omniORB.orb_cond.wait(60)
-        omniORB.orb_lock.release()
+        # We have to use a timeout rather than just blocking in run(),
+        # since otherwise ctrl-c is not handled.
+
+        timeout = 0.000001 # 1 usec
+
+        shutdown = _omnipy.orb_func.run_timeout(self, timeout)
+
+        try:
+            while not shutdown:
+                if timeout < 1.0:
+                    timeout = timeout * 1.1
+
+                shutdown = _omnipy.orb_func.run_timeout(self, timeout)
+
+        except BAD_INV_ORDER:
+            # If a shutdown races with the timeout occurring, we will
+            # call run_timeout() on the shutdown ORB, resulting in a
+            # BAD_INV_ORDER exception.
+            pass
 
     def shutdown(self, wait_for_completion):
         _omnipy.orb_func.shutdown(self, wait_for_completion)
 
     def destroy(self):
         _omnipy.orb_func.destroy(self)
-
-    def _has_shutdown(self):
-        # Callback from the C++ world to kill threads blocked in run()
-        omniORB.orb_lock.acquire()
-        self._shutdown = 1
-        omniORB.orb_cond.notifyAll()
-        omniORB.orb_lock.release()
 
 
     # TypeCode operations

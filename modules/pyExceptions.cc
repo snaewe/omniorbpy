@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.6  2001/08/01 10:12:36  dpg1
+// Main thread policy.
+//
 // Revision 1.1.2.5  2001/05/29 17:10:14  dpg1
 // Support for in process identity.
 //
@@ -294,8 +297,7 @@ PyUserException::operator<<=(cdrStream& stream)
     if (omniORB::trace(25)) {
       {
 	omniORB::logger l;
-	l <<
-	  "Caught unexpected error trying to create an exception:\n";
+	l << "Caught unexpected error trying to create an exception:\n";
       }
       PyErr_Print();
     }

@@ -1,3 +1,16 @@
+Wed Aug  1 11:10:52 BST 2001 dpg1
+=================================
+
+- Main thread policy.
+
+src/lib/omniORBpy/modules/pyExceptions.cc
+src/lib/omniORBpy/modules/pyORBFunc.cc
+src/lib/omniORBpy/modules/pyThreadCache.cc
+src/lib/omniORBpy/python/omniORB/CORBA.py
+src/lib/omniORBpy/python/omniORB/PortableServer.py
+src/lib/omniORBpy/python/omniORB/__init__.py
+
+
 Tue Jul  3 12:37:11 BST 2001 dpg1
 =================================
 

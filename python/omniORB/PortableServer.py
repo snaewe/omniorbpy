@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.7.4.3  2001/08/01 10:12:36  dpg1
+# Main thread policy.
+#
 # Revision 1.7.4.2  2001/06/11 13:06:26  dpg1
 # Support for PortableServer::Current.
 #
@@ -566,9 +569,10 @@ class RequestProcessingPolicy (CORBA.Policy):
 # enum ThreadPolicyValue
 ORB_CTRL_MODEL      = omniORB.EnumItem("ORB_CTRL_MODEL", 0)
 SINGLE_THREAD_MODEL = omniORB.EnumItem("SINGLE_THREAD_MODEL", 1)
+MAIN_THREAD_MODEL   = omniORB.EnumItem("MAIN_THREAD_MODEL", 2)
 ThreadPolicyValue   = omniORB.Enum(\
     "IDL:omg.org/PortableServer/ThreadPolicyValue:1.0",
-    (ORB_CTRL_MODEL, SINGLE_THREAD_MODEL))
+    (ORB_CTRL_MODEL, SINGLE_THREAD_MODEL, MAIN_THREAD_MODEL))
 
 _d_ThreadPolicyValue  = (omniORB.tcInternal.tv_enum,
                          ThreadPolicyValue._NP_RepositoryId,
