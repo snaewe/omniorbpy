@@ -30,8 +30,19 @@
 #ifndef _omnipy30_sysdep_h_
 #define _omnipy30_sysdep_h_
 
+// Defaults for things we'd like to do
+
+#define PY_OMNISERVANT_BASE omniPy::Py_omniServant
+
+
+// Things that are broken
+
 #if defined(_MSC_VER)
 #  undef HAS_Cplusplus_catch_exception_by_base
+
+#  undef  PY_OMNISERVANT_BASE
+#  define PY_OMNISERVANT_BASE Py_omniServant
+
 #endif
 
 #endif // _omnipy30_sysdep_h_
