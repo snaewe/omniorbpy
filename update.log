@@ -1,3 +1,11 @@
+Wed Jun 11 13:30:17 BST 2003 dgrisby
+====================================
+
+- RPM spec file.
+
+contrib/RPMs/omniORBpy.spec  -- new
+
+
 Wed May 28 11:04:11 BST 2003 dgrisby
 ====================================
 
