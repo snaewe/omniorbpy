@@ -670,7 +670,7 @@ def doTests(orb, poa, io):
         r = io.complex8(s)
         tresult("-")
         ok = 0
-    except CORBA.BAD_PARAM:
+    except CORBA.MARSHAL:
         tresult("+")
 
     s = "str\0ing"
@@ -946,7 +946,7 @@ def doTests(orb, poa, io):
         r = io.complex18(s)
         ok = 0
         tresult("-")
-    except CORBA.BAD_PARAM:
+    except CORBA.MARSHAL:
         tresult("+")
 
     s = (-6, 7, -8, 9, 10, 11)
@@ -962,7 +962,7 @@ def doTests(orb, poa, io):
         r = io.complex20(s)
         ok = 0
         tresult("-")
-    except CORBA.BAD_PARAM:
+    except CORBA.MARSHAL:
         tresult("+")
 
     s = [1L, 2, 3L, 4L, 5, 6L, 7L, 8, 9, 10, 11, 12]
@@ -970,7 +970,7 @@ def doTests(orb, poa, io):
         r = io.complex21(s)
         ok = 0
         tresult("-")
-    except CORBA.BAD_PARAM:
+    except CORBA.MARSHAL:
         tresult("+")
 
     s = (1.2, 2, -3.4, 4.5, 5.6, 8, 9, 10, 11, 12, 14)
@@ -978,7 +978,7 @@ def doTests(orb, poa, io):
         r = io.complex22(s)
         ok = 0
         tresult("-")
-    except CORBA.BAD_PARAM:
+    except CORBA.MARSHAL:
         tresult("+")
 
     s = [1.2, 2.3, -3.4, 4.5, 5.6, 7, 8, 9, 10, 11, 12, 145]
@@ -986,7 +986,7 @@ def doTests(orb, poa, io):
         r = io.complex23(s)
         ok = 0
         tresult("-")
-    except CORBA.BAD_PARAM:
+    except CORBA.MARSHAL:
         tresult("+")
 
     s = (1, 0, 1, 1.2, 0, 3, 1, 1, 1)
@@ -1002,7 +1002,7 @@ def doTests(orb, poa, io):
         r = io.complex25(s)
         ok = 0
         tresult("-")
-    except CORBA.BAD_PARAM:
+    except CORBA.MARSHAL:
         tresult("+")
 
     s = "This is a long sequence<octet>"
@@ -1010,7 +1010,7 @@ def doTests(orb, poa, io):
         r = io.complex26(s)
         ok = 0
         tresult("-")
-    except CORBA.BAD_PARAM:
+    except CORBA.MARSHAL:
         tresult("+")
 
     if ok: tpass()
