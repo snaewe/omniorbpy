@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.10.2.10  2004/07/28 13:37:39  dgrisby
+# Bug in equivalent for aliases to basic types.
+#
 # Revision 1.10.2.9  2003/11/19 00:17:27  dgrisby
 # Use -1 for indirection constant.
 #
@@ -713,7 +716,9 @@ def equivalentDescriptors(a, b, seen=None, a_ids=None, b_ids=None):
             return 0
 
         # Follow aliases and indirections
-        while a[0] == tv_alias or a[0] == tv__indirect:
+        while (type(a) is types.TupleType and
+               (a[0] == tv_alias or a[0] == tv__indirect)):
+
             if a[0] == tv_alias:
                 if a[1] != "": a_ids[a[1]] = a
                 a = a[3]
@@ -723,7 +728,9 @@ def equivalentDescriptors(a, b, seen=None, a_ids=None, b_ids=None):
                 else:
                     a = a[1][0]
 
-        while b[0] == tv_alias or b[0] == tv__indirect:
+        while (type(b) is types.TupleType and
+               (b[0] == tv_alias or b[0] == tv__indirect)):
+            
             if b[0] == tv_alias:
                 if b[1] != "": b_ids[b[1]] = b
                 b = b[3]
@@ -733,6 +740,13 @@ def equivalentDescriptors(a, b, seen=None, a_ids=None, b_ids=None):
                 else:
                     b = b[1][0]
 
+        # Re-do the trivial checks on the underlying types.
+        if a == b: return 1
+
+        if type(a) is not types.TupleType or type(b) is not types.TupleType:
+            return 0
+
+        # Handle cycles
         if seen.has_key((id(a),id(b))):
             return 1
 

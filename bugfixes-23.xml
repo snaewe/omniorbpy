@@ -8,6 +8,13 @@
 
 <buglist version="2.3">
 
+<bug id="4" date="Wed Jul 28 14:35:21 BST 2004" user="dgrisby">
+  <summary>Bug in TypeCode equivalent check</summary>
+  <text>
+  The equivalent code sometimes blew up with aliases to basic types.
+  </text>
+</bug>
+
 <bug id="3" date="Mon Jun 14 12:56:43 BST 2004" user="dgrisby">
   <summary>Deadlock in get_reference</summary>
   <text>
