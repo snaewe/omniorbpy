@@ -1,3 +1,11 @@
+Tue Mar 16 15:54:20 GMT 2004 dgrisby
+====================================
+
+- Fix reference counts in keyword clashing member names. Thanks Alex Tingle.
+
+modules/pyTypeCode.cc
+
+
 Tue Mar  2 15:39:42 GMT 2004 dgrisby
 ====================================
 

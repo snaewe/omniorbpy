@@ -29,6 +29,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.2.14  2004/03/16 15:46:31  dgrisby
+// Fix reference counts in keyword clashing member names. Thanks Alex Tingle.
+//
 // Revision 1.1.2.13  2003/08/31 20:27:27  dgrisby
 // Couple of memory leaks in TypeCode unmarshalling.
 //
@@ -723,6 +726,7 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
 	  t_o = omniPy::unmarshalRawPyString(encap);
 
 	  if ((word = PyDict_GetItem(omniPy::pyomniORBwordMap, t_o))) {
+	    Py_INCREF(word);
 	    Py_DECREF(t_o);
 	    t_o = word;
 	  }
@@ -840,6 +844,7 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
 	  t_o = omniPy::unmarshalRawPyString(encap);
 
 	  if ((word = PyDict_GetItem(omniPy::pyomniORBwordMap, t_o))) {
+	    Py_INCREF(word);
 	    Py_DECREF(t_o);
 	    t_o = word;
 	  }
@@ -1055,6 +1060,7 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
 	  t_o = omniPy::unmarshalRawPyString(encap);
 
 	  if ((word = PyDict_GetItem(omniPy::pyomniORBwordMap, t_o))) {
+	    Py_INCREF(word);
 	    Py_DECREF(t_o);
 	    t_o = word;
 	  }
