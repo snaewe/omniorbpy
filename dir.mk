@@ -1,4 +1,4 @@
-SUBDIRS = modules python
+SUBDIRS = modules python omniidl
 
 all::
 	@$(MakeSubdirs)
