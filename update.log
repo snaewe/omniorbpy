@@ -1,3 +1,21 @@
+Tue Jul 29 15:35:31 BST 2003 dgrisby
+====================================
+
+- Changes to compile with debug Python 2.3.
+
+modules/omnipy.cc
+modules/pyFixed.cc
+
+- Reuse Python thread state if possible. (Python 2.3.)
+
+modules/pyThreadCache.cc
+modules/pyThreadCache.h
+
+- Properly support omniORB base not the same as install prefix.
+
+python/omniORB/dir.mk
+
+
 Mon Jul 28 16:40:18 BST 2003 dgrisby
 ====================================
 

@@ -5,7 +5,9 @@ INSTALLPYLIBDIR = $(INSTALLPYTHONDIR)/omniORB
 ir_idl.py: ir.idl
 	$(OMNIIDL) -v -p$(BASE_OMNI_TREE)/omniidl_be \
         -I$(BASE_OMNI_TREE)/idl \
-        -I$(OMNIORB_ROOT)/idl/omniORB -I$(DATADIR)/idl/omniORB \
+        -I$(OMNIORB_ROOT)/idl/omniORB \
+        -I$(OMNIORB_ROOT)/share/idl/omniORB \
+        -I$(DATADIR)/idl/omniORB \
         -bpython -Wbinline -Wbno_package $^
 
 all:: ir_idl.py
