@@ -29,6 +29,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.2.6  2001/03/13 10:38:08  dpg1
+// Fixes from omnipy1_develop
+//
 // Revision 1.1.2.5  2000/12/05 17:48:36  dpg1
 // Strings in TypeCodes need to be marshalled as raw strings. Fix
 // incorrect offset in recursive indirections.
@@ -153,10 +156,8 @@ void marshalRawPyString(cdrStream& stream, PyObject* pystring)
 {
   CORBA::ULong slen = PyString_GET_SIZE(pystring) + 1;
   slen >>= stream;
-  if (slen > 0) {
-    char* str = PyString_AS_STRING(pystring);
-    stream.put_octet_array((const CORBA::Octet*)((const char*)str), slen);
-  }
+  char* str = PyString_AS_STRING(pystring);
+  stream.put_octet_array((const CORBA::Octet*)((const char*)str), slen);
 }
 
 

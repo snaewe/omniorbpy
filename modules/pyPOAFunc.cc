@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.3  2001/03/13 10:38:07  dpg1
+// Fixes from omnipy1_develop
+//
 // Revision 1.1.2.2  2000/12/04 18:57:24  dpg1
 // Fix deadlock when trying to lock omniORB internal lock while holding
 // the Python interpreter lock.
@@ -380,7 +383,7 @@ extern "C" {
 	  repoId  = act->_PR_getobj()->_mostDerivedRepoId();
 	  lobjref = omniPy::makeLocalObjRef(repoId, act);
 	}
-	return omniPy::createPyCorbaObjRef(repoId, lobjref);
+	return omniPy::createPyCorbaObjRef(0, lobjref);
       }
     }
     OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
@@ -439,7 +442,7 @@ extern "C" {
 	  repoId  = sm->_PR_getobj()->_mostDerivedRepoId();
 	  lobjref = omniPy::makeLocalObjRef(repoId, sm);
 	}
-	return omniPy::createPyCorbaObjRef(repoId, lobjref);
+	return omniPy::createPyCorbaObjRef(0, lobjref);
       }
     }
     catch (PortableServer::POA::WrongPolicy& ex) {
@@ -671,7 +674,8 @@ extern "C" {
     OMNIORB_ASSERT(poa);
 
     try {
-      CORBA::Object_ptr objref, lobjref;
+      CORBA::Object_var objref;
+      CORBA::Object_ptr lobjref;
       {
 	omniPy::InterpreterUnlocker _u;
 	objref  = poa->create_reference(repoId);
@@ -703,7 +707,8 @@ extern "C" {
 
     try {
       PortableServer::ObjectId oid(oidlen, oidlen, (CORBA::Octet*)oidstr, 0);
-      CORBA::Object_ptr objref, lobjref;
+      CORBA::Object_var objref;
+      CORBA::Object_ptr lobjref;
       {
 	omniPy::InterpreterUnlocker _u;
 	objref  = poa->create_reference_with_id(oid, repoId);
@@ -766,7 +771,8 @@ extern "C" {
     PYOSReleaseHelper _r(pyos);
 
     try {
-      CORBA::Object_ptr objref, lobjref;
+      CORBA::Object_var objref;
+      CORBA::Object_ptr lobjref;
       {
 	omniPy::InterpreterUnlocker _u;
 	objref  = poa->servant_to_reference(pyos);
@@ -937,7 +943,8 @@ extern "C" {
 
     try {
       PortableServer::ObjectId oid(oidlen, oidlen, (CORBA::Octet*)oidstr, 0);
-      CORBA::Object_ptr objref, lobjref;
+      CORBA::Object_var objref;
+      CORBA::Object_ptr lobjref;
       const char* mdri;
       {
 	omniPy::InterpreterUnlocker _u;
@@ -945,7 +952,7 @@ extern "C" {
 	mdri    = objref->_PR_getobj()->_mostDerivedRepoId();
 	lobjref = omniPy::makeLocalObjRef(mdri, objref);
       }
-      return omniPy::createPyCorbaObjRef(mdri, lobjref);
+      return omniPy::createPyCorbaObjRef(0, lobjref);
     }
     catch (PortableServer::POA::ObjectNotActive& ex) {
       return raisePOAException(pyPOA, "ObjectNotActive");

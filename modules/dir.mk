@@ -46,7 +46,7 @@ DIR_CPPFLAGS += $(patsubst %,-I%/src/lib/omniORB/orbcore,$(IMPORT_TREES))
 #############################################################################
 
 ifdef UnixPlatform
-#CXXDEBUGFLAGS = -g
+CXXDEBUGFLAGS = -g
 
 PYPREFIX  := $(shell $(PYTHON) -c 'import sys; print sys.exec_prefix')
 PYVERSION := $(shell $(PYTHON) -c 'import sys; print sys.version[:3]')

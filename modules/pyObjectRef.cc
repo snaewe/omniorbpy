@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.5  2001/03/13 10:38:07  dpg1
+// Fixes from omnipy1_develop
+//
 // Revision 1.1.2.4  2001/01/10 12:00:07  dpg1
 // Release the Python interpreter lock when doing potentially blocking
 // stream calls.
@@ -368,7 +371,8 @@ omniPy::createObjRef(const char*        targetRepoId,
 
 
 CORBA::Object_ptr
-omniPy::makeLocalObjRef(const char* targetRepoId, CORBA::Object_ptr objref)
+omniPy::makeLocalObjRef(const char* targetRepoId,
+			const CORBA::Object_ptr objref)
 {
   ASSERT_OMNI_TRACEDMUTEX_HELD(*omni::internalLock, 0);
 
@@ -381,7 +385,6 @@ omniPy::makeLocalObjRef(const char* targetRepoId, CORBA::Object_ptr objref)
     newooref = omniPy::createObjRef(targetRepoId, ooref->_localId(),
 				    ooref->_getIOR(), 1);
   }
-  CORBA::release(objref);
   return (CORBA::Object_ptr)newooref->_ptrToObjRef(CORBA::Object::_PD_repoId);
 }
 

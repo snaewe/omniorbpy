@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.4  2001/03/13 10:38:07  dpg1
+// Fixes from omnipy1_develop
+//
 // Revision 1.1.2.3  2000/12/04 18:57:23  dpg1
 // Fix deadlock when trying to lock omniORB internal lock while holding
 // the Python interpreter lock.
@@ -104,10 +107,11 @@ extern "C" {
     RAISE_PY_BAD_PARAM_IF(!objref);
 
     CORBA::String_var str;
-    {
+    try {
       omniPy::InterpreterUnlocker _u;
       str = orb->object_to_string(objref);
     }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
     return PyString_FromString((char*)str);
   }
 

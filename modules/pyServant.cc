@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.3  2001/03/13 10:38:08  dpg1
+// Fixes from omnipy1_develop
+//
 // Revision 1.1.2.2  2000/12/04 18:57:24  dpg1
 // Fix deadlock when trying to lock omniORB internal lock while holding
 // the Python interpreter lock.
@@ -295,7 +298,8 @@ PyObject*
 omniPy::
 Py_omniServant::py_this()
 {
-  CORBA::Object_ptr objref, lobjref;
+  CORBA::Object_var objref;
+  CORBA::Object_ptr lobjref;
   {
     omniPy::InterpreterUnlocker _u;
     objref  = (CORBA::Object_ptr)_do_this(CORBA::Object::_PD_repoId);
