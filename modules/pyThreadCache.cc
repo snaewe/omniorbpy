@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.6  2004/06/15 14:49:50  dgrisby
+// Properly handle exceptions thrown by thread hooks.
+//
 // Revision 1.1.2.5  2003/07/29 14:52:10  dgrisby
 // Reuse Python thread state if possible. (Python 2.3.)
 //
@@ -156,6 +159,18 @@ addNewNode(long id, unsigned int hash)
 
     cn->workerThread = PyEval_CallObject(omniPy::pyWorkerThreadClass,
 					 omniPy::pyEmptyTuple);
+    if (!cn->workerThread) {
+      if (omniORB::trace(1)) {
+	{
+	  omniORB::logger l;
+	  l << "Exception trying to create worker thread.\n";
+	}
+	PyErr_Print();
+      }
+      else {
+	PyErr_Clear();
+      }
+    }
     PyThreadState_Swap(oldState);
     PyEval_ReleaseLock();
 
@@ -218,6 +233,7 @@ threadExit()
 	  Py_XDECREF(tmp);
 	  Py_DECREF(argtuple);
 	}
+
 	PyThreadState_Swap(oldState);
 	PyThreadState_Clear(cn->threadState);
 	PyThreadState_Delete(cn->threadState);
