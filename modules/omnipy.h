@@ -31,6 +31,9 @@
 #define _omnipy_h_
 
 // $Log$
+// Revision 1.2.4.22  2003/12/15 12:10:52  dgrisby
+// Bug with omniORB.LOCATION_FORWARD handling.
+//
 // Revision 1.2.4.21  2003/05/28 10:13:01  dgrisby
 // Preliminary interceptor support. General clean-up.
 //
@@ -619,8 +622,9 @@ public:
       tstate_ = 0;
     }
 
-    // Extract and take ownership of stored args/results
-    inline PyObject* args()   { PyObject* r = args_;   args_ = 0;   return r; }
+    inline PyObject* args() { return args_; }
+
+    // Extract and take ownership of stored results
     inline PyObject* result() { PyObject* r = result_; result_ = 0; return r; }
 
     //

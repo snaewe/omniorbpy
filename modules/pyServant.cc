@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.16  2003/12/15 12:10:52  dgrisby
+// Bug with omniORB.LOCATION_FORWARD handling.
+//
 // Revision 1.1.2.15  2003/05/28 10:13:01  dgrisby
 // Preliminary interceptor support. General clean-up.
 //
@@ -517,7 +520,6 @@ Py_omniServant::remote_dispatch(Py_omniCallDescriptor* pycd)
   PyObject* args   = pycd->args();
   PyObject* result = PyEval_CallObject(method, args);
   Py_DECREF(method);
-  Py_DECREF(args);
 
   if (result) {
     // No exception was thrown. Set the return value
@@ -605,7 +607,7 @@ Py_omniServant::local_dispatch(Py_omniCallDescriptor* pycd)
   PyObject* exc_d  = pycd->exc_d_;
   PyObject* ctxt_d = pycd->ctxt_d_;
 
-  PyObject* args  = pycd->args();
+  PyObject* args   = pycd->args();
 
   // Copy args which would otherwise have reference semantics
   PyObject* argtuple = PyTuple_New(in_l + (ctxt_d ? 1 : 0));
@@ -628,13 +630,10 @@ Py_omniServant::local_dispatch(Py_omniCallDescriptor* pycd)
     }
   }
   catch (...) {
-    Py_DECREF(args);
     Py_DECREF(argtuple);
     Py_DECREF(method);
     throw;
   }
-
-  Py_DECREF(args);
 
   //
   // Do the call
