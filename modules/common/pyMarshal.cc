@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.20  2000/03/28 11:54:24  dpg1
+// Refcounting bug in Any unmarshalling.
+//
 // Revision 1.19  2000/03/24 16:48:58  dpg1
 // Local calls now have proper pass-by-value semantics.
 // Lots of little stability improvements.
@@ -2678,20 +2681,19 @@ omniPy::unmarshalPyObject(NetBufferedStream& stream,
 
   case CORBA::tk_any:
     {
-      //      cout << "about to unmarshal Any's TypeCode..." << endl;
-
       // TypeCode
       PyObject* desc     = unmarshalTypeCode(stream);
       PyObject* argtuple = PyTuple_New(1);
-      Py_INCREF(desc);
       PyTuple_SET_ITEM(argtuple, 0, desc);
       PyObject* tcobj    = PyEval_CallObject(pyCreateTypeCode, argtuple);
-      Py_DECREF(argtuple);
-
-      //      cout << "about to unmarshal Any's value..." << endl;
 
       // Value
       t_o = unmarshalPyObject(stream, desc);
+
+      // This decref may delete the descriptor object, in the case
+      // that an identical one was already available. That's why it
+      // comes after the call to unmarshal the any's value.
+      Py_DECREF(argtuple);
 
       argtuple = PyTuple_New(2);
       PyTuple_SET_ITEM(argtuple, 0, tcobj);
@@ -2699,8 +2701,6 @@ omniPy::unmarshalPyObject(NetBufferedStream& stream,
 
       r_o = PyEval_CallObject(pyCORBAAnyClass, argtuple);
       Py_DECREF(argtuple);
-
-      //      cout << "Any unmarshalled." << endl;
     }
     break;
 
@@ -3257,20 +3257,19 @@ omniPy::unmarshalPyObject(MemBufferedStream& stream,
 
   case CORBA::tk_any:
     {
-      //      cout << "about to unmarshal Any's TypeCode..." << endl;
-
       // TypeCode
       PyObject* desc     = unmarshalTypeCode(stream);
       PyObject* argtuple = PyTuple_New(1);
-      Py_INCREF(desc);
       PyTuple_SET_ITEM(argtuple, 0, desc);
       PyObject* tcobj    = PyEval_CallObject(pyCreateTypeCode, argtuple);
-      Py_DECREF(argtuple);
-
-      //      cout << "about to unmarshal Any's value..." << endl;
 
       // Value
       t_o = unmarshalPyObject(stream, desc);
+
+      // This decref may delete the descriptor object, in the case
+      // that an identical one was already available. That's why it
+      // comes after the call to unmarshal the any's value.
+      Py_DECREF(argtuple);
 
       argtuple = PyTuple_New(2);
       PyTuple_SET_ITEM(argtuple, 0, tcobj);
@@ -3278,8 +3277,6 @@ omniPy::unmarshalPyObject(MemBufferedStream& stream,
 
       r_o = PyEval_CallObject(pyCORBAAnyClass, argtuple);
       Py_DECREF(argtuple);
-
-      //      cout << "Any unmarshalled." << endl;
     }
     break;
 
