@@ -1,3 +1,22 @@
+Wed Jun 28 11:38:10 BST 2000 dpg1
+=================================
+
+- Incorrect comment removed
+
+python/omniORB/__init__.py
+
+- Internal release notes removed; external ones updated
+
+ReleaseNote                  -- deleted
+external_merge/ReleaseNote
+
+- Prerelease indication changed
+
+external_merge/THIS_IS_OMNIORBPY_1_0_PRE2  -- removed
+external_merge/THIS_IS_OMNIORBPY_1_0_PRE3  -- new
+
+
+
 Tue Jun 27 15:53:26 BST 2000 dpg1
 =================================
 
