@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.27.2.3  2001/05/17 14:05:01  dpg1
+# Implement _get_interface()
+#
 # Revision 1.27.2.2  2000/08/17 08:46:06  dpg1
 # Support for omniORB.LOCATION_FORWARD exception
 #
@@ -592,8 +595,18 @@ class Object:
         o.__del__ = dummy
 
     def _get_interface(self):
-        # ***
-        raise NO_IMPLEMENT()
+        import omniORB
+        if omniORB.orb is None:
+            raise BAD_INV_ORDER(0, COMPLETED_NO)
+
+        import omniORB.ir_idl # Make sure IR stubs are loaded
+
+        ir = omniORB.orb.resolve_initial_references("InterfaceRepository")
+        ir = ir._narrow(Repository)
+        if ir is None:
+            raise INTF_REPOS(0, COMPLETED_NO)
+        interf = ir.lookup_id(self._NP_RepositoryId)
+        return interf._narrow(InterfaceDef)
     
     def _is_a(self, repoId):
         return _omnipy.isA(self, repoId)
