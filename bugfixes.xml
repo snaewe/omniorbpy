@@ -8,6 +8,28 @@
 
 <buglist version="1.2">
 
-<nobugs/>
+<bug id="1" date="Mon Oct  9 09:54:53 BST 2000" user="dpg1">
+
+  <summary>Premature deletion of Python thread state</summary>
+
+  <text>
+  <p>
+  If a servant method makes a call into omniORB which requires the ORB
+  to make another up-call to Python, the thread state for the call is
+  marked as inactive when the up-call finishes, even though the
+  servant call is still in progress. If the method takes more than a
+  minute to complete, without making any more re-entrant up-calls, the
+  thread state will be deleted while the thread is still running.
+  </p>
+  <p>
+  This is <em>not</em> the problem described <a
+  href="http://www.uk.research.att.com/omniORB/archives/2000-10/0021.html">here</a>,
+  which is due to mixing threads created with the <code>thread</code>
+  package with primitives from the <code>threading</code> package.
+  </p>
+  </text>
+
+</bug>
+
 
 </buglist>
