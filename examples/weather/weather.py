@@ -1,4 +1,28 @@
 #!/usr/bin/env python
+#                           Package   : weather
+# weather.py                Created on: 2000/01/06
+#			    Author    : Duncan Grisby (dpg1)
+#
+#    Copyright (C) 2000 AT&T Laboratories Cambridge
+#
+#  This is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+#  General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+#  02111-1307, USA.
+#
+# Description:
+#   
+#   Client to AT&T Labs Cambridge weather service
 
 weatherIOR = "IOR:0003003c0000001449444c3a77656174686572496e666f3a312e300000000001000000000000003400010000000000187777772e756b2e72657365617263682e6174742e636f6d00669800000000000c3519450765f2b96f00000001"
 
