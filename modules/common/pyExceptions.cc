@@ -31,6 +31,10 @@
 // $Id$
 
 // $Log$
+// Revision 1.9.2.1  2000/08/17 08:43:34  dpg1
+// Fix possible obscure assertion failure with unexpected user exception
+// containing a member named "minor".
+//
 // Revision 1.9  2000/06/12 15:36:08  dpg1
 // Support for exception handler functions. Under omniORB 3, local
 // operation dispatch modified so exceptions handlers are run.
@@ -114,8 +118,8 @@ omniPy::createPySystemException(const CORBA::SystemException& ex)
 void
 omniPy::produceSystemException(PyObject* eobj, PyObject* erepoId)
 {
-  CORBA::ULong            minor;
-  CORBA::CompletionStatus status;
+  CORBA::ULong            minor  = 0;
+  CORBA::CompletionStatus status = CORBA::COMPLETED_MAYBE;
 
   PyObject *a, *b;
 
@@ -124,16 +128,16 @@ omniPy::produceSystemException(PyObject* eobj, PyObject* erepoId)
     minor = PyInt_AS_LONG(a);
     Py_DECREF(a);
 
-    a = PyObject_GetAttrString(eobj, (char*)"completed"); OMNIORB_ASSERT(a);
-    b = PyObject_GetAttrString(a,    (char*)"_v");
-    OMNIORB_ASSERT(b && PyInt_Check(b));
-    status = (CORBA::CompletionStatus)PyInt_AS_LONG(b);
-    Py_DECREF(a); Py_DECREF(b);
-  }
-  else {
-    PyErr_Clear();
-    minor  = 0;
-    status = CORBA::COMPLETED_MAYBE;
+    a = PyObject_GetAttrString(eobj, (char*)"completed");
+
+    if (a) {
+      b = PyObject_GetAttrString(a, (char*)"_v");
+
+      if (b && PyInt_Check(b))
+	status = (CORBA::CompletionStatus)PyInt_AS_LONG(b);
+
+      Py_DECREF(a); Py_XDECREF(b);
+    }
   }
 
   char* repoId = PyString_AS_STRING(erepoId);
