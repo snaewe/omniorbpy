@@ -490,3 +490,39 @@ export:: $(lib)
 
 endif
 endif
+
+#############################################################################
+#   Make rules for Darwin                                                   #
+#############################################################################
+
+ifdef Darwin
+
+CXXOPTIONS += $(SHAREDLIB_CPPFLAGS)
+
+libname = _omnipymodule.so
+soname  = _omnipymodule.$(OMNIPY_MAJOR).so
+lib     = _omnipymodule.$(OMNIPY_MAJOR).$(OMNIPY_MINOR).so
+
+$(lib): $(OBJS)
+       (set -x; \
+         $(RM) $@; \
+         $(CXX) -bundle -undefined suppress -o $@ $(IMPORT_LIBRARY_FLAGS) \
+         $(filter-out $(LibSuffixPattern),$^) $(OMNIORB_LIB_NODYN) \
+       )
+
+export:: $(lib)
+       @$(ExportLibrary)
+       @(set -x; \
+               cd $(EXPORT_TREE)/$(LIBDIR); \
+               $(RM) $(soname); \
+               ln -s $(lib) $(soname); \
+               $(RM) $(libname); \
+               ln -s $(soname) $(libname); \
+       )
+
+all:: $(lib)
+
+clean::
+       $(RM) $(lib)
+
+endif

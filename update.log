@@ -1,3 +1,11 @@
+Thu Jun 21 14:35:52 BST 2001 dpg1
+=================================
+
+- Support for Darwin / Mac OS X.
+
+modules/dir.mk
+
+
 Thu Jun 21 10:26:24 BST 2001 dpg1
 =================================
 
