@@ -1,3 +1,18 @@
+Wed Nov 19 00:16:36 GMT 2003 dgrisby
+====================================
+
+- Use -1 for indirection constant.
+
+python/omniORB/tcInternal.py
+
+- Update RPM spec file; fix OpenSSL lib issue.
+
+acinclude.m4
+aclocal.m4
+configure
+contrib/RPMs/omniORBpy.spec
+
+
 Mon Nov 10 16:47:17 GMT 2003 dgrisby
 ====================================
 

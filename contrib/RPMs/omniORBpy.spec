@@ -1,26 +1,15 @@
-# omniORBpy RPM SPEC file
-
-%define version       2.2
-%define release       1
-%define name          omniORBpy
-%define lib_major     2
-%define lib_name      lib%{name}%{lib_major}
-%define py_ver        %(python -c 'import sys;print(sys.version[0:3])')
-%define prefix        /usr
-
-Summary: Python Language Mapping for omniORB
-Name:           %{name}
-Version:        %{version}
-Release:        %{release}
-License:        GPL / LGPL
-Group:          System/Libraries
-Source0:        %{name}-%{version}.tar.gz
-#Patch0:         omniORBpy.patches
-URL:            http://omniorb.sourceforge.net/
-Requires:       omniORB = 4.0.2
-Buildroot:      %{_tmppath}/%{name}-%{version}-root
-BuildRequires:	omniORB-devel
-#BuildArch:      i586
+Summary:  Python Language Mapping for omniORB
+Name:     omniORBpy
+Version:  2.3
+Release:  1
+License:  GPL / LGPL
+Group:    System/Libraries
+Source0:  %{name}-%{version}.tar.gz
+Prefix:   /usr
+URL:      http://omniorb.sourceforge.net/
+Requires: omniORB = 4.0.2
+BuildRequires: omniORB-devel python
+Buildroot: %{_tmppath}/%{name}-%{version}-root
 
 %description
 omniORBpy is a Python language mapping for the omniORB CORBA
@@ -29,26 +18,25 @@ Object Request Broker (ORB).
 # devel part of the bundle
 
 %package -n %{name}-devel
-Summary: Header files and libraries needed for %{name} development
-Group:          Development/Python
-Requires:       %{name} = %{version}-%{release} omniORB-devel
-Provides:       libomniorbpy-devel = %{version}-%{release} %{name}-devel = %{version}-%{release}
-#BuildArch:      i586
+Summary:  Header files and libraries needed for %{name} development
+Group:    Development/Python
+Requires: %{name} = %{version}-%{release} omniORB-devel
+Provides: libomniorbpy-devel = %{version}-%{release} %{name}-devel = %{version}-%{release}
 
 %description -n %{name}-devel
-This package includes the header files and libraries needed for
-developing programs using %{name}.
+The header files and libraries needed for developing programs using %{name}.
 
 # docs and examples are in a separate package
 
 %package -n %{name}-doc
-Summary: Documentation needed for %{name} development
-Group:          Development/Python
-#Requires:       %{name} = %{version}
-#BuildArch:      noarch
+Summary:  Documentation needed for %{name} development
+Group:    Development/Python
 
 %description -n %{name}-doc
-This package includes developer documentation including examples.
+Developer documentation and examples.
+
+
+%define py_ver %(python -c 'import sys;print(sys.version[0:3])')
 
 %prep 
 
@@ -60,18 +48,21 @@ This package includes developer documentation including examples.
 ./configure --prefix=%{prefix} --with-openssl=/usr
 
 %build
-make CCFLAGS+="$RPM_OPT_FLAGS" all
+# We abuse the CPPFLAGS to pass optimisation options through.
+make IMPORT_CPPFLAGS+="$RPM_OPT_FLAGS" all
 
 %install
 make DESTDIR=$RPM_BUILD_ROOT install
-rm -f $RPM_BUILD_ROOT/lib/python%{py_ver}/site-packages/omniidl_be/__init__.py*
+rm -rf $RPM_BUILD_ROOT%{prefix}/lib/python%{py_ver}/site-packages/omniidl_be/__init__.py*
+
 
 %clean
-[ -z $RPM_BUILD_ROOT ] || rm -rf $RPM_BUILD_ROOT
+rm -rf $RPM_BUILD_ROOT
 
 %post -n %{name} -p /sbin/ldconfig
 
 %postun -n %{name} -p /sbin/ldconfig
+
 
 # main package includes libraries and servers
 %files
@@ -90,15 +81,22 @@ rm -f $RPM_BUILD_ROOT/lib/python%{py_ver}/site-packages/omniidl_be/__init__.py*
 %doc README* ReleaseNotes* update.log
 %prefix/include/omniORBpy.h
 %prefix/include/omniORB4/pydistdate.hh
+# omit omniidl_be/__init__.py because it is a duplicate of the file
+# already provided by omniORB.
 %prefix/lib/python%{py_ver}/site-packages/omniidl_be/python.py*
 
 %files -n %{name}-doc
 %defattr(-,root,root)
 %doc doc/* 
-%doc examples
 
 %changelog
-* Wed Aug  6 2003 Duncan Grisby <dgrisby@apasphere.com> 4.0.2
+* Wed Nov 19 2003 Duncan Grisby <duncan@grisby.org> 2.3
+- Merge contributed updates, bump version number.
+
+* Fri Aug 08 2003 Thomas Lockhart <lockhart@fourpalms.org>
+- Drop circular definition of RPM macros
+
+* Wed Aug  6 2003 Duncan Grisby <dgrisby@apasphere.com> 2.2
 - Remove clashing omniidl __init__.py. Bump version number.
 
 * Tue Jun 10 2003 Duncan Grisby <dgrisby@apasphere.com> 2.2pre1
