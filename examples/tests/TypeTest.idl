@@ -101,6 +101,17 @@ module TypeTest {
 
   typedef fixed<10,5> F1;
 
+  valuetype V1 {
+    public string s;
+    public long   l;
+  };
+
+  valuetype V2 : V1 {
+    public V1 v;
+  };
+
+  valuetype B1 long;
+
   interface I {
 
     // Simple types
@@ -176,6 +187,11 @@ module TypeTest {
 
     // Fixed
     F1         complex40(in F1         a);
+
+    // ValueType
+    V1         complex41(in V1         a);
+    V2         complex42(in V2         a);
+    B1         complex43(in B1         a);
 
     // Exceptions
     void except1()          raises (X1);

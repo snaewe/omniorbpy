@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.13.2.2  2003/05/20 17:10:26  dgrisby
+# Preliminary valuetype support.
+#
 # Revision 1.13.2.1  2003/03/23 21:51:43  dgrisby
 # New omnipy3_develop branch.
 #
@@ -347,6 +350,18 @@ def createTypeCode(d, parent=None):
         tc = omniORB.findTypeCode(d[2])
         if tc is None:
             tc = TypeCode_except(d, parent)
+        return tc
+
+    elif k == tv_value:
+        tc = omniORB.findTypeCode(d[2])
+        if tc is None:
+            tc = TypeCode_value(d, parent)
+        return tc
+
+    elif k == tv_value_box:
+        tc = omniORB.findTypeCode(d[2])
+        if tc is None:
+            tc = TypeCode_value_box(d, parent)
         return tc
 
     elif k == tv__indirect:
@@ -696,6 +711,81 @@ class TypeCode_except (TypeCode_base):
         else:
             return createTypeCode(self._d[off], self._p)
 
+# value:
+class TypeCode_value (TypeCode_base):
+    def __init__(self, desc, parent):
+        if type(desc) is not types.TupleType or \
+           desc[0] != tv_value:
+            raise CORBA.INTERNAL()
+        self._d = desc
+        self._k = CORBA.tk_value
+        self._p = parent
+
+    def __del__(self):
+        if self._p is None and removeIndirections is not None:
+            removeIndirections(self._d)
+
+    def equivalent(self, tc):
+        return equivalentDescriptors(self._d, tc._d)
+
+    def get_compact_typecode(self):
+        return TypeCode_value(getCompactDescriptor(self._d), None)
+
+    def id(self):                 return self._d[2]
+    def name(self):               return self._d[3]
+    def member_count(self):       return (len(self._d) - 7) / 3
+    def member_name(self, index):
+        off = index * 3 + 7
+        if index < 0 or off >= len(self._d): raise CORBA.TypeCode.Bounds()
+        return self._d[off]
+
+    def member_type(self, index):
+        off = index * 3 + 8
+        if index < 0 or off >= len(self._d): raise CORBA.TypeCode.Bounds()
+        if self._p is None and removeIndirections is not None:
+            return createTypeCode(self._d[off], self)
+        else:
+            return createTypeCode(self._d[off], self._p)
+
+    def member_visibility(self, index):
+        off = index * 3 + 9
+        if index < 0 or off >= len(self._d): raise CORBA.TypeCode.Bounds()
+        return self._d[off]
+
+    def type_modifier(self):
+        return self._d[4]
+
+    def concrete_base_type(self):
+        if self._d[6] == tv_null:
+            return None
+        else:
+            return createTypeCode(self._d[6], self._p)
+
+# valuebox:
+class TypeCode_value_box (TypeCode_base):
+    def __init__(self, desc, parent):
+        if type(desc) is not types.TupleType or \
+           desc[0] != tv_value_box:
+            raise CORBA.INTERNAL()
+        self._d = desc
+        self._k = CORBA.tk_value_box
+        self._p = parent
+
+    def __del__(self):
+        if self._p is None and removeIndirections is not None:
+            removeIndirections(self._d)
+
+    def equivalent(self, tc):
+        return equivalentDescriptors(self._d, tc._d)
+
+    def get_compact_typecode(self):
+        return TypeCode_alias(getCompactDescriptor(self._d), None)
+
+    def id(self):           return self._d[2]
+    def name(self):         return self._d[3]
+    def content_type(self): return createTypeCode(self._d[4])
+
+
 
 # Functions to test descriptor equivalence
 def equivalentDescriptors(a, b, seen=None, a_ids=None, b_ids=None):
@@ -854,6 +944,49 @@ def equivalentDescriptors(a, b, seen=None, a_ids=None, b_ids=None):
                         return 0
             return 1
 
+        elif a[0] == tv_value:
+            # id
+            if a[2] != "": a_ids[a[2]] = a
+            if b[2] != "": b_ids[b[2]] = b
+
+            if a[2] != "" and b[2] != "":
+                if a[2] == b[2]:
+                    return 1
+                else:
+                    return 0
+
+            # members
+            if len(a) != len(b):
+                return 0
+
+            for i in range(7, len(a), 3):
+                # Access spec
+                if a[i+2] != b[i+2]:
+                    return 0
+                
+                if not equivalentDescriptors(a[i+1], b[i+1],
+                                             seen, a_ids, b_ids):
+                    return 0
+
+            return 1
+
+        elif a[0] == tv_value_box:
+            # id
+            if a[2] != "": a_ids[a[2]] = a
+            if b[2] != "": b_ids[b[2]] = b
+
+            if a[2] != "" and b[2] != "":
+                if a[2] == b[2]:
+                    return 1
+                else:
+                    return 0
+
+            # Boxed type
+            if equivalentDescriptors(a[4], b[4], seen, a_ids, b_ids):
+                return 1
+            else:
+                return 0
+
         return 0
 
     except AttributeError:
@@ -956,6 +1089,25 @@ def r_getCompactDescriptor(d, seen, ind):
 
         r = tuple(c)
 
+    elif k == tv_value:
+        c = list(d)
+        c[3] = ""
+        for i in range(7, len(c), 3):
+            c[i]   = ""
+            c[i+1] = r_getCompactDescriptor(d[i+1], seen, ind)
+
+        r = tuple(c)
+        seen[d[2]] = r
+        seen[id(d)] = r
+    
+    elif k == tv_value_box:
+        c = list(d)
+        c[3] = ""
+        c[4] = r_getCompactDescriptor(d[4], seen, ind)
+        r = tuple(c)
+        seen[d[2]] = r
+        seen[id(d)] = r
+
     elif k == tv__indirect:
         l = [d[1][0]]
         ind.append(l)
@@ -967,7 +1119,9 @@ def r_getCompactDescriptor(d, seen, ind):
 
 
 # Function to remove indirections from a descriptor, so it can be
-# collected by Python's reference counting garbage collector:
+# collected by Python's reference counting garbage collector. Not
+# strictly necessary now Python has a cycle collector, but it does no
+# harm.
 
 def removeIndirections(desc):
     if type(desc) is not types.TupleType: return
@@ -995,6 +1149,10 @@ def removeIndirections(desc):
 
     elif k == tv_except:
         for i in range(5, len(desc), 2):
+            removeIndirections(desc[i])
+
+    elif k == tv_value:
+        for i in range(8, len(desc), 3):
             removeIndirections(desc[i])
 
     elif k == tv__indirect:

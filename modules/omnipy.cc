@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.4.2  2003/05/20 17:10:23  dgrisby
+// Preliminary valuetype support.
+//
 // Revision 1.1.4.1  2003/03/23 21:51:57  dgrisby
 // New omnipy3_develop branch.
 //
@@ -118,9 +121,11 @@ PyObject* omniPy::pyCORBAmodule;	// The CORBA module
 PyObject* omniPy::pyCORBAsysExcMap;	//  The system exception map
 PyObject* omniPy::pyCORBAAnyClass;	//  Any class
 PyObject* omniPy::pyCORBAContextClass;	//  Context class
+PyObject* omniPy::pyCORBAValueBaseDesc;	//  ValueBase descriptor
 PyObject* omniPy::pyomniORBmodule;	// The omniORB module
 PyObject* omniPy::pyomniORBobjrefMap;	//  The objref class map
 PyObject* omniPy::pyomniORBtypeMap;     //  The repoId to descriptor mapping
+PyObject* omniPy::pyomniORBvalueMap;    //  The repoId to value factory mapping
 PyObject* omniPy::pyomniORBwordMap;     //  Reserved word map
 PyObject* omniPy::pyPortableServerModule; // Portable server module
 PyObject* omniPy::pyServantClass;       // Servant class
@@ -135,6 +140,7 @@ PyObject* omniPy::pySERVANT_TWIN;
 PyObject* omniPy::pyPOA_TWIN;
 PyObject* omniPy::pyPOAMANAGER_TWIN;
 PyObject* omniPy::pyPOACURRENT_TWIN;
+PyObject* omniPy::pyNP_RepositoryId;
 
 
 ////////////////////////////////////////////////////////////////////////////
@@ -271,7 +277,7 @@ extern "C" {
     if (!PyArg_ParseTuple(args, (char*)"iis", &maj, &min, &mod))
       return 0;
 
-    if (maj != OMNIPY_MAJOR || (maj == 0 && min != OMNIPY_MINOR)) {
+    if (maj > OMNIPY_MAJOR || maj == 0) {
       if (omniORB::trace(1)) {
 	omniORB::logger l;
 	l << "omniORBpy: ***\n"
@@ -329,11 +335,18 @@ extern "C" {
     omniPy::pyCORBAContextClass =
       PyObject_GetAttrString(omniPy::pyCORBAmodule, (char*)"Context");
 
+    omniPy::pyCORBAValueBaseDesc =
+      PyObject_GetAttrString(omniPy::pyCORBAmodule, (char*)"_d_ValueBase");
+
     omniPy::pyomniORBobjrefMap =
       PyObject_GetAttrString(omniPy::pyomniORBmodule, (char*)"objrefMapping");
 
     omniPy::pyomniORBtypeMap =
       PyObject_GetAttrString(omniPy::pyomniORBmodule, (char*)"typeMapping");
+
+    omniPy::pyomniORBvalueMap =
+      PyObject_GetAttrString(omniPy::pyomniORBmodule,
+			     (char*)"valueFactoryMapping");
 
     omniPy::pyomniORBwordMap =
       PyObject_GetAttrString(omniPy::pyomniORBmodule, (char*)"keywordMapping");
@@ -367,10 +380,14 @@ extern "C" {
     OMNIORB_ASSERT(PyClass_Check(omniPy::pyCORBAAnyClass));
     OMNIORB_ASSERT(omniPy::pyCORBAContextClass);
     OMNIORB_ASSERT(PyClass_Check(omniPy::pyCORBAContextClass));
+    OMNIORB_ASSERT(omniPy::pyCORBAValueBaseDesc);
+    OMNIORB_ASSERT(PyTuple_Check(omniPy::pyCORBAValueBaseDesc));
     OMNIORB_ASSERT(omniPy::pyomniORBobjrefMap);
     OMNIORB_ASSERT(PyDict_Check(omniPy::pyomniORBobjrefMap));
     OMNIORB_ASSERT(omniPy::pyomniORBtypeMap);
     OMNIORB_ASSERT(PyDict_Check(omniPy::pyomniORBtypeMap));
+    OMNIORB_ASSERT(omniPy::pyomniORBvalueMap);
+    OMNIORB_ASSERT(PyDict_Check(omniPy::pyomniORBvalueMap));
     OMNIORB_ASSERT(omniPy::pyomniORBwordMap);
     OMNIORB_ASSERT(PyDict_Check(omniPy::pyomniORBwordMap));
     OMNIORB_ASSERT(omniPy::pyServantClass);
@@ -389,6 +406,7 @@ extern "C" {
     omniPy::pyPOA_TWIN        = PyString_FromString((char*)"__omni_poa");
     omniPy::pyPOAMANAGER_TWIN = PyString_FromString((char*)"__omni_mgr");
     omniPy::pyPOACURRENT_TWIN = PyString_FromString((char*)"__omni_pct");
+    omniPy::pyNP_RepositoryId = PyString_FromString((char*)"_NP_RepositoryId");
 
     OMNIORB_ASSERT(omniPy::pyORB_TWIN);
     OMNIORB_ASSERT(omniPy::pyOBJREF_TWIN);
@@ -862,6 +880,7 @@ OMNIORB_FOR_EACH_SYS_EXCEPTION(DO_CALL_DESC_SYSTEM_EXCEPTON)
     // Set up the C++ API singleton
     PyObject* api = PyCObject_FromVoidPtr((void*)&omniPy::cxxAPI, 0);
     PyDict_SetItemString(d, (char*)"API", api);
+    Py_DECREF(api);
 
     // Create an empty list for extrernal modules to register
     // additional pseudo object creation functions.

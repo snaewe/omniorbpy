@@ -31,6 +31,9 @@
 #define _omnipy_h_
 
 // $Log$
+// Revision 1.3.2.2  2003/05/20 17:10:23  dgrisby
+// Preliminary valuetype support.
+//
 // Revision 1.3.2.1  2003/03/23 21:51:57  dgrisby
 // New omnipy3_develop branch.
 //
@@ -145,24 +148,26 @@ public:
   // Global pointers to Python objects                                      //
   ////////////////////////////////////////////////////////////////////////////
 
-  static PyObject* py_omnipymodule;    // _omnipy module
-  static PyObject* pyCORBAmodule;      // CORBA module
-  static PyObject* pyCORBAsysExcMap;   //  The system exception map
-  static PyObject* pyCORBAAnyClass;    //  Any class
-  static PyObject* pyCORBAContextClass;//  Context class
-  static PyObject* pyomniORBmodule;    // The omniORB module
-  static PyObject* pyomniORBobjrefMap; //  The objref class map
-  static PyObject* pyomniORBtypeMap;   //  Type map
-  static PyObject* pyomniORBwordMap;   //  Reserved word map
+  static PyObject* py_omnipymodule;    	// _omnipy module
+  static PyObject* pyCORBAmodule;      	// CORBA module
+  static PyObject* pyCORBAsysExcMap;   	//  The system exception map
+  static PyObject* pyCORBAAnyClass;    	//  Any class
+  static PyObject* pyCORBAContextClass;	//  Context class
+  static PyObject* pyCORBAValueBaseDesc;//  Descriptor for ValueBase
+  static PyObject* pyomniORBmodule;    	// The omniORB module
+  static PyObject* pyomniORBobjrefMap; 	//  The objref class map
+  static PyObject* pyomniORBtypeMap;   	//  Type map
+  static PyObject* pyomniORBvalueMap;  	//  Value factory map
+  static PyObject* pyomniORBwordMap;   	//  Reserved word map
   static PyObject* pyPortableServerModule; // Portable server module
-  static PyObject* pyServantClass;     // Servant class
-  static PyObject* pyCreateTypeCode;   // Function to create a TypeCode object
-  static PyObject* pyWorkerThreadClass;// Worker thread class
-  static PyObject* pyWorkerThreadDel;  // Method to delete worker thread
-  static PyObject* pyEmptyTuple;       // Zero element tuple
+  static PyObject* pyServantClass;     	// Servant class
+  static PyObject* pyCreateTypeCode;   	// Function to create a TypeCode object
+  static PyObject* pyWorkerThreadClass;	// Worker thread class
+  static PyObject* pyWorkerThreadDel;  	// Method to delete worker thread
+  static PyObject* pyEmptyTuple;       	// Zero element tuple
 
   ////////////////////////////////////////////////////////////////////////////
-  // Twin name strings                                                      //
+  // Twin names and other 'static' strings                                  //
   ////////////////////////////////////////////////////////////////////////////
 
   static PyObject* pyORB_TWIN;
@@ -171,6 +176,7 @@ public:
   static PyObject* pyPOA_TWIN;
   static PyObject* pyPOAMANAGER_TWIN;
   static PyObject* pyPOACURRENT_TWIN;
+  static PyObject* pyNP_RepositoryId;
 
   ////////////////////////////////////////////////////////////////////////////
   // Constant strings to facilitate comparison by pointer                   //
@@ -256,6 +262,18 @@ public:
   // Throw a C++ system exception equivalent to the given Python exception
   static
   void produceSystemException(PyObject* eobj, PyObject* erepoId);
+
+  // Handle the current Python exception. An exception must have
+  // occurred. Deals with system exceptions and
+  // omniORB.LocationForward; all other exceptions print a traceback
+  // and raise UNKNOWN.
+  static
+  void handlePythonException();
+
+  // Handle the omniORB.LocationForward exception in the argument.
+  static
+  void handleLocationForward(PyObject* evalue);
+  
 
   // Ensure there is an omni_thread associated with the calling thread.
   static
@@ -380,24 +398,27 @@ public:
   // completion status.
   //
   typedef void (*ValidateTypeFn)(PyObject*, PyObject*,
-				 CORBA::CompletionStatus);
+				 CORBA::CompletionStatus,
+				 PyObject*);
 
   static const ValidateTypeFn validateTypeFns[];
 
   static void validateTypeIndirect(PyObject* d_o, PyObject* a_o,
-				   CORBA::CompletionStatus compstatus);
+				   CORBA::CompletionStatus compstatus,
+				   PyObject* track);
 
   static inline
   void validateType(PyObject* d_o, PyObject* a_o,
-		    CORBA::CompletionStatus compstatus)
+		    CORBA::CompletionStatus compstatus,
+		    PyObject* track = 0)
   {
     CORBA::ULong tk = descriptorToTK(d_o);
 
     if (tk <= 33) { // tk_local_interface
-      validateTypeFns[tk](d_o, a_o, compstatus);
+      validateTypeFns[tk](d_o, a_o, compstatus, track);
     }
     else if (tk == 0xffffffff) { // Indirection
-      validateTypeIndirect(d_o, a_o, compstatus);
+      validateTypeIndirect(d_o, a_o, compstatus, track);
     }
     else OMNIORB_THROW(BAD_TYPECODE, BAD_TYPECODE_UnknownKind, compstatus);
   }
@@ -482,6 +503,63 @@ public:
     else OMNIORB_THROW(BAD_TYPECODE, BAD_TYPECODE_UnknownKind, compstatus);
     return 0; // For dumb compilers
   }
+
+  static inline
+  void marshalRawPyString(cdrStream& stream, PyObject* pystring)
+  {
+    CORBA::ULong slen = PyString_GET_SIZE(pystring) + 1;
+    slen >>= stream;
+    char* str = PyString_AS_STRING(pystring);
+    stream.put_octet_array((const CORBA::Octet*)((const char*)str), slen);
+  }
+
+  static inline PyObject*
+  unmarshalRawPyString(cdrStream& stream)
+  {
+    CORBA::ULong len; len <<= stream;
+
+    if (!stream.checkInputOverrun(1, len))
+      OMNIORB_THROW(MARSHAL, MARSHAL_PassEndOfMessage,
+		    (CORBA::CompletionStatus)stream.completion());
+
+    PyObject* pystring = PyString_FromStringAndSize(0, len - 1);
+
+    stream.get_octet_array((_CORBA_Octet*)PyString_AS_STRING(pystring), len);
+    return pystring;
+  }
+
+
+  ////////////////////////////////////////////////////////////////////////////
+  // Valuetype marshalling functions                                        //
+  ////////////////////////////////////////////////////////////////////////////
+
+  static void
+  validateTypeValue(PyObject* d_o, PyObject* a_o,
+		    CORBA::CompletionStatus compstatus,
+		    PyObject* track);
+
+  static void
+  validateTypeValueBox(PyObject* d_o, PyObject* a_o,
+		       CORBA::CompletionStatus compstatus,
+		       PyObject* track);
+
+  static void
+  marshalPyObjectValue(cdrStream& stream, PyObject* d_o, PyObject* a_o);
+
+  static void
+  marshalPyObjectValueBox(cdrStream& stream, PyObject* d_o, PyObject* a_o);
+
+  static PyObject*
+  unmarshalPyObjectValue(cdrStream& stream, PyObject* d_o);
+  // Shared by Value and ValueBox
+
+  static PyObject*
+  copyArgumentValue(PyObject* d_o, PyObject* a_o,
+		    CORBA::CompletionStatus compstatus);
+
+  static PyObject*
+  copyArgumentValueBox(PyObject* d_o, PyObject* a_o,
+		       CORBA::CompletionStatus compstatus);
 
 
   ////////////////////////////////////////////////////////////////////////////

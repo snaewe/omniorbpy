@@ -28,6 +28,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.33.2.2  2003/05/20 17:10:24  dgrisby
+# Preliminary valuetype support.
+#
 # Revision 1.33.2.1  2003/03/23 21:51:56  dgrisby
 # New omnipy3_develop branch.
 #
@@ -184,6 +187,7 @@ cpp_args = ["-D__OMNIIDL_PYTHON__"]
 usage_string = """\
   -Wbstdout       Send generated stubs to stdout rather than a file
   -Wbinline       Output stubs for #included files in line with the main file
+  -Wbfactories    Register value factories for all valuetypes
   -Wbpackage=p    Put both Python modules and stub files in package p
   -Wbmodules=p    Put Python modules in package p
   -Wbstubs=p      Put stub files in package p
@@ -285,7 +289,7 @@ operation_descriptor = """\
 objref_class = """\
 
 # @ifid@ object reference
-class _objref_@ifid@ @inherits@:
+class _objref_@ifid@ (@inherits@):
     _NP_RepositoryId = @ifid@._NP_RepositoryId
 
     def __init__(self):"""
@@ -331,6 +335,10 @@ skeleton_end = """
 _0_@s_modname@.@ifid@ = @ifid@
 del @ifid@
 __name__ = "@package@@modname@"\
+"""
+
+skeleton_set_skel = """
+@ifid@._omni_skeleton = @ifid@
 """
 
 constant_at_module_scope = """\
@@ -541,6 +549,74 @@ _tc_@ename@ = omniORB.tcInternal.createTypeCode(_d_@ename@)
 omniORB.registerType(@ename@._NP_RepositoryId, _d_@ename@, _tc_@ename@)"""
 
 
+value_forward_at_module_scope = """\
+# forward valuetype @vname@
+_0_@modname@._d_@vname@ = (omniORB.tcInternal.tv__indirect, ["@repoId@"])
+omniORB.typeMapping["@repoId@"] = _0_@modname@._d_@vname@
+"""
+
+value_class = """
+# valuetype @vname@
+_0_@modname@._d_@vname@ = (omniORB.tcInternal.tv__indirect, ["@repoId@"])
+omniORB.typeMapping["@repoId@"] = _0_@modname@._d_@vname@
+
+class @vname@ (@inherits@):
+    _NP_RepositoryId = "@repoId@"
+
+    def __init__(self, *args, **kwargs):
+        if args:
+            if len(args) != @arglen@:
+                raise TypeError("@vname@() takes @arglen@ arguments "
+                                "(%d given)" % len(args))
+            @set_args@
+        if kwargs:
+            self.__dict__.update(kwargs)
+"""
+
+valueabs_class = """\
+class @vname@ (@inherits@):
+    _NP_RepositoryId = "@repoId@"
+
+    def __init__(self, *args, **kwargs):
+        raise RuntimeError("Cannot construct objects of this type.")
+"""
+
+value_register_factory = """\
+omniORB.registerValueFactory(@vname@._NP_RepositoryId, @vname@)
+"""
+
+value_descriptor_at_module_scope = """\
+_0_@modname@.@vname@ = @vname@
+_0_@modname@._d_@vname@  = (omniORB.tcInternal.tv_value, @vname@, @vname@._NP_RepositoryId, "@vname@", @modifier@, @tbaseids@, @basedesc@, @mdescs@)
+_0_@modname@._tc_@vname@ = omniORB.tcInternal.createTypeCode(_0_@modname@._d_@vname@)
+omniORB.registerType(@vname@._NP_RepositoryId, _0_@modname@._d_@vname@, _0_@modname@._tc_@vname@)
+del @vname@
+"""
+
+value_objref_register = """
+omniORB.registerObjref(@ifid@._NP_RepositoryId, _objref_@ifid@)
+_0_@modname@._objref_@ifid@ = _objref_@ifid@
+del _objref_@ifid@"""
+
+
+valuebox = """\
+
+# valuebox @boxname@
+class @boxname@:
+    _NP_RepositoryId = "@repoId@"
+    def __init__(self, *args, **kw):
+        raise RuntimeError("Cannot construct objects of this type.")
+
+_0_@modname@.@boxname@ = @boxname@
+_0_@modname@._d_@boxname@  = (omniORB.tcInternal.tv_value_box, @boxname@, @boxname@._NP_RepositoryId, "@boxname@", @boxdesc@)
+_0_@modname@._tc_@boxname@ = omniORB.tcInternal.createTypeCode(_0_@modname@._d_@boxname@)
+omniORB.registerType(@boxname@._NP_RepositoryId, _0_@modname@._d_@boxname@, _0_@modname@._tc_@boxname@)
+omniORB.registerValueFactory(@boxname@._NP_RepositoryId, @boxname@)
+del @boxname@
+"""
+
+
+
 
 # Global state
 imported_files   = {}
@@ -552,6 +628,7 @@ global_module    = "_GlobalIDL"
 module_package   = ""
 stub_package     = ""
 stub_directory   = ""
+all_factories    = 0
 
 
 def error_exit(message):
@@ -561,6 +638,7 @@ def error_exit(message):
 def run(tree, args):
     global main_idl_file, imported_files, exported_modules, output_inline
     global global_module, module_package, stub_package, stub_directory
+    global all_factories
 
     imported_files.clear()
     exported_modules.clear()
@@ -579,6 +657,9 @@ def run(tree, args):
 
         elif arg == "inline":
             output_inline = 1
+
+        elif arg == "factories":
+            all_factories = 1
 
         elif arg[:8] == "modules=":
             module_package = arg[8:]
@@ -860,9 +941,9 @@ class PythonVisitor:
                 sn = fixupScopedName(i.scopedName())
                 inheritl.append(dotName(sn[:-1] + ["_objref_" + sn[-1]]))
                 
-            inherits = "(" + string.join(inheritl, ", ") + ")"
+            inherits = string.join(inheritl, ", ")
         else:
-            inherits = "(CORBA.Object)"
+            inherits = "CORBA.Object"
 
         self.st.out(objref_class, ifid=ifid, inherits=inherits)
 
@@ -1502,24 +1583,274 @@ class PythonVisitor:
                          node.identifier() + "\n")
 
     def visitValueForward(self, node):
-        sys.stderr.write(node.file() + ":" + str(node.line()) + \
-                         ": omniORBpy does not support valuetype\n")
-        sys.exit(1)
+        if self.handleImported(node): return
+
+        vname = mangle(node.identifier())
+
+        self.st.out(value_forward_at_module_scope,
+                    vname=vname, repoId=node.repoId(), modname=self.modname)
+
 
     def visitValueBox(self, node):
-        sys.stderr.write(node.file() + ":" + str(node.line()) + \
-                         ": omniORBpy does not support valuetype\n")
-        sys.exit(1)
+        if self.handleImported(node): return
+
+        boxname = mangle(node.identifier())
+        boxdesc = typeToDescriptor(node.boxedType())
+
+        self.st.out(valuebox, boxname=boxname, repoId=node.repoId(),
+                    boxdesc=boxdesc, modname=self.modname)
+
 
     def visitValueAbs(self, node):
-        sys.stderr.write(node.file() + ":" + str(node.line()) + \
-                         ": omniORBpy does not support valuetype\n")
-        sys.exit(1)
+        if self.handleImported(node): return
+
+        vname = mangle(node.identifier())
+
+        fscopedName = fixupScopedName(node.scopedName(), "")
+        scopedname  = dotName(fscopedName)
+
+        if len(node.inherits()) > 0:
+            inheritl = []
+            for i in node.inherits():
+                while isinstance(i, idlast.Declarator):
+                    i = i.alias().aliasType()
+                inheritl.append(dotName(fixupScopedName(i.scopedName())))
+            
+            inherits = string.join(inheritl, ", ")
+        else:
+            inherits = "_0_CORBA.ValueBase"
+
+        self.st.out(valueabs_class,
+                    vname=vname, scopedname=scopedname, repoId=node.repoId(),
+                    inherits=inherits, modname=self.modname)
+
+        # Declarations within the value
+        if len(node.declarations()) > 0:
+            self.st.inc_indent()
+            self.at_module_scope = 0
+            self.currentScope.append(node.identifier())
+
+            for d in node.declarations():
+                d.accept(self)
+
+            self.currentScope.pop()
+            self.at_module_scope = 1
+            self.st.dec_indent()
+            self.st.out("")
+
+        basedesc = "_0_CORBA.tcInternal.tv_null"
+
+        self.st.out(value_descriptor_at_module_scope,
+                    vname=vname, modifier="_0_CORBA.VM_ABSTRACT",
+                    tbaseids="None", basedesc=basedesc, mdescs="",
+                    modname=self.modname)
+
 
     def visitValue(self, node):
-        sys.stderr.write(node.file() + ":" + str(node.line()) + \
-                         ": omniORBpy does not support valuetype\n")
-        sys.exit(1)
+        if self.handleImported(node): return
+
+        vname = mangle(node.identifier())
+
+        fscopedName = fixupScopedName(node.scopedName(), "")
+        scopedname  = dotName(fscopedName)
+
+        if len(node.inherits()) > 0:
+            inheritl = []
+            for i in node.inherits():
+                while isinstance(i, idlast.Declarator):
+                    i = i.alias().aliasType()
+                inheritl.append(dotName(fixupScopedName(i.scopedName())))
+            
+        else:
+            inheritl = ["_0_CORBA.ValueBase"]
+
+        skeleton_opl = []
+        for i in node.supports():
+            while isinstance(i, idlast.Declarator):
+                i = i.alias().aliasType()
+            sn = fixupScopedName(i.scopedName())
+            sn[0] = sn[0] + "__POA"
+            dn = dotName(sn)
+            inheritl.append(dn)
+            skeleton_opl.append(dn)
+
+        inherits = string.join(inheritl, ", ")
+
+        # Go up the chain of inherited interfaces, picking out the
+        # state members
+        members = []
+        ilist   = []
+        cnode   = node
+        
+        while 1:
+            cin = cnode.inherits()
+            if not cin:
+                break
+            i = cin[0]
+            while isinstance(i, idlast.Declarator):
+                i = i.alias().aliasType()
+            if not isinstance(i, idlast.Value):
+                break
+            ilist.append(i)
+            cnode = i
+
+        ilist.reverse()
+        ilist.append(node)
+        
+        for i in ilist:
+            members.extend(i.statemembers())
+
+        set_argl = []
+
+        for i in range(len(members)):
+            member = members[i]
+            for d in member.declarators():
+                set_argl.append("self.%s = args[%d]" %
+                                (mangle(d.identifier()),i))
+
+        if set_argl:
+            set_args = string.join(set_argl, "\n")
+        else:
+            set_args = "pass"
+
+        self.st.out(value_class,
+                    vname=vname, scopedname=scopedname, repoId=node.repoId(),
+                    inherits=inherits, set_args=set_args, arglen=len(set_argl),
+                    modname=self.modname)
+
+        # Declarations within the value
+        if len(node.declarations()) > 0:
+            self.st.inc_indent()
+            self.at_module_scope = 0
+            self.currentScope.append(node.identifier())
+
+            for d in node.declarations():
+                d.accept(self)
+
+            self.currentScope.pop()
+            self.at_module_scope = 1
+            self.st.dec_indent()
+            self.st.out("")
+
+        # Skeleton operation declarations if necessary
+        if node.supports():
+            self.st.out(skeleton_methodmap, methodmap="{}")
+            for i in skeleton_opl:
+                self.st.out(skeleton_inheritmap, inheritclass=i)
+
+            self.st.out(skeleton_set_skel, ifid=vname)
+
+        # Register factory if no callables or factories
+        register_factory = 1
+
+        if not all_factories:
+            cnode = node
+            while 1:
+                if cnode.callables() or cnode.factories() or cnode.supports():
+                    register_factory = 0
+                    break
+                cin = cnode.inherits()
+                if not cin:
+                    break
+                for n in cin:
+                    while isinstance(n, idlast.Declarator):
+                        n = n.alias().aliasType()
+                    if not isinstance(n, idlast.Value):
+                        register_factory = 0
+                        break
+                cnode = cin[0]
+
+        if register_factory:
+            self.st.out(value_register_factory, vname=vname)
+        
+        # If value supports some interfaces, output an objref class for it
+        if node.supports():
+            inheritl = []
+            methodl  = []
+            for i in node.supports():
+                while isinstance(i, idlast.Declarator):
+                    i = i.alias().aliasType()
+                sn = fixupScopedName(i.scopedName())
+                inheritl.append(dotName(sn[:-1] + ["_objref_" + sn[-1]]))
+                methodl.append(dotName(sn[:-1] + ["_objref_" + sn[-1]]) +
+                               ".__methods__")
+                
+            inherits = string.join(inheritl, ", ")
+
+            self.st.out(objref_class, ifid=vname, inherits=inherits)
+
+            for inclass in inheritl:
+                self.st.out(objref_inherit_init, inclass=inclass)
+
+            methods = string.join(methodl, " + ")
+            self.st.out(objref_methods, methods = methods)
+
+            # registerObjRef()
+            self.st.out(value_objref_register,
+                        ifid=vname, modname=self.modname)
+
+        # Modifier
+        if node.custom():
+            modifier = "_0_CORBA.VM_CUSTOM"
+        elif node.truncatable():
+            modifier = "_0_CORBA.VM_TRUNCATABLE"
+        else:
+            modifier = "_0_CORBA.VM_NONE"
+
+        # Truncatable bases
+        tbasel = []
+        cnode  = node
+        while 1:
+            cin = cnode.inherits()
+            if not cin:
+                break
+            i = cin[0]
+            while isinstance(i, idlast.Declarator):
+                i = i.alias().aliasType()
+            if not isinstance(i, idlast.Value):
+                break
+            if cnode.truncatable():
+                sn = fixupScopedName(i.scopedName())
+                tbasel.append(dotName(sn) + "._NP_RepositoryId")
+            else:
+                break
+            cnode = i
+
+        if tbasel:
+            tbaseids = "(%s._NP_RepositoryId, %s)" % (vname,
+                                                     string.join(tbasel, ", "))
+        else:
+            tbaseids = "None"
+
+        basedesc = None
+        if cnode.inherits():
+            i = cnode.inherits()[0]
+            while isinstance(i, idlast.Declarator):
+                i = i.alias().aliasType()
+            if isinstance(i, idlast.Value):
+                sn = i.scopedName()[:]
+                sn[-1] = "_d_" + sn[-1]
+                basedesc = dotName(fixupScopedName(sn))
+
+        if basedesc is None:
+            basedesc = "_0_CORBA.tcInternal.tv_null"
+
+        mlist = []
+        for m in members:
+            for d in m.declarators():
+                mlist.append('"%s"' % mangle(d.identifier()))
+                mlist.append(typeAndDeclaratorToDescriptor(m.memberType(),
+                                                           d, []))
+                if m.memberAccess() == 1:
+                    mlist.append("_0_CORBA.PRIVATE_MEMBER")
+                else:
+                    mlist.append("_0_CORBA.PUBLIC_MEMBER")
+                    
+        mdescs = string.join(mlist, ", ")
+        self.st.out(value_descriptor_at_module_scope,
+                    vname=vname, modifier=modifier, tbaseids=tbaseids,
+                    basedesc=basedesc, mdescs=mdescs, modname=self.modname)
+
 
 
 def docConst(node):
@@ -1733,8 +2064,6 @@ ttdMap = {
 
 unsupportedMap = {
     idltype.tk_longdouble: "long double",
-    idltype.tk_value:      "valuetype",
-    idltype.tk_value_box:  "value box",
     idltype.tk_abstract_interface: "abstract interface"
 }
 

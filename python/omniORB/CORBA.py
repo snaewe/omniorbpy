@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.31.2.2  2003/05/20 17:10:25  dgrisby
+# Preliminary valuetype support.
+#
 # Revision 1.31.2.1  2003/03/23 21:51:43  dgrisby
 # New omnipy3_develop branch.
 #
@@ -320,6 +323,17 @@ TCKind = omniORB.Enum("IDL:omg.org/CORBA/TCKind:1.0",
                        tk_value, tk_value_box, tk_native,
                        tk_abstract_interface, tk_local_interface))
 
+# ValueModifiers
+VM_NONE        = 0
+VM_CUSTOM      = 1
+VM_ABSTRACT    = 2
+VM_TRUNCATABLE = 3
+
+# Value Visibility
+PRIVATE_MEMBER = 0
+PUBLIC_MEMBER  = 1
+
+
 class TypeCode:
     class Bounds (UserException):
         pass
@@ -352,7 +366,6 @@ class TypeCode:
     def fixed_digits(self):             return self._t.fixed_digits()
     def fixed_scale(self):              return self._t.fixed_scale()
 
-    # Things for types we don't support:
     def member_visibility(self, index): return self._t.member_visibility(index)
     def type_modifier(self):            return self._t.type_modifier()
     def concrete_base_type(self):       return self._t.concrete_base_type()
@@ -360,7 +373,9 @@ class TypeCode:
     __methods__ = ["equal", "equivalent", "get_compact_typecode",
                    "kind", "id", "name", "member_count", "member_name",
                    "member_type", "member_label", "discriminator_type",
-                   "default_index", "length", "content_type"]
+                   "default_index", "length", "content_type",
+                   "fixed_digits", "fixed_scale", "member_visibility",
+                   "type_modifier", "concrete_base_type"]
 
 import tcInternal
 _d_TypeCode = tcInternal.tv_TypeCode
@@ -467,6 +482,9 @@ class ORB:
         if self.__release:
             self.__release(self)
 
+    def id(self):
+        return ORB_ID
+
     def string_to_object(self, ior):
         return _omnipy.orb_func.string_to_object(self, ior)
 
@@ -550,6 +568,8 @@ class ORB:
     def create_recursive_tc(self, id):
         return tcInternal.createRecursiveTC(id)
 
+    # *** More tc operations here ***
+
     # Context operation
     def get_default_context(self):
         omniORB.lock.acquire()
@@ -557,6 +577,17 @@ class ORB:
             self.__context = Context("", None)
         omniORB.lock.release()
         return self.__context
+
+    # ValueFactory operations
+    def register_value_factory(self, repoId, factory):
+        omniORB.registerValueFactory(repoId, factory)
+        return factory
+
+    def unregister_value_factory(self, repoId):
+        omniORB.unregisterValueFactory(repoId)
+
+    def lookup_value_factory(self, repoId):
+        return omniORB.findValueFactory(repoId)
 
 
     __methods__ = ["string_to_object", "object_to_string",
@@ -568,7 +599,8 @@ class ORB:
                    "create_exception_tc", "create_interface_tc",
                    "create_string_tc", "create_sequence_tc",
                    "create_array_tc", "create_recursive_tc",
-                   "get_default_context"]
+                   "get_default_context", "register_value_factory",
+                   "lookup_value_factory"]
 
     class InvalidName (UserException):
         _NP_RepositoryId = "IDL:omg.org/CORBA/ORB/InvalidName:1.0"
@@ -662,6 +694,66 @@ other_id = "IDL:omg.org/CORBA/Object:1.0"
 omniORB.registerType(other_id, _d_Object, _tc_Object)
 omniORB.registerObjref(other_id, Object)
 del other_id
+
+
+#############################################################################
+#                                                                           #
+# ValueBase                                                                 #
+#                                                                           #
+#############################################################################
+
+class ValueBase:
+    """ CORBA::ValueBase base class """
+
+    _NP_RepositoryId = "IDL:omg.org/CORBA/ValueBase:1.0"
+
+    def _get_value_def(self):
+        import omniORB
+        if omniORB.orb is None:
+            raise BAD_INV_ORDER(omniORB.BAD_INV_ORDER_ORBHasShutdown,
+                                COMPLETED_NO)
+
+        omniORB.importIRStubs()
+
+        ir = omniORB.orb.resolve_initial_references("InterfaceRepository")
+        ir = ir._narrow(Repository)
+        if ir is None:
+            raise INTF_REPOS(INTF_REPOS_NotAvailable, COMPLETED_NO)
+        interf = ir.lookup_id(self._NP_RepositoryId)
+        return interf._narrow(ValueDef)
+
+_d_ValueBase = (omniORB.tcInternal.tv_value, ValueBase,
+                ValueBase._NP_RepositoryId, "ValueBase", VM_NONE, None,
+                omniORB.tcInternal.tv_null)
+TC_ValueBase = _tc_ValueBase = omniORB.tcInternal.createTypeCode(_d_ValueBase)
+omniORB.registerType(ValueBase._NP_RepositoryId, _d_ValueBase, _tc_ValueBase)
+omniORB.registerValueFactory(ValueBase._NP_RepositoryId, ValueBase)
+
+#############################################################################
+#                                                                           #
+# StringValue, WStringValue                                                 #
+#                                                                           #
+#############################################################################
+
+class StringValue:
+    _NP_RepositoryId = "IDL:omg.org/CORBA/StringValue:1.0"
+    def __init__(self, *args, **kw):
+        raise RuntimeError("Cannot construct objects of this type.")
+
+_d_StringValue  = (tcInternal.tv_value_box, StringValue, StringValue._NP_RepositoryId, "StringValue", (tcInternal.tv_string,0))
+_tc_StringValue = tcInternal.createTypeCode(_d_StringValue)
+omniORB.registerType(StringValue._NP_RepositoryId, _d_StringValue, _tc_StringValue)
+omniORB.registerValueFactory(StringValue._NP_RepositoryId, StringValue)
+
+class WStringValue:
+    _NP_RepositoryId = "IDL:omg.org/CORBA/WStringValue:1.0"
+    def __init__(self, *args, **kw):
+        raise RuntimeError("Cannot construct objects of this type.")
+
+_d_WStringValue  = (tcInternal.tv_value_box, WStringValue, WStringValue._NP_RepositoryId, "WStringValue", (tcInternal.tv_wstring,0))
+_tc_WStringValue = tcInternal.createTypeCode(_d_WStringValue)
+omniORB.registerType(WStringValue._NP_RepositoryId, _d_WStringValue, _tc_WStringValue)
+omniORB.registerValueFactory(WStringValue._NP_RepositoryId, WStringValue)
 
 
 #############################################################################

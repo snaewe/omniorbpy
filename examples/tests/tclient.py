@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import sys, time
+import sys, time, gc
 from omniORB import CORBA, PortableServer
 import TypeTest, TypeTest__POA
 
@@ -1428,6 +1428,92 @@ def doTests(orb, poa, io):
     else:  tfail()
 
 
+    tstart("ValueType")
+    ok = 1
+    v1 = TypeTest.V1("hello", 5)
+    r = io.complex41(v1)
+    if r.s == v1.s and r.l == v1.l:
+        tresult("+")
+    else:
+        ok = 0
+        tresult("-")
+
+    r = io.complex41(None)
+    if r is None:
+        tresult("+")
+    else:
+        ok = 0
+        tresult("-")
+
+    v2 = TypeTest.V2("two", 42, v1)
+    r = io.complex41(v2)
+    if r.s == v2.s and r.l == v2.l:
+        tresult("+")
+    else:
+        ok = 0
+        tresult("-")
+
+    r = io.complex41(None)
+    if r is None:
+        tresult("+")
+    else:
+        ok = 0
+        tresult("-")
+
+    r = io.complex42(v2)
+    if r.s == v2.s and r.l == v2.l and r.v.s == v1.s:
+        tresult("+")
+    else:
+        ok = 0
+        tresult("-")
+
+    v2.v = v2
+
+    r = io.complex41(v2)
+    if r.s == v2.s and r.l == v2.l:
+        tresult("+")
+    else:
+        ok = 0
+        tresult("-")
+
+    r = io.complex42(v2)
+    if r.s == v2.s and r.l == v2.l and r.v.s == v2.s:
+        tresult("+")
+    else:
+        ok = 0
+        tresult("-")
+
+    r = io.complex42(None)
+    if r is None:
+        tresult("+")
+    else:
+        ok = 0
+        tresult("-")
+
+    if ok: tpass()
+    else:  tfail()
+
+    tstart("ValueBox")
+    ok = 1
+
+    r = io.complex43(1234)
+    if r == 1234:
+        tresult("+")
+    else:
+        ok = 0
+        tresult("-")
+
+    r = io.complex43(None)
+    if r is None:
+        tresult("+")
+    else:
+        ok = 0
+        tresult("-")
+
+    if ok: tpass()
+    else:  tfail()
+
+
     tstart("Exceptions")
 
     ok = 1
@@ -1683,3 +1769,5 @@ if __name__ == "__main__":
         output = 0
         while 1:
             doTests(orb, poa, io)
+
+    orb.destroy()

@@ -1,0 +1,21 @@
+
+module ValueTest {
+  valuetype One {
+    public string s;
+    public long l;
+  };
+
+  valuetype Two {
+    public One a;
+    public One b;
+  };
+
+  valuetype StringValue string;
+
+  interface Test {
+    One op1(in One a);
+    void op2(in One a, in One b);
+    Two op3(in Two a);
+    StringValue op4(in StringValue a);
+  };
+};

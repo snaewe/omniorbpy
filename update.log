@@ -1,3 +1,32 @@
+Tue May 20 17:56:32 BST 2003 dgrisby
+====================================
+
+- Preliminary valuetype support.
+
+update.log
+examples/tests/TypeTest.idl
+examples/tests/tclient.py
+examples/tests/tserver.py
+examples/valuetype/client.py   -- new
+examples/valuetype/server.py   -- new
+examples/valuetype/value1.idl  -- new
+examples/valuetype/value2.idl  -- new
+mk/beforeauto.mk.in
+modules/dir.mk
+modules/omnipy.cc
+modules/omnipy.h
+modules/pyContext.cc
+modules/pyExceptions.cc
+modules/pyMarshal.cc
+modules/pyServant.cc
+modules/pyTypeCode.cc
+modules/pyValueType.cc         -- new
+omniidl_be/python.py
+python/omniORB/CORBA.py
+python/omniORB/__init__.py
+python/omniORB/tcInternal.py
+
+
 Sun Mar 23 21:50:21 GMT 2003 dgrisby
 ====================================
 

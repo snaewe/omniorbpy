@@ -29,6 +29,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.4.2  2003/05/20 17:10:23  dgrisby
+// Preliminary valuetype support.
+//
 // Revision 1.1.4.1  2003/03/23 21:51:57  dgrisby
 // New omnipy3_develop branch.
 //
@@ -42,31 +45,6 @@
 #include <omnipy.h>
 
 OMNI_USING_NAMESPACE(omni)
-
-
-static inline
-void marshalRawPyString(cdrStream& stream, PyObject* pystring)
-{
-  CORBA::ULong slen = PyString_GET_SIZE(pystring) + 1;
-  slen >>= stream;
-  char* str = PyString_AS_STRING(pystring);
-  stream.put_octet_array((const CORBA::Octet*)((const char*)str), slen);
-}
-
-static inline PyObject*
-unmarshalRawPyString(cdrStream& stream)
-{
-  CORBA::ULong len; len <<= stream;
-
-  if (!stream.checkInputOverrun(1, len))
-    OMNIORB_THROW(MARSHAL, MARSHAL_PassEndOfMessage,
-		  (CORBA::CompletionStatus)stream.completion());
-
-  PyObject* pystring = PyString_FromStringAndSize(0, len - 1);
-
-  stream.get_octet_array((_CORBA_Octet*)PyString_AS_STRING(pystring), len);
-  return pystring;
-}
 
 
 void
@@ -99,8 +77,8 @@ omniPy::marshalContext(cdrStream& stream, PyObject* p_o, PyObject* c_o)
 
     for (CORBA::ULong i=0; i < count; i++) {
       PyObject* item = PyList_GET_ITEM(items, i);
-      marshalRawPyString(stream, PyTuple_GET_ITEM(item, 0));
-      marshalRawPyString(stream, PyTuple_GET_ITEM(item, 1));
+      omniPy::marshalRawPyString(stream, PyTuple_GET_ITEM(item, 0));
+      omniPy::marshalRawPyString(stream, PyTuple_GET_ITEM(item, 1));
     }
     Py_DECREF(values);
   }
@@ -135,8 +113,8 @@ omniPy::unmarshalContext(cdrStream& stream)
   CORBA::ULong count = mlen / 2;
 
   for (CORBA::ULong i=0; i < count; i++) {
-    PyObject* k = unmarshalRawPyString(stream);
-    PyObject* v = unmarshalRawPyString(stream);
+    PyObject* k = omniPy::unmarshalRawPyString(stream);
+    PyObject* v = omniPy::unmarshalRawPyString(stream);
     PyDict_SetItem(dict, k, v);
     Py_DECREF(k);
     Py_DECREF(v);

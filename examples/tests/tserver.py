@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import sys, time
+import sys, time, gc
 from omniORB import CORBA, PortableServer
 import TypeTest, TypeTest__POA
 
@@ -85,6 +85,9 @@ class I_i (TypeTest__POA.I):
     def complex38(self, a): return a
     def complex39(self, a): return a
     def complex40(self, a): return a
+    def complex41(self, a): return a
+    def complex42(self, a): return a
+    def complex43(self, a): return a
 
     def except1(self):
         raise TypeTest.X1()

@@ -30,6 +30,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.30.2.2  2003/05/20 17:10:25  dgrisby
+# Preliminary valuetype support.
+#
 # Revision 1.30.2.1  2003/03/23 21:51:43  dgrisby
 # New omnipy3_develop branch.
 #
@@ -376,9 +379,10 @@ rootPOA = None
 lock    = threading.Lock()
 
 # Maps for object reference classes and IDL-defined types:
-objrefMapping   = {}
-typeMapping     = {}
-typeCodeMapping = {}
+objrefMapping       = {}
+typeMapping         = {}
+typeCodeMapping     = {}
+valueFactoryMapping = {}
 
 
 def registerObjref(repoId, objref):
@@ -393,6 +397,15 @@ def findType(repoId):
 
 def findTypeCode(repoId):
     return typeCodeMapping.get(repoId)
+
+def registerValueFactory(repoId, factory):
+    valueFactoryMapping[repoId] = factory
+
+def unregisterValueFactory(repoId):
+    del valueFactoryMapping[repoId]
+
+def findValueFactory(repoId):
+    return valueFactoryMapping.get(repoId)
 
 
 # Function to return a Python module for the required IDL module name

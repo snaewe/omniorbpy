@@ -29,6 +29,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.4.2  2003/05/20 17:10:23  dgrisby
+// Preliminary valuetype support.
+//
 // Revision 1.1.4.1  2003/03/23 21:51:57  dgrisby
 // New omnipy3_develop branch.
 //
@@ -151,7 +154,8 @@ sequenceOptimisedType(PyObject* desc)
 
 static void
 validateTypeNull(PyObject* d_o, PyObject* a_o,
-		 CORBA::CompletionStatus compstatus)
+		 CORBA::CompletionStatus compstatus,
+		 PyObject* track)
 {
   if (a_o != Py_None)
     OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
@@ -159,7 +163,8 @@ validateTypeNull(PyObject* d_o, PyObject* a_o,
 
 static void
 validateTypeVoid(PyObject* d_o, PyObject* a_o,
-		 CORBA::CompletionStatus compstatus)
+		 CORBA::CompletionStatus compstatus,
+		 PyObject* track)
 {
   if (a_o != Py_None)
     OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
@@ -167,7 +172,8 @@ validateTypeVoid(PyObject* d_o, PyObject* a_o,
 
 static void
 validateTypeShort(PyObject* d_o, PyObject* a_o,
-		  CORBA::CompletionStatus compstatus)
+		  CORBA::CompletionStatus compstatus,
+		  PyObject* track)
 {
   long l;
 
@@ -187,7 +193,8 @@ validateTypeShort(PyObject* d_o, PyObject* a_o,
 
 static void
 validateTypeLong(PyObject* d_o, PyObject* a_o,
-		 CORBA::CompletionStatus compstatus)
+		 CORBA::CompletionStatus compstatus,
+		 PyObject* track)
 {
   long l;
 
@@ -209,7 +216,8 @@ validateTypeLong(PyObject* d_o, PyObject* a_o,
 
 static void
 validateTypeUShort(PyObject* d_o, PyObject* a_o,
-		   CORBA::CompletionStatus compstatus)
+		   CORBA::CompletionStatus compstatus,
+		   PyObject* track)
 {
   long l;
 
@@ -226,7 +234,8 @@ validateTypeUShort(PyObject* d_o, PyObject* a_o,
 
 static void
 validateTypeULong(PyObject* d_o, PyObject* a_o,
-		  CORBA::CompletionStatus compstatus)
+		  CORBA::CompletionStatus compstatus,
+		  PyObject* track)
 {
   if (PyLong_Check(a_o)) {
     unsigned long ul = PyLong_AsUnsignedLong(a_o);
@@ -255,7 +264,8 @@ validateTypeULong(PyObject* d_o, PyObject* a_o,
 
 static void
 validateTypeFloat(PyObject* d_o, PyObject* a_o,
-		  CORBA::CompletionStatus compstatus)
+		  CORBA::CompletionStatus compstatus,
+		  PyObject* track)
 {
   if (!(PyFloat_Check(a_o) || PyInt_Check(a_o) || PyLong_Check(a_o)))
     OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
@@ -263,7 +273,8 @@ validateTypeFloat(PyObject* d_o, PyObject* a_o,
 
 static void
 validateTypeDouble(PyObject* d_o, PyObject* a_o,
-		   CORBA::CompletionStatus compstatus)
+		   CORBA::CompletionStatus compstatus,
+		   PyObject* track)
 {
   if (!(PyFloat_Check(a_o) || PyInt_Check(a_o) || PyLong_Check(a_o)))
     OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
@@ -271,7 +282,8 @@ validateTypeDouble(PyObject* d_o, PyObject* a_o,
 
 static void
 validateTypeBoolean(PyObject* d_o, PyObject* a_o,
-		    CORBA::CompletionStatus compstatus)
+		    CORBA::CompletionStatus compstatus,
+		    PyObject* track)
 {
   if (!(PyInt_Check(a_o) || PyLong_Check(a_o)))
     OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
@@ -279,7 +291,8 @@ validateTypeBoolean(PyObject* d_o, PyObject* a_o,
 
 static void
 validateTypeChar(PyObject* d_o, PyObject* a_o,
-		 CORBA::CompletionStatus compstatus)
+		 CORBA::CompletionStatus compstatus,
+		 PyObject* track)
 {
   if (!(PyString_Check(a_o) && (PyString_GET_SIZE(a_o) == 1)))
     OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
@@ -287,7 +300,8 @@ validateTypeChar(PyObject* d_o, PyObject* a_o,
 
 static void
 validateTypeOctet(PyObject* d_o, PyObject* a_o,
-		  CORBA::CompletionStatus compstatus)
+		  CORBA::CompletionStatus compstatus,
+		  PyObject* track)
 {
   long l;
 
@@ -304,7 +318,8 @@ validateTypeOctet(PyObject* d_o, PyObject* a_o,
 
 static void
 validateTypeAny(PyObject* d_o, PyObject* a_o,
-		CORBA::CompletionStatus compstatus)
+		CORBA::CompletionStatus compstatus,
+		PyObject* track)
 {
   if (!PyInstance_Check(a_o))
     OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
@@ -326,12 +341,13 @@ validateTypeAny(PyObject* d_o, PyObject* a_o,
   if (!t_o)
     OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
 
-  omniPy::validateType(desc, t_o, compstatus);
+  omniPy::validateType(desc, t_o, compstatus, track);
 }
 
 static void
 validateTypeTypeCode(PyObject* d_o, PyObject* a_o,
-		     CORBA::CompletionStatus compstatus)
+		     CORBA::CompletionStatus compstatus,
+		     PyObject* track)
 {
   if (!PyInstance_Check(a_o))
     OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
@@ -344,14 +360,16 @@ validateTypeTypeCode(PyObject* d_o, PyObject* a_o,
 
 static void
 validateTypePrincipal(PyObject* d_o, PyObject* a_o,
-		      CORBA::CompletionStatus compstatus)
+		      CORBA::CompletionStatus compstatus,
+		      PyObject* track)
 {
   OMNIORB_THROW(NO_IMPLEMENT, NO_IMPLEMENT_Unsupported, compstatus);
 }
 
 static void
 validateTypeObjref(PyObject* d_o, PyObject* a_o,
-		   CORBA::CompletionStatus compstatus)
+		   CORBA::CompletionStatus compstatus,
+		   PyObject* track)
 { // repoId, name
   if (a_o != Py_None) {
     if (!PyInstance_Check(a_o))
@@ -366,7 +384,8 @@ validateTypeObjref(PyObject* d_o, PyObject* a_o,
 
 static void
 validateTypeStruct(PyObject* d_o, PyObject* a_o,
-		   CORBA::CompletionStatus compstatus)
+		   CORBA::CompletionStatus compstatus,
+		   PyObject* track)
 { // class, repoId, struct name, name, descriptor, ...
 
   // The descriptor tuple has twice the number of struct members,
@@ -391,7 +410,8 @@ validateTypeStruct(PyObject* d_o, PyObject* a_o,
       value   = PyDict_GetItem(sdict, name);
 
       if (value) {
-	omniPy::validateType(PyTuple_GET_ITEM(d_o, j), value, compstatus);
+	omniPy::validateType(PyTuple_GET_ITEM(d_o, j), value,
+			     compstatus, track);
       }
       else {
 	// Not such a fast case after all
@@ -404,7 +424,8 @@ validateTypeStruct(PyObject* d_o, PyObject* a_o,
 	// because the struct object still holds a reference to the
 	// value.
 	Py_DECREF(value);
-	omniPy::validateType(PyTuple_GET_ITEM(d_o, j), value, compstatus);
+	omniPy::validateType(PyTuple_GET_ITEM(d_o, j), value,
+			     compstatus, track);
       }
     }
   }
@@ -419,14 +440,15 @@ validateTypeStruct(PyObject* d_o, PyObject* a_o,
       }
 
       Py_DECREF(value);
-      omniPy::validateType(PyTuple_GET_ITEM(d_o, j), value, compstatus);
+      omniPy::validateType(PyTuple_GET_ITEM(d_o, j), value, compstatus, track);
     }
   }
 }
 
 static void
 validateTypeUnion(PyObject* d_o, PyObject* a_o,
-		  CORBA::CompletionStatus compstatus)
+		  CORBA::CompletionStatus compstatus,
+		  PyObject* track)
 { // class,
   // repoId,
   // name,
@@ -446,7 +468,7 @@ validateTypeUnion(PyObject* d_o, PyObject* a_o,
     OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
 
   PyObject* t_o = PyTuple_GET_ITEM(d_o, 4); // Discriminant descriptor
-  omniPy::validateType(t_o, discriminant, compstatus);
+  omniPy::validateType(t_o, discriminant, compstatus, track);
 
   PyObject* cdict = PyTuple_GET_ITEM(d_o, 8);
   OMNIORB_ASSERT(PyDict_Check(cdict));
@@ -455,14 +477,14 @@ validateTypeUnion(PyObject* d_o, PyObject* a_o,
   if (t_o) {
     // Discriminant found in case dictionary
     OMNIORB_ASSERT(PyTuple_Check(t_o));
-    omniPy::validateType(PyTuple_GET_ITEM(t_o, 2), value, compstatus);
+    omniPy::validateType(PyTuple_GET_ITEM(t_o, 2), value, compstatus, track);
   }
   else {
     // Is there a default case?
     t_o = PyTuple_GET_ITEM(d_o, 7);
     if (t_o != Py_None) {
       OMNIORB_ASSERT(PyTuple_Check(t_o));
-      omniPy::validateType(PyTuple_GET_ITEM(t_o, 2), value, compstatus);
+      omniPy::validateType(PyTuple_GET_ITEM(t_o, 2), value, compstatus, track);
     }
 
   }
@@ -470,7 +492,8 @@ validateTypeUnion(PyObject* d_o, PyObject* a_o,
 
 static void
 validateTypeEnum(PyObject* d_o, PyObject* a_o,
-		 CORBA::CompletionStatus compstatus)
+		 CORBA::CompletionStatus compstatus,
+		 PyObject* track)
 { // repoId, name, item list
 
   if (!PyInstance_Check(a_o))
@@ -493,7 +516,8 @@ validateTypeEnum(PyObject* d_o, PyObject* a_o,
 
 static void
 validateTypeString(PyObject* d_o, PyObject* a_o,
-		   CORBA::CompletionStatus compstatus)
+		   CORBA::CompletionStatus compstatus,
+		   PyObject* track)
 { // max_length
 
   PyObject* t_o = PyTuple_GET_ITEM(d_o, 1);
@@ -521,7 +545,8 @@ validateTypeString(PyObject* d_o, PyObject* a_o,
 
 static void
 validateTypeSequence(PyObject* d_o, PyObject* a_o,
-		     CORBA::CompletionStatus compstatus)
+		     CORBA::CompletionStatus compstatus,
+		     PyObject* track)
 { // element_desc, max_length
 
   PyObject*     t_o      = PyTuple_GET_ITEM(d_o, 2);
@@ -890,7 +915,8 @@ validateTypeSequence(PyObject* d_o, PyObject* a_o,
 	OMNIORB_THROW(MARSHAL, MARSHAL_SequenceIsTooLong, compstatus);
 	  
       for (i=0; i < len; i++) {
-	omniPy::validateType(elm_desc, PyList_GET_ITEM(a_o, i), compstatus);
+	omniPy::validateType(elm_desc, PyList_GET_ITEM(a_o, i),
+			     compstatus, track);
       }
     }
     else if (PyTuple_Check(a_o)) {
@@ -899,7 +925,8 @@ validateTypeSequence(PyObject* d_o, PyObject* a_o,
 	OMNIORB_THROW(MARSHAL, MARSHAL_SequenceIsTooLong, compstatus);
 
       for (i=0; i < len; i++) {
-	omniPy::validateType(elm_desc, PyTuple_GET_ITEM(a_o, i), compstatus);
+	omniPy::validateType(elm_desc, PyTuple_GET_ITEM(a_o, i),
+			     compstatus, track);
       }
     }
     else
@@ -909,7 +936,8 @@ validateTypeSequence(PyObject* d_o, PyObject* a_o,
 
 static void
 validateTypeArray(PyObject* d_o, PyObject* a_o,
-		  CORBA::CompletionStatus compstatus)
+		  CORBA::CompletionStatus compstatus,
+		  PyObject* track)
 { // element_desc, length
 
   PyObject*    t_o      = PyTuple_GET_ITEM(d_o, 2);
@@ -1277,7 +1305,8 @@ validateTypeArray(PyObject* d_o, PyObject* a_o,
 	OMNIORB_THROW(BAD_PARAM, BAD_PARAM_PythonValueOutOfRange, compstatus);
 
       for (i=0; i < len; i++) {
-	omniPy::validateType(elm_desc, PyList_GET_ITEM(a_o, i), compstatus);
+	omniPy::validateType(elm_desc, PyList_GET_ITEM(a_o, i),
+			     compstatus, track);
       }
     }
     else if (PyTuple_Check(a_o)) {
@@ -1286,7 +1315,8 @@ validateTypeArray(PyObject* d_o, PyObject* a_o,
 	OMNIORB_THROW(BAD_PARAM, BAD_PARAM_PythonValueOutOfRange, compstatus);
 
       for (i=0; i < len; i++) {
-	omniPy::validateType(elm_desc, PyTuple_GET_ITEM(a_o, i), compstatus);
+	omniPy::validateType(elm_desc, PyTuple_GET_ITEM(a_o, i),
+			     compstatus, track);
       }
     }
   }
@@ -1294,15 +1324,17 @@ validateTypeArray(PyObject* d_o, PyObject* a_o,
 
 static void
 validateTypeAlias(PyObject* d_o, PyObject* a_o,
-		  CORBA::CompletionStatus compstatus)
+		  CORBA::CompletionStatus compstatus,
+		  PyObject* track)
 { // repoId, name, descr
 
-  omniPy::validateType(PyTuple_GET_ITEM(d_o, 3), a_o, compstatus);
+  omniPy::validateType(PyTuple_GET_ITEM(d_o, 3), a_o, compstatus, track);
 }
 
 static void
 validateTypeExcept(PyObject* d_o, PyObject* a_o,
-		   CORBA::CompletionStatus compstatus)
+		   CORBA::CompletionStatus compstatus,
+		   PyObject* track)
 { // class, repoId, exc name, name, descriptor, ...
 
   if (!PyInstance_Check(a_o))
@@ -1324,13 +1356,15 @@ validateTypeExcept(PyObject* d_o, PyObject* a_o,
     value   = PyDict_GetItem(sdict, name);
     if (!value)
       OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
-    omniPy::validateType(PyTuple_GET_ITEM(d_o, j++), value, compstatus);
+    omniPy::validateType(PyTuple_GET_ITEM(d_o, j++), value,
+			 compstatus, track);
   }
 }
 
 static void
 validateTypeLongLong(PyObject* d_o, PyObject* a_o,
-		     CORBA::CompletionStatus compstatus)
+		     CORBA::CompletionStatus compstatus,
+		     PyObject* track)
 {
 #ifdef HAS_LongLong
   if (PyLong_Check(a_o)) {
@@ -1350,7 +1384,8 @@ validateTypeLongLong(PyObject* d_o, PyObject* a_o,
 
 static void
 validateTypeULongLong(PyObject* d_o, PyObject* a_o,
-		      CORBA::CompletionStatus compstatus)
+		      CORBA::CompletionStatus compstatus,
+		      PyObject* track)
 {
 #ifdef HAS_LongLong
   if (PyLong_Check(a_o)) {
@@ -1375,14 +1410,16 @@ validateTypeULongLong(PyObject* d_o, PyObject* a_o,
 
 static void
 validateTypeLongDouble(PyObject* d_o, PyObject* a_o,
-		       CORBA::CompletionStatus compstatus)
+		       CORBA::CompletionStatus compstatus,
+		       PyObject* track)
 {
   OMNIORB_THROW(NO_IMPLEMENT, NO_IMPLEMENT_Unsupported, compstatus);
 }
 
 static void
 validateTypeWChar(PyObject* d_o, PyObject* a_o,
-		  CORBA::CompletionStatus compstatus)
+		  CORBA::CompletionStatus compstatus,
+		  PyObject* track)
 {
 #ifdef PY_HAS_UNICODE
   if (!(PyUnicode_Check(a_o) && (PyUnicode_GET_SIZE(a_o) == 1)))
@@ -1394,7 +1431,8 @@ validateTypeWChar(PyObject* d_o, PyObject* a_o,
 
 static void
 validateTypeWString(PyObject* d_o, PyObject* a_o,
-		  CORBA::CompletionStatus compstatus)
+		    CORBA::CompletionStatus compstatus,
+		    PyObject* track)
 { // max_length
 #ifdef PY_HAS_UNICODE
   PyObject* t_o = PyTuple_GET_ITEM(d_o, 1);
@@ -1424,7 +1462,8 @@ validateTypeWString(PyObject* d_o, PyObject* a_o,
 
 static void
 validateTypeFixed(PyObject* d_o, PyObject* a_o,
-		  CORBA::CompletionStatus compstatus)
+		  CORBA::CompletionStatus compstatus,
+		  PyObject* track)
 { // digits, scale
   if (!omnipyFixed_Check(a_o))
     OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
@@ -1445,37 +1484,28 @@ validateTypeFixed(PyObject* d_o, PyObject* a_o,
     OMNIORB_THROW(DATA_CONVERSION, DATA_CONVERSION_RangeError, compstatus);
 }
 
-static void
-validateTypeValue(PyObject* d_o, PyObject* a_o,
-		  CORBA::CompletionStatus compstatus)
-{
-  OMNIORB_THROW(NO_IMPLEMENT, NO_IMPLEMENT_Unsupported, compstatus);
-}
-
-static void
-validateTypeValueBox(PyObject* d_o, PyObject* a_o,
-		     CORBA::CompletionStatus compstatus)
-{
-  OMNIORB_THROW(NO_IMPLEMENT, NO_IMPLEMENT_Unsupported, compstatus);
-}
+// validateTypeValue and validateTypeValueBox are in pyValueType.cc
 
 static void
 validateTypeNative(PyObject* d_o, PyObject* a_o,
-		   CORBA::CompletionStatus compstatus)
+		   CORBA::CompletionStatus compstatus,
+		   PyObject* track)
 {
   OMNIORB_THROW(BAD_TYPECODE, NO_IMPLEMENT_Unsupported, compstatus);
 }
 
 static void
 validateTypeAbstractInterface(PyObject* d_o, PyObject* a_o,
-			      CORBA::CompletionStatus compstatus)
+			      CORBA::CompletionStatus compstatus,
+			      PyObject* track)
 {
   OMNIORB_THROW(NO_IMPLEMENT, NO_IMPLEMENT_Unsupported, compstatus);
 }
 
 static void
 validateTypeLocalInterface(PyObject* d_o, PyObject* a_o,
-			   CORBA::CompletionStatus compstatus)
+			   CORBA::CompletionStatus compstatus,
+			   PyObject* track)
 {
   OMNIORB_THROW(NO_IMPLEMENT, NO_IMPLEMENT_Unsupported, compstatus);
 }
@@ -1483,7 +1513,8 @@ validateTypeLocalInterface(PyObject* d_o, PyObject* a_o,
 void
 omniPy::
 validateTypeIndirect(PyObject* d_o, PyObject* a_o,
-		     CORBA::CompletionStatus compstatus)
+		     CORBA::CompletionStatus compstatus,
+		     PyObject* track)
 {
   PyObject* l = PyTuple_GET_ITEM(d_o, 1); OMNIORB_ASSERT(PyList_Check(l));
   PyObject* d = PyList_GET_ITEM(l, 0);
@@ -1497,7 +1528,7 @@ validateTypeIndirect(PyObject* d_o, PyObject* a_o,
     Py_INCREF(d);
     PyList_SetItem(l, 0, d);
   }
-  validateType(d, a_o, compstatus);
+  validateType(d, a_o, compstatus, track);
 }
 
 
@@ -1531,8 +1562,8 @@ const omniPy::ValidateTypeFn omniPy::validateTypeFns[] = {
   validateTypeWChar,
   validateTypeWString,
   validateTypeFixed,
-  validateTypeValue,
-  validateTypeValueBox,
+  omniPy::validateTypeValue,
+  omniPy::validateTypeValueBox,
   validateTypeNative,
   validateTypeAbstractInterface,
   validateTypeLocalInterface
@@ -2537,17 +2568,7 @@ marshalPyObjectFixed(cdrStream& stream, PyObject* d_o, PyObject* a_o)
   f >>= stream;
 }
 
-static void
-marshalPyObjectValue(cdrStream& stream, PyObject* d_o, PyObject* a_o)
-{
-  OMNIORB_ASSERT(0);
-}
-
-static void
-marshalPyObjectValueBox(cdrStream& stream, PyObject* d_o, PyObject* a_o)
-{
-  OMNIORB_ASSERT(0);
-}
+// marshalPyObjectValue and marshalPyObjectValueBox are in pyValueType.cc
 
 static void
 marshalPyObjectNative(cdrStream& stream, PyObject* d_o, PyObject* a_o)
@@ -2609,8 +2630,8 @@ const omniPy::MarshalPyObjectFn omniPy::marshalPyObjectFns[] = {
   marshalPyObjectWChar,
   marshalPyObjectWString,
   marshalPyObjectFixed,
-  marshalPyObjectValue,
-  marshalPyObjectValueBox,
+  omniPy::marshalPyObjectValue,
+  omniPy::marshalPyObjectValueBox,
   marshalPyObjectNative,
   marshalPyObjectAbstractInterface,
   marshalPyObjectLocalInterface
@@ -3343,21 +3364,8 @@ unmarshalPyObjectFixed(cdrStream& stream, PyObject* d_o)
   return omniPy::newFixedObject(f);
 }
 
-static PyObject*
-unmarshalPyObjectValue(cdrStream& stream, PyObject* d_o)
-{
-  OMNIORB_THROW(NO_IMPLEMENT, NO_IMPLEMENT_Unsupported,
-		(CORBA::CompletionStatus)stream.completion());
-  return 0;
-}
-
-static PyObject*
-unmarshalPyObjectValueBox(cdrStream& stream, PyObject* d_o)
-{
-  OMNIORB_THROW(NO_IMPLEMENT, NO_IMPLEMENT_Unsupported,
-		(CORBA::CompletionStatus)stream.completion());
-  return 0;
-}
+// unmarshalPyObjectValue is in pyValueType.cc. It does both values
+// and valueboxes.
 
 static PyObject*
 unmarshalPyObjectNative(cdrStream& stream, PyObject* d_o)
@@ -3433,8 +3441,8 @@ const omniPy::UnmarshalPyObjectFn omniPy::unmarshalPyObjectFns[] = {
   unmarshalPyObjectWChar,
   unmarshalPyObjectWString,
   unmarshalPyObjectFixed,
-  unmarshalPyObjectValue,
-  unmarshalPyObjectValueBox,
+  omniPy::unmarshalPyObjectValue,
+  omniPy::unmarshalPyObjectValue, // Same function as value
   unmarshalPyObjectNative,
   unmarshalPyObjectAbstractInterface,
   unmarshalPyObjectLocalInterface
@@ -5206,22 +5214,6 @@ copyArgumentFixed(PyObject* d_o, PyObject* a_o,
 }
 
 static PyObject*
-copyArgumentValue(PyObject* d_o, PyObject* a_o,
-		  CORBA::CompletionStatus compstatus)
-{
-  OMNIORB_THROW(NO_IMPLEMENT, NO_IMPLEMENT_Unsupported, compstatus);
-  return 0;
-}
-
-static PyObject*
-copyArgumentValueBox(PyObject* d_o, PyObject* a_o,
-		     CORBA::CompletionStatus compstatus)
-{
-  OMNIORB_THROW(NO_IMPLEMENT, NO_IMPLEMENT_Unsupported, compstatus);
-  return 0;
-}
-
-static PyObject*
 copyArgumentNative(PyObject* d_o, PyObject* a_o,
 		   CORBA::CompletionStatus compstatus)
 {
@@ -5297,8 +5289,8 @@ const omniPy::CopyArgumentFn omniPy::copyArgumentFns[] = {
   copyArgumentWChar,
   copyArgumentWString,
   copyArgumentFixed,
-  copyArgumentValue,
-  copyArgumentValueBox,
+  omniPy::copyArgumentValue,
+  omniPy::copyArgumentValueBox,
   copyArgumentNative,
   copyArgumentAbstractInterface,
   copyArgumentLocalInterface

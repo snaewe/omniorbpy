@@ -1,5 +1,5 @@
 # Version number
-OMNIPY_MAJOR = 2
+OMNIPY_MAJOR = 3
 OMNIPY_MINOR = 0
 
 DIR_CPPFLAGS += -DOMNIPY_MAJOR=$(OMNIPY_MAJOR) -DOMNIPY_MINOR=$(OMNIPY_MINOR)
@@ -22,6 +22,7 @@ CXXSRCS = omnipy.cc \
           pyomniFunc.cc \
 	  pyFixed.cc \
           pyContext.cc \
+          pyValueType.cc \
           cxxAPI.cc
 
 OBJS =    omnipy.o \
@@ -39,6 +40,7 @@ OBJS =    omnipy.o \
           pyomniFunc.o \
 	  pyFixed.o \
 	  pyContext.o \
+          pyValueType.o \
           cxxAPI.o
 
 
@@ -69,7 +71,7 @@ endif
 #############################################################################
 
 ifdef UnixPlatform
-#CXXDEBUGFLAGS = -g
+CXXDEBUGFLAGS = -g
 
 PYPREFIX  := $(shell $(PYTHON) -c 'import sys; print sys.exec_prefix')
 PYVERSION := $(shell $(PYTHON) -c 'import sys; print sys.version[:3]')
