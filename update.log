@@ -1,3 +1,12 @@
+Wed Jul 26 11:46:16 BST 2000 dpg1
+=================================
+
+- omniidl front-end incorrect error report when inheriting typedef to
+  forward declared interface
+
+omniidl/cxx/idlast.cc
+
+
 Wed Jul 19 18:21:28 BST 2000 dpg1
 =================================
 
