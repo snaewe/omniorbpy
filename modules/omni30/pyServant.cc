@@ -31,6 +31,11 @@
 // $Id$
 
 // $Log$
+// Revision 1.7  1999/09/29 15:46:50  dpg1
+// lockWithNewThreadState now creates a dummy threading.Thread object so
+// threading doesn't get upset that it's not there. Very dependent on the
+// implementation of threading.py.
+//
 // Revision 1.6  1999/09/29 11:38:29  dpg1
 // Comments removed.
 //
@@ -72,9 +77,24 @@ public:
     // Acquire global interpreter lock
     PyEval_AcquireLock();
     oldstate_ = PyThreadState_Swap(newstate_);
+
+    // Create a dummy threading.Thread object, so the threading module
+    // is happy. *** This is very dependent on the implementation of
+    // the threading module.
+    dummy_thread_ = PyEval_CallObject(omniPy::pyDummyThreadClass,
+				      empty_tuple_);
+    assert(dummy_thread_);
   }
 
   ~lockWithNewThreadState() {
+    // Remove the dummy Thread object
+    PyObject* meth = PyObject_GetAttrString(dummy_thread_, "_Thread__delete");
+    assert(meth);
+    PyEval_CallObject(meth, empty_tuple_);
+    Py_DECREF(meth);
+    Py_DECREF(dummy_thread_);
+
+    // Return to the previous thread state
     PyThreadState_Swap(oldstate_);
 
     // We would like to release the interpreter lock here, before
@@ -94,9 +114,13 @@ public:
   }
 
 private:
-  PyThreadState* newstate_;
-  PyThreadState* oldstate_;
+  PyThreadState*   newstate_;
+  PyThreadState*   oldstate_;
+  PyObject*        dummy_thread_;
+  static PyObject* empty_tuple_;
 };
+
+PyObject* lockWithNewThreadState::empty_tuple_ = PyTuple_New(0);
 
 
 omniPy::

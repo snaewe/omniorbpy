@@ -31,6 +31,11 @@
 // $Id$
 
 // $Log$
+// Revision 1.10  1999/09/29 15:46:50  dpg1
+// lockWithNewThreadState now creates a dummy threading.Thread object so
+// threading doesn't get upset that it's not there. Very dependent on the
+// implementation of threading.py.
+//
 // Revision 1.9  1999/09/29 11:25:56  dpg1
 // Nil objects now map to None. They work too, which is more than can be
 // said for the old mapping...
@@ -204,7 +209,8 @@ _CORBA_MODULE_VAR PyObject* pyomniORBtypeMap;   //  Type map
 _CORBA_MODULE_VAR PyObject* pyomniORBwordMap;   //  Reserved word map
 _CORBA_MODULE_VAR PyObject* pyCreateTypeCode;	// Function to create a
 						//  TypeCode object
-
+_CORBA_MODULE_VAR PyObject* pyDummyThreadClass; // threading module dummy
+                                                //  thread class
 
 
 ////////////////////////////////////////////////////////////////////////////

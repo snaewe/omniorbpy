@@ -31,6 +31,11 @@
 # $Id$
 
 # $Log$
+# Revision 1.9  1999/09/29 15:46:50  dpg1
+# lockWithNewThreadState now creates a dummy threading.Thread object so
+# threading doesn't get upset that it's not there. Very dependent on the
+# implementation of threading.py.
+#
 # Revision 1.8  1999/09/27 09:06:37  dpg1
 # Friendly error message if there is no thread support.
 #
@@ -440,7 +445,7 @@ keywordMapping = {
     }
 
 
-# Register this module with omnipy:
+# Register this module and the threading module with omnipy:
 import omniORB, omniORB.PortableServer
-_omnipy.registerPyObjects(omniORB)
+_omnipy.registerPyObjects(omniORB, threading)
 del omniORB

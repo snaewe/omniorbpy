@@ -31,6 +31,11 @@
 // $Id$
 
 // $Log$
+// Revision 1.17  1999/09/29 15:46:51  dpg1
+// lockWithNewThreadState now creates a dummy threading.Thread object so
+// threading doesn't get upset that it's not there. Very dependent on the
+// implementation of threading.py.
+//
 // Revision 1.16  1999/09/29 11:25:56  dpg1
 // Nil objects now map to None. They work too, which is more than can be
 // said for the old mapping...
@@ -110,6 +115,8 @@ PyObject* omniPy::pyomniORBobjrefMap;	//  The objref class map
 PyObject* omniPy::pyomniORBtypeMap;     //  The repoId to descriptor mapping
 PyObject* omniPy::pyomniORBwordMap;     //  Reserved word map
 PyObject* omniPy::pyCreateTypeCode;	// Function to create a TypeCode object
+PyObject* omniPy::pyDummyThreadClass;   // threading module dummy
+                                        //  thread class
 
 
 // Things visible to Python:
@@ -146,15 +153,17 @@ extern "C" {
   omnipy_registerPyObjects(PyObject* self, PyObject* args)
   {
     PyObject* temp;
+    PyObject* pythreading;
 
     // Get a pointer to the interpreter state
     PyThreadState* tstate = PyThreadState_Get();
     omniPy::pyInterpreter = tstate->interp;
 
-    if (!PyArg_ParseTuple(args, "O", &omniPy::pyomniORBmodule))
+    if (!PyArg_ParseTuple(args, "OO", &omniPy::pyomniORBmodule, &pythreading))
       return NULL;
 
     assert(PyModule_Check(omniPy::pyomniORBmodule));
+    assert(PyModule_Check(pythreading));
 
     omniPy::pyCORBAmodule =
       PyObject_GetAttrString(omniPy::pyomniORBmodule, "CORBA");
@@ -182,8 +191,10 @@ extern "C" {
     temp =
       PyObject_GetAttrString(omniPy::pyomniORBmodule, "tcInternal");
 
-    omniPy::pyCreateTypeCode =
-      PyObject_GetAttrString(temp, "createTypeCode");
+    omniPy::pyCreateTypeCode = PyObject_GetAttrString(temp, "createTypeCode");
+
+    omniPy::pyDummyThreadClass = PyObject_GetAttrString(pythreading,
+							"_DummyThread");
 
     assert(omniPy::pyCORBAsysExcMap);
     assert(PyDict_Check(omniPy::pyCORBAsysExcMap));
@@ -197,6 +208,8 @@ extern "C" {
     assert(PyDict_Check(omniPy::pyomniORBwordMap));
     assert(omniPy::pyCreateTypeCode);
     assert(PyFunction_Check(omniPy::pyCreateTypeCode));
+    assert(omniPy::pyDummyThreadClass);
+    assert(PyClass_Check(omniPy::pyDummyThreadClass));
 
     //    cout << "Python objects registered." << endl;
 
