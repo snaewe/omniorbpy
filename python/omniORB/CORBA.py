@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.16  2000/01/18 17:14:13  dpg1
+# Support for pickle
+#
 # Revision 1.15  1999/12/07 12:35:33  dpg1
 # id() function added.
 #
@@ -585,6 +588,15 @@ class Object:
 
     def __del__(self):
         pass
+
+    def __getstate__(self):
+        return ORB_init().object_to_string(self)
+
+    def __setstate__(self, state):
+        o = ORB_init().string_to_object(state)
+        self.__dict__.update(o.__dict__)
+        def dummy(): pass # Why doesn't dummy want an argument? ***
+        o.__del__ = dummy
 
     def _get_interface(self):
         # ***
