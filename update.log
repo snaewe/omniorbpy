@@ -1,3 +1,11 @@
+Wed Jun 28 13:46:42 BST 2000 dpg1
+=================================
+
+- Proper error messages for unsupported IDL constructs.
+
+omniidl_be/python.py
+
+
 Wed Jun 28 11:38:10 BST 2000 dpg1
 =================================
 
@@ -14,7 +22,6 @@ external_merge/ReleaseNote
 
 external_merge/THIS_IS_OMNIORBPY_1_0_PRE2  -- removed
 external_merge/THIS_IS_OMNIORBPY_1_0_PRE3  -- new
-
 
 
 Tue Jun 27 15:53:26 BST 2000 dpg1
