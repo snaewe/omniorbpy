@@ -1,3 +1,29 @@
+Sun May 26 01:53:54 BST 2002 dgrisby
+====================================
+
+- C++ API to convert object references to/from Python.
+
+configure
+configure.ac
+dir.mk
+examples/embed/dir.mk
+examples/embed/embed.cc
+examples/embed/embed.py
+mk/beforeauto.mk.in
+modules/cxxAPI.cc        -- new
+modules/dir.mk
+modules/omnipy.cc
+modules/omnipy.h
+
+- traceInvocations() function.
+
+modules/pyomniFunc.cc
+
+- Minor bug in ORB __del__.
+
+python/omniORB/CORBA.py
+
+
 Sat May 25 21:56:07 BST 2002 dgrisby
 ====================================
 

@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.28.2.13  2002/05/26 00:56:57  dgrisby
+# Minor bug in ORB __del__.
+#
 # Revision 1.28.2.12  2002/03/11 15:40:05  dpg1
 # _get_interface support, exception minor codes.
 #
@@ -433,12 +436,14 @@ class ORB:
     """omnipy ORB object"""
 
     def __init__(self, argv, orb_identifier):
+        self.__release = None
         _omnipy.ORB_init(self, argv, orb_identifier)
         self.__release = _omnipy.orb_func.releaseRef
         self.__context = None
 
     def __del__(self):
-        self.__release(self)
+        if self.__release:
+            self.__release(self)
 
     def string_to_object(self, ior):
         return _omnipy.orb_func.string_to_object(self, ior)
