@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.7.4.9  2003/01/27 11:58:51  dgrisby
+# Correct IfR scoping.
+#
 # Revision 1.7.4.8  2002/05/28 22:04:41  dgrisby
 # Incorrect repoIds.
 #
@@ -97,11 +100,12 @@ class Servant:
     def _get_interface(self):
         omniORB.importIRStubs() # Make sure IR stubs are loaded
         ir = omniORB.orb.resolve_initial_references("InterfaceRepository")
-        ir = ir._narrow(Repository)
+        ir = ir._narrow(CORBA.Repository)
         if ir is None:
-            raise INTF_REPOS(omniORB.INTF_REPOS_NotAvailable, COMPLETED_NO)
+            raise CORBA.INTF_REPOS(omniORB.INTF_REPOS_NotAvailable,
+                                   CORBA.COMPLETED_NO)
         interf = ir.lookup_id(self._NP_RepositoryId)
-        return interf._narrow(InterfaceDef)
+        return interf._narrow(CORBA.InterfaceDef)
 
     def _non_existent(self):
         return 0
