@@ -7,6 +7,10 @@ external_merge/README.Python -- new
 modules/dir.mk
 modules/omni28/omnipy28.h
 modules/omni30/omnipy30.h
+omniidl/cxx/dir.mk
+omniidl/cxx/idlpython.cc
+omniidl/python/omniidl/main.py
+omniidl/python/scripts/omniidlrun.py
 
 
 Fri Sep  1 15:07:45 BST 2000 dpg1

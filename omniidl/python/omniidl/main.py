@@ -29,6 +29,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.25.2.2  2000/09/06 11:40:24  dpg1
+# Support for Python 1.6 and 2.0b1.
+#
 # Revision 1.25.2.1  2000/08/29 15:20:28  dpg1
 # New relativeScope() function. New -i flag to enter interactive loop
 # after parsing
@@ -129,10 +132,10 @@
 
 import sys
 
-if sys.version[:6] != "1.5.2 ":
+if sys.hexversion < 0x10502f0:
     sys.stderr.write("\n\n")
     sys.stderr.write("omniidl: WARNING!!\n\n")
-    sys.stderr.write("omniidl: Python version 1.5.2 is required.\n")
+    sys.stderr.write("omniidl: Python version 1.5.2 or later is required.\n")
     sys.stderr.write("omniidl: " + sys.executable + " is version " + \
                      sys.version + "\n")
     sys.stderr.write("omniidl: Execution is likely to fail.\n")
