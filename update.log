@@ -1,3 +1,19 @@
+Wed Nov 29 17:01:06 GMT 2000 dpg1
+=================================
+
+- Fix deadlock when trying to lock omniORB internal lock while holding
+  the Python interpreter lock. Must be allowed to lock Python lock
+  while holding omniORB lock to avoid the race condition with
+  _release_ref() on Python servants.
+
+modules/omni30/omnipy30.h
+modules/omni30/pyORBFunc.cc
+modules/omni30/pyObjectRef.cc
+modules/omni30/pyPOAFunc.cc
+modules/omni30/pyPOAManagerFunc.cc
+modules/omni30/pyServant.cc
+
+
 Tue Nov 28 14:48:48 GMT 2000 dpg1
 =================================
 

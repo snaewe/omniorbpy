@@ -30,6 +30,10 @@
 // $Id$
 
 // $Log$
+// Revision 1.24.2.5  2000/11/29 17:11:19  dpg1
+// Fix deadlock when trying to lock omniORB internal lock while holding
+// the Python interpreter lock.
+//
 // Revision 1.24.2.4  2000/09/21 11:05:49  dpg1
 // Fix race condition with Py_omniServant deletion.
 //
@@ -340,34 +344,37 @@ PortableServer::POA_ptr
 omniPy::
 Py_omniServant::_default_POA()
 {
-  omnipyThreadCache::lock _t;
-  PyObject* pyPOA = PyObject_CallMethod(pyservant_, (char*)"_default_POA", 0);
+  {
+    omnipyThreadCache::lock _t;
+    PyObject* pyPOA = PyObject_CallMethod(pyservant_,
+					  (char*)"_default_POA", 0);
+    if (pyPOA) {
+      PortableServer::POA_ptr poa =
+	(PortableServer::POA_ptr)omniPy::getTwin(pyPOA, POA_TWIN);
 
-  if (pyPOA) {
-    PortableServer::POA_ptr poa =
-      (PortableServer::POA_ptr)omniPy::getTwin(pyPOA, POA_TWIN);
-
-    Py_DECREF(pyPOA);
-    if (poa) {
-      return PortableServer::POA::_duplicate(poa);
+      Py_DECREF(pyPOA);
+      if (poa) {
+	return PortableServer::POA::_duplicate(poa);
+      }
+      else {
+	if (omniORB::trace(1)) {
+	  omniORB::logger l;
+	  l <<
+	    "Python servant returned an invalid object from `_default_POA'.\n"
+	    "Returning Root POA\n";
+	}
+      }      
     }
     else {
       if (omniORB::trace(1)) {
 	omniORB::logger l;
-	l << "Python servant returned an invalid object from `_default_POA'.\n"
-             "Returning Root POA\n";
+	l << "Exception while trying to call _default_POA(). "
+	  "Returning Root POA\n";
+	PyErr_Print();
       }
-    }      
-  }
-  else {
-    if (omniORB::trace(1)) {
-      omniORB::logger l;
-      l << "Exception while trying to call _default_POA(). "
-	   "Returning Root POA\n";
-      PyErr_Print();
+      else
+	PyErr_Clear();
     }
-    else
-      PyErr_Clear();
   }
   CORBA::Object_var obj = omniPy::orb->resolve_initial_references("RootPOA");
   return PortableServer::POA::_narrow(obj);
@@ -378,12 +385,12 @@ PyObject*
 omniPy::
 Py_omniServant::py_this()
 {
-  CORBA::Object_ptr objref;
+  CORBA::Object_ptr objref, lobjref;
   {
     omniPy::InterpreterUnlocker _u;
-    objref = (CORBA::Object_ptr)_do_this(CORBA::Object::_PD_repoId);
+    objref  = (CORBA::Object_ptr)_do_this(CORBA::Object::_PD_repoId);
+    lobjref = omniPy::makeLocalObjRef(repoId_, objref);
   }
-  CORBA::Object_ptr lobjref = omniPy::makeLocalObjRef(repoId_, objref);
   return omniPy::createPyCorbaObjRef(repoId_, lobjref);
 }
 
@@ -949,14 +956,18 @@ Py_ServantActivator::etherealize(const PortableServer::ObjectId& oid,
 
   omniPy::Py_omniServant* pyos;
   pyos = (omniPy::Py_omniServant*)serv->_ptrToInterface("Py_omniServant");
-  if (!pyos) OMNIORB_THROW(OBJ_ADAPTER, 0, CORBA::COMPLETED_NO);
-  // *** Good choice of exn?
+  if (!pyos) {
+    omniPy::InterpreterUnlocker _u;
+    serv->_remove_ref();
+    OMNIORB_THROW(OBJ_ADAPTER, 0, CORBA::COMPLETED_NO);
+  }
 
   method = PyObject_GetAttrString(pysa_, (char*)"etherealize");
   if (!method) {
     PyErr_Clear();
+    omniPy::InterpreterUnlocker _u;
+    serv->_remove_ref();
     OMNIORB_THROW(OBJ_ADAPTER, 0, CORBA::COMPLETED_NO);
-    // *** Good choice of exn?
   }
   PortableServer::POA::_duplicate(poa);
   argtuple = Py_BuildValue((char*)"s#NNii",
@@ -1148,14 +1159,18 @@ Py_ServantLocator::postinvoke(const PortableServer::ObjectId& oid,
 
   omniPy::Py_omniServant* pyos;
   pyos = (omniPy::Py_omniServant*)serv->_ptrToInterface("Py_omniServant");
-  if (!pyos) OMNIORB_THROW(OBJ_ADAPTER, 0, CORBA::COMPLETED_NO);
-  // *** Good choice of exn?
+  if (!pyos) {
+    omniPy::InterpreterUnlocker _u;
+    serv->_remove_ref();
+    OMNIORB_THROW(OBJ_ADAPTER, 0, CORBA::COMPLETED_NO);
+  }
 
   method = PyObject_GetAttrString(pysl_, (char*)"postinvoke");
   if (!method) {
     PyErr_Clear();
+    omniPy::InterpreterUnlocker _u;
+    serv->_remove_ref();
     OMNIORB_THROW(OBJ_ADAPTER, 0, CORBA::COMPLETED_NO);
-    // *** Good choice of exn?
   }
   PortableServer::POA::_duplicate(poa);
   argtuple = Py_BuildValue((char*)"s#NsNN",

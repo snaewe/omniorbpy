@@ -8,6 +8,19 @@
 
 <buglist version="1.2">
 
+<bug id="5" date="Wed Nov 29 17:01:06 GMT 2000" user="dpg1">
+
+  <summary>Deadlock with concurrent calls to _this()</summary>
+  <reported>Mike Olson</reported>
+  <link href="http://www.uk.research.att.com/omniORB/archives/2000-11/0203.html"/>
+  <text>
+  In various circumstances, omniORBpy could deadlock due to holding an
+  omniORB internal lock at inappropriate times. This bug was provoked
+  by the fix to <a href="bugfixes11.html#bug6">bug 6</a> in omniORBpy
+  1.1.
+  </text>
+</bug>
+
 <bug id="4" date="Tue Nov 21 10:46:54 GMT 2000" user="dpg1">
 
   <summary>Segfault in string_to_object</summary>

@@ -31,6 +31,10 @@
 // $Id$
 
 // $Log$
+// Revision 1.17.2.2  2000/11/29 17:11:18  dpg1
+// Fix deadlock when trying to lock omniORB internal lock while holding
+// the Python interpreter lock.
+//
 // Revision 1.17.2.1  2000/11/21 10:59:58  dpg1
 // Segfault when string_to_object returns a nil objref.
 //
@@ -540,10 +544,14 @@ omniPy::copyObjRefArgument(PyObject* pytargetRepoId, PyObject* pyobjref,
 
   if (targetRepoId[0] == '\0') targetRepoId = CORBA::Object::_PD_repoId;
 
-  omniObjRef* newooref     = omniPy::createObjRef(actualRepoId,
-						  targetRepoId,
-						  ooref->_iopProfiles(), 0,
-						  0, 0);
+  omniObjRef* newooref;
+  {
+    omniPy::InterpreterUnlocker _u;
+    newooref = omniPy::createObjRef(actualRepoId,
+				    targetRepoId,
+				    ooref->_iopProfiles(), 0,
+				    0, 0);
+  }
   return createPyCorbaObjRef(targetRepoId,
 			     (CORBA::Object_ptr)newooref->
 			             _ptrToObjRef(CORBA::Object::_PD_repoId));
@@ -561,10 +569,14 @@ omniPy::stringToObject(const char* uri)
     return cxxobj;
   }
   omniObjRef* cxxobjref = cxxobj->_PR_getobj();
-  omniObjRef* objref    = omniPy::createObjRef(cxxobjref->_mostDerivedRepoId(),
-					       CORBA::Object::_PD_repoId,
-					       cxxobjref->_iopProfiles(),
-					       0, 0);
+  omniObjRef* objref;
+  {
+    omniPy::InterpreterUnlocker _u;
+    objref = omniPy::createObjRef(cxxobjref->_mostDerivedRepoId(),
+				  CORBA::Object::_PD_repoId,
+				  cxxobjref->_iopProfiles(),
+				  0, 0);
+  }
   CORBA::release(cxxobj);
   return (CORBA::Object_ptr)objref->_ptrToObjRef(CORBA::Object::_PD_repoId);
 }
@@ -573,6 +585,7 @@ omniPy::stringToObject(const char* uri)
 CORBA::Object_ptr
 omniPy::UnMarshalObjRef(const char* repoId, NetBufferedStream& s)
 {
+  omniPy::InterpreterUnlocker _u;
   OMNIORB_ASSERT(repoId);
 
   CORBA::ULong idlen;
@@ -656,6 +669,7 @@ omniPy::UnMarshalObjRef(const char* repoId, NetBufferedStream& s)
 CORBA::Object_ptr
 omniPy::UnMarshalObjRef(const char* repoId, MemBufferedStream& s)
 {
+  omniPy::InterpreterUnlocker _u;
   OMNIORB_ASSERT(repoId);
 
   CORBA::ULong idlen;

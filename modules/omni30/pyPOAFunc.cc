@@ -29,6 +29,10 @@
 
 // $Id$
 // $Log$
+// Revision 1.12.2.2  2000/11/29 17:11:18  dpg1
+// Fix deadlock when trying to lock omniORB internal lock while holding
+// the Python interpreter lock.
+//
 // Revision 1.12.2.1  2000/09/21 11:05:49  dpg1
 // Fix race condition with Py_omniServant deletion.
 //
@@ -330,7 +334,10 @@ extern "C" {
     OMNIORB_ASSERT(poa);
 
     try {
-      return PyString_FromString(poa->the_name());
+      char*     name   = poa->the_name();
+      PyObject* pyname = PyString_FromString(name);
+      CORBA::string_free(name);
+      return pyname;
     }
     OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
   }
@@ -406,8 +413,13 @@ extern "C" {
 	return Py_None;
       }
       else {
-	const char* repoId = act->_PR_getobj()->_mostDerivedRepoId();
-	CORBA::Object_ptr lobjref = omniPy::makeLocalObjRef(repoId, act);
+	CORBA::Object_ptr lobjref;
+	const char* repoId;
+	{
+	  omniPy::InterpreterUnlocker _u;
+	  repoId  = act->_PR_getobj()->_mostDerivedRepoId();
+	  lobjref = omniPy::makeLocalObjRef(repoId, act);
+	}
 	return omniPy::createPyCorbaObjRef(repoId, lobjref);
       }
     }
@@ -427,19 +439,20 @@ extern "C" {
 								  OBJREF_TWIN);
     RAISE_PY_BAD_PARAM_IF(!actobj);
 
-    PortableServer::AdapterActivator_var act;
-    {
-      omniPy::InterpreterUnlocker _u;
-      act = PortableServer::AdapterActivator::_narrow(actobj);
-    }
-    RAISE_PY_BAD_PARAM_IF(CORBA::is_nil(act));
-
     try {
+      omniPy::InterpreterUnlocker _u;
+      PortableServer::AdapterActivator_var act =
+	PortableServer::AdapterActivator::_narrow(actobj);
+
+      if (CORBA::is_nil(act))
+	OMNIORB_THROW(BAD_PARAM, 0, CORBA::COMPLETED_NO);
+
       poa->the_activator(act);
-      Py_INCREF(Py_None);
-      return Py_None;
     }
     OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
+
+    Py_INCREF(Py_None);
+    return Py_None;
   }
 
   static PyObject* pyPOA_get_servant_manager(PyObject* self, PyObject* args)
@@ -459,8 +472,13 @@ extern "C" {
 	return Py_None;
       }
       else {
-	const char* repoId = sm->_PR_getobj()->_mostDerivedRepoId();
-	CORBA::Object_ptr lobjref = omniPy::makeLocalObjRef(repoId, sm);
+	CORBA::Object_ptr lobjref;
+	const char*       repoId;
+	{
+	  omniPy::InterpreterUnlocker _u;
+	  repoId  = sm->_PR_getobj()->_mostDerivedRepoId();
+	  lobjref = omniPy::makeLocalObjRef(repoId, sm);
+	}
 	return omniPy::createPyCorbaObjRef(repoId, lobjref);
       }
     }
@@ -483,22 +501,23 @@ extern "C" {
 								  OBJREF_TWIN);
     RAISE_PY_BAD_PARAM_IF(!mgrobj);
 
-    PortableServer::ServantManager_var mgr;
-    {
-      omniPy::InterpreterUnlocker _u;
-      mgr = PortableServer::ServantManager::_narrow(mgrobj);
-    }
-    RAISE_PY_BAD_PARAM_IF(CORBA::is_nil(mgr));
-
     try {
+      omniPy::InterpreterUnlocker _u;
+      PortableServer::ServantManager_var mgr =
+	PortableServer::ServantManager::_narrow(mgrobj);
+
+      if (CORBA::is_nil(mgr))
+	OMNIORB_THROW(BAD_PARAM, 0, CORBA::COMPLETED_NO);
+
       poa->set_servant_manager(mgr);
-      Py_INCREF(Py_None);
-      return Py_None;
     }
     catch (PortableServer::POA::WrongPolicy& ex) {
       return raisePOAException(pyPOA, "WrongPolicy");
     }
     OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
+
+    Py_INCREF(Py_None);
+    return Py_None;
   }
 
   static PyObject* pyPOA_get_servant(PyObject* self, PyObject* args)
@@ -528,8 +547,11 @@ extern "C" {
       else {
 	// Oh dear -- the servant is C++, not Python. OBJ_ADAPTER
 	// seems the most sensible choice of exception.
-	CORBA::OBJ_ADAPTER ex;
-	return omniPy::handleSystemException(ex);
+	{
+	  omniPy::InterpreterUnlocker _u;
+	  servant->_remove_ref();
+	}
+	OMNIORB_THROW(OBJ_ADAPTER, 0, CORBA::COMPLETED_NO);
       }
     }
     catch (PortableServer::POA::NoServant& ex) {
@@ -539,6 +561,7 @@ extern "C" {
       return raisePOAException(pyPOA, "WrongPolicy");
     }
     OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
+    return 0;
   }
 
   static PyObject* pyPOA_set_servant(PyObject* self, PyObject* args)
@@ -688,12 +711,12 @@ extern "C" {
     OMNIORB_ASSERT(poa);
 
     try {
-      CORBA::Object_ptr objref;
+      CORBA::Object_ptr objref, lobjref;
       {
 	omniPy::InterpreterUnlocker _u;
-	objref = poa->create_reference(repoId);
+	objref  = poa->create_reference(repoId);
+	lobjref = omniPy::makeLocalObjRef(repoId, objref);
       }
-      CORBA::Object_ptr lobjref = omniPy::makeLocalObjRef(repoId, objref);
       return omniPy::createPyCorbaObjRef(repoId, lobjref);
     }
     catch (PortableServer::POA::WrongPolicy& ex) {
@@ -720,12 +743,12 @@ extern "C" {
 
     try {
       PortableServer::ObjectId oid(oidlen, oidlen, (CORBA::Octet*)oidstr, 0);
-      CORBA::Object_ptr objref;
+      CORBA::Object_ptr objref, lobjref;
       {
 	omniPy::InterpreterUnlocker _u;
-	objref = poa->create_reference_with_id(oid, repoId);
+	objref  = poa->create_reference_with_id(oid, repoId);
+	lobjref = omniPy::makeLocalObjRef(repoId, objref);
       }
-      CORBA::Object_ptr lobjref = omniPy::makeLocalObjRef(repoId, objref);
       return omniPy::createPyCorbaObjRef(repoId, lobjref);
     }
     catch (PortableServer::POA::WrongPolicy& ex) {
@@ -783,14 +806,12 @@ extern "C" {
     PYOSReleaseHelper _r(pyos);
 
     try {
-      CORBA::Object_ptr objref;
+      CORBA::Object_ptr objref, lobjref;
       {
 	omniPy::InterpreterUnlocker _u;
-	objref = poa->servant_to_reference(pyos);
+	objref  = poa->servant_to_reference(pyos);
+	lobjref = omniPy::makeLocalObjRef(pyos->_mostDerivedRepoId(), objref);
       }
-      CORBA::Object_ptr lobjref =
-	omniPy::makeLocalObjRef(pyos->_mostDerivedRepoId(), objref);
-
       return omniPy::createPyCorbaObjRef(pyos->_mostDerivedRepoId(), lobjref);
     }
     catch (PortableServer::POA::ServantNotActive& ex) {
@@ -837,8 +858,11 @@ extern "C" {
       else {
 	// Oh dear -- the servant is C++, not Python. OBJ_ADAPTER
 	// seems the most sensible choice of exception.
-	CORBA::OBJ_ADAPTER ex;
-	return omniPy::handleSystemException(ex);
+	{
+	  omniPy::InterpreterUnlocker _u;
+	  servant->_remove_ref();
+	}
+	OMNIORB_THROW(OBJ_ADAPTER, 0, CORBA::COMPLETED_NO);
       }
     }
     catch (PortableServer::POA::ObjectNotActive& ex) {
@@ -851,6 +875,7 @@ extern "C" {
       return raisePOAException(pyPOA, "WrongPolicy");
     }
     OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
+    return 0;
   }
 
   static PyObject* pyPOA_reference_to_id(PyObject* self, PyObject* args)
@@ -904,8 +929,8 @@ extern "C" {
 
     try {
       PortableServer::ObjectId oid(oidlen, oidlen, (CORBA::Octet*)oidstr, 0);
-      PortableServer::Servant servant;
-      omniPy::Py_omniServant* pyos;
+      PortableServer::Servant  servant;
+      omniPy::Py_omniServant*  pyos;
       {
 	omniPy::InterpreterUnlocker _u;
 	servant = poa->id_to_servant(oid);
@@ -920,8 +945,11 @@ extern "C" {
       else {
 	// Oh dear -- the servant is C++, not Python. OBJ_ADAPTER
 	// seems the most sensible choice of exception.
-	CORBA::OBJ_ADAPTER ex;
-	return omniPy::handleSystemException(ex);
+	{
+	  omniPy::InterpreterUnlocker _u;
+	  servant->_remove_ref();
+	}
+	OMNIORB_THROW(OBJ_ADAPTER, 0, CORBA::COMPLETED_NO);
       }
     }
     catch (PortableServer::POA::ObjectNotActive& ex) {
@@ -931,6 +959,7 @@ extern "C" {
       return raisePOAException(pyPOA, "WrongPolicy");
     }
     OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
+    return 0;
   }
 
   static PyObject* pyPOA_id_to_reference(PyObject* self, PyObject* args)
@@ -948,13 +977,14 @@ extern "C" {
 
     try {
       PortableServer::ObjectId oid(oidlen, oidlen, (CORBA::Octet*)oidstr, 0);
-      CORBA::Object_ptr objref;
+      CORBA::Object_ptr objref, lobjref;
+      const char* mdri;
       {
 	omniPy::InterpreterUnlocker _u;
-	objref = poa->id_to_reference(oid);
+	objref  = poa->id_to_reference(oid);
+	mdri    = objref->_PR_getobj()->_mostDerivedRepoId();
+	lobjref = omniPy::makeLocalObjRef(mdri, objref);
       }
-      const char*       mdri    = objref->_PR_getobj()->_mostDerivedRepoId();
-      CORBA::Object_ptr lobjref = omniPy::makeLocalObjRef(mdri, objref);
       return omniPy::createPyCorbaObjRef(mdri, lobjref);
     }
     catch (PortableServer::POA::ObjectNotActive& ex) {
@@ -964,6 +994,7 @@ extern "C" {
       return raisePOAException(pyPOA, "WrongPolicy");
     }
     OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
+    return 0;
   }
 
   static PyObject* pyPOA_releaseRef(PyObject* self, PyObject* args)

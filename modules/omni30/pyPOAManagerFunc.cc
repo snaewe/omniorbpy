@@ -30,6 +30,10 @@
 // $Id$
 
 // $Log$
+// Revision 1.3.2.1  2000/11/29 17:11:19  dpg1
+// Fix deadlock when trying to lock omniORB internal lock while holding
+// the Python interpreter lock.
+//
 // Revision 1.3  2000/03/24 16:48:57  dpg1
 // Local calls now have proper pass-by-value semantics.
 // Lots of little stability improvements.
@@ -80,6 +84,7 @@ extern "C" {
     OMNIORB_ASSERT(pm);
 
     try {
+      omniPy::InterpreterUnlocker _u;
       pm->activate();
     }
     catch (PortableServer::POAManager::AdapterInactive& ex) {
@@ -104,6 +109,7 @@ extern "C" {
     OMNIORB_ASSERT(pm);
 
     try {
+      omniPy::InterpreterUnlocker _u;
       pm->hold_requests(wfc);
     }
     catch (PortableServer::POAManager::AdapterInactive& ex) {
@@ -128,6 +134,7 @@ extern "C" {
     OMNIORB_ASSERT(pm);
 
     try {
+      omniPy::InterpreterUnlocker _u;
       pm->discard_requests(wfc);
     }
     catch (PortableServer::POAManager::AdapterInactive& ex) {
@@ -152,6 +159,7 @@ extern "C" {
     OMNIORB_ASSERT(pm);
 
     try {
+      omniPy::InterpreterUnlocker _u;
       pm->deactivate(eo, wfc);
     }
     catch (PortableServer::POAManager::AdapterInactive& ex) {
@@ -174,7 +182,11 @@ extern "C" {
 
     OMNIORB_ASSERT(pm);
 
-    PortableServer::POAManager::State s = pm->get_state();
+    PortableServer::POAManager::State s;
+    {
+      omniPy::InterpreterUnlocker _u;
+      s = pm->get_state();
+    }
     return PyInt_FromLong((int)s);
   }
 
@@ -188,8 +200,10 @@ extern "C" {
       (PortableServer::POAManager_ptr)omniPy::getTwin(pyPM, POAMANAGER_TWIN);
 
     OMNIORB_ASSERT(pm);
-    CORBA::release(pm);
-
+    {
+      omniPy::InterpreterUnlocker _u;
+      CORBA::release(pm);
+    }
     omniPy::remTwin(pyPM, POAMANAGER_TWIN);
     omniPy::remTwin(pyPM, OBJREF_TWIN);
 
