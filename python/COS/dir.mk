@@ -74,6 +74,9 @@ INSTALLEDFILES += $(foreach f, $(FILES), $(INSTALLPYLIBDIR)/$(f))
 # Put CosNaming at the top of the installation area too
 INSTALLEDFILES += $(foreach f, $(filter CosNaming%, $(FILES)), $(INSTALLPYTHONDIR)/$(f))
 
+EXPORTEDFILES += $(foreach f, $(FILES), $(PYLIBDIR)/$(f))
+EXPORTEDFILES += $(foreach f, $(filter CosNaming%, $(FILES)), $(PYLIBROOT)/$(f))
+
 # A .pth file to expose omniORB/COS to the global namespace
 FILES += omniORB.pth
 INSTALLEDFILES += $(INSTALLPYTHONDIR)/omniORB.pth
@@ -85,19 +88,14 @@ clean::
 	$(RM) $(FILES)
 	$(RM) -r $(IDLFILES:.idl=) $(IDLFILES:.idl=__POA)
 
-export:: $(FILES)
-	@(dir="$(PYLIBDIR)"; \
-          for file in $^; do \
-            $(ExportFileToDir) \
-          done; \
-          cd $(PYLIBDIR); \
-	  $(PYTHON) -c "import compileall; compileall.compile_dir('.')"; \
-	 )
+export:: $(EXPORTEDFILES)
+	cd $(PYLIBDIR); \
+	$(PYTHON) -c "import compileall; compileall.compile_dir('.')";
 
 ifdef INSTALLTARGET
 install:: $(INSTALLEDFILES)
 	cd $(INSTALLPYLIBDIR); \
-	 $(PYTHON) -c "import compileall; compileall.compile_dir('.')";
+	$(PYTHON) -c "import compileall; compileall.compile_dir('.')";
 endif
 
 # Specific rule for installing CosNaming at the top level
@@ -120,6 +118,15 @@ $(INSTALLPYLIBDIR)/%: %
 # Specific rule for building the path file.
 omniORB.pth: ;
 	@echo $(subst $(INSTALLPYTHONDIR)/,,$(INSTALLPYLIBDIR)) > $@
+
+
+# Rules for make export
+$(PYLIBROOT)/CosNaming%: CosNaming%
+	@(dir="$(dir $@)"; file="$^"; $(ExportFileToDir))
+
+$(PYLIBDIR)/%: %
+	@(dir="$(dir $@)"; file="$^"; $(ExportFileToDir))
+
 
 # Generic rule for building all stubs and skeletons.
 %_idl.py %/__init__.py %__POA/__init__.py: %.idl
