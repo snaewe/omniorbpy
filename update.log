@@ -1,3 +1,11 @@
+Fri Jun 29 10:52:37 BST 2001 dpg1
+=================================
+
+- Fix for clients using GIOP 1.0.
+
+modules/pyCallDescriptor.cc
+
+
 Thu Jun 28 17:39:13 BST 2001 dpg1
 =================================
 
