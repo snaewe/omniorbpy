@@ -81,8 +81,8 @@
           <ul><li>Update from <a href="../cvs.html">CVS</a> in the
                   <code>"omnipy1_develop"</code> branch.</li>
 
-              <li>Apply <a href="ftp://ftp.uk.research.att.com/pub/omniORB/omniORBpy/omniORBpy_1_2_bugfixes.patch">this
-                  patch</a> to the omniORBpy 1.1 distribution.</li>
+              <li>Apply <a href="ftp://ftp.uk.research.att.com/pub/omniORB/omniORBpy/omniORBpy_1_3_bugfixes.patch">this
+                  patch</a> to the omniORBpy 1.3 distribution.</li>
 
               <li>Download the latest <a
               href="ftp://ftp.uk.research.att.com/pub/omniORB/omniORBpy_snapshots/">source

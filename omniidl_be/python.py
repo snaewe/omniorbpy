@@ -28,6 +28,10 @@
 
 # $Id$
 # $Log$
+# Revision 1.27.2.5  2001/03/19 12:01:24  dpg1
+# Invalid stub code generated for typedef to struct/union inside an
+# interface.
+#
 # Revision 1.27.2.4  2000/11/01 11:25:56  dpg1
 # Recursive structs inside interfaces were broken
 #
@@ -994,8 +998,19 @@ class PythonVisitor:
                    unaliased_type.kind() in [idltype.tk_struct,
                                              idltype.tk_union]:
 
-                    parent = dotName(fixupScopedName(unaliased_type.decl().\
-                                                     scopedName()))
+                    psname  = unaliased_type.decl().scopedName()
+                    myscope = decl.scopedName()[:-1]
+
+                    # If the struct/union definition is in the same
+                    # scope as the typedef, we must use a relative
+                    # name to refer to the parent class, since the
+                    # enclosing Python class has not yet been fully
+                    # defined.
+
+                    if psname[:len(myscope)] == myscope:
+                        parent = dotName(psname[len(myscope):])
+                    else:
+                        parent = dotName(fixupScopedName(psname))
 
                     self.st.out(typedef_struct_union_header,
                                 tdname = tdname,

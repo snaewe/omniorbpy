@@ -1,13 +1,32 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
 <?xml-stylesheet type="text/xsl" href="bugfixes.xsl"?>
 
-<!-- The following bugs have been fixed since the omniORBpy 1.2     -->
+<!-- The following bugs have been fixed since the omniORBpy 1.3     -->
 <!-- release. This file is transformed into html with bugfixes.xsl. -->
 
 <!-- Editors: make sure the content you add is well-formed XML.     -->
 
 <buglist version="1.3">
 
-<nobugs/>
+<bug id="1" date="Mon Mar 19 11:33:37 GMT 2001" user="dpg1">
+
+  <summary>Invalid stub code for typedef to struct/union inside
+  interface</summary>
+  <reported>Jimmy Wilson</reported>
+  <link href="http://www.uk.research.att.com/omniORB/archives/2001-03/0119.html"/>
+  <text>
+  omniidl -bpython would generate invalid stub code for IDL like the
+  following:
+  <p/>
+  <pre>
+  interface I {
+    struct S {
+      long l;
+    };
+    typedef S T;
+  };
+  </pre>
+  </text>
+</bug>
 
 </buglist>
