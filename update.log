@@ -1,3 +1,12 @@
+Mon May 14 15:17:31 BST 2001 dpg1
+=================================
+
+- TypeCode.equivalent() was broken in a similar manner to
+  get_compact_typecode()
+
+python/omniORB/tcInternal.py
+
+
 Mon May 14 11:02:47 BST 2001 dpg1
 =================================
 
