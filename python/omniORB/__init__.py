@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.24.2.2  2000/08/23 09:22:07  dpg1
+# Fix loading of IfR stubs with "import CORBA"
+#
 # Revision 1.24.2.1  2000/08/17 08:46:06  dpg1
 # Support for omniORB.LOCATION_FORWARD exception
 #
@@ -333,7 +336,9 @@ def findTypeCode(repoId):
 
 # Function to return a Python module for the required IDL module name
 def openModule(mname, fname=None):
-    if sys.modules.has_key(mname):
+    if mname == "CORBA":
+        mod = sys.modules["omniORB.CORBA"]
+    elif sys.modules.has_key(mname):
         mod = sys.modules[mname]
     else:
         mod = newModule(mname)
@@ -353,11 +358,6 @@ def newModule(mname):
     mlist   = string.split(mname, ".")
     current = ""
     mod     = None
-
-    # If we're trying to re-open the CORBA module, make it appear as
-    # just "CORBA", as well as "omniORB.CORBA"
-    if mlist[0] == "CORBA" and sys.modules.has_key("omniORB.CORBA"):
-        sys.modules["CORBA"] = sys.modules["omniORB.CORBA"]
 
     for name in mlist:
         current = current + name

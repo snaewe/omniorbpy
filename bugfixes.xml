@@ -8,6 +8,18 @@
 
 <buglist>
 
+<bug id="3" date="Wed Aug 23 10:15:43 BST 2000" user="dpg1">
+
+  <summary>Interface Repository stubs not available with "import
+  CORBA"</summary>
+  <reported>Richard Gruet</reported>
+  <text>
+  The <code>OMNIORBPY_IMPORT_IR_STUBS</code> environment variable
+  worked with "<code>from omniORB import CORBA</code>", but not
+  "<code>import CORBA</code>".
+  </text>
+</bug>
+
 <bug id="2" date="Tue Aug 22 17:01:50 BST 2000" user="dpg1">
 
   <summary>Instability after unexpected user exceptions</summary>
