@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.18  2000/03/30 13:01:14  dpg1
+// Locking fixed for ~Py_omniServant().
+//
 // Revision 1.17  2000/03/24 17:10:51  dpg1
 // Work-around for conflict between VC++ and xlC bugs.
 //
@@ -828,7 +831,10 @@ Py_ServantActivator::etherealize(const PortableServer::ObjectId& oid,
   Py_DECREF(method);
   Py_DECREF(argtuple);
 
-  pyos->_remove_ref();
+  {
+    omniPy::InterpreterUnlocker _u;
+    pyos->_remove_ref();
+  }
 
   if (result)
     Py_DECREF(result);
@@ -1000,7 +1006,10 @@ Py_ServantLocator::postinvoke(const PortableServer::ObjectId& oid,
   Py_DECREF(method);
   Py_DECREF(argtuple);
 
-  pyos->_remove_ref();
+  {
+    omniPy::InterpreterUnlocker _u;
+    pyos->_remove_ref();
+  }
 
   if (result)
     Py_DECREF(result);
