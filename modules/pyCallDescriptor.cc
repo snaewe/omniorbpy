@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.6  2001/06/29 15:11:12  dpg1
+// Fix for clients using GIOP 1.0.
+//
 // Revision 1.1.2.5  2001/06/29 09:53:56  dpg1
 // Fix for clients using GIOP 1.0.
 //
@@ -104,8 +107,9 @@ omniPy::Py_omniCallDescriptor::marshalArguments(cdrStream& stream)
 			      PyTuple_GET_ITEM(in_d_,i),
 			      PyTuple_GET_ITEM(args_,i));
     in_marshal_ = 0;
+
+    releaseInterpreterLock();
   }
-  releaseInterpreterLock();
 }
 
 
