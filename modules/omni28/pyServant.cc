@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.6  1999/09/29 11:38:29  dpg1
+// Comments removed.
+//
 // Revision 1.5  1999/09/29 09:53:23  dpg1
 // Workaround to Python's lack of concurrency control on its
 // PyInterpreterState.
@@ -155,7 +158,7 @@ Py_Servant::dispatch(GIOP_S&        giop_server,
 {
   int i;
 
-  cout << "dispatch()..." << op << endl;
+  //  cout << "dispatch()..." << op << endl;
 
   lockWithNewThreadState _t;
 
@@ -246,14 +249,14 @@ Py_Servant::dispatch(GIOP_S&        giop_server,
     Py_DECREF(result);
     giop_server.ReplyCompleted();
 
-    cout << "dispatch done: " << op << endl;
+    //    cout << "dispatch done: " << op << endl;
     return 1;
   }
   else {
     // An exception of some sort was thrown
     PyObject *etype, *evalue, *etraceback;
 
-    cout << "Exception..." << endl;
+    //    cout << "Exception..." << endl;
 
     PyErr_Fetch(&etype, &evalue, &etraceback);
 
