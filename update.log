@@ -1,3 +1,11 @@
+Fri Jul 18 12:22:53 BST 2003 dgrisby
+====================================
+
+- Reference count bug. Thanks Scott Robertson.
+
+modules/pyMarshal.cc
+
+
 Thu Jul  3 14:48:17 BST 2003 dgrisby
 ====================================
 

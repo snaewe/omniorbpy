@@ -29,6 +29,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.2.16  2003/07/18 11:28:18  dgrisby
+// Reference count bug. Thanks Scott Robertson.
+//
 // Revision 1.1.2.15  2003/01/27 11:56:58  dgrisby
 // Correctly handle invalid returns from application code.
 //
@@ -2722,8 +2725,6 @@ unmarshalPyObjectAny(cdrStream& stream, PyObject* d_o)
   omniPy::PyRefHolder tcobj_holder(tcobj);
 
   PyObject* value = omniPy::unmarshalPyObject(stream, desc);
-
-  Py_DECREF(argtuple);
 
   argtuple = argtuple_holder.change(PyTuple_New(2));
   PyTuple_SET_ITEM(argtuple, 0, tcobj_holder.retn());
