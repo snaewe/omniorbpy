@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+<?xml-stylesheet type="text/xml" href="buglayout.xml"?>
+
+<!-- The following bugs have been fixed since the omniORBpy 2.3     -->
+<!-- release. This file is transformed into html with bugfixes.xsl. -->
+
+<!-- Editors: make sure the content you add is well-formed XML.     -->
+
+<buglist version="2.3">
+
+<bug id="3" date="Mon Jun 14 12:56:43 BST 2004" user="dgrisby">
+  <summary>Deadlock in get_reference</summary>
+  <text>
+  POA current get_reference did not obey the lock partial order, so it
+  could result in a deadlock.
+  </text>
+</bug>
+
+<bug id="2" date="Mon Feb 16 13:55:02 GMT 2004" user="dgrisby">
+  <summary>Operations clashing with keywords were broken</summary>
+  <text>
+  The stub code used the escaped operation name on the wire, so the
+  remote end did not accept the operation.
+  </text>
+</bug>
+
+<bug id="1" date="Mon Dec 15 12:11:03 GMT 2003" user="dgrisby">
+  <summary>Bugs in LOCATION_FORWARD handling</summary>
+  <text>
+  Reference counting bugs could lead to crashes.
+  </text>
+</bug>
+
+</buglist>
