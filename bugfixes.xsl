@@ -73,7 +73,7 @@
 	  The following bugs in omniORBpy 1.0 have been fixed. You can
 	  get the fixes in three ways:</p>
 
-          <ul><li>Update from <a href="cvs.html">CVS</a> in the
+          <ul><li>Update from <a href="../cvs.html">CVS</a> in the
                   <code>"omnipy1_develop"</code> branch.</li>
 
               <li>Apply <a href="ftp://ftp.uk.research.att.com/pub/omniORB/omniORBpy/omniORBpy_1_0_bugfixes.patch">this
