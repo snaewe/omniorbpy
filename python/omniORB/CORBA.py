@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.15  1999/12/07 12:35:33  dpg1
+# id() function added.
+#
 # Revision 1.14  1999/11/25 14:12:34  dpg1
 # sleep()ing for maxint seconds wasn't a good idea, since some platforms
 # use milliseconds for their sleep system call.
@@ -398,6 +401,14 @@ _tc_any       = tcInternal.createTypeCode(tcInternal.tv_any)
 _tc_TypeCode  = tcInternal.createTypeCode(tcInternal.tv_TypeCode)
 _tc_Principal = tcInternal.createTypeCode(tcInternal.tv_Principal)
 _tc_string    = tcInternal.createTypeCode((tcInternal.tv_string,0))
+
+
+# id() function returns the repository ID of an object
+def id(obj):
+    try:
+        return obj._NP_RepositoryId
+    except AttributeError:
+        raise BAD_PARAM()
 
 
 #############################################################################
