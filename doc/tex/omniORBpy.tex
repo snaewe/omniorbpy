@@ -1300,9 +1300,7 @@ followed by the actual value.  Normally, the TypeCodes for entities
 with names---members of structs, for example---contain those names as
 strings. That permits omniORBpy to create types with the corresponding
 names. Unfortunately, the GIOP specification permits TypeCodes to be
-sent with empty strings where the names would normally
-be\footnote{This is now deprecated, but some ORBs may still send empty
-strings. No version of omniORB has ever sent empty strings.}. In this
+sent with empty strings where the names would normally be. In this
 situation, the types which omniORBpy creates cannot be given the
 correct names. The contents of all types except structs and exceptions
 can be accessed without having to know their names, through the
@@ -1314,10 +1312,11 @@ Similarly, TypeCodes for constructed types such as structs and unions
 normally contain the repository ids of those types. This means that
 omniORBpy can use types statically declared in the stubs when they are
 available. Once again, the specification permits the repository id
-strings to be empty\footnote{And once again, this practice is
-deprecated.}. This means that even if stubs for a type received in an
-Any are available, it may not be able to create a Python value with
-the right type. For example, with a struct definition such as:
+strings to be empty\footnote{The use of empty repository id strings is
+deprecated as of GIOP 1.2.}. This means that even if stubs for a type
+received in an Any are available, it may not be able to create a
+Python value with the right type. For example, with a struct
+definition such as:
 
 \begin{idllisting}
 module M {
@@ -2860,7 +2859,7 @@ values can be changed using the command-line options
 
 Similarly, how long the ORB will wait for a remote call to complete is
 determined by the parameter clientCallTimeOutPeriod for the client
-side and the serverCallTimeOutPeroid for the server side. By default
+side and the serverCallTimeOutPeriod for the server side. By default
 calls will not timeout on either the client or server side.
 
 The timeout can be changed with the
