@@ -63,7 +63,7 @@ following is a list of the missing features.<BR>
 <BR>
 <UL>
 <LI> omniORB does not have its own Interface Repository. However, it
-can act as a client to an IR.<BR>
+can act as a client to an IR<A NAME="text3" HREF="#note3"><SUP><FONT SIZE=2>3</FONT></SUP></A>.<BR>
 <BR>
 
 <LI> The IDL types wchar, wstring, fixed, and valuetype are not
@@ -81,12 +81,36 @@ best to check out the latest status on the omniORB home page
 (<A HREF="http://www.uk.research.att.com/omniORB/"><TT>http://www.uk.research.att.com/omniORB/</TT></A>).<BR>
 <BR>
 <A NAME="toc2"></A>
-<H2>1.2&nbsp;&nbsp; Setting Up Your Environment</H2>
+<H2>1.2&nbsp;&nbsp; Setting up your environment</H2>
 <A NAME="sec:setup"></A>omniORBpy relies on the omniORB C++ libraries. If you are building
 from source, you must first build omniORB itself, as detailed in the
-omniORB documentation.<BR>
+omniORB documentation. After that, you can build the omniORBpy
+distribution, according to the instructions in the release notes.<BR>
 <BR>
-<UL>
+
+<H3>1.2.1&nbsp;&nbsp; Paths</H3>For Python to find omniORBpy, you must add two directories to the
+<TT>PYTHONPATH</TT> environment variable. The <TT>lib/python</TT>
+directory contains platform-independent Python code; the
+<TT>lib/</TT><TT>$</TT><TT>FARCH</TT> directory contains
+platform-specific binaries, where <TT>FARCH</TT> is the name of your
+platform, such as <TT>i586_linux_glibc</TT> or <TT>x86_win32</TT>.<BR>
+<BR>
+On Unix platforms, set <TT>PYTHONPATH</TT> with a command like:<BR>
+<BR>
+<PRE>
+   export PYTHONPATH=$PYTHONPATH:$TOP/lib/python:$TOP/lib/$FARCH
+</PRE>On Windows, use<BR>
+<BR>
+<PRE>
+   set PYTHONPATH=%PYTHONPATH%;%TOP%\lib\python;%TOP%\lib\x86_win32
+</PRE>(Where the <TT>TOP</TT> environment variable is the root of your
+omniORB tree.)<BR>
+<BR>
+You should also add the <TT>bin/</TT><TT>$</TT><TT>FARCH</TT> directory
+to your <TT>PATH</TT>, so you can run the IDL compiler, omniidl.<BR>
+<BR>
+
+<H3>1.2.2&nbsp;&nbsp; Configuration file</H3><UL>
 <LI> On Unix platforms, the omniORB runtime looks for the environment
 variable <TT>OMNIORB_CONFIG</TT>. If this variable is defined, it
 contains the pathname of the omniORB configuration file. If the
@@ -119,7 +143,7 @@ key
 <CODE>HKEY_LOCAL_MACHINE\SOFTWARE\ORL\omniORB\2.0</CODE>.<BR>
 <BR>
 
-<H3>1.2.1&nbsp;&nbsp; omniORB 2.8 configuration file entries</H3><TT>ORBInitRef</TT> is new with omniORB 3. Under omniORB 2.8, you
+<H4> omniORB 2.8 configuration file entries</H4><TT>ORBInitRef</TT> is new with omniORB 3. Under omniORB 2.8, you
 must use the older format (which is still supported by omniORB 3):<BR>
 <BR>
 <PRE>
@@ -144,6 +168,9 @@ in section&nbsp;<A HREF="#sec:missing">1.1.3</A>, a number of features are missi
 
 <DT><A NAME="note2" HREF="#text2"><FONT SIZE=5>2</FONT></A><DD> This means that your Python
 interpreter must have been built with thread support.
+
+<DT><A NAME="note3" HREF="#text3"><FONT SIZE=5>3</FONT></A><DD> See section&nbsp;<A HREF="omniORBpy003.html#sec:ifrstubs">3.3</A>
+for a note about using an interface repository.
 </DL>
 <HR>
 <A HREF="index.html"><IMG SRC ="contents_motif.gif" ALT="Contents"></A>

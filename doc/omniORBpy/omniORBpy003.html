@@ -66,7 +66,7 @@ module M2 {
   };
 };
 </PRE>A reference to an object with interface <TT>B</TT> will
-normally contain the repository id `<TT>IDL:M2/B:1.0</TT>'<A NAME="text8" HREF="#note8"><SUP><FONT SIZE=2>1</FONT></SUP></A>. It is also permitted to have an empty
+normally contain the repository id `<TT>IDL:M2/B:1.0</TT>'<A NAME="text9" HREF="#note9"><SUP><FONT SIZE=2>1</FONT></SUP></A>. It is also permitted to have an empty
 repository id, or the id `<TT>IDL:M1/A:1.0</TT>'.
 `<TT>IDL:M1/A:1.0</TT>' is unlikely unless the server is being
 deliberately obtuse.<BR>
@@ -161,7 +161,7 @@ should bear in mind what omniORBpy's idea of the target type is. You
 must not assume that the ORB will always correctly figure out a more
 derived type than the target. One consequence of this is that you must
 always narrow a plain <TT>CORBA::Object</TT> to a more specific type
-before invoking on it<A NAME="text9" HREF="#note9"><SUP><FONT SIZE=2>2</FONT></SUP></A>. You
+before invoking on it<A NAME="text10" HREF="#note10"><SUP><FONT SIZE=2>2</FONT></SUP></A>. You
 <EM>can</EM> assume that the object reference you receive is of the
 target type, or something derived from it, although the object it
 refers to may turn out to be invalid. The fact that omniORBpy often
@@ -194,7 +194,7 @@ with names---members of structs, for example---contain those names as
 strings. That permits omniORBpy to create types with the corresponding
 names. Unfortunately, the GIOP specification permits TypeCodes to be
 sent with empty strings where the names would normally
-be<A NAME="text10" HREF="#note10"><SUP><FONT SIZE=2>3</FONT></SUP></A>. In this
+be<A NAME="text11" HREF="#note11"><SUP><FONT SIZE=2>3</FONT></SUP></A>. In this
 situation, the types which omniORBpy creates cannot be given the
 correct names. The contents of all types except structs and exceptions
 can be accessed without having to know their names, through the
@@ -206,7 +206,7 @@ Similarly, TypeCodes for constructed types such as structs and unions
 normally contain the repository ids of those types. This means that
 omniORBpy can use types statically declared in the stubs when they are
 available. Once again, the specification permits the repository id
-strings to be empty<A NAME="text11" HREF="#note11"><SUP><FONT SIZE=2>4</FONT></SUP></A>. This means that even if stubs for a type received in an
+strings to be empty<A NAME="text12" HREF="#note12"><SUP><FONT SIZE=2>4</FONT></SUP></A>. This means that even if stubs for a type received in an
 Any are available, it may not be able to create a Python value with
 the right type. For example, with a struct definition such as:<BR>
 <BR>
@@ -237,7 +237,22 @@ if v is not None:
 else:
     print "The Any does not contain a value compatible with M::S."
 </PRE><A NAME="toc12"></A>
-<H2>3.3&nbsp;&nbsp; Using omniORBpy with omniORB 2.8</H2>omniORBpy is designed to work with omniORB 3. When it is used with
+<H2>3.3&nbsp;&nbsp; Interface Repository stubs</H2>
+<A NAME="sec:ifrstubs"></A>The Interface Repository interfaces are declared in IDL module
+<TT>CORBA</TT> so, according to the Python mapping, the stubs for them
+should appear in the Python <TT>CORBA</TT> module, along with all the
+other CORBA definitions. However, since the stubs are extremely large,
+omniORBpy does not include them by default. To do so would
+unnecessarily increase the memory footprint and start-up time.<BR>
+<BR>
+The Interface Repository stubs are automatically included if you
+define the <TT>OMNIORBPY_IMPORT_IR_STUBS</TT> environment variable.
+Alternatively, you can import the stubs at run-time by calling the
+<TT>omniORB.importIRStubs()</TT> function. In both cases, the stubs become
+available in the Python <TT>CORBA</TT> module.<BR>
+<BR>
+<A NAME="toc13"></A>
+<H2>3.4&nbsp;&nbsp; Using omniORBpy with omniORB 2.8</H2>omniORBpy is designed to work with omniORB 3. When it is used with
 omniORB 2.8, many facilities are not available. This section describes
 the limitations.<BR>
 <BR>
@@ -251,7 +266,7 @@ differ only in micro version number are guaranteed to be compatible
 with each other.<BR>
 <BR>
 
-<H3>3.3.1&nbsp;&nbsp; POA functions</H3>Under 2.8, only the root POA is available. It supports only the
+<H3>3.4.1&nbsp;&nbsp; POA functions</H3>Under 2.8, only the root POA is available. It supports only the
 following functions:<BR>
 <BR>
 <UL>
@@ -288,7 +303,7 @@ following functions:<BR>
 <TT>CORBA.NO_IMPLEMENT</TT> exception.<BR>
 <BR>
 
-<H3>3.3.2&nbsp;&nbsp; Local / remote transparency</H3>omniORB 3 goes to great lengths to make sure that the semantics of
+<H3>3.4.2&nbsp;&nbsp; Local / remote transparency</H3>omniORB 3 goes to great lengths to make sure that the semantics of
 local objects are identical to those for remote objects. omniORB 2.8
 does not. omniORBpy also tries very hard to keep local and remote
 semantics identical, but on the foundation of omniORB 2.8 it is not
@@ -319,18 +334,18 @@ caller.</UL>In all of these cases, omniORB 3 properly preserves local/remote
 transparency.<BR>
 <BR>
 <HR WIDTH="50%" SIZE=1><DL>
-<DT><A NAME="note8" HREF="#text8"><FONT SIZE=5>1</FONT></A><DD> It
+<DT><A NAME="note9" HREF="#text9"><FONT SIZE=5>1</FONT></A><DD> It
 is possible to change the repository id strings associated with
 particular interfaces using the <TT>ID</TT>, <TT>version</TT> and
 <TT>prefix</TT> pragmas.
 
-<DT><A NAME="note9" HREF="#text9"><FONT SIZE=5>2</FONT></A><DD> Unless you are invoking pseudo
+<DT><A NAME="note10" HREF="#text10"><FONT SIZE=5>2</FONT></A><DD> Unless you are invoking pseudo
 operations like <TT>_is_a()</TT> and <TT>_non_existent()</TT>.
 
-<DT><A NAME="note10" HREF="#text10"><FONT SIZE=5>3</FONT></A><DD> This is now deprecated, but some ORBs may still send empty
+<DT><A NAME="note11" HREF="#text11"><FONT SIZE=5>3</FONT></A><DD> This is now deprecated, but some ORBs may still send empty
 strings. No version of omniORB has ever sent empty strings.
 
-<DT><A NAME="note11" HREF="#text11"><FONT SIZE=5>4</FONT></A><DD> And once again, this practice is
+<DT><A NAME="note12" HREF="#text12"><FONT SIZE=5>4</FONT></A><DD> And once again, this practice is
 deprecated.
 </DL>
 <HR>

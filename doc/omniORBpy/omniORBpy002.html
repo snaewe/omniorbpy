@@ -262,7 +262,7 @@ some hexadecimal digits. All CORBA 2 compliant ORBs are able to
 convert the string into its internal representation of a so-called
 Interoperable Object Reference (IOR). The IOR contains the location
 information and a key to uniquely identify the object implementation
-in its own address space<A NAME="text3" HREF="#note3"><SUP><FONT SIZE=2>1</FONT></SUP></A>. From the IOR, an object
+in its own address space<A NAME="text4" HREF="#note4"><SUP><FONT SIZE=2>1</FONT></SUP></A>. From the IOR, an object
 reference can be constructed.<BR>
 <BR>
 After the POA has been activated, <TT>orb.run()</TT> is called. Since
@@ -300,7 +300,7 @@ rather than exiting immediately when the end-of-file is reached.
 20  
 21  print "I said '%s'. The object said '%s'." % (message,result)
 </PRE>The stringified object reference is passed to the client as a
-command-line argument<A NAME="text4" HREF="#note4"><SUP><FONT SIZE=2>2</FONT></SUP></A>. The client uses the ORB's
+command-line argument<A NAME="text5" HREF="#note5"><SUP><FONT SIZE=2>2</FONT></SUP></A>. The client uses the ORB's
 <TT>string_to_object()</TT> function to convert the string into a generic
 object reference (<TT>CORBA.Object</TT>).<BR>
 <BR>
@@ -358,7 +358,7 @@ of its servant object. Persistent objects can live beyond the
 destruction of their servant object, the POA they were created in, and
 even their process. Persistent objects are, of course, only
 contactable when their associated servants are active, or can be
-activated by their POA with a servant manager<A NAME="text5" HREF="#note5"><SUP><FONT SIZE=2>3</FONT></SUP></A>. A reference to
+activated by their POA with a servant manager<A NAME="text6" HREF="#note6"><SUP><FONT SIZE=2>3</FONT></SUP></A>. A reference to
 a persistent object can be published, and will remain valid even if
 the server process is restarted.<BR>
 <BR>
@@ -395,7 +395,7 @@ component is bound to an object reference.<BR>
 <BR>
 Sequences of name components can be represented as a flat string,
 using `.' to separate the id and kind fields, and `/' to separate name
-components from each other<A NAME="text6" HREF="#note6"><SUP><FONT SIZE=2>4</FONT></SUP></A>. In our example, the Echo object
+components from each other<A NAME="text7" HREF="#note7"><SUP><FONT SIZE=2>4</FONT></SUP></A>. In our example, the Echo object
 reference is bound to the stringified name
 `<TT>test.my_context/ExampleEcho.Object</TT>'.<BR>
 <BR>
@@ -430,7 +430,7 @@ line. If this file is not present, the internal list will be empty and
 Note that, like <TT>string_to_object()</TT>,
 <TT>resolve_initial_references()</TT> returns base <TT>CORBA.Object</TT>, so
 we should narrow it to the interface we want. In this case, we want
-<TT>CosNaming.NamingContext</TT><A NAME="text7" HREF="#note7"><SUP><FONT SIZE=2>5</FONT></SUP></A>.<BR>
+<TT>CosNaming.NamingContext</TT><A NAME="text8" HREF="#note8"><SUP><FONT SIZE=2>5</FONT></SUP></A>.<BR>
 <BR>
 
 <H3>2.6.2&nbsp;&nbsp; The Naming Service interface</H3>It is beyond the scope of this chapter to describe in detail the
@@ -578,22 +578,22 @@ message = "Hello from Python"
 result  = eo.echoString(message)
 print "I said '%s'. The object said '%s'" % (message,result)
 </PRE><HR WIDTH="50%" SIZE=1><DL>
-<DT><A NAME="note3" HREF="#text3"><FONT SIZE=5>1</FONT></A><DD> Notice that the object key is not
+<DT><A NAME="note4" HREF="#text4"><FONT SIZE=5>1</FONT></A><DD> Notice that the object key is not
 globally unique across address spaces.
 
-<DT><A NAME="note4" HREF="#text4"><FONT SIZE=5>2</FONT></A><DD> The code does not check that there is
+<DT><A NAME="note5" HREF="#text5"><FONT SIZE=5>2</FONT></A><DD> The code does not check that there is
 actually an IOR on the command line!
 
-<DT><A NAME="note5" HREF="#text5"><FONT SIZE=5>3</FONT></A><DD> The POA itself
+<DT><A NAME="note6" HREF="#text6"><FONT SIZE=5>3</FONT></A><DD> The POA itself
 can be activated on demand with an adapter activator.
 
-<DT><A NAME="note6" HREF="#text6"><FONT SIZE=5>4</FONT></A><DD> There are escaping rules to cope
+<DT><A NAME="note7" HREF="#text7"><FONT SIZE=5>4</FONT></A><DD> There are escaping rules to cope
 with id and kind fields which contain `.' and `/' characters. See
 chapter&nbsp;<A HREF="omniORBpy004.html#chap:ins">4</A> of this manual, and chapter 3 of the CORBA
 services specification, as updated for the Interoperable Naming
 Service&nbsp;[<A HREF="omniORBpy009.html#inschapters"><CITE>OMG99b</CITE></A>].
 
-<DT><A NAME="note7" HREF="#text7"><FONT SIZE=5>5</FONT></A><DD> If you are on-the-ball, you
+<DT><A NAME="note8" HREF="#text8"><FONT SIZE=5>5</FONT></A><DD> If you are on-the-ball, you
 will have noticed that we didn't call <TT>_narrow()</TT> when resolving the
 Root POA. The reason it is safe to miss it out is given in
 section&nbsp;<A HREF="omniORBpy003.html#sec:narrowing">3.1</A>.

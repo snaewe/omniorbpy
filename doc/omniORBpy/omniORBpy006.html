@@ -23,7 +23,7 @@ portable to run unchanged on other vendors' ORBs. To make it easier to
 identify omniORB dependent code, this API is defined in the
 `<TT>omniORB</TT>' module.<BR>
 <BR>
-<A NAME="toc21"></A>
+<A NAME="toc22"></A>
 <H2>6.1&nbsp;&nbsp; ORB initialisation options</H2>
 <A NAME="omniorbapioptions"></A><A NAME="sec:ORBargs"></A><TT>CORBA::ORB_init()</TT> accepts the following standard command-line
 arguments:<BR>
@@ -113,7 +113,7 @@ arguments understood by the ORB will be removed from <TT>argv</TT> when
 the initialisation functions return. Therefore, an application is not
 required to handle any command-line arguments it does not understand.<BR>
 <BR>
-<A NAME="toc22"></A>
+<A NAME="toc23"></A>
 <H2>6.2&nbsp;&nbsp; Hostname and port</H2>
 <A NAME="sec:nameport"></A>Normally, omniORB lets the operating system pick which port number it
 should use to listen for IIOP calls. Alternatively, you can specify a
@@ -136,7 +136,7 @@ specify more than one host name by using
 When using omniORB 2.8, these two options are named
 <TT>-BOAiiop_port</TT> and <TT>-BOAiiop_name_port</TT>.<BR>
 <BR>
-<A NAME="toc23"></A>
+<A NAME="toc24"></A>
 <H2>6.3&nbsp;&nbsp; Run-time Tracing and Diagnostic Messages</H2>
 <A NAME="sec:rttrace"></A>omniORB can output tracing and diagnostic messages to the standard
 error stream. You can vary the amount of tracing using the
@@ -173,7 +173,7 @@ $ example_echo_srv.py -ORBtraceLevel 5
 With omniORB 3, you can also use
 <TT>-ORBtraceInvocations</TT> to trace all operation invocations.<BR>
 <BR>
-<A NAME="toc24"></A>
+<A NAME="toc25"></A>
 <H2>6.4&nbsp;&nbsp; Server Name</H2>
 <A NAME="sec:servername"></A>Applications can optionally specify a name to identify the server
 process. At the moment, this name is only used by the host-based
@@ -181,7 +181,7 @@ access control module. See section&nbsp;<A HREF="omniORBpy007.html#sec:accept">7
 server name can be changed by specifying the command-line option:
 <TT>-ORBserverName </TT>&lt;<I>string</I>&gt;.<BR>
 <BR>
-<A NAME="toc25"></A>
+<A NAME="toc26"></A>
 <H2>6.5&nbsp;&nbsp; GIOP Message Size</H2>
 <A NAME="sec:giopmsg"></A>omniORB sets a limit on the GIOP message size that can be sent or
 received. The maximum size can be set with the command-line option
@@ -193,7 +193,7 @@ contains a sequence length field set to 2<SUP><FONT SIZE=2>31</FONT></SUP>. With
 message size limit, the server can reject this rogue message straight
 away.<BR>
 <BR>
-<A NAME="toc26"></A>
+<A NAME="toc27"></A>
 <H2>6.6&nbsp;&nbsp; Object table size</H2>
 <A NAME="sec:objtable"></A>omniORB uses a hash table to store the mapping from object keys to
 servant objects. Normally, it dynamically re-sizes the hash table when
@@ -210,13 +210,13 @@ number of objects active, no matter what size table you specify. If
 you have many more active objects than hash table entries, object
 look-up performance will become linear with the number of objects.<BR>
 <BR>
-<A NAME="toc27"></A>
+<A NAME="toc28"></A>
 <H2>6.7&nbsp;&nbsp; Obsolete Initial Object Reference Bootstrapping</H2>
 <A NAME="sec:bootstrap"></A>Starting from 2.6.0, but superseded by the Interoperable Naming
 Service in omniORB 3, a mechanism is available for the ORB runtime to
 obtain the initial object references to CORBA services. The bootstrap
 service is a special object with the object key `INIT' and the
-following interface<A NAME="text14" HREF="#note14"><SUP><FONT SIZE=2>1</FONT></SUP></A>:<BR>
+following interface<A NAME="text16" HREF="#note16"><SUP><FONT SIZE=2>1</FONT></SUP></A>:<BR>
 <BR>
 <PRE>
   // IDL
@@ -289,7 +289,7 @@ Alternatively, the command line options can be used, for example:<BR>
 <BR>
 <TT>$ eg3_impl -ORBInitialHost wobble -ORBInitialPort 1234 &amp;</TT><BR>
 <BR>
-<TT>$ eg3_clt -ORBInitialHost wobble -ORBInitialPort 1234</TT></OL><A NAME="toc28"></A>
+<TT>$ eg3_clt -ORBInitialHost wobble -ORBInitialPort 1234</TT></OL><A NAME="toc29"></A>
 <H2>6.8&nbsp;&nbsp; GIOP Lowest Common Denominator Mode</H2>
 <A NAME="sec:lcd"></A>
 <A NAME="sec:strictIIOP"></A>Sometimes, to cope with bugs in another ORB, it is necessary to
@@ -325,7 +325,7 @@ can disable this feature with the
 <TT>-ORBverifyObjectExistsAndType</TT> option, and hence achieve
 interoperability.<BR>
 <BR>
-<A NAME="toc29"></A>
+<A NAME="toc30"></A>
 <H2>6.9&nbsp;&nbsp; System Exception Handlers</H2>
 <A NAME="sec:exHandlers"></A>By default, all system exceptions which are raised during an operation
 invocation, with the exception of <TT>CORBA.TRANSIENT</TT>, are
@@ -403,7 +403,7 @@ omniORB.installSystemExceptionHandler(cookie, function [, object])
 </PRE>In both cases, the call-back function has the same signature
 as for <TT>TRANSIENT</TT> handlers.<BR>
 <BR>
-<A NAME="toc30"></A>
+<A NAME="toc31"></A>
 <H2>6.10&nbsp;&nbsp; Dynamic importing of IDL</H2>
 <A NAME="sec:importIDL"></A>omniORBpy is usually used with pre-generated stubs. Since Python is a
 dynamic language, however, it is possible to compile and import new
@@ -456,7 +456,7 @@ module M3 {
 &gt;&gt;&gt; sys.modules["_GlobalIDL"].s
 'Hello'
 </PRE><HR WIDTH="50%" SIZE=1><DL>
-<DT><A NAME="note14" HREF="#text14"><FONT SIZE=5>1</FONT></A><DD> This interface was first defined by Sun's
+<DT><A NAME="note16" HREF="#text16"><FONT SIZE=5>1</FONT></A><DD> This interface was first defined by Sun's
 NEO and is in used in Sun's JavaIDL.
 </DL>
 <HR>
