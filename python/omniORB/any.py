@@ -44,6 +44,8 @@ import omniORB
 import CORBA, tcInternal
 import random
 
+__all__ = ["to_any", "from_any"]
+
 
 # Counter for generating repoIds. Ideally, should not clash with other
 # IDs, but this will do for now...
@@ -65,7 +67,7 @@ FixedType = type(_f)
 
 
 def to_any(data):
-    """to_any(data) -- try to return data an a CORBA.Any"""
+    """to_any(data) -- try to return data as a CORBA.Any"""
     tc, val = _to_tc_value(data)
     return CORBA.Any(tc, val)
 
@@ -183,7 +185,7 @@ def _to_tc_value(data):
         # Generic list
         tc = tcInternal.createTypeCode((tcInternal.tv_sequence,
                                         tcInternal.tv_any, 0))
-        return tc, map(toany, data)
+        return tc, map(to_any, data)
 
     elif isinstance(data, TupleType):
         return _to_tc_value(list(data))
@@ -242,7 +244,7 @@ def _from_desc_value(desc, value, keep_structs=0):
     """_from_desc_value(desc,val,keep_structs) -- de-Any value"""
 
     if type(desc) is IntType:
-        if  desc != tcInternal.tv_any:
+        if desc != tcInternal.tv_any:
             # Nothing to do
             return value
         else:
@@ -253,8 +255,12 @@ def _from_desc_value(desc, value, keep_structs=0):
     while k == tcInternal.tv_alias:
         desc = desc[3]
         if type(desc) is IntType:
-            return value
-        k = desc[0]
+            if desc != tcInternal.tv_any:
+                return value
+            else:
+                k = desc
+        else:
+            k = desc[0]
 
     if k == tcInternal.tv_any:
         return _from_desc_value(value._t._d, value._v, keep_structs)
