@@ -344,3 +344,96 @@ export:: $(lib)
               ln -s $(soname) $(libname); 
       )
 endif
+
+#############################################################################
+#   Make rules for HPUX                                                     #
+#############################################################################
+
+ifdef HPUX
+ifeq ($(notdir $(CXX)),aCC)
+
+# Note: the python installation must be built to load C++ shared library
+#       this usually means that the main function of the python executable
+#       is compiled and linked with aCC.
+
+CXXOPTIONS += +Z
+  
+libname = _omnipymodule.sl
+soname  = $(libname).$(OMNIPY_MAJOR)
+lib     = $(soname).$(OMNIPY_MINOR)
+
+$(lib): $(OBJS)
+	(set -x; \
+         $(RM) $@; \
+         aCC -b -Wl,+h$(soname) -o $@  $(IMPORT_LIBRARY_FLAGS) \
+           $(patsubst %,-L %,$(IMPORT_LIBRARY_DIRS)) \
+           $(filter-out $(LibSuffixPattern),$^) $(OMNIORB_LIB_NODYN); \
+        )
+
+all:: $(lib)
+
+clean::
+	$(RM) $(lib)
+
+export:: $(lib)
+	@$(ExportLibrary)
+	@(set -x; \
+          cd $(EXPORT_TREE)/$(LIBDIR); \
+          $(RM) $(soname); \
+          ln -s $(lib) $(soname); \
+          $(RM) $(libname); \
+          ln -s $(soname) $(libname); \
+         )
+
+endif
+endif
+
+#############################################################################
+#   Make rules for SGI Irix 6.2                                             #
+#############################################################################
+
+ifdef IRIX
+ifeq ($(notdir $(CXX)),CC)
+
+# Not tested yet!
+
+CXXOPTIONS += -KPIC
+
+ifdef IRIX_n32
+ADD_CPPFLAGS = -n32
+endif
+ifdef IRIX_64
+ADD_CPPFLAGS = -64
+endif
+
+libname = _omnipymodule.so
+soname  = $(libname).$(OMNIPY_MAJOR)
+lib     = $(soname).$(OMNIPY_MINOR)
+
+$(lib): $(OBJS)
+	(set -x; \
+         $(RM) $@; \
+         $(LINK.cc) -KPIC -shared -Wl,-h,$(libname) \
+           -Wl,-set_version,$(soname) -Wl,-rpath,$(LIBDIR) \
+           -o $@ $(IMPORT_LIBRARY_FLAGS) \
+           $(filter-out $(LibSuffixPattern),$^) $(OMNIORB_LIB_NODYN)\
+           $(LDLIBS); \
+        )
+
+all:: $(lib)
+
+clean::
+	$(RM) $(lib)
+
+export:: $(lib)
+	@$(ExportLibrary)
+	@(set -x; \
+          cd $(EXPORT_TREE)/$(LIBDIR); \
+          $(RM) $(soname); \
+          ln -s $(lib) $(soname); \
+          $(RM) $(libname); \
+          ln -s $(soname) $(libname); \
+         )
+
+endif
+endif
