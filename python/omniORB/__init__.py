@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.13  1999/11/12 17:15:50  dpg1
+# Can now specify arguments for omniidl.
+#
 # Revision 1.12  1999/11/12 16:49:18  dpg1
 # Stupid bug introduced with last change.
 #
@@ -87,22 +90,49 @@ import _omnipy
 
 # Public functions
 
+_omniidl_args = []
+
+def omniidlArguments(args):
+    """omniidlArguments(list)
+
+Set default omniidl arguments for importIDL() and importIDLString().
+e.g. omniidlArguments(["-I/my/include", "-DMY_DEFINE"])"""
+
+    global _omniidl_args
+
+    if type(args) is not types.ListType:
+        raise TypeError("argument must be a list of strings")
+
+    for arg in args:
+        if type(arg) is not types.StringType:
+            raise TypeError("argument must be a list of strings")
+
+    _omniidl_args = args
+
+
 # Import an IDL file by forking the IDL compiler and processing the
 # output
-def importIDL(idlname):
-    """importIDL(filename) -> tuple
+def importIDL(idlname, args=None):
+    """importIDL(filename [, args ]) -> tuple
 
 Run the IDL compiler on the specified IDL file, and import the
-resulting stubs. Returns a tuple of Python module names corresponding
-to the IDL module names declared in the file. The modules can be
-accessed through sys.modules."""
+resulting stubs. If args is present, it must contain a list of strings
+used as arguments to omniidl. If args is not present, uses the default
+set with omniidlArguments().
+
+Returns a tuple of Python module names corresponding to the IDL module
+names declared in the file. The modules can be accessed through
+sys.modules."""
 
     if not os.path.isfile(idlname):
         raise ImportError("File " + idlname + " does not exist")
 
-    modname = string.replace(os.path.basename(idlname), ".", "_")
-    pipe    = os.popen("omniidl -q -bpython -Wbstdout " + idlname)
+    if args is None: args = _omniidl_args
 
+    argstr  = string.join(args, " ")
+    modname = string.replace(os.path.basename(idlname), ".", "_")
+    pipe    = os.popen("omniidl -q -bpython -Wbstdout " + \
+                       argstr + " " + idlname)
     try:
         m = imp.load_module(modname, pipe, "", (".idl", "r", imp.PY_SOURCE))
     finally:
@@ -116,12 +146,16 @@ accessed through sys.modules."""
         del sys.modules[modname]
         raise ImportError("Invalid output from omniidl")
 
-def importIDLString(str):
-    """importIDLString(string) -> tuple
+def importIDLString(str, args=None):
+    """importIDLString(string [, args ]) -> tuple
 
 Run the IDL compiler on the given string, and import the resulting
-stubs. Returns a tuple of Python module names corresponding to the IDL
-module names declared in the file. The modules can be accessed through
+stubs. If args is present, it must contain a list of strings used as
+arguments to omniidl. If args is not present, uses the default set
+with omniidlArguments().
+
+Returns a tuple of Python module names corresponding to the IDL module
+names declared in the file. The modules can be accessed through
 sys.modules."""
 
     tfn = tempfile.mktemp()
@@ -129,7 +163,7 @@ sys.modules."""
     tf.write(str)
     tf.close()
     try:
-        ret = importIDL(tfn)
+        ret = importIDL(tfn, args)
     finally:
         os.remove(tfn)
     return ret
