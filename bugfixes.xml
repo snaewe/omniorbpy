@@ -8,6 +8,20 @@
 
 <buglist>
 
+<bug id="2" date="Tue Aug 22 17:01:50 BST 2000" user="dpg1">
+
+  <summary>Instability after unexpected user exceptions</summary>
+  <text>
+  After the fix on 17 August (see the update.log), when an unexpected
+  user exception was raised in an up-call, the Python error status
+  would not be properly cleared. This meant that later up-calls could
+  fail with exceptions of the form "AttributeError: minor", even when
+  the code didn't mention "minor" at all.
+  </text>
+
+</bug>
+
+
 <bug id="1" date="Tue Aug 22 12:44:57 BST 2000" user="dpg1">
 
   <summary>omniidl back-end generates useless classes for typedef to
