@@ -28,6 +28,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.29.2.6  2001/06/13 11:29:04  dpg1
+# Proper omniidl support for wchar/wstring constants.
+#
 # Revision 1.29.2.5  2001/05/10 15:16:03  dpg1
 # Big update to support new omniORB 4 internals.
 #
@@ -1599,8 +1602,11 @@ def valueToString(val, kind, scope=[]):
     elif kind == idltype.tk_string or kind == idltype.tk_char:
         return '"' + idlutil.escapifyString(val) + '"'
 
-    elif kind == idltype.tk_wstring or kind == idltype.tk_wchar:
+    elif kind == idltype.tk_wstring:
         return 'u"' + idlutil.escapifyWString(val) + '"'
+
+    elif kind == idltype.tk_wchar:
+        return 'u"' + idlutil.escapifyWString([val]) + '"'
 
     elif kind == idltype.tk_long and val == -2147483647 - 1:
         return "-2147483647 - 1"
