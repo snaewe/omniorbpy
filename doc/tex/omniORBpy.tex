@@ -180,12 +180,20 @@ Apasphere Ltd.\\}
 
 \vfill
 \vfill
-August 2002
+November 2002
 \vfill
 
 \end{center}
 
 \clearpage
+
+{\Large \bf Changes and Additions, November 2002}
+\begin{itemize}
+\item Per thread timeouts.
+\item Minor fixes.
+\end{itemize}
+
+\vspace{\baselineskip}
 
 {\Large \bf Changes and Additions, August 2002}
 \begin{itemize}
@@ -1546,12 +1554,20 @@ server's address. See section~\ref{sec:clientRule} for details.
 Call timeout in milliseconds for the client side. If a call takes
 longer than the specified number of milliseconds, the ORB closes the
 connection and raises a \code{COMM\_\dsc{}FAILURE} exception. A value
-of zero means no timeout; calls can block for ever.
+of zero means no timeout; calls can block for ever. See
+section~\ref{sec:timeoutAPI} for more information about timeouts.
 
 \vspace{.5\baselineskip}
 
 \noindent\textbf{Note}: omniORB 3 had timeouts specified in seconds; omniORB
 4.0 uses milliseconds for timeouts.
+
+
+\confopt{supportPerThreadTimeOut}{0}
+
+If this parameter is set true, timeouts can be set on a per thread
+basis, as well as globally and per object. Checking per-thread storage
+has a noticeable performance impact, so it is turned off by default.
 
 
 \confopt{outConScanPeriod}{120}
@@ -2889,6 +2905,37 @@ Note that some server-side ORBs, including omniORB versions before
 version 4.0, are unable to deal with concurrent calls multiplexed on a
 single connection, so they serialise the calls. It is usually best to
 keep to the default mode of opening multiple connections.
+
+
+\subsection{Client side timeouts}
+\label{sec:timeoutAPI}
+
+omniORB can associate a timeout with a call, meaning that if the call
+takes too long a \code{TRANSIENT} exception is thrown. Timeouts can be
+set for the whole process, for a specific thread, or for a specific
+object reference.
+
+Timeouts are set using functions in the \code{omniORB} module:
+
+\begin{pylisting}
+omniORB.setClientCallTimeout(millisecs)
+omniORB.setClientCallTimeout(objref, millisecs)
+omniORB.setClientThreadCallTimeout(millisecs)
+\end{pylisting}
+
+\op{setClientCallTimeout} sets either the global timeout or the
+timeout for a specific object reference.
+\op{setClientThreadCallTimeout} sets the timeout for the calling
+thread. Setting any timeout value to zero disables it.
+
+Accessing per-thread state is a relatively expensive operation, so per
+thread timeouts are disabled by default. The
+\code{supportPerThreadTimeOut} parameter must be set true to enable
+them.
+
+To choose the timeout value to use for a call, the ORB first looks to
+see if there is a timeout for the object reference, then to the
+calling thread, and finally to the global timeout.
 
 
 

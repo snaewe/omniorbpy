@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.11  2002/11/27 00:18:25  dgrisby
+// Per thread / per objref timeouts.
+//
 // Revision 1.1.2.10  2002/08/16 19:27:36  dgrisby
 // Documentation update. Minor ORB updates to match docs.
 //
@@ -206,6 +209,61 @@ static CORBA::Boolean systemEH(void* cookie, CORBA::ULong retries,
     Py_DECREF(r);
   }
   return ret;
+}
+
+extern "C" {
+  static void removeDummyOmniThread(void* vself) {
+    if ((omni_thread*)vself == omni_thread::self()) {
+      omniORB::logs(10, "Remove dummy omni thread.");
+      omni_thread::release_dummy();
+    }
+    else
+      omniORB::logs(5, "Unable to release dummy omni_thread.");
+  }
+}
+
+
+omni_thread*
+omniPy::ensureOmniThread()
+{
+  omni_thread* self = omni_thread::self();
+  if (self)
+    return self;
+
+  omniORB::logs(10, "Create dummy omni thread.");
+
+  // Get the threading.Thread object for this thread.
+  PyObject* threading = PyImport_ImportModule((char*)"threading");
+  if (!threading)
+    return 0;
+
+  PyObject* current = PyObject_CallMethod(threading,
+					  (char*)"currentThread",
+					  (char*)"");
+  if (!current)
+    return 0;
+
+  // Create a dummy omni_thread
+  self = omni_thread::create_dummy();
+
+  // Create a CObject with a suitable destructor function and set it
+  // as an attribute of the current thread.
+  PyObject* cobj = PyCObject_FromVoidPtr(self, removeDummyOmniThread);
+  PyObject_SetAttrString(current, (char*)"__omni_thread", cobj);
+
+  // Use an evil hack to make sure the __omni_thread member is
+  // released when the thread stops.
+  PyObject* hook = PyObject_CallMethod(omniPy::pyomniORBmodule,
+				       (char*)"omniThreadHook", (char*)"O",
+				       current);
+  if (!hook)
+    PyErr_Print();
+
+  Py_XDECREF(hook);
+  Py_DECREF(cobj);
+  Py_DECREF(current);
+
+  return self;
 }
 
 
@@ -571,6 +629,57 @@ extern "C" {
     }
   }
 
+  static char setClientCallTimeout_doc [] =
+  "setClientCallTimeout(millisecs)\n"
+  "setClientCallTimeout(objref, millisecs)\n"
+  "\n"
+  "Set the global client call timeout, or set the timeout for a specific\n"
+  "object reference.\n";
+
+  static PyObject* pyomni_setClientCallTimeout(PyObject* self, PyObject* args)
+  {
+    if (PyTuple_GET_SIZE(args) == 1) {
+      int timeout;
+      if (!PyArg_ParseTuple(args, (char*)"i", &timeout))
+	return 0;
+      omniORB::setClientCallTimeout(timeout);
+    }
+    else {
+      int timeout;
+      PyObject* pyobjref;
+      if (!PyArg_ParseTuple(args, (char*)"Oi", &pyobjref, &timeout))
+	return 0;
+      RAISE_PY_BAD_PARAM_IF(!PyInstance_Check(pyobjref),
+			    BAD_PARAM_WrongPythonType);
+      CORBA::Object_ptr objref =
+	(CORBA::Object_ptr)omniPy::getTwin(pyobjref, OBJREF_TWIN);
+
+      RAISE_PY_BAD_PARAM_IF(!objref, BAD_PARAM_WrongPythonType);
+
+      omniORB::setClientCallTimeout(objref, timeout);
+    }
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
+
+  static char setClientThreadCallTimeout_doc [] =
+  "setClientThreadCallTimeout(millisecs)\n"
+  "\n"
+  "Set the client call timeout for the calling thread.\n";
+
+  static PyObject* pyomni_setClientThreadCallTimeout(PyObject* self,
+						     PyObject* args)
+  {
+    int timeout;
+    if (!PyArg_ParseTuple(args, (char*)"i", &timeout))
+      return 0;
+
+    omniPy::ensureOmniThread();
+    omniORB::setClientThreadCallTimeout(timeout);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
 
   static PyMethodDef pyomni_methods[] = {
     {(char*)"installTransientExceptionHandler",
@@ -612,6 +721,14 @@ extern "C" {
     {(char*)"minorCodeToString",
      pyomni_minorCodeToString,
      METH_VARARGS, minorCodeToString_doc},
+
+    {(char*)"setClientCallTimeout",
+     pyomni_setClientCallTimeout,
+     METH_VARARGS, setClientCallTimeout_doc},
+
+    {(char*)"setClientThreadCallTimeout",
+     pyomni_setClientThreadCallTimeout,
+     METH_VARARGS, setClientThreadCallTimeout_doc},
 
     {NULL,NULL}
   };

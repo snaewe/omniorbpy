@@ -30,6 +30,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.26.2.14  2002/11/27 00:18:25  dgrisby
+# Per thread / per objref timeouts.
+#
 # Revision 1.26.2.13  2002/09/21 23:27:11  dgrisby
 # New omniORB.any helper module.
 #
@@ -734,6 +737,23 @@ class WorkerThread(threading.Thread):
     def _set_daemon(self): return 1
     def join(self):        assert 0, "cannot join an omniORB WorkerThread"
     
+
+# omniThreadHook is used to release a dummy omni_thread C++ object
+# associated with a threading.Thread object when the thread stops.
+
+class omniThreadHook:
+    def __init__(self, target):
+        self.target            = target
+        self.target_del        = target._Thread__delete
+        target._Thread__delete = self.omni_thread_del
+
+    def omni_thread_del(self):
+        try:
+            delattr(self.target, "__omni_thread")
+            del self.target._Thread__delete
+        except AttributeError:
+            pass
+        self.target_del()
 
 
 # System exception mapping.

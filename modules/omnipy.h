@@ -31,6 +31,9 @@
 #define _omnipy_h_
 
 // $Log$
+// Revision 1.2.4.19  2002/11/27 00:18:25  dgrisby
+// Per thread / per objref timeouts.
+//
 // Revision 1.2.4.18  2002/05/26 00:55:36  dgrisby
 // C++ API to convert object references to/from Python.
 //
@@ -247,6 +250,10 @@ public:
   static
   void produceSystemException(PyObject* eobj, PyObject* erepoId);
 
+  // Ensure there is an omni_thread associated with the calling thread.
+  static
+  omni_thread* ensureOmniThread();
+  
 
   ////////////////////////////////////////////////////////////////////////////
   // Fixed point                                                            //
