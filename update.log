@@ -1,10 +1,25 @@
+Tue Aug 29 11:17:26 BST 2000 dpg1
+=================================
+
+- In omniidl, operations and attributes now have repository ids.
+
+omniidl/cxx/idlast.cc
+omniidl/cxx/idlast.h
+omniidl/cxx/idldump.cc
+omniidl/cxx/idlpython.cc
+omniidl/cxx/idlrepoId.cc
+omniidl/cxx/lex.yy.cc
+omniidl/cxx/y.tab.cc
+omniidl/python/omniidl/idlast.py
+
+
 Fri Aug 25 14:25:20 BST 2000 dpg1
 =================================
 
 - Multiple comments preceding a declaration are now properly attached
   on all platforms
 
-src/tool/omniidl/cxx/idlast.cc
+omniidl/cxx/idlast.cc
 
 
 Thu Aug 24 12:26:28 BST 2000 dpg1
@@ -12,7 +27,7 @@ Thu Aug 24 12:26:28 BST 2000 dpg1
 
 - Typo in error message % format string
 
-src/tool/omniidl/cxx/idlscope.cc
+omniidl/cxx/idlscope.cc
 
 
 Wed Aug 23 10:15:43 BST 2000 dpg1
