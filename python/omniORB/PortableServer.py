@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.7  2000/05/25 16:07:44  dpg1
+# Servant._default_POA now caches the root POA.
+#
 # Revision 1.6  2000/03/03 17:41:27  dpg1
 # Major reorganisation to support omniORB 3.0 as well as 2.8.
 #
@@ -54,6 +57,7 @@ import _omnipy
 import omniORB
 from omniORB import CORBA
 
+_rootPOA = None
 
 # native Servant
 class Servant:
@@ -63,8 +67,11 @@ class Servant:
         return _omnipy.poa_func.servantThis(self)
 
     def _default_POA(self):
+        global _rootPOA
+        if _rootPOA: return _rootPOA
         orb = CORBA.ORB_init()
-        return orb.resolve_initial_references("RootPOA")
+        _rootPOA = orb.resolve_initial_references("RootPOA")
+        return _rootPOA
 
 _d_Servant = omniORB.tcInternal.tv_native
 
@@ -74,7 +81,8 @@ class POAManager (CORBA.Object) :
     _NP_RepositoryId = "IDL:omg.org/PortableServer/POAManager:1.0"
 
     def __del__(self):
-        if _omnipy is not None: _omnipy.poamanager_func.releaseRef(self)
+        if _omnipy is not None and _omnipy.poamanager_func is not None:
+            _omnipy.poamanager_func.releaseRef(self)
 
     def activate(self):
         _omnipy.poamanager_func.activate(self)
@@ -130,7 +138,8 @@ class POA (CORBA.Object) :
     _NP_RepositoryId = _d_POA[1]
 
     def __del__(self):
-        if _omnipy is not None: _omnipy.poa_func.releaseRef(self)
+        if _omnipy is not None and _omnipy.poa_func is not None:
+                _omnipy.poa_func.releaseRef(self)
 
     def create_POA(self, adapter_name, a_POAManager, policies):
         return _omnipy.poa_func.create_POA(self, adapter_name,

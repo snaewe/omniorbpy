@@ -1,3 +1,11 @@
+Thu May 25 17:05:55 BST 2000 dpg1
+=================================
+
+- Servant._default_POA now caches the root POA.
+
+python/omniORB/PortableServer.py
+
+
 Wed May 24 12:07:37 BST 2000 dpg1
 =================================
 
