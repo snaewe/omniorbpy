@@ -364,10 +364,14 @@ def doTests(orb, poa, io):
     else:                    tfail()
 
     tstart("Unknown Object")
-    ns = orb.resolve_initial_references("NameService")
-    r = io.complex1(ns)
-    if r._is_equivalent(ns): tpass()
-    else:                    tfail()
+    try:
+        ns = orb.resolve_initial_references("NameService")
+        r = io.complex1(ns)
+        if r._is_equivalent(ns): tpass()
+        else:                    tfail()
+    except CORBA.NO_RESOURCES:
+        tresult("skip")
+        tpass()
 
     tstart("Nil Object")
     r = io.complex1(None)
@@ -1186,6 +1190,106 @@ def doTests(orb, poa, io):
         tresult("-")
     except CORBA.BAD_PARAM:
         tresult("+")
+
+    if ok: tpass()
+    else:  tfail()
+
+    tstart("Short with Long")
+    r = io.simple3(42L)
+    if r == 42: tpass()
+    else:       tfail()
+
+    tstart("UShort with Long")
+    r = io.simple4(42L)
+    if r == 42: tpass()
+    else:       tfail()
+
+    tstart("Long with Long")
+    r = io.simple5(42L)
+    if r == 42: tpass()
+    else:       tfail()
+
+    tstart("Float with Long")
+    r = io.simple7(42L)
+    if r == 42: tpass()
+    else:       tfail()
+
+    tstart("Double with Long")
+    r = io.simple8(42L)
+    if r == 42: tpass()
+    else:       tfail()
+
+    tstart("Octet with Long")
+    r = io.simple11(123L)
+    if r == 123: tpass()
+    else:        tfail()
+
+    tstart("Sequences with Longs")
+    ok = 1
+
+    s = [1L, 2L, 3L, 4L, 5L]
+    r = io.complex9(s)
+    if list(r) == list(s):
+        tresult("+")
+    else:
+        ok = 0
+        tresult("-")
+
+    s = (-6L, 7L, -8L, 9L, 10L, 11L)
+    r = io.complex9(s)
+    if list(r) == list(s):
+        tresult("+")
+    else:
+        ok = 0
+        tresult("-")
+
+    s = [1L, 2L, 3L, 4L, 5L]
+    r = io.complex10(s)
+    if list(r) == list(s):
+        tresult("+")
+    else:
+        ok = 0
+        tresult("-")
+
+    s = (1L, 2L, -3L, 4L, 5L)
+    r = io.complex11(s)
+    if list(r) == list(s):
+        tresult("+")
+    else:
+        ok = 0
+        tresult("-")
+
+    s = [1L, 2, 3L, 4L, 5]
+    r = io.complex12(s)
+    if list(r) == list(s):
+        tresult("+")
+    else:
+        ok = 0
+        tresult("-")
+
+    s = (1L, 2L, -3L, 4L, 5L)
+    r = io.complex13(s)
+    if len(r) == len(s):
+        tresult(r)
+    else:
+        ok = 0
+        tresult("-")
+
+    s = [1L, 2L, -3L, 4L, 5L]
+    r = io.complex14(s)
+    if len(r) == len(s):
+        tresult(r)
+    else:
+        ok = 0
+        tresult("-")
+
+    s = (1L, 0L, 1L, 1L, 0L, 3L, 1L, 1L, 1L)
+    r = io.complex15(s)
+    if len(r) == len(s):
+        tresult(r)
+    else:
+        ok = 0
+        tresult("-")
 
     if ok: tpass()
     else:  tfail()
