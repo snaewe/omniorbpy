@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.15  2000/05/11 11:58:25  dpg1
+// Throw system exceptions with OMNIORB_THROW.
+//
 // Revision 1.14  2000/04/27 11:03:40  dpg1
 // Support for ORB core Interoperable Naming Service changes.
 //
@@ -83,7 +86,6 @@
 #include <omnipy.h>
 
  // Internal omniORB interfaces
-#include <exception.h>
 #include <ropeFactory.h>
 #include <localIdentity.h>
 #include <remoteIdentity.h>

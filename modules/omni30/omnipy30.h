@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.23  2000/05/11 11:58:25  dpg1
+// Throw system exceptions with OMNIORB_THROW.
+//
 // Revision 1.22  2000/04/27 11:01:52  dpg1
 // Interoperable Naming Service
 //
@@ -119,6 +122,7 @@
 
 #include <omniORB3/CORBA.h>
 #include <omniORB3/callDescriptor.h>
+#include <exception.h>
 #include "omnipy30_sysdep.h"
 
 ////////////////////////////////////////////////////////////////////////////

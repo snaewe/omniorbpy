@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.22  2000/05/11 11:58:24  dpg1
+// Throw system exceptions with OMNIORB_THROW.
+//
 // Revision 1.21  2000/05/03 11:07:37  dpg1
 // Fix for unmarshalling Any with null typecode.
 //
@@ -109,7 +112,7 @@ PyObject* omnipyCompaqCxxBug() {
 }
 #endif
 
-#define AS_THROW_BAD_PARAM throw CORBA::BAD_PARAM(0,compstatus)
+#define AS_THROW_BAD_PARAM OMNIORB_THROW(BAD_PARAM, 0,compstatus)
 
 CORBA::ULong
 omniPy::alignedSize(CORBA::ULong            msgsize,
@@ -2826,7 +2829,8 @@ omniPy::unmarshalPyObject(NetBufferedStream& stream,
       CORBA::ULong e;
       e <<= stream;
 
-      if (e >= (CORBA::ULong)PyTuple_GET_SIZE(t_o)) throw CORBA::MARSHAL();
+      if (e >= (CORBA::ULong)PyTuple_GET_SIZE(t_o))
+	OMNIORB_THROW(MARSHAL, 0, CORBA::COMPLETED_NO);
 
       PyObject* ev = PyTuple_GET_ITEM(t_o, e);
       Py_INCREF(ev);
@@ -2849,7 +2853,7 @@ omniPy::unmarshalPyObject(NetBufferedStream& stream,
       r_o = PyString_FromString(str_tmp._ptr);
 
       if (max_len > 0 && (CORBA::ULong)PyString_GET_SIZE(r_o) > max_len)
-	throw CORBA::MARSHAL();
+	OMNIORB_THROW(MARSHAL, 0, CORBA::COMPLETED_NO);
     }
     break;
 
@@ -2865,7 +2869,8 @@ omniPy::unmarshalPyObject(NetBufferedStream& stream,
       CORBA::ULong len;
       len <<= stream;
 
-      if (max_len > 0 && len > max_len) throw CORBA::MARSHAL();
+      if (max_len > 0 && len > max_len)
+	OMNIORB_THROW(MARSHAL, 0, CORBA::COMPLETED_NO);
 
       PyObject* elm_desc = PyTuple_GET_ITEM(d_o, 1);
 
@@ -3406,7 +3411,8 @@ omniPy::unmarshalPyObject(MemBufferedStream& stream,
       CORBA::ULong e;
       e <<= stream;
 
-      if (e >= (CORBA::ULong)PyTuple_GET_SIZE(t_o)) throw CORBA::MARSHAL();
+      if (e >= (CORBA::ULong)PyTuple_GET_SIZE(t_o))
+	OMNIORB_THROW(MARSHAL, 0, CORBA::COMPLETED_NO);
 
       PyObject* ev = PyTuple_GET_ITEM(t_o, e);
       Py_INCREF(ev);
@@ -3429,7 +3435,7 @@ omniPy::unmarshalPyObject(MemBufferedStream& stream,
       r_o = PyString_FromString(str_tmp._ptr);
 
       if (max_len > 0 && (CORBA::ULong)PyString_GET_SIZE(r_o) > max_len)
-	throw CORBA::MARSHAL();
+	OMNIORB_THROW(MARSHAL, 0, CORBA::COMPLETED_NO);
     }
     break;
 
@@ -3445,7 +3451,8 @@ omniPy::unmarshalPyObject(MemBufferedStream& stream,
       CORBA::ULong len;
       len <<= stream;
 
-      if (max_len > 0 && len > max_len) throw CORBA::MARSHAL();
+      if (max_len > 0 && len > max_len)
+	OMNIORB_THROW(MARSHAL, 0, CORBA::COMPLETED_NO);
 
       PyObject* elm_desc = PyTuple_GET_ITEM(d_o, 1);
 

@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.8  2000/05/11 11:58:24  dpg1
+// Throw system exceptions with OMNIORB_THROW.
+//
 // Revision 1.7  2000/03/24 16:48:58  dpg1
 // Local calls now have proper pass-by-value semantics.
 // Lots of little stability improvements.
@@ -115,96 +118,96 @@ omniPy::produceSystemException(PyObject* eobj, PyObject* erepoId)
   Py_DECREF(eobj);
 
   if (!strcmp(repoId, "IDL:omg.org/CORBA/UNKNOWN:1.0")) {
-    Py_DECREF(erepoId); throw CORBA::UNKNOWN(minor, status);
+    Py_DECREF(erepoId); OMNIORB_THROW(UNKNOWN, minor, status);
   }
   else if (!strcmp(repoId, "IDL:omg.org/CORBA/BAD_PARAM:1.0")) {
-    Py_DECREF(erepoId); throw CORBA::BAD_PARAM(minor, status);
+    Py_DECREF(erepoId); OMNIORB_THROW(BAD_PARAM, minor, status);
   }
   else if (!strcmp(repoId, "IDL:omg.org/CORBA/NO_MEMORY:1.0")) {
-    Py_DECREF(erepoId); throw CORBA::NO_MEMORY(minor, status);
+    Py_DECREF(erepoId); OMNIORB_THROW(NO_MEMORY, minor, status);
   }
   else if (!strcmp(repoId, "IDL:omg.org/CORBA/IMP_LIMIT:1.0")) {
-    Py_DECREF(erepoId); throw CORBA::IMP_LIMIT(minor, status);
+    Py_DECREF(erepoId); OMNIORB_THROW(IMP_LIMIT, minor, status);
   }
   else if (!strcmp(repoId, "IDL:omg.org/CORBA/COMM_FAILURE:1.0")) {
-    Py_DECREF(erepoId); throw CORBA::COMM_FAILURE(minor, status);
+    Py_DECREF(erepoId); OMNIORB_THROW(COMM_FAILURE, minor, status);
   }
   else if (!strcmp(repoId, "IDL:omg.org/CORBA/INV_OBJREF:1.0")) {
-    Py_DECREF(erepoId); throw CORBA::INV_OBJREF(minor, status);
+    Py_DECREF(erepoId); OMNIORB_THROW(INV_OBJREF, minor, status);
   }
   else if (!strcmp(repoId, "IDL:omg.org/CORBA/OBJECT_NOT_EXIST:1.0")) {
-    Py_DECREF(erepoId); throw CORBA::OBJECT_NOT_EXIST(minor, status);
+    Py_DECREF(erepoId); OMNIORB_THROW(OBJECT_NOT_EXIST, minor, status);
   }
   else if (!strcmp(repoId, "IDL:omg.org/CORBA/NO_PERMISSION:1.0")) {
-    Py_DECREF(erepoId); throw CORBA::NO_PERMISSION(minor, status);
+    Py_DECREF(erepoId); OMNIORB_THROW(NO_PERMISSION, minor, status);
   }
   else if (!strcmp(repoId, "IDL:omg.org/CORBA/INTERNAL:1.0")) {
-    Py_DECREF(erepoId); throw CORBA::INTERNAL(minor, status);
+    Py_DECREF(erepoId); OMNIORB_THROW(INTERNAL, minor, status);
   }
   else if (!strcmp(repoId, "IDL:omg.org/CORBA/MARSHAL:1.0")) {
-    Py_DECREF(erepoId); throw CORBA::MARSHAL(minor, status);
+    Py_DECREF(erepoId); OMNIORB_THROW(MARSHAL, minor, status);
   }
   else if (!strcmp(repoId, "IDL:omg.org/CORBA/INITIALIZE:1.0")) {
-    Py_DECREF(erepoId); throw CORBA::INITIALIZE(minor, status);
+    Py_DECREF(erepoId); OMNIORB_THROW(INITIALIZE, minor, status);
   }
   else if (!strcmp(repoId, "IDL:omg.org/CORBA/NO_IMPLEMENT:1.0")) {
-    Py_DECREF(erepoId); throw CORBA::NO_IMPLEMENT(minor, status);
+    Py_DECREF(erepoId); OMNIORB_THROW(NO_IMPLEMENT, minor, status);
   }
   else if (!strcmp(repoId, "IDL:omg.org/CORBA/BAD_TYPECODE:1.0")) {
-    Py_DECREF(erepoId); throw CORBA::BAD_TYPECODE(minor, status);
+    Py_DECREF(erepoId); OMNIORB_THROW(BAD_TYPECODE, minor, status);
   }
   else if (!strcmp(repoId, "IDL:omg.org/CORBA/BAD_OPERATION:1.0")) {
-    Py_DECREF(erepoId); throw CORBA::BAD_OPERATION(minor, status);
+    Py_DECREF(erepoId); OMNIORB_THROW(BAD_OPERATION, minor, status);
   }
   else if (!strcmp(repoId, "IDL:omg.org/CORBA/NO_RESOURCES:1.0")) {
-    Py_DECREF(erepoId); throw CORBA::NO_RESOURCES(minor, status);
+    Py_DECREF(erepoId); OMNIORB_THROW(NO_RESOURCES, minor, status);
   }
   else if (!strcmp(repoId, "IDL:omg.org/CORBA/NO_RESPONSE:1.0")) {
-    Py_DECREF(erepoId); throw CORBA::NO_RESPONSE(minor, status);
+    Py_DECREF(erepoId); OMNIORB_THROW(NO_RESPONSE, minor, status);
   }
   else if (!strcmp(repoId, "IDL:omg.org/CORBA/PERSIST_STORE:1.0")) {
-    Py_DECREF(erepoId); throw CORBA::PERSIST_STORE(minor, status);
+    Py_DECREF(erepoId); OMNIORB_THROW(PERSIST_STORE, minor, status);
   }
   else if (!strcmp(repoId, "IDL:omg.org/CORBA/BAD_INV_ORDER:1.0")) {
-    Py_DECREF(erepoId); throw CORBA::BAD_INV_ORDER(minor, status);
+    Py_DECREF(erepoId); OMNIORB_THROW(BAD_INV_ORDER, minor, status);
   }
   else if (!strcmp(repoId, "IDL:omg.org/CORBA/TRANSIENT:1.0")) {
-    Py_DECREF(erepoId); throw CORBA::TRANSIENT(minor, status);
+    Py_DECREF(erepoId); OMNIORB_THROW(TRANSIENT, minor, status);
   }
   else if (!strcmp(repoId, "IDL:omg.org/CORBA/FREE_MEM:1.0")) {
-    Py_DECREF(erepoId); throw CORBA::FREE_MEM(minor, status);
+    Py_DECREF(erepoId); OMNIORB_THROW(FREE_MEM, minor, status);
   }
   else if (!strcmp(repoId, "IDL:omg.org/CORBA/INV_IDENT:1.0")) {
-    Py_DECREF(erepoId); throw CORBA::INV_IDENT(minor, status);
+    Py_DECREF(erepoId); OMNIORB_THROW(INV_IDENT, minor, status);
   }
   else if (!strcmp(repoId, "IDL:omg.org/CORBA/INV_FLAG:1.0")) {
-    Py_DECREF(erepoId); throw CORBA::INV_FLAG(minor, status);
+    Py_DECREF(erepoId); OMNIORB_THROW(INV_FLAG, minor, status);
   }
   else if (!strcmp(repoId, "IDL:omg.org/CORBA/INTF_REPOS:1.0")) {
-    Py_DECREF(erepoId); throw CORBA::INTF_REPOS(minor, status);
+    Py_DECREF(erepoId); OMNIORB_THROW(INTF_REPOS, minor, status);
   }
   else if (!strcmp(repoId, "IDL:omg.org/CORBA/BAD_CONTEXT:1.0")) {
-    Py_DECREF(erepoId); throw CORBA::BAD_CONTEXT(minor, status);
+    Py_DECREF(erepoId); OMNIORB_THROW(BAD_CONTEXT, minor, status);
   }
   else if (!strcmp(repoId, "IDL:omg.org/CORBA/OBJ_ADAPTER:1.0")) {
-    Py_DECREF(erepoId); throw CORBA::OBJ_ADAPTER(minor, status);
+    Py_DECREF(erepoId); OMNIORB_THROW(OBJ_ADAPTER, minor, status);
   }
   else if (!strcmp(repoId, "IDL:omg.org/CORBA/DATA_CONVERSION:1.0")) {
-    Py_DECREF(erepoId); throw CORBA::DATA_CONVERSION(minor, status);
+    Py_DECREF(erepoId); OMNIORB_THROW(DATA_CONVERSION, minor, status);
   }
   else if (!strcmp(repoId, "IDL:omg.org/CORBA/TRANSACTION_REQUIRED:1.0")) {
-    Py_DECREF(erepoId); throw CORBA::TRANSACTION_REQUIRED(minor, status);
+    Py_DECREF(erepoId); OMNIORB_THROW(TRANSACTION_REQUIRED, minor, status);
   }
   else if (!strcmp(repoId, "IDL:omg.org/CORBA/TRANSACTION_ROLLEDBACK:1.0")) {
-    Py_DECREF(erepoId); throw CORBA::TRANSACTION_ROLLEDBACK(minor, status);
+    Py_DECREF(erepoId); OMNIORB_THROW(TRANSACTION_ROLLEDBACK, minor, status);
   }
   else if (!strcmp(repoId, "IDL:omg.org/CORBA/INVALID_TRANSACTION:1.0")) {
-    Py_DECREF(erepoId); throw CORBA::INVALID_TRANSACTION(minor, status);
+    Py_DECREF(erepoId); OMNIORB_THROW(INVALID_TRANSACTION, minor, status);
   }
   else if (!strcmp(repoId, "IDL:omg.org/CORBA/WRONG_TRANSACTION:1.0")) {
-    Py_DECREF(erepoId); throw CORBA::WRONG_TRANSACTION(minor, status);
+    Py_DECREF(erepoId); OMNIORB_THROW(WRONG_TRANSACTION, minor, status);
   }
   else {
-    Py_DECREF(erepoId); throw CORBA::UNKNOWN(0, CORBA::COMPLETED_NO);
+    Py_DECREF(erepoId); OMNIORB_THROW(UNKNOWN, 0, CORBA::COMPLETED_NO);
   }
 }

@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.16  2000/05/11 11:58:25  dpg1
+// Throw system exceptions with OMNIORB_THROW.
+//
 // Revision 1.15  2000/04/25 13:36:17  dpg1
 // If an object is deactivated while invocations on it are happening, the
 // deletion is performed by a callback at the end of the invoke(). The
@@ -97,7 +100,7 @@ omniPy::Py_omniCallDescriptor::unmarshalReturnedValues(GIOP_C& giop_client)
 					PyTuple_GET_ITEM(out_d_, 0));
   else {
     result_ = PyTuple_New(out_l_);
-    if (!result_) throw CORBA::NO_MEMORY();
+    if (!result_) OMNIORB_THROW(NO_MEMORY,0,CORBA::COMPLETED_NO);
 
     for (int i=0; i < out_l_; i++) {
       PyTuple_SET_ITEM(result_, i,
@@ -148,7 +151,7 @@ omniPy::Py_omniCallDescriptor::userException(GIOP_C&     giop_client,
   else {
     releaseInterpreterLock();
     giop_client.RequestCompleted(1);
-    throw CORBA::MARSHAL(0, CORBA::COMPLETED_MAYBE);
+    OMNIORB_THROW(MARSHAL, 0, CORBA::COMPLETED_MAYBE);
   }
 }
 

@@ -1,3 +1,20 @@
+Thu May 11 12:55:49 BST 2000 dpg1
+=================================
+
+- Throw system exceptions with OMNIORB_THROW so they are reported with
+  ORB trace level 10.
+
+modules/common/pyExceptions.cc
+modules/common/pyMarshal.cc
+modules/common/pyTypeCode.cc
+modules/omni28/omnipy28.h
+modules/omni30/omnipy30.h
+modules/omni30/pyCallDescriptor.cc
+modules/omni30/pyObjectRef.cc
+modules/omni30/pyPOAFunc.cc
+modules/omni30/pyServant.cc
+
+
 Thu May  4 10:52:09 BST 2000 dpg1
 =================================
 

@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.21  2000/05/11 11:58:25  dpg1
+// Throw system exceptions with OMNIORB_THROW.
+//
 // Revision 1.20  2000/03/24 16:48:58  dpg1
 // Local calls now have proper pass-by-value semantics.
 // Lots of little stability improvements.
@@ -116,6 +119,10 @@
 #ifndef OMNIORB_ASSERT
 #include <assert.h>
 #define OMNIORB_ASSERT(x) assert(x)
+#endif
+
+#ifndef OMNIORB_THROW
+#define OMNIORB_THROW(ex,min,comp) throw CORBA::ex(min,comp)
 #endif
 
 

@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.11  2000/05/11 11:58:24  dpg1
+// Throw system exceptions with OMNIORB_THROW.
+//
 // Revision 1.10  2000/03/24 16:48:58  dpg1
 // Local calls now have proper pass-by-value semantics.
 // Lots of little stability improvements.
@@ -332,7 +335,7 @@ r_alignedSizeTypeCode(CORBA::ULong msgsize, PyObject* d_o,
 	case CORBA::tk_enum:
 	  dsize = 4; dalign = omni::ALIGN_4; break;
 	default:
-	  throw CORBA::BAD_TYPECODE();
+	  OMNIORB_THROW(BAD_TYPECODE, 0, CORBA::COMPLETED_NO);
 	}
 
 	// Default used, count
@@ -494,7 +497,7 @@ r_alignedSizeTypeCode(CORBA::ULong msgsize, PyObject* d_o,
       break;
 
     default:
-      throw CORBA::BAD_TYPECODE();
+      OMNIORB_THROW(BAD_TYPECODE, 0, CORBA::COMPLETED_NO);
     }
   }
   //  cout << "alignedSizeTypecode returning " << msgsize << endl;
@@ -886,7 +889,7 @@ r_marshalTypeCode(NetBufferedStream&   stream,
 	CORBA::Long position, offset;
 
 	if (!dom.lookup(t_o, position))
-	  throw CORBA::BAD_TYPECODE();
+	  OMNIORB_THROW(BAD_TYPECODE, 0, CORBA::COMPLETED_NO);
 
 	offset = position - (tc_offset + 4);
 
@@ -897,7 +900,7 @@ r_marshalTypeCode(NetBufferedStream&   stream,
       break;
 
     default:
-      throw CORBA::BAD_TYPECODE();
+      OMNIORB_THROW(BAD_TYPECODE, 0, CORBA::COMPLETED_NO);
     }
   }
   //  cout << "marshalTypeCode() done." << endl;
@@ -1278,7 +1281,7 @@ r_marshalTypeCode(MemBufferedStream&   stream,
 	CORBA::Long position, offset;
 
 	if (!dom.lookup(t_o, position))
-	  throw CORBA::BAD_TYPECODE();
+	  OMNIORB_THROW(BAD_TYPECODE, 0, CORBA::COMPLETED_NO);
 
 	offset = position - (tc_offset + 4); // Position in stream of
 	                                     // indirect pointer
@@ -1290,7 +1293,7 @@ r_marshalTypeCode(MemBufferedStream&   stream,
       break;
 
     default:
-      throw CORBA::BAD_TYPECODE();
+      OMNIORB_THROW(BAD_TYPECODE, 0, CORBA::COMPLETED_NO);
     }
   }
   //  cout << "marshalTypeCode() done." << endl;
@@ -1358,7 +1361,7 @@ r_unmarshalTypeCode(NetBufferedStream& stream, OffsetDescriptorMap& odm)
       //      cout << "objref" << endl;
       CORBA::ULong size; size <<= stream;
       MemBufferedStream encap(size);
-      if (stream.overrun(size)) throw CORBA::MARSHAL();
+      if (stream.overrun(size)) OMNIORB_THROW(MARSHAL, 0, CORBA::COMPLETED_NO);
       encap.copy_from(stream, size);
       CORBA::Boolean bo; bo <<= encap; encap.byteOrder(bo);
 
@@ -1376,7 +1379,7 @@ r_unmarshalTypeCode(NetBufferedStream& stream, OffsetDescriptorMap& odm)
       //      cout << "struct" << endl;
       CORBA::ULong size; size <<= stream;
       MemBufferedStream encap(size);
-      if (stream.overrun(size)) throw CORBA::MARSHAL();
+      if (stream.overrun(size)) OMNIORB_THROW(MARSHAL, 0, CORBA::COMPLETED_NO);
       encap.copy_from(stream, size);
       CORBA::Boolean bo; bo <<= encap; encap.byteOrder(bo);
 
@@ -1448,7 +1451,7 @@ r_unmarshalTypeCode(NetBufferedStream& stream, OffsetDescriptorMap& odm)
       //      cout << "union" << endl;
       CORBA::ULong size; size <<= stream;
       MemBufferedStream encap(size);
-      if (stream.overrun(size)) throw CORBA::MARSHAL();
+      if (stream.overrun(size)) OMNIORB_THROW(MARSHAL, 0, CORBA::COMPLETED_NO);
       encap.copy_from(stream, size);
       CORBA::Boolean bo; bo <<= encap; encap.byteOrder(bo);
 
@@ -1550,7 +1553,7 @@ r_unmarshalTypeCode(NetBufferedStream& stream, OffsetDescriptorMap& odm)
       //      cout << "enum" << endl;
       CORBA::ULong size; size <<= stream;
       MemBufferedStream encap(size);
-      if (stream.overrun(size)) throw CORBA::MARSHAL();
+      if (stream.overrun(size)) OMNIORB_THROW(MARSHAL, 0, CORBA::COMPLETED_NO);
       encap.copy_from(stream, size);
       CORBA::Boolean bo; bo <<= encap; encap.byteOrder(bo);
 
@@ -1608,7 +1611,7 @@ r_unmarshalTypeCode(NetBufferedStream& stream, OffsetDescriptorMap& odm)
       //      cout << "sequence" << endl;
       CORBA::ULong size; size <<= stream;
       MemBufferedStream encap(size);
-      if (stream.overrun(size)) throw CORBA::MARSHAL();
+      if (stream.overrun(size)) OMNIORB_THROW(MARSHAL, 0, CORBA::COMPLETED_NO);
       encap.copy_from(stream, size);
       CORBA::Boolean bo; bo <<= encap; encap.byteOrder(bo);
 
@@ -1632,7 +1635,7 @@ r_unmarshalTypeCode(NetBufferedStream& stream, OffsetDescriptorMap& odm)
       //      cout << "array" << endl;
       CORBA::ULong size; size <<= stream;
       MemBufferedStream encap(size);
-      if (stream.overrun(size)) throw CORBA::MARSHAL();
+      if (stream.overrun(size)) OMNIORB_THROW(MARSHAL, 0, CORBA::COMPLETED_NO);
       encap.copy_from(stream, size);
       CORBA::Boolean bo; bo <<= encap; encap.byteOrder(bo);
 
@@ -1656,7 +1659,7 @@ r_unmarshalTypeCode(NetBufferedStream& stream, OffsetDescriptorMap& odm)
       //      cout << "alias" << endl;
       CORBA::ULong size; size <<= stream;
       MemBufferedStream encap(size);
-      if (stream.overrun(size)) throw CORBA::MARSHAL();
+      if (stream.overrun(size)) OMNIORB_THROW(MARSHAL, 0, CORBA::COMPLETED_NO);
       encap.copy_from(stream, size);
       CORBA::Boolean bo; bo <<= encap; encap.byteOrder(bo);
 
@@ -1691,7 +1694,7 @@ r_unmarshalTypeCode(NetBufferedStream& stream, OffsetDescriptorMap& odm)
       //      cout << "except" << endl;
       CORBA::ULong size; size <<= stream;
       MemBufferedStream encap(size);
-      if (stream.overrun(size)) throw CORBA::MARSHAL();
+      if (stream.overrun(size)) OMNIORB_THROW(MARSHAL, 0, CORBA::COMPLETED_NO);
       encap.copy_from(stream, size);
       CORBA::Boolean bo; bo <<= encap; encap.byteOrder(bo);
 
@@ -1767,7 +1770,7 @@ r_unmarshalTypeCode(NetBufferedStream& stream, OffsetDescriptorMap& odm)
       position  = tc_offset + 4 + offset;
 
       if (!odm.lookup(t_o, position))
-	throw CORBA::BAD_TYPECODE();
+	OMNIORB_THROW(BAD_TYPECODE, 0, CORBA::COMPLETED_NO);
 
       d_o = PyTuple_New(2); odm.add(d_o, tc_offset);
       PyTuple_SET_ITEM(d_o, 0, PyInt_FromLong(tk));
@@ -1779,7 +1782,7 @@ r_unmarshalTypeCode(NetBufferedStream& stream, OffsetDescriptorMap& odm)
     break;
 
   default:
-    throw CORBA::BAD_TYPECODE();
+    OMNIORB_THROW(BAD_TYPECODE, 0, CORBA::COMPLETED_NO);
   }
 
   //  cout << "r_unmarshalTypeCode ended." << endl;
@@ -1840,7 +1843,7 @@ r_unmarshalTypeCode(MemBufferedStream& stream, OffsetDescriptorMap& odm)
       //      cout << "objref" << endl;
       CORBA::ULong size; size <<= stream;
       MemBufferedStream encap(size);
-      if (stream.overrun(size)) throw CORBA::MARSHAL();
+      if (stream.overrun(size)) OMNIORB_THROW(MARSHAL, 0, CORBA::COMPLETED_NO);
       encap.copy_from(stream, size);
       CORBA::Boolean bo; bo <<= encap; encap.byteOrder(bo);
 
@@ -1858,7 +1861,7 @@ r_unmarshalTypeCode(MemBufferedStream& stream, OffsetDescriptorMap& odm)
       //      cout << "struct" << endl;
       CORBA::ULong size; size <<= stream;
       MemBufferedStream encap(size);
-      if (stream.overrun(size)) throw CORBA::MARSHAL();
+      if (stream.overrun(size)) OMNIORB_THROW(MARSHAL, 0, CORBA::COMPLETED_NO);
       encap.copy_from(stream, size);
       CORBA::Boolean bo; bo <<= encap; encap.byteOrder(bo);
 
@@ -1930,7 +1933,7 @@ r_unmarshalTypeCode(MemBufferedStream& stream, OffsetDescriptorMap& odm)
       //      cout << "union" << endl;
       CORBA::ULong size; size <<= stream;
       MemBufferedStream encap(size);
-      if (stream.overrun(size)) throw CORBA::MARSHAL();
+      if (stream.overrun(size)) OMNIORB_THROW(MARSHAL, 0, CORBA::COMPLETED_NO);
       encap.copy_from(stream, size);
       CORBA::Boolean bo; bo <<= encap; encap.byteOrder(bo);
 
@@ -2032,7 +2035,7 @@ r_unmarshalTypeCode(MemBufferedStream& stream, OffsetDescriptorMap& odm)
       //      cout << "enum" << endl;
       CORBA::ULong size; size <<= stream;
       MemBufferedStream encap(size);
-      if (stream.overrun(size)) throw CORBA::MARSHAL();
+      if (stream.overrun(size)) OMNIORB_THROW(MARSHAL, 0, CORBA::COMPLETED_NO);
       encap.copy_from(stream, size);
       CORBA::Boolean bo; bo <<= encap; encap.byteOrder(bo);
 
@@ -2090,7 +2093,7 @@ r_unmarshalTypeCode(MemBufferedStream& stream, OffsetDescriptorMap& odm)
       //      cout << "sequence" << endl;
       CORBA::ULong size; size <<= stream;
       MemBufferedStream encap(size);
-      if (stream.overrun(size)) throw CORBA::MARSHAL();
+      if (stream.overrun(size)) OMNIORB_THROW(MARSHAL, 0, CORBA::COMPLETED_NO);
       encap.copy_from(stream, size);
       CORBA::Boolean bo; bo <<= encap; encap.byteOrder(bo);
 
@@ -2114,7 +2117,7 @@ r_unmarshalTypeCode(MemBufferedStream& stream, OffsetDescriptorMap& odm)
       //      cout << "array" << endl;
       CORBA::ULong size; size <<= stream;
       MemBufferedStream encap(size);
-      if (stream.overrun(size)) throw CORBA::MARSHAL();
+      if (stream.overrun(size)) OMNIORB_THROW(MARSHAL, 0, CORBA::COMPLETED_NO);
       encap.copy_from(stream, size);
       CORBA::Boolean bo; bo <<= encap; encap.byteOrder(bo);
 
@@ -2138,7 +2141,7 @@ r_unmarshalTypeCode(MemBufferedStream& stream, OffsetDescriptorMap& odm)
       //      cout << "alias" << endl;
       CORBA::ULong size; size <<= stream;
       MemBufferedStream encap(size);
-      if (stream.overrun(size)) throw CORBA::MARSHAL();
+      if (stream.overrun(size)) OMNIORB_THROW(MARSHAL, 0, CORBA::COMPLETED_NO);
       encap.copy_from(stream, size);
       CORBA::Boolean bo; bo <<= encap; encap.byteOrder(bo);
 
@@ -2173,7 +2176,7 @@ r_unmarshalTypeCode(MemBufferedStream& stream, OffsetDescriptorMap& odm)
       //      cout << "except" << endl;
       CORBA::ULong size; size <<= stream;
       MemBufferedStream encap(size);
-      if (stream.overrun(size)) throw CORBA::MARSHAL();
+      if (stream.overrun(size)) OMNIORB_THROW(MARSHAL, 0, CORBA::COMPLETED_NO);
       encap.copy_from(stream, size);
       CORBA::Boolean bo; bo <<= encap; encap.byteOrder(bo);
 
@@ -2249,7 +2252,7 @@ r_unmarshalTypeCode(MemBufferedStream& stream, OffsetDescriptorMap& odm)
       position  = tc_offset + 4 + offset;
 
       if (!odm.lookup(t_o, position))
-	throw CORBA::BAD_TYPECODE();
+	OMNIORB_THROW(BAD_TYPECODE, 0, CORBA::COMPLETED_NO);
 
       d_o = PyTuple_New(2); odm.add(d_o, tc_offset);
       PyTuple_SET_ITEM(d_o, 0, PyInt_FromLong(tk));
@@ -2261,7 +2264,7 @@ r_unmarshalTypeCode(MemBufferedStream& stream, OffsetDescriptorMap& odm)
     break;
 
   default:
-    throw CORBA::BAD_TYPECODE();
+    OMNIORB_THROW(BAD_TYPECODE, 0, CORBA::COMPLETED_NO);
   }
 
   //  cout << "r_unmarshalTypeCode ended." << endl;
