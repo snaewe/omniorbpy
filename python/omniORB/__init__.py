@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.19  2000/06/01 11:10:30  dme
+# add omniORB.WorkerThread create/delete hooks (e.g. for profiling)
+#
 # Revision 1.18  2000/04/06 09:31:43  dpg1
 # newModule() spots if we're trying to re-open the CORBA module, and if
 # so uses omniORB.CORBA.
@@ -229,6 +232,19 @@ encapsulation MUST adhere to the given TypeCode."""
 
     return _omnipy.cdrUnmarshal(tc._d, encap)
 
+WTHREAD_CREATED = 0
+WTHREAD_DELETED = 1
+
+def addWThreadHook(hook):
+    """addWThreadHook(hook) -> None
+
+Arrange to call "hook(WTHREAD_{CREATED,DELETED}, wt)" on the new thread
+whenever the runtime creates or deletes a Python "omniORB.WorkerThread"
+"wt" (for instance as a result of a new incoming connection).  There is
+no concurrency control: "addWThreadHook()" must be called before the
+runtime creates any "WorkerThread"s.
+"""
+    WorkerThread.hooks.append(hook)
 
 
 # Private things
@@ -571,6 +587,8 @@ _thr_rel  = threading._active_limbo_lock.release
 
 class WorkerThread(threading.Thread):
 
+    hooks = []
+
     def __init__(self):
         _thr_init(self, name="omniORB")
         self._Thread__started = 1
@@ -582,9 +600,14 @@ class WorkerThread(threading.Thread):
             self.add = 1
             _thr_act[self.id] = self
         _thr_rel()
+        if self.add:
+            for hook in self.hooks:
+                hook(WTHREAD_CREATED, self)
 
     def delete(self):
         if self.add:
+            for hook in self.hooks:
+                hook(WTHREAD_DELETED, self)
             _thr_acq()
             del _thr_act[self.id]
             _thr_rel()
