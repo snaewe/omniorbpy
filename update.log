@@ -1,3 +1,23 @@
+Thu Aug 17 09:41:58 BST 2000 dpg1
+=================================
+
+- Fix possible obscure assertion failure with unexpected user
+  exception containing a member named "minor".
+
+modules/common/pyExceptions.cc
+
+- Updates for long long were broken on platforms without it
+
+modules/common/pyMarshal.cc
+modules/common/pyTypeCode.cc
+
+- Support for omniORB.LOCATION_FORWARD exception
+
+modules/omni30/pyServant.cc
+python/omniORB/CORBA.py
+python/omniORB/__init__.py
+
+
 Mon Aug 14 17:08:04 BST 2000 dpg1
 =================================
 
