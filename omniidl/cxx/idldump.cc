@@ -28,11 +28,11 @@
 
 // $Id$
 // $Log$
-// Revision 1.11.2.1  2000/08/14 14:39:10  dpg1
-// IDL dumping now properly escapes string and char constants
+// Revision 1.11.2.2  2000/08/29 10:20:24  dpg1
+// Operations and attributes now have repository ids.
 //
-// Revision 1.11  2000/03/03 17:41:40  dpg1
-// Major reorganisation to support omniORB 3.0 as well as 2.8.
+// Revision 1.9.2.1  2000/08/14 14:35:13  dpg1
+// IDL dumping now properly escapes string and char constants
 //
 // Revision 1.9  2000/02/03 14:50:08  dpg1
 // Native declarations can now be used as types.
@@ -242,8 +242,6 @@ visitDeclarator(Declarator* d)
   printf("%s", d->identifier());
   for (ArraySize* s = d->sizes(); s; s = s->next())
     printf("[%d]", s->size());
-  if (d->alias())
-    printf(" /* RepoId = %s */", d->repoId());
 }
 
 void
