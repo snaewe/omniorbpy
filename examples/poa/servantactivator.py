@@ -35,7 +35,12 @@ class ServantActivator_i (PortableServer__POA.ServantActivator):
 
     def etherealize(self, oid, poa, serv, cleanup_in_progress,
                     remaining_activations):
-        print "etherealize(): oid:", oid, "poa:", poa._get_the_name()
+        print "etherealize called"
+        try:
+            name = poa._get_the_name()
+        except CORBA.OBJECT_NOT_EXIST, ex:
+            name = "<dead poa>"
+        print "etherealize(): oid:", oid, "poa:", name
 
 
 # Initialise the ORB and activate the root POA.

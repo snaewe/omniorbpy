@@ -24,7 +24,8 @@ class Echo_i (_GlobalIDL__POA.Echo):
         print "Echo_i deleted."
 
     def echoString(self, mesg):
-        print "echoString() called with message:", mesg
+        print "echoString() called with message:", mesg, \
+              ", ObjectId =", current.get_object_id()
         return mesg
 
 class ServantLocator_i (PortableServer__POA.ServantLocator):
@@ -43,6 +44,8 @@ poa = orb.resolve_initial_references("RootPOA")
 poaManager = poa._get_the_POAManager()
 poaManager.activate()
 
+current = orb.resolve_initial_references("POACurrent")
+
 # Create a child POA with the right policies for a ServantLocator
 ps = [poa.create_id_assignment_policy(PortableServer.USER_ID),
       poa.create_servant_retention_policy(PortableServer.NON_RETAIN),
@@ -57,6 +60,7 @@ child.set_servant_manager(slo)
 
 # Create an object reference with no servant
 eo = child.create_reference_with_id("MyEcho", CORBA.id(_GlobalIDL.Echo))
+eo2 = child.create_reference_with_id("MyEcho2", CORBA.id(_GlobalIDL.Echo))
 print orb.object_to_string(eo)
 
 # Run, or do some local calls...
@@ -77,6 +81,9 @@ print eo.echoString("Hello again")
 time.sleep(1)
 
 print eo.echoString("Hello again again")
+time.sleep(1)
+
+print eo2.echoString("Hello object 2")
 time.sleep(1)
 
 print "Destroying POA..."

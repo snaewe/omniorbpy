@@ -26,7 +26,11 @@ if eo is None:
     sys.exit(1)
 
 # Invoke the echoString operation
-message = "Hello from Python"
+if len(sys.argv) == 3:
+    message = sys.argv[2]
+else:
+    message = "Hello from Python"
+
 result  = eo.echoString(message)
 
 print "I said '%s'. The object said '%s'." % (message,result)
