@@ -1,3 +1,25 @@
+Thu Aug  7 00:55:46 BST 2003 dgrisby
+====================================
+
+- This is the 2.2 release.
+
+
+Wed Aug  6 23:32:16 BST 2003 dgrisby
+====================================
+
+- Preparation for 2.2 release.
+
+README
+ReleaseNotes_2_1.txt   -- deleted
+ReleaseNotes_2_2.txt   -- new
+THIS_IS_OMNIORBPY_2_1  -- deleted
+THIS_IS_OMNIORBPY_2_2  -- new
+configure
+configure.ac
+update.log
+contrib/RPMs/omniORBpy.spec
+mk/beforeauto.mk.in
+modules/dir.mk
 
 
 Tue Jul 29 15:35:31 BST 2003 dgrisby
@@ -67,28 +89,6 @@ Thu Jul  3 14:48:17 BST 2003 dgrisby
 
 bugfixes-21.xml
 modules/pyCallDescriptor.cc
-Thu Aug  7 00:55:46 BST 2003 dgrisby
-====================================
-
-- This is the 2.2 release.
-
-
-Wed Aug  6 23:32:16 BST 2003 dgrisby
-====================================
-
-- Preparation for 2.2 release.
-
-README
-ReleaseNotes_2_1.txt   -- deleted
-ReleaseNotes_2_2.txt   -- new
-THIS_IS_OMNIORBPY_2_1  -- deleted
-THIS_IS_OMNIORBPY_2_2  -- new
-configure
-configure.ac
-update.log
-contrib/RPMs/omniORBpy.spec
-mk/beforeauto.mk.in
-modules/dir.mk
 
 
 Mon Jun 23 21:04:33 BST 2003 dgrisby
