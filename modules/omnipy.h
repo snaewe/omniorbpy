@@ -31,6 +31,9 @@
 #define _omnipy_h_
 
 // $Log$
+// Revision 1.2.4.13  2001/08/21 10:52:41  dpg1
+// Update to new ORB core APIs.
+//
 // Revision 1.2.4.12  2001/08/15 10:37:14  dpg1
 // Track ORB core object table changes.
 //
@@ -70,6 +73,7 @@
 #include <omniORB4/callDescriptor.h>
 #include <exceptiondefs.h>
 #include <objectTable.h>
+#include <orbParameters.h>
 #include "omnipy_sysdep.h"
 
 

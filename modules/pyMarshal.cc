@@ -29,6 +29,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.2.10  2001/08/21 10:52:41  dpg1
+// Update to new ORB core APIs.
+//
 // Revision 1.1.2.9  2001/07/03 11:29:03  dpg1
 // Tweaks to compile on Solaris.
 //
@@ -58,9 +61,9 @@
 // Initial support for omniORB 4.
 //
 
-
 #include <omnipy.h>
 #include <pyFixed.h>
+
 
 #ifdef Py_UNICODEOBJECT_H
 #  include <codeSetUtil.h>
@@ -1485,9 +1488,10 @@ marshalPyObjectEnum(cdrStream& stream, PyObject* d_o, PyObject* a_o)
 static void
 marshalPyObjectString(cdrStream& stream, PyObject* d_o, PyObject* a_o)
 { // max_length
-  cdrStream::ncs_c->marshalString(stream, stream.TCS_C(), 0,
-				  PyString_GET_SIZE(a_o),
-				  PyString_AS_STRING(a_o));
+  _OMNI_NS(orbParameters)::
+    nativeCharCodeSet->marshalString(stream, stream.TCS_C(), 0,
+				     PyString_GET_SIZE(a_o),
+				     PyString_AS_STRING(a_o));
 }
 
 static void
@@ -2511,7 +2515,8 @@ unmarshalPyObjectString(cdrStream& stream, PyObject* d_o)
 
   char* s;
   CORBA::ULong len =
-    cdrStream::ncs_c->unmarshalString(stream, stream.TCS_C(), max_len, s);
+    _OMNI_NS(orbParameters)::
+    nativeCharCodeSet->unmarshalString(stream, stream.TCS_C(), max_len, s);
 
   PyObject* r_o = PyString_FromStringAndSize(s, len);
   _CORBA_String_helper::free(s);

@@ -1,18 +1,30 @@
+Tue Aug 21 11:50:55 BST 2001 dpg1
+=================================
+
+- Update to new ORB core APIs.
+
+modules/omnipy.cc
+modules/omnipy.h
+modules/pyMarshal.cc
+modules/pyTypeCode.cc
+modules/pyomniFunc.cc
+
+
 Wed Aug 15 11:32:53 BST 2001 dpg1
 =================================
 
 - Tweak examples.
 
-src/lib/omniORBpy/examples/echo/echo_clt.py
-src/lib/omniORBpy/examples/poa/servantactivator.py
-src/lib/omniORBpy/examples/poa/servantlocator.py
+examples/echo/echo_clt.py
+examples/poa/servantactivator.py
+examples/poa/servantlocator.py
 
 - Track ORB core object table changes.
 
-src/lib/omniORBpy/modules/omnipy.cc
-src/lib/omniORBpy/modules/omnipy.h
-src/lib/omniORBpy/modules/pyCallDescriptor.cc
-src/lib/omniORBpy/modules/pyObjectRef.cc
+modules/omnipy.cc
+modules/omnipy.h
+modules/pyCallDescriptor.cc
+modules/pyObjectRef.cc
 
 
 Wed Aug  1 11:10:52 BST 2001 dpg1
@@ -20,12 +32,12 @@ Wed Aug  1 11:10:52 BST 2001 dpg1
 
 - Main thread policy.
 
-src/lib/omniORBpy/modules/pyExceptions.cc
-src/lib/omniORBpy/modules/pyORBFunc.cc
-src/lib/omniORBpy/modules/pyThreadCache.cc
-src/lib/omniORBpy/python/omniORB/CORBA.py
-src/lib/omniORBpy/python/omniORB/PortableServer.py
-src/lib/omniORBpy/python/omniORB/__init__.py
+modules/pyExceptions.cc
+modules/pyORBFunc.cc
+modules/pyThreadCache.cc
+python/omniORB/CORBA.py
+python/omniORB/PortableServer.py
+python/omniORB/__init__.py
 
 
 Tue Jul  3 12:37:11 BST 2001 dpg1

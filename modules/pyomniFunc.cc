@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.5  2001/08/21 10:52:42  dpg1
+// Update to new ORB core APIs.
+//
 // Revision 1.1.2.4  2001/04/09 15:22:16  dpg1
 // Fixed point support.
 //
@@ -45,6 +48,8 @@
 
 #include <omnipy.h>
 #include <pyThreadCache.h>
+
+OMNI_USING_NAMESPACE(omni);
 
 
 static PyObject* transientEHtuple   = 0;
@@ -359,37 +364,6 @@ extern "C" {
     return 0;
   }
 
-  static char maxTcpConnectionPerServer_doc [] =
-  "maxTcpConnectionPerServer(int) -> None\n"
-  "maxTcpConnectionPerServer()    -> int\n"
-  "\n"
-  "The ORB opens more than one TCP connection to a server if there\n"
-  "is more than one concurrent invocation to that server. This variable\n"
-  "decides the maximum number of connections to use per server. This\n"
-  "variable is read only once at ORB_init. If the number of concurrent\n"
-  "invocations exceeds this number, the extra invocations are blocked\n"
-  "until the the outstanding ones return. (The default value is 5.)\n";
-
-  static PyObject* pyomni_maxTcpConnectionPerServer(PyObject* self,
-						    PyObject* args)
-  {
-    if (PyTuple_GET_SIZE(args) == 0) {
-      return PyInt_FromLong(omniORB::maxTcpConnectionPerServer);
-    }
-    else if (PyTuple_GET_SIZE(args) == 1) {
-      PyObject* pymc = PyTuple_GET_ITEM(args, 0);
-
-      if (PyInt_Check(pymc)) {
-	omniORB::maxTcpConnectionPerServer = PyInt_AS_LONG(pymc);
-	Py_INCREF(Py_None);
-	return Py_None;
-      }
-    }
-    PyErr_SetString(PyExc_TypeError,
-		    (char*)"Operation requires a single integer argument");
-    return 0;
-  }
-
   static char nativeCharCodeSet_doc [] =
   "nativeCharCodeSet(string) -> None\n"
   "nativeCharCodeSet()       -> string\n"
@@ -399,9 +373,12 @@ extern "C" {
   static PyObject* pyomni_nativeCharCodeSet(PyObject* self, PyObject* args)
   {
     if (PyTuple_GET_SIZE(args) == 0) {
-      const char* ncs = omniORB::nativeCharCodeSet();
-      if (ncs)
+      omniCodeSet::NCS_C* ncs_c = orbParameters::nativeCharCodeSet;
+
+      if (ncs_c) {
+	const char* ncs = ncs_c->name();
 	return PyString_FromString((char*)ncs);
+      }
       else {
 	Py_INCREF(Py_None);
 	return Py_None;
@@ -412,7 +389,9 @@ extern "C" {
 
       if (PyString_Check(pyncs)) {
 	try {
-	  omniORB::nativeCharCodeSet(PyString_AS_STRING(pyncs));
+	  omniCodeSet::NCS_C* ncs_c;
+	  ncs_c = omniCodeSet::getNCS_C(PyString_AS_STRING(pyncs));
+	  orbParameters::nativeCharCodeSet = ncs_c;
 	}
 	OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
 
@@ -421,7 +400,7 @@ extern "C" {
       }
     }
     PyErr_SetString(PyExc_TypeError,
-		    (char*)"Operation requires a single integer argument");
+		    (char*)"Operation requires a single string argument");
     return 0;
   }
 
@@ -466,10 +445,6 @@ extern "C" {
     {(char*)"traceLevel",
      pyomni_traceLevel,
      METH_VARARGS, traceLevel_doc},
-
-    {(char*)"maxTcpConnectionPerServer",
-     pyomni_maxTcpConnectionPerServer,
-     METH_VARARGS, maxTcpConnectionPerServer_doc},
 
     {(char*)"nativeCharCodeSet",
      pyomni_nativeCharCodeSet,
