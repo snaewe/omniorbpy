@@ -1,3 +1,11 @@
+Wed Feb 11 11:03:52 GMT 2004 dgrisby
+====================================
+
+- Enum __cmp__ didn't work with comparisons with other object types.
+
+python/omniORB/__init__.py
+
+
 Mon Dec 15 18:14:04 GMT 2003 dgrisby
 ====================================
 

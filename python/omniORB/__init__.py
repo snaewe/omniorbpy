@@ -30,6 +30,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.26.2.20  2004/02/11 11:02:01  dgrisby
+# Enum __cmp__ didn't work with comparisons with other object types.
+#
 # Revision 1.26.2.19  2003/11/19 14:23:42  dgrisby
 # Make COS directory a Python package; add it to sys.path if it's not
 # already there.
@@ -478,7 +481,16 @@ class EnumItem:
         return self._n
 
     def __cmp__(self, other):
-        return cmp(self._v, other._v)
+        try:
+            if isinstance(other, EnumItem):
+                if other._parent_id == self._parent_id:
+                    return cmp(self._v, other._v)
+                else:
+                    return cmp(self._parent_id, other._parent_id)
+            else:
+                return cmp(id(self), id(other))
+        except:
+            return cmp(id(self), id(other))
 
     def __hash__(self):
         return id(self)
