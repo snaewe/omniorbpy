@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.2  2000/11/06 17:06:38  dpg1
+// Fix to prevent extra _is_a call after narrow
+//
 // Revision 1.1.2.1  2000/10/13 13:55:23  dpg1
 // Initial support for omniORB 4.
 //
@@ -630,7 +633,7 @@ OMNIORB_FOR_EACH_SYS_EXCEPTION(DO_CALL_DESC_SYSTEM_EXCEPTON)
     if (isa) {
       omniObjRef* oosource = cxxsource->_PR_getobj();
       omniObjRef* oodest = omniPy::createObjRef(repoId,
-						oosource->_getIOR(), 0, 0);
+						oosource->_getIOR(), 0, 1);
       CORBA::Object_ptr cxxdest =
 	(CORBA::Object_ptr)(oodest->_ptrToObjRef(CORBA::Object::_PD_repoId));
 
