@@ -357,7 +357,7 @@ ifeq ($(notdir $(CXX)),aCC)
 #       is compiled and linked with aCC.
 
 CXXOPTIONS += +Z
-  
+
 libname = _omnipymodule.sl
 soname  = $(libname).$(OMNIPY_MAJOR)
 lib     = $(soname).$(OMNIPY_MINOR)
