@@ -38,7 +38,7 @@ SSLIOP.idl TimeBase.idl
 # Should be able to fix with a string substitution...
 # Lname-library.idl
 
-IDLFILES = AttNotifyChannelAdmin.idl CosCollection.idl \
+IDLFILES = CosCollection.idl \
 	   CosCompoundLifeCycle.idl \
 	   CosContainment.idl CosEventChannelAdmin.idl \
 	   CosEventComm.idl CosExternalizationContainment.idl \

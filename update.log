@@ -1,3 +1,11 @@
+Mon Jun 23 21:04:33 BST 2003 dgrisby
+====================================
+
+- Remove reference to obsolete AttNotifyChannelAdmin.idl.
+
+python/COS/dir.mk
+
+
 Wed Jun 11 13:30:17 BST 2003 dgrisby
 ====================================
 
