@@ -81,12 +81,12 @@ DIR_CPPFLAGS += $(patsubst %,-I%/src/lib/omniORB2/orbcore,$(IMPORT_TREES))
 ifdef UnixPlatform
 #CXXDEBUGFLAGS = -g
 
-PYPREFIX  := $(shell $(PYTHON) -c 'import sys; print sys.exec_prefix')
+PYEPREFIX := $(shell $(PYTHON) -c 'import sys; print sys.exec_prefix')
+PYPREFIX  := $(shell $(PYTHON) -c 'import sys; print sys.prefix')
 PYVERSION := $(shell $(PYTHON) -c 'import sys; print sys.version[:3]')
-PYINCDIR  := $(PYPREFIX)/include
 PYINCFILE := "<python$(PYVERSION)/Python.h>"
 PYINCTHRD := "<python$(PYVERSION)/pythread.h>"
-DIR_CPPFLAGS += -I$(PYINCDIR) -DPYTHON_INCLUDE=$(PYINCFILE) -DPYTHON_THREAD_INC=$(PYINCTHRD)
+DIR_CPPFLAGS += -I$(PYEPREFIX)/include -I$(PYPREFIX)/include -DPYTHON_INCLUDE=$(PYINCFILE) -DPYTHON_THREAD_INC=$(PYINCTHRD)
 
 endif
 
