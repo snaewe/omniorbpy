@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.11  2001/06/22 10:29:26  dpg1
+// Add distribution date to logging.
+//
 // Revision 1.1.2.10  2001/06/11 13:06:25  dpg1
 // Support for PortableServer::Current.
 //
@@ -67,6 +70,7 @@
 #define DLL_EXPORT
 #endif
 
+#include <omniORB4/pydistdate.hh>
 #include <omnipy.h>
 #include <pyThreadCache.h>
 
@@ -361,6 +365,11 @@ extern "C" {
       orb = CORBA::ORB_init(argc, argv, orbid);
     }
     OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
+
+    if (omniORB::trace(2)) {
+      omniORB::logger l;
+      l << "omniORBpy distribution date: " OMNIORBPY_DIST_DATE "\n";
+    }
 
     omniPy::orb = orb;
 

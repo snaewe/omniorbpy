@@ -7,9 +7,6 @@ DIR_CPPFLAGS += -DOMNIORB_VERSION_STRING=\"$(OMNIORB_VERSION)\"
 
 OMNIORB_VERSION_NOMICRO := $(OMNIORB_MAJOR_VERSION).$(OMNIORB_MINOR_VERSION)
 
-# Test which omniORB version we're using
-
-
 CXXSRCS = omnipy.cc \
           pyORBFunc.cc \
           pyPOAFunc.cc \

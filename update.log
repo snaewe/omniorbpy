@@ -1,3 +1,13 @@
+Fri Jun 22 11:26:40 BST 2001 dpg1
+=================================
+
+- Add distribution date to logging.
+
+dir.mk
+modules/dir.mk
+modules/omnipy.cc
+
+
 Fri Jun 15 11:47:15 BST 2001 dpg1
 =================================
 
