@@ -28,6 +28,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.21  2000/02/23 10:20:52  dpg1
+# Bug in descriptors for single-item enums.
+#
 # Revision 1.20  2000/01/04 15:29:41  dpg1
 # Fixes to modules generated within a package.
 #
@@ -417,7 +420,7 @@ enum_item_at_module_scope = """\
 _0_@modname@.@item@ = omniORB.EnumItem("@item@", @eval@)"""
 
 enum_object_and_descriptor_at_module_scope = """\
-_0_@modname@.@ename@ = omniORB.Enum("@repoId@", (@eitems@))
+_0_@modname@.@ename@ = omniORB.Enum("@repoId@", (@eitems@,))
 
 _0_@modname@._d_@ename@  = (omniORB.tcInternal.tv_enum, _0_@modname@.@ename@._NP_RepositoryId, "@ename@", _0_@modname@.@ename@._items)
 _0_@modname@._tc_@ename@ = omniORB.tcInternal.createTypeCode(_0_@modname@._d_@ename@)
@@ -427,7 +430,7 @@ enum_item = """\
 @item@ = omniORB.EnumItem("@item@", @eval@)"""
 
 enum_object_and_descriptor = """\
-@ename@ = omniORB.Enum("@repoId@", (@eitems@))
+@ename@ = omniORB.Enum("@repoId@", (@eitems@,))
 
 _d_@ename@  = (omniORB.tcInternal.tv_enum, @ename@._NP_RepositoryId, "@ename@", @ename@._items)
 _tc_@ename@ = omniORB.tcInternal.createTypeCode(_d_@ename@)
