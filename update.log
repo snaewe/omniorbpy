@@ -1,3 +1,13 @@
+Sun Aug 31 21:22:30 BST 2003 dgrisby
+====================================
+
+- Couple of memory leaks in TypeCode unmarshalling.
+
+bugfixes-22.xml   -- new
+modules/omnipy.cc
+modules/pyTypeCode.cc
+
+
 Fri Aug 29 14:24:42 BST 2003 dgrisby
 ====================================
 

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+<?xml-stylesheet type="text/xml" href="buglayout.xml"?>
+
+<!-- The following bugs have been fixed since the omniORBpy 2.0     -->
+<!-- release. This file is transformed into html with bugfixes.xsl. -->
+
+<!-- Editors: make sure the content you add is well-formed XML.     -->
+
+<buglist version="2.2">
+
+<bug id="1" date="Sun Aug 31 21:22:30 BST 2003" user="dgrisby">
+  <summary>Memory leaks in TypeCode unmarshalling.</summary>
+  <reported>Frank Grunewald</reported>
+  <text>
+  Two reference counting mistakes led to memory leaks when
+  unmarshalling TypeCodes.
+  </text>
+</bug>
+
+</buglist>

@@ -29,6 +29,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.2.13  2003/08/31 20:27:27  dgrisby
+// Couple of memory leaks in TypeCode unmarshalling.
+//
 // Revision 1.1.2.12  2003/05/28 10:13:01  dgrisby
 // Preliminary interceptor support. General clean-up.
 //
@@ -849,12 +852,9 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
 	  PyTuple_SET_ITEM(mems, i, mem);
 
 	  if (def_used > 0 && i == (CORBA::ULong)def_used) {
-	    Py_INCREF(mem); // **** Error here?
 	    PyTuple_SET_ITEM(d_o, 7, mem);
 	  }
 	  else {
-	    Py_INCREF(mem); // ****
-	    Py_INCREF(label); // ****
 	    PyDict_SetItem(dict, label, mem);
 	  }
 	}
@@ -911,12 +911,14 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
 
 	// members
 	for (CORBA::ULong i=0; i<cnt; i++) {
-	  t_o = omniPy::unmarshalRawPyString(encap);
+	  PyObject* mname = omniPy::unmarshalRawPyString(encap);
 
-	  if (PyString_GET_SIZE(t_o) > 0)
-	    t_o = PyObject_CallFunction(eclass, (char*)"Oi", t_o, i);
+	  if (PyString_GET_SIZE(mname) > 0)
+	    t_o = PyObject_CallFunction(eclass, (char*)"Oi", mname, i);
 	  else
 	    t_o = PyObject_CallFunction(aclass, (char*)"i", i);
+
+	  Py_DECREF(mname);
 
 	  OMNIORB_ASSERT(t_o && PyInstance_Check(t_o));
 
@@ -993,7 +995,8 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
 	PyTuple_SET_ITEM(d_o, 1, repoId);
 	
 	// name
-	t_o = omniPy::unmarshalRawPyString(encap); PyTuple_SET_ITEM(d_o, 2, t_o);
+	t_o = omniPy::unmarshalRawPyString(encap);
+	PyTuple_SET_ITEM(d_o, 2, t_o);
 
 	// TypeCode
 	t_o = r_unmarshalTypeCode(encap, eodm);
