@@ -28,6 +28,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.17  1999/12/17 11:39:52  dpg1
+# New arguments to put modules and stubs in a specified package.
+#
 # Revision 1.16  1999/12/15 11:32:42  dpg1
 # -Wbinline option added.
 #
@@ -86,16 +89,13 @@
 from omniidl import idlast, idltype, idlutil, output
 import sys, string, types, os.path, keyword
 
-# Configuration defaults:
-stub_directory   = ""
-stub_module      = ""
-module_directory = ""
-
 cpp_args = ["-D__OMNIIDL_PYTHON__"]
 usage_string = """\
   -Wbstdout       Send generated stubs to stdout rather than a file
-  -Wbinline       Output stubs for #included files in line with the main file\
-"""
+  -Wbinline       Output stubs for #included files in line with the main file
+  -Wbpackage=p    Put both Python modules and stub files in package p
+  -Wbmodules=p    Put Python modules in package p
+  -Wbstubs=p      Put stub files in package p"""
 
 #""" Uncomment this line to get syntax highlighting on the output strings
 
@@ -123,24 +123,24 @@ _omnipy.checkVersion(0,2, __file__)
 """
 
 file_end = """\
-_exported_modules = ( @export_list@, )
+_exported_modules = ( @export_string@, )
 
 # The end."""
 
 module_start = """
 #
-# Start of module @sname@
+# Start of module "@sname@"
 #
-__name__ = "@sname@"
-_0_@sname@     = omniORB.openModule("@sname@",     "@filename@")
-_0_POA_@sname@ = omniORB.openModule("POA_@sname@", "@filename@")
+__name__ = "@package@@sname@"
+_0_@sname@     = omniORB.openModule("@package@@sname@",     "@filename@")
+_0_POA_@sname@ = omniORB.openModule("@package@POA_@sname@", "@filename@")
 """
 
 module_end = """
 #
-# End of module @sname@
+# End of module "@sname@"
 #
-__name__ = "@modname@"
+__name__ = "@package@@modname@"
 """
 
 import_idl_file = """\
@@ -424,13 +424,19 @@ _tc_@ename@ = omniORB.tcInternal.createTypeCode(_d_@ename@)
 omniORB.registerType(@ename@._NP_RepositoryId, _d_@ename@, _tc_@ename@)"""
 
 
-
+# Global state
 imported_files   = {}
 exported_modules = {}
+
+# Command line options
 output_inline    = 0
+module_package   = ""
+stub_package     = ""
+stub_directory   = ""
 
 def run(tree, args):
     global main_idl_file, imported_files, exported_modules, output_inline
+    global module_package, stub_package, stub_directory
 
     imported_files.clear()
     exported_modules.clear()
@@ -438,26 +444,48 @@ def run(tree, args):
     # Look at the args:
     use_stdout = 0
     for arg in args:
+
         if arg == "stdout":
             use_stdout = 1
+
         elif arg == "inline":
             output_inline = 1
+
+        elif arg[:8] == "modules=":
+            module_package = arg[8:]
+            if module_package != "":
+                module_package = module_package + "."
+
+        elif arg[:6] == "stubs=":
+            stub_package   = arg[6:]
+            stub_directory = apply(os.path.join,
+                                   string.split(stub_package, "."))
+            if stub_package != "":
+                stub_package = stub_package + "."
+
+        elif arg[:8] == "package=":
+            module_package = stub_package = arg[8:]
+            stub_directory = apply(os.path.join,
+                                   string.split(stub_package, "."))
+            if module_package != "":
+                module_package = stub_package = module_package + "."
+
         else:
             print "Warning: python back-end does not understand argument:", \
                   arg
     
     main_idl_file = tree.file()
 
-    imported_files[outputFileName(main_idl_file)] = 1
-
     outpybasename = outputFileName(main_idl_file)
-    outpymodule   = stub_module + outpybasename
+    outpymodule   = stub_package + outpybasename
     outpyname     = os.path.join(stub_directory, outpybasename + ".py")
+
+    imported_files[outpybasename] = 1
 
     if (use_stdout):
         st = output.Stream(sys.stdout, 4)
     else:
-        checkStubDir(stub_directory)
+        checkStubPackage(stub_package)
         st = output.Stream(open(outpyname, "w"), 4)
 
     st.out(file_start, filename=main_idl_file)
@@ -467,9 +495,10 @@ def run(tree, args):
 
     exports = exported_modules.keys()
     exports.sort()
-    export_list = string.join(map(lambda s: '"' + s + '"', exports), ", ")
+    export_list   = map(lambda s: '"' + module_package + s + '"', exports)
+    export_string = string.join(export_list, ", ")
 
-    st.out(file_end, export_list=export_list)
+    st.out(file_end, export_string=export_string)
 
     if not use_stdout:
         updateModules(exports, outpymodule)
@@ -489,7 +518,8 @@ class PythonVisitor:
             ifilename = outputFileName(node.file())
             if not imported_files.has_key(ifilename):
                 imported_files[ifilename] = 1
-                self.st.out(import_idl_file, ifilename=stub_module + ifilename)
+                self.st.out(import_idl_file,
+                            ifilename=stub_package + ifilename)
             return 1
         
     #
@@ -501,7 +531,8 @@ class PythonVisitor:
         self.currentScope    = ["_0__GlobalIDL"]
         self.modname         = "_GlobalIDL"
 
-        self.st.out(module_start, sname="_GlobalIDL", filename=node.file())
+        self.st.out(module_start, sname="_GlobalIDL", filename=node.file(),
+                    package=module_package)
 
         decls_in_global_module = 0
 
@@ -513,7 +544,8 @@ class PythonVisitor:
         if decls_in_global_module:
             exported_modules["_GlobalIDL"] = 1
 
-        self.st.out(module_end, modname=self.outpymodule, sname="_GlobalIDL")
+        self.st.out(module_end, modname=self.outpymodule, sname="_GlobalIDL",
+                    package="")
 
     #
     # Module
@@ -528,7 +560,8 @@ class PythonVisitor:
         sname = dotName(node.scopedName())
 
         if node.mainFile() or output_inline:
-            self.st.out(module_start, sname=sname, filename=node.file())
+            self.st.out(module_start, sname=sname, filename=node.file(),
+                        package=module_package)
 
         parentmodname = self.modname
         self.modname  = dotName(node.scopedName())
@@ -553,7 +586,8 @@ class PythonVisitor:
 
         if node.mainFile() or output_inline:
             exported_modules[sname] = 1
-            self.st.out(module_end, modname=parentmodname, sname=sname)
+            self.st.out(module_end, modname=parentmodname, sname=sname,
+                        package=module_package)
 
     #
     # Forward interface
@@ -1333,22 +1367,29 @@ def valueToString(val, kind, scope=[]):
 def outputFileName(idlname):
     return string.replace(os.path.basename(idlname), ".", "_")
 
-def checkStubDir(path):
-    """Check the given path for use as a stub directory
+def checkStubPackage(package):
+    """Check the given package name for use as a stub directory
 
-    If it exists, make sure it is a directory.
-    If it does not exist, create it.
-    Make sure it has a __init__.py file
-    """
+    Make sure all fragments of the package name are directories, or
+    create them. Make __init__.py files in all directories."""
 
-    if path != "":
+    if len(package) == 0:
+        return
+
+    if package[-1] == ".":
+        package = package[:-1]
+
+    path = ""
+    for name in string.split(package, "."):
+        path = os.path.join(path, name)
+        
         if os.path.exists(path):
             if not os.path.isdir(path):
                 print 'Output error: "' + path +\
                       '" exists and is not a directory.'
                 sys.exit(1)
         else:
-            os.makedirs(path)
+            os.mkdir(path)
 
         initfile = os.path.join(path, "__init__.py")
 
@@ -1365,6 +1406,8 @@ def updateModules(modules, pymodule):
     """Create or update the Python modules corresponding to the IDL
     module names"""
 
+    checkStubPackage(module_package)
+
     poamodules = map(lambda m: "POA_" + m, modules)
 
     real_updateModules(modules,    pymodule)
@@ -1374,8 +1417,8 @@ def updateModules(modules, pymodule):
 def real_updateModules(modules, pymodule):
 
     for module in modules:
-        moddir  = apply(os.path.join, string.split(module, "."))
-        modpath = os.path.join(module_directory, moddir)
+        modlist = string.split(module_package, ".") + string.split(module, ".")
+        modpath = apply(os.path.join, modlist)
         modfile = os.path.join(modpath, "__init__.py")
         tmpfile = os.path.join(modpath, "new__init__.py")
 
@@ -1453,9 +1496,9 @@ def real_updateModules(modules, pymodule):
         if len(modlist) == 1:
             continue
 
+        modlist = string.split(module_package, ".") + modlist
         submod  = modlist[-1]
-        moddir  = apply(os.path.join, modlist[:-1])
-        modpath = os.path.join(module_directory, moddir)
+        modpath = apply(os.path.join, modlist[:-1])
         modfile = os.path.join(modpath, "__init__.py")
         tmpfile = os.path.join(modpath, "new__init__.py")
 
@@ -1468,7 +1511,7 @@ def real_updateModules(modules, pymodule):
             line = inf.readline()
             if line == "":
                 print 'Output error: "' + modfile +\
-                      '" ended before I found a "# ** 1." tag.'
+                      '" ended before I found a "# ** 2." tag.'
                 sys.exit(1)
                 
             outf.write(line)
