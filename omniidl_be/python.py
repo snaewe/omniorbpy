@@ -28,6 +28,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.6  1999/11/04 11:46:12  dpg1
+# Now uses our own version of the GNU C preprocessor.
+#
 # Revision 1.5  1999/11/02 12:17:26  dpg1
 # Top-level module name now has a prefix of _0_ to avoid clashes with
 # names of nested declarations.
@@ -55,6 +58,7 @@ stub_directory   = ""
 stub_module      = ""
 module_directory = ""
 
+cpp_args = ["-D__OMNIIDL_PYTHON__"]
 
 #""" Uncomment this line to get syntax highlighthing on the output strings
 
