@@ -191,5 +191,10 @@ module TypeTest {
     // TypeCode, Any
     CORBA::TypeCode tc1 (in CORBA::TypeCode a);
     any             any1(in any             a);
+
+    // Context
+    typedef sequence<string> strings;
+    strings context1(in long l) context("test");
+    strings context2(in long l) context("test*", "foo*", "bar");
   };
 };

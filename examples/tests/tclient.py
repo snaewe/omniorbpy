@@ -1531,7 +1531,39 @@ def doTests(orb, poa, io):
     except:
         tfail()
 
+
+    tstart("Context")
+    ok = 1
+    try:
+        ctxt = orb.get_default_context()
+        ctxt.set_one_value("test", "hello")
+        ctxt.set_one_value("test2", "there")
+        ctxt.set_values({"foo": "wib", "foo2": "wob", "foobarbaz": "wuz"})
+
+        r = io.context1(5, ctxt)
+        if r == ["test", "hello"]:
+            tresult("+")
+        else:
+            ok = 0
+            tresult("-")
+
+        r = io.context2(5, ctxt)
+        if len(r) == 10:
+            tresult("+")
+        else:
+            ok = 0
+            tresult("-")
+    except:
+        ok = 0
+        tresult("!")
+
+    if ok:
+        tpass()
+    else:
+        tfail()
+
     tdone()
+
 
 if __name__ == "__main__":
     orb = CORBA.ORB_init(sys.argv, CORBA.ORB_ID)

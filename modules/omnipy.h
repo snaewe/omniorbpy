@@ -31,6 +31,9 @@
 #define _omnipy_h_
 
 // $Log$
+// Revision 1.2.4.16  2002/01/18 15:49:44  dpg1
+// Context support. New system exception construction. Fix None call problem.
+//
 // Revision 1.2.4.15  2001/10/18 15:48:39  dpg1
 // Track ORB core changes.
 //
@@ -129,6 +132,7 @@ public:
   static PyObject* pyCORBAmodule;      // The CORBA module
   static PyObject* pyCORBAsysExcMap;   //  The system exception map
   static PyObject* pyCORBAAnyClass;    //  Any class
+  static PyObject* pyCORBAContextClass;//  Context class
   static PyObject* pyomniORBmodule;    // The omniORB module
   static PyObject* pyomniORBobjrefMap; //  The objref class map
   static PyObject* pyomniORBtypeMap;   //  Type map
@@ -463,6 +467,26 @@ public:
   static
   PyObject* unmarshalTypeCode(cdrStream& stream);
 
+  ////////////////////////////////////////////////////////////////////////////
+  // Context support functions                                              //
+  ////////////////////////////////////////////////////////////////////////////
+
+  // Validate a Context object.
+  static
+  void validateContext(PyObject* c_o, CORBA::CompletionStatus compstatus);
+
+  // Marshal context c_o, filtered according to pattern list p_o.
+  static
+  void marshalContext(cdrStream& stream, PyObject* p_o, PyObject* c_o);
+
+  // Unmarshal context. Trust the sender to correctly filter.
+  static
+  PyObject* unmarshalContext(cdrStream& stream);
+
+  // Filter context c_o according to pattern list p_o. Returns a new Context.
+  static
+  PyObject* filterContext(PyObject* p_o, PyObject* c_o);
+
 
   ////////////////////////////////////////////////////////////////////////////
   // Proxy call descriptor object                                           //
@@ -477,14 +501,15 @@ public:
     inline Py_omniCallDescriptor(const char* op, int op_len,
 				 CORBA::Boolean oneway,
 				 PyObject* in_d, PyObject* out_d,
-				 PyObject* exc_d, PyObject* args,
-				 CORBA::Boolean is_upcall)
+				 PyObject* exc_d, PyObject* ctxt_d,
+				 PyObject* args, CORBA::Boolean is_upcall)
 
       : omniCallDescriptor(Py_localCallBackFunction, op, op_len,
 			   oneway, 0, 0, is_upcall),
       in_d_(in_d),
       out_d_(out_d),
       exc_d_(exc_d),
+      ctxt_d_(ctxt_d),
       args_(args),
       result_(0),
       in_marshal_(0)
@@ -560,6 +585,7 @@ public:
     PyObject*      out_d_;
     int            out_l_;
     PyObject*      exc_d_;
+    PyObject*      ctxt_d_;
 
   private:
     PyObject*      args_;

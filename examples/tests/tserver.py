@@ -108,6 +108,22 @@ class I_i (TypeTest__POA.I):
     def any1(self, a): return a
     def tc1 (self, a): return a
 
+    def context1(self, l, ctxt):
+        vs = ctxt.get_values("*").items()
+        r  = []
+        for v in vs:
+            r.append(v[0])
+            r.append(v[1])
+        return r
+
+    def context2(self, l, ctxt):
+        vs = ctxt.get_values("*").items()
+        r  = []
+        for v in vs:
+            r.append(v[0])
+            r.append(v[1])
+        return r
+
 
 orb = CORBA.ORB_init(sys.argv, CORBA.ORB_ID)
 poa = orb.resolve_initial_references("RootPOA")

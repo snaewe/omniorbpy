@@ -30,6 +30,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.26.2.8  2002/01/18 15:49:45  dpg1
+# Context support. New system exception construction. Fix None call problem.
+#
 # Revision 1.26.2.7  2001/09/20 14:51:26  dpg1
 # Allow ORB reinitialisation after destroy(). Clean up use of omni namespace.
 #
@@ -311,9 +314,9 @@ Make stubs for the Interface Repository appear in the CORBA module"""
 #   installCommFailureExceptionHandler()
 #   installSystemExceptionHandler()
 #   traceLevel
-#   maxTcpConnectionPerServer
 #   nativeCharCodeSet
 #   fixed
+#   minorCodeToString
 
 from _omnipy.omni_func import *
 
@@ -325,44 +328,43 @@ from _omnipy.omni_func import *
 # ORB:
 orb     = None
 rootPOA = None
+lock    = threading.Lock()
 
 # Maps for object reference classes and IDL-defined types:
-map_lock = threading.Lock()
-
 objrefMapping   = {}
 typeMapping     = {}
 typeCodeMapping = {}
 
 
 def registerObjref(repoId, objref):
-    map_lock.acquire()
+    lock.acquire()
     objrefMapping[repoId] = objref
-    map_lock.release()
+    lock.release()
 
 def registerType(repoId, desc, tc):
-    map_lock.acquire()
+    lock.acquire()
     typeMapping[repoId]     = desc
     typeCodeMapping[repoId] = tc
-    map_lock.release()
+    lock.release()
 
 def findType(repoId):
-    map_lock.acquire()
+    lock.acquire()
     try:
         d = typeMapping[repoId]
-        map_lock.release()
+        lock.release()
         return d
     except KeyError:
-        map_lock.release()
+        lock.release()
         return None
 
 def findTypeCode(repoId):
-    map_lock.acquire()
+    lock.acquire()
     try:
         tc = typeCodeMapping[repoId]
-        map_lock.release()
+        lock.release()
         return tc
     except KeyError:
-        map_lock.release()
+        lock.release()
         return None
 
 # Function to return a Python module for the required IDL module name
@@ -711,73 +713,16 @@ class WorkerThread(threading.Thread):
     
 
 
-# System exception mapping. omniORB 3.0 ends exception repoIds with
-# :1.0; omniORB 2.8 doesn't. We put a mapping for both here.
+# System exception mapping.
 
-sysExceptionMapping = {
-    "IDL:omg.org/CORBA/UNKNOWN:1.0":               CORBA.UNKNOWN,
-    "IDL:omg.org/CORBA/BAD_PARAM:1.0":             CORBA.BAD_PARAM,
-    "IDL:omg.org/CORBA/NO_MEMORY:1.0":             CORBA.NO_MEMORY,
-    "IDL:omg.org/CORBA/IMP_LIMIT:1.0":             CORBA.IMP_LIMIT,
-    "IDL:omg.org/CORBA/COMM_FAILURE:1.0":          CORBA.COMM_FAILURE,
-    "IDL:omg.org/CORBA/INV_OBJREF:1.0":            CORBA.INV_OBJREF,
-    "IDL:omg.org/CORBA/OBJECT_NOT_EXIST:1.0":      CORBA.OBJECT_NOT_EXIST,
-    "IDL:omg.org/CORBA/NO_PERMISSION:1.0":         CORBA.NO_PERMISSION,
-    "IDL:omg.org/CORBA/INTERNAL:1.0":              CORBA.INTERNAL,
-    "IDL:omg.org/CORBA/MARSHAL:1.0":               CORBA.MARSHAL,
-    "IDL:omg.org/CORBA/INITIALIZE:1.0":            CORBA.INITIALIZE,
-    "IDL:omg.org/CORBA/NO_IMPLEMENT:1.0":          CORBA.NO_IMPLEMENT,
-    "IDL:omg.org/CORBA/BAD_TYPECODE:1.0":          CORBA.BAD_TYPECODE,
-    "IDL:omg.org/CORBA/BAD_OPERATION:1.0":         CORBA.BAD_OPERATION,
-    "IDL:omg.org/CORBA/NO_RESOURCES:1.0":          CORBA.NO_RESOURCES,
-    "IDL:omg.org/CORBA/NO_RESPONSE:1.0":           CORBA.NO_RESPONSE,
-    "IDL:omg.org/CORBA/PERSIST_STORE:1.0":         CORBA.PERSIST_STORE,
-    "IDL:omg.org/CORBA/BAD_INV_ORDER:1.0":         CORBA.BAD_INV_ORDER,
-    "IDL:omg.org/CORBA/TRANSIENT:1.0":             CORBA.TRANSIENT,
-    "IDL:omg.org/CORBA/FREE_MEM:1.0":              CORBA.FREE_MEM,
-    "IDL:omg.org/CORBA/INV_IDENT:1.0":             CORBA.INV_IDENT,
-    "IDL:omg.org/CORBA/INV_FLAG:1.0":              CORBA.INV_FLAG,
-    "IDL:omg.org/CORBA/INTF_REPOS:1.0":            CORBA.INTF_REPOS,
-    "IDL:omg.org/CORBA/BAD_CONTEXT:1.0":           CORBA.BAD_CONTEXT,
-    "IDL:omg.org/CORBA/OBJ_ADAPTER:1.0":           CORBA.OBJ_ADAPTER,
-    "IDL:omg.org/CORBA/DATA_CONVERSION:1.0":       CORBA.DATA_CONVERSION,
-    "IDL:omg.org/CORBA/TRANSACTION_REQUIRED:1.0":  CORBA.TRANSACTION_REQUIRED,
-    "IDL:omg.org/CORBA/TRANSACTION_ROLLEDBACK:1.0":CORBA.TRANSACTION_ROLLEDBACK,
-    "IDL:omg.org/CORBA/INVALID_TRANSACTION:1.0":   CORBA.INVALID_TRANSACTION,
-    "IDL:omg.org/CORBA/WRONG_TRANSACTION:1.0":     CORBA.WRONG_TRANSACTION,
+sysExceptionMapping = {}
 
-    # Second time around, with no version number
-    "IDL:omg.org/CORBA/UNKNOWN":                   CORBA.UNKNOWN,
-    "IDL:omg.org/CORBA/BAD_PARAM":                 CORBA.BAD_PARAM,
-    "IDL:omg.org/CORBA/NO_MEMORY":                 CORBA.NO_MEMORY,
-    "IDL:omg.org/CORBA/IMP_LIMIT":                 CORBA.IMP_LIMIT,
-    "IDL:omg.org/CORBA/COMM_FAILURE":              CORBA.COMM_FAILURE,
-    "IDL:omg.org/CORBA/INV_OBJREF":                CORBA.INV_OBJREF,
-    "IDL:omg.org/CORBA/OBJECT_NOT_EXIST":          CORBA.OBJECT_NOT_EXIST,
-    "IDL:omg.org/CORBA/NO_PERMISSION":             CORBA.NO_PERMISSION,
-    "IDL:omg.org/CORBA/INTERNAL":                  CORBA.INTERNAL,
-    "IDL:omg.org/CORBA/MARSHAL":                   CORBA.MARSHAL,
-    "IDL:omg.org/CORBA/INITIALIZE":                CORBA.INITIALIZE,
-    "IDL:omg.org/CORBA/NO_IMPLEMENT":              CORBA.NO_IMPLEMENT,
-    "IDL:omg.org/CORBA/BAD_TYPECODE":              CORBA.BAD_TYPECODE,
-    "IDL:omg.org/CORBA/BAD_OPERATION":             CORBA.BAD_OPERATION,
-    "IDL:omg.org/CORBA/NO_RESOURCES":              CORBA.NO_RESOURCES,
-    "IDL:omg.org/CORBA/NO_RESPONSE":               CORBA.NO_RESPONSE,
-    "IDL:omg.org/CORBA/PERSIST_STORE":             CORBA.PERSIST_STORE,
-    "IDL:omg.org/CORBA/BAD_INV_ORDER":             CORBA.BAD_INV_ORDER,
-    "IDL:omg.org/CORBA/TRANSIENT":                 CORBA.TRANSIENT,
-    "IDL:omg.org/CORBA/FREE_MEM":                  CORBA.FREE_MEM,
-    "IDL:omg.org/CORBA/INV_IDENT":                 CORBA.INV_IDENT,
-    "IDL:omg.org/CORBA/INV_FLAG":                  CORBA.INV_FLAG,
-    "IDL:omg.org/CORBA/INTF_REPOS":                CORBA.INTF_REPOS,
-    "IDL:omg.org/CORBA/BAD_CONTEXT":               CORBA.BAD_CONTEXT,
-    "IDL:omg.org/CORBA/OBJ_ADAPTER":               CORBA.OBJ_ADAPTER,
-    "IDL:omg.org/CORBA/DATA_CONVERSION":           CORBA.DATA_CONVERSION,
-    "IDL:omg.org/CORBA/TRANSACTION_REQUIRED":      CORBA.TRANSACTION_REQUIRED,
-    "IDL:omg.org/CORBA/TRANSACTION_ROLLEDBACK":    CORBA.TRANSACTION_ROLLEDBACK,
-    "IDL:omg.org/CORBA/INVALID_TRANSACTION":       CORBA.INVALID_TRANSACTION,
-    "IDL:omg.org/CORBA/WRONG_TRANSACTION":         CORBA.WRONG_TRANSACTION
-    }
+cd = CORBA.__dict__
+for exc in _omnipy.system_exceptions:
+    cls = cd[exc]
+    sysExceptionMapping[cls._NP_RepositoryId] = cls
+
+del cd, exc, cls
 
 # Reserved word mapping:
 keywordMapping = {
@@ -814,36 +759,26 @@ keywordMapping = {
 
 # More public things, which depend on the CORBA module
 
-# LOCATION_FORWARD exception, only avaiable with omniORB 3 up
-if _coreVersion != "2.8.0":
-    class LOCATION_FORWARD (exceptions.Exception):
-        """LOCATION_FORWARD(objref, permanent=0)
+# LOCATION_FORWARD exception
+class LOCATION_FORWARD (exceptions.Exception):
+    """LOCATION_FORWARD(objref, permanent=0)
 
 This exception may be thrown inside any operation implementation. It
 causes the ORB the return a LOCATION_FORWARD message to the caller, so
 the invocation is retried on the given object reference. If permanent
 is set to 1, a permanent location forward is requested."""
 
-        _NP_RepositoryId = "omniORB.LOCATION_FORWARD" # Not really a CORBA type
+    _NP_RepositoryId = "omniORB.LOCATION_FORWARD" # Not really a CORBA type
 
-        def __init__(self, objref, perm=0):
-            if not isinstance(objref, CORBA.Object):
-                raise CORBA.BAD_PARAM(0,CORBA.COMPLETED_NO)
-            
-            self._forward = objref
-            self._perm    = perm
+    def __init__(self, objref, perm=0):
+        if not isinstance(objref, CORBA.Object):
+            raise CORBA.BAD_PARAM(0,CORBA.COMPLETED_NO)
 
-        def __str__(self):
-            return "Location forward exception"
+        self._forward = objref
+        self._perm    = perm
 
-else:
-    class LOCATION_FORWARD (exceptions.Exception):
-        """LOCATION_FORWARD(objref)
-
-The LOCATION_FORWARD exception is not supported with omniORB 2.8.0."""
-
-        def __init__(self, objref, perm=0):
-            raise CORBA.NO_IMPLEMENT(0,CORBA.COMPLETED_NO)
+    def __str__(self):
+        return "Location forward exception"
 
 
 

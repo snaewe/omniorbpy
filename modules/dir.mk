@@ -20,7 +20,8 @@ CXXSRCS = omnipy.cc \
           pyTypeCode.cc \
           pyThreadCache.cc \
           pyomniFunc.cc \
-	  pyFixed.cc
+	  pyFixed.cc \
+          pyContext.cc
 
 OBJS =    omnipy.o \
           pyORBFunc.o \
@@ -35,7 +36,8 @@ OBJS =    omnipy.o \
           pyTypeCode.o \
           pyThreadCache.o \
           pyomniFunc.o \
-	  pyFixed.o
+	  pyFixed.o \
+	  pyContext.o
 
 
 DIR_CPPFLAGS += $(patsubst %,-I%/src/lib/omniORB/include,$(IMPORT_TREES))
@@ -46,7 +48,7 @@ DIR_CPPFLAGS += $(patsubst %,-I%/src/lib/omniORB/include,$(IMPORT_TREES))
 #############################################################################
 
 ifdef UnixPlatform
-CXXDEBUGFLAGS = -g
+#CXXDEBUGFLAGS = -g
 
 PYPREFIX  := $(shell $(PYTHON) -c 'import sys; print sys.exec_prefix')
 PYVERSION := $(shell $(PYTHON) -c 'import sys; print sys.version[:3]')

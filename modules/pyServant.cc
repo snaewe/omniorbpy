@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.10  2002/01/18 15:49:44  dpg1
+// Context support. New system exception construction. Fix None call problem.
+//
 // Revision 1.1.2.9  2001/09/24 10:48:28  dpg1
 // Meaningful minor codes.
 //
@@ -306,10 +309,12 @@ Py_omniServant::_default_POA()
     }
     else {
       if (omniORB::trace(1)) {
-	omniORB::logger l;
-	l <<
-	  "Exception while trying to call _default_POA(). "
-	  "Returning Root POA\n";
+	{
+	  omniORB::logger l;
+	  l <<
+	    "Exception while trying to call _default_POA(). "
+	    "Returning Root POA\n";
+	}
 	PyErr_Print();
       }
       else
@@ -465,10 +470,16 @@ Py_omniServant::_dispatch(omniCallHandle& handle)
   PyObject* in_d  = PyTuple_GET_ITEM(desc,0);
   PyObject* out_d = PyTuple_GET_ITEM(desc,1);
   PyObject* exc_d = PyTuple_GET_ITEM(desc,2);
+  PyObject* ctxt_d;
+
+  if (PyTuple_GET_SIZE(desc) == 4)
+    ctxt_d = PyTuple_GET_ITEM(desc,3);
+  else
+    ctxt_d = 0;
 
   Py_omniCallDescriptor call_desc(op, 0,
 				  (out_d == Py_None),
-				  in_d, out_d, exc_d, 0, 1);
+				  in_d, out_d, exc_d, ctxt_d, 0, 1);
   try {
     omniPy::InterpreterUnlocker _u;
     handle.upcall(this, call_desc);
@@ -585,16 +596,17 @@ Py_omniServant::local_dispatch(Py_omniCallDescriptor* pycd)
 		  CORBA::COMPLETED_NO);
   }
 
-  PyObject* in_d  = pycd->in_d_;
-  int       in_l  = pycd->in_l_;
-  PyObject* out_d = pycd->out_d_;
-  int       out_l = pycd->out_l_;
-  PyObject* exc_d = pycd->exc_d_;
+  PyObject* in_d   = pycd->in_d_;
+  int       in_l   = pycd->in_l_;
+  PyObject* out_d  = pycd->out_d_;
+  int       out_l  = pycd->out_l_;
+  PyObject* exc_d  = pycd->exc_d_;
+  PyObject* ctxt_d = pycd->ctxt_d_;
 
   PyObject* args  = pycd->args();
 
   // Copy args which would otherwise have reference semantics
-  PyObject* argtuple = PyTuple_New(in_l);
+  PyObject* argtuple = PyTuple_New(in_l + (ctxt_d ? 1 : 0));
   PyObject* t_o;
 
   int i;
@@ -606,6 +618,11 @@ Py_omniServant::local_dispatch(Py_omniCallDescriptor* pycd)
 			 CORBA::COMPLETED_NO);
       OMNIORB_ASSERT(t_o);
       PyTuple_SET_ITEM(argtuple, i, t_o);
+    }
+    if (ctxt_d) {
+      t_o = filterContext(ctxt_d, PyTuple_GET_ITEM(args, in_l));
+      OMNIORB_ASSERT(t_o);
+      PyTuple_SET_ITEM(argtuple, in_l, t_o);
     }
   }
   catch (...) {

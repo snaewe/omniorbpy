@@ -29,6 +29,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.1.4.1  2002/01/18 15:49:45  dpg1
+# Context support. New system exception construction. Fix None call problem.
+#
 # Revision 1.1  2000/06/27 15:07:10  dpg1
 # Change from POA_M to M__POA mapping
 #
@@ -44,10 +47,6 @@ import _omnipy
 class ServantManager (PortableServer.Servant):
     _NP_RepositoryId = PortableServer.ServantManager._NP_RepositoryId
 
-    def __del__(self):
-        if _omnipy is not None:
-            _omnipy.releaseObjref(self)
-
     _omni_op_d = {}
     _omni_special = 1
 
@@ -57,10 +56,6 @@ ServantManager._omni_skeleton = ServantManager
 # ServantActivator skeleton
 class ServantActivator (ServantManager):
     _NP_RepositoryId = PortableServer.ServantActivator._NP_RepositoryId
-
-    def __del__(self):
-        if _omnipy is not None:
-            _omnipy.releaseObjref(self)
 
     _omni_op_d = {"incarnate":  PortableServer.ServantActivator._d_incarnate,
                   "etherealize":PortableServer.ServantActivator._d_etherealize}
@@ -74,10 +69,6 @@ ServantActivator._omni_skeleton = ServantActivator
 class ServantLocator (ServantManager):
     _NP_RepositoryId = PortableServer.ServantLocator._NP_RepositoryId
 
-    def __del__(self):
-        if _omnipy is not None:
-            _omnipy.releaseObjref(self)
-
     _omni_op_d = {"preinvoke":  PortableServer.ServantLocator._d_preinvoke,
                   "postinvoke": PortableServer.ServantLocator._d_postinvoke}
     _omni_op_d.update(ServantManager._omni_op_d)
@@ -90,10 +81,6 @@ ServantLocator._omni_skeleton = ServantLocator
 # AdapterActivator skeleton
 class AdapterActivator (PortableServer.Servant):
     _NP_RepositoryId = PortableServer.AdapterActivator._NP_RepositoryId
-
-    def __del__(self):
-        if _omnipy is not None:
-            _omnipy.releaseObjref(self)
 
     _omni_op_d = {"unknown_adapter":
                   PortableServer.AdapterActivator._d_unknown_adapter}
