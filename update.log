@@ -1,3 +1,11 @@
+Mon Apr  9 17:25:49 BST 2001 dpg1
+=================================
+
+- De-uglify ORB_init command line argument eating.
+
+modules/omni30/omnipy.cc
+
+
 Mon Apr  9 12:40:02 BST 2001 dpg1
 =================================
 
