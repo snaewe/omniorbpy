@@ -30,6 +30,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.26.2.4  2001/05/14 15:22:00  dpg1
+# cdrMarshal() / cdrUnmarshal() are back.
+#
 # Revision 1.26.2.3  2001/04/10 16:35:33  dpg1
 # Minor bugs in Any coercion.
 #
@@ -244,11 +247,13 @@ sys.modules."""
 
 
 def cdrMarshal(tc, data):
-    """cdrMarshal(TypeCode, data) -> string
+    """cdrMarshal(TypeCode, data) -> binary string
 
 Marshal data with the given type into a CDR encapsulation. The data
 can later be converted back into Python objects with cdrUnmarshal().
-The encapsulation is language, platform, and ORB independent."""
+The encapsulation is language, platform, and ORB independent.
+
+Throws CORBA.BAD_PARAM if the data does not match the TypeCode."""
 
     if not isinstance(tc, CORBA.TypeCode):
         raise TypeError("Argument 1 must be a TypeCode")
@@ -259,7 +264,10 @@ def cdrUnmarshal(tc, encap):
     """cdrUnmarshal(TypeCode, string) -> data
 
 Unmarshal a CDR stream created with cdrMarshal() or equivalent. The
-encapsulation MUST adhere to the given TypeCode."""
+encapsulation must adhere to the given TypeCode.
+
+Throws CORBA.MARSHAL if the binary string does not match the
+TypeCode."""
 
     if not isinstance(tc, CORBA.TypeCode):
         raise TypeError("Argument 1 must be a TypeCode")

@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.8  2001/05/14 15:22:00  dpg1
+// cdrMarshal() / cdrUnmarshal() are back.
+//
 // Revision 1.1.2.7  2001/05/14 12:47:20  dpg1
 // Fix memory leaks.
 //
@@ -383,32 +386,25 @@ extern "C" {
   static PyObject*
   omnipy_cdrMarshal(PyObject* self, PyObject* args)
   {
-    OMNIORB_ASSERT(0);
-    return 0;
-    /* ***
     PyObject *desc, *data;
 
     if (!PyArg_ParseTuple(args, (char*)"OO", &desc, &data)) return 0;
 
     try {
-      size_t size = 1; // One byte for the byteorder
-      size = omniPy::alignedSize(size, desc, data, CORBA::COMPLETED_NO);
-      MemBufferedStream stream(size);
-      stream.byteOrder() >>= stream;
+      cdrEncapsulationStream stream;
+
+      omniPy::validateType(desc, data, CORBA::COMPLETED_NO);
       omniPy::marshalPyObject(stream, desc, data);
-      return PyString_FromStringAndSize((char*)stream.data(),
-					stream.alreadyWritten());
+
+      return PyString_FromStringAndSize((char*)stream.bufPtr(),
+					stream.bufSize());
     }
     OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
-    */
   }
 
   static PyObject*
   omnipy_cdrUnmarshal(PyObject* self, PyObject* args)
   {
-    OMNIORB_ASSERT(0);
-    return 0;
-    /* ***
     PyObject* desc;
     char*     encap;
     size_t    size;
@@ -416,15 +412,16 @@ extern "C" {
     if (!PyArg_ParseTuple(args, (char*)"Os#", &desc, &encap, &size)) return 0;
 
     try {
-      MemBufferedStream stream(size);
-      stream.put_char_array((CORBA::Char*)encap, size);
-      CORBA::Char byteOrder;
-      byteOrder <<= stream;
-      stream.byteOrder(byteOrder);
-      return omniPy::unmarshalPyObject(stream, desc);
+      cdrEncapsulationStream stream((CORBA::Octet*)encap, size);
+      PyObject* r = omniPy::unmarshalPyObject(stream, desc);
+      if (stream.checkInputOverrun(1, 1)) {
+	// More data in stream -- must have used the wrong TypeCode
+	Py_DECREF(r);
+	OMNIORB_THROW(MARSHAL, 0, CORBA::COMPLETED_NO);
+      }
+      return r;
     }
     OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
-    */
   }
 
 
