@@ -30,6 +30,10 @@
 // $Id$
 
 // $Log$
+// Revision 1.3  2000/03/17 15:57:07  dpg1
+// Correct, and more consistent handling of invalid strings in
+// string_to_object().
+//
 // Revision 1.2  2000/03/07 16:52:17  dpg1
 // Support for compilers which do not allow exceptions to be caught by
 // base class. (Like MSVC 5, surprise surprise.)
@@ -58,8 +62,8 @@ extern "C" {
     OMNIORB_ASSERT(orb);
 
     if (!s || strlen(s) == 0) {
-      PyErr_SetString(PyExc_TypeError, "Invalid IOR");
-      return 0;
+      CORBA::MARSHAL ex;
+      return omniPy::handleSystemException(ex);
     }
     CORBA::Object_ptr objref;
 

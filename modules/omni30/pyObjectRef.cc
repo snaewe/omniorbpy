@@ -28,10 +28,13 @@
 //    Versions of ORB object ref functions which deal with Python
 //    objects, rather than C++ objects
 
-
 // $Id$
 
 // $Log$
+// Revision 1.11  2000/03/17 15:57:07  dpg1
+// Correct, and more consistent handling of invalid strings in
+// string_to_object().
+//
 // Revision 1.10  2000/03/03 17:41:42  dpg1
 // Major reorganisation to support omniORB 3.0 as well as 2.8.
 //
@@ -417,14 +420,9 @@ omniPy::stringToObject(omniObjRef*& objref, const char* sior)
   char* repoId;
   IOP::TaggedProfileList* profiles;
 
-  try {
-    IOP::EncapStrToIor((const CORBA::Char*) sior,
-		       (CORBA::Char*&) repoId,
-		       profiles);
-  }
-  catch(...) {
-    return 0;
-  }
+  IOP::EncapStrToIor((const CORBA::Char*) sior,
+		     (CORBA::Char*&) repoId,
+		     profiles);
 
   if( *repoId == '\0' && profiles->length() == 0 ) {
     // nil object reference
@@ -437,7 +435,6 @@ omniPy::stringToObject(omniObjRef*& objref, const char* sior)
   objref = omniPy::createObjRef(repoId, CORBA::Object::_PD_repoId,
 				profiles, 1, 0);
   delete[] repoId;
-
   return objref ? 1 : 0;
 }
 
