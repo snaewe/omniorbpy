@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.4  2001/06/01 11:09:26  dpg1
+// Make use of new omni::ptrStrCmp() and omni::strCmp().
+//
 // Revision 1.1.2.3  2001/03/13 10:38:07  dpg1
 // Fixes from omnipy1_develop
 //
@@ -499,8 +502,8 @@ extern "C" {
       {
 	omniPy::InterpreterUnlocker _u;
 	servant = poa->get_servant();
-	pyos =
-	  (omniPy::Py_omniServant*)servant->_ptrToInterface("Py_omniServant");
+	pyos = (omniPy::Py_omniServant*)servant->
+	                        _ptrToInterface(omniPy::string_Py_omniServant);
       }
       if (pyos) {
 	PyObject* pyservant = pyos->pyServant();
@@ -813,8 +816,8 @@ extern "C" {
       {
 	omniPy::InterpreterUnlocker _u;
 	servant = poa->reference_to_servant(objref);
-	pyos =
-	  (omniPy::Py_omniServant*)servant->_ptrToInterface("Py_omniServant");
+	pyos = (omniPy::Py_omniServant*)servant->
+                                _ptrToInterface(omniPy::string_Py_omniServant);
       }
       if (pyos) {
 	PyObject* pyservant = pyos->pyServant();
@@ -900,8 +903,8 @@ extern "C" {
       {
 	omniPy::InterpreterUnlocker _u;
 	servant = poa->id_to_servant(oid);
-	pyos =
-	  (omniPy::Py_omniServant*)servant->_ptrToInterface("Py_omniServant");
+	pyos = (omniPy::Py_omniServant*)servant->
+                                _ptrToInterface(omniPy::string_Py_omniServant);
       }
       if (pyos) {
 	PyObject* pyservant = pyos->pyServant();

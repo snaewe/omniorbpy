@@ -1,3 +1,16 @@
+Fri Jun  1 12:07:45 BST 2001 dpg1
+=================================
+
+- Make use of new omni::ptrStrCmp() and omni::strCmp().
+
+modules/omnipy.cc
+modules/omnipy.h
+modules/pyCallDescriptor.cc
+modules/pyObjectRef.cc
+modules/pyPOAFunc.cc
+modules/pyServant.cc
+
+
 Tue May 29 18:04:34 BST 2001 dpg1
 =================================
 

@@ -31,6 +31,9 @@
 #define _omnipy_h_
 
 // $Log$
+// Revision 1.2.4.10  2001/06/01 11:09:26  dpg1
+// Make use of new omni::ptrStrCmp() and omni::strCmp().
+//
 // Revision 1.2.4.9  2001/05/29 17:10:14  dpg1
 // Support for in process identity.
 //
@@ -125,6 +128,14 @@ public:
   static PyObject* pySERVANT_TWIN;
   static PyObject* pyPOA_TWIN;
   static PyObject* pyPOAMANAGER_TWIN;
+
+  ////////////////////////////////////////////////////////////////////////////
+  // Constant strings to facilitate comparison by pointer                   //
+  ////////////////////////////////////////////////////////////////////////////
+
+  static const char* string_Py_omniObjRef;
+  static const char* string_Py_omniServant;
+
 
   ////////////////////////////////////////////////////////////////////////////
   // Pointer to the ORB                                                     //

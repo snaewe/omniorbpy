@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.4  2001/06/01 11:09:26  dpg1
+// Make use of new omni::ptrStrCmp() and omni::strCmp().
+//
 // Revision 1.1.2.3  2001/05/10 15:16:02  dpg1
 // Big update to support new omniORB 4 internals.
 //
@@ -170,7 +173,7 @@ omniPy::Py_localCallBackFunction(omniCallDescriptor* cd, omniServant* svnt)
 {
   Py_omniCallDescriptor* pycd = (Py_omniCallDescriptor*)cd;
   Py_omniServant*        pyos =
-    (Py_omniServant*)svnt->_ptrToInterface("Py_omniServant");
+    (Py_omniServant*)svnt->_ptrToInterface(omniPy::string_Py_omniServant);
 
   // Unfortunately, we can't use the call descriptor's
   // reacquireInterpreterLock() function, since this call-back may be

@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.9  2001/06/01 11:09:26  dpg1
+// Make use of new omni::ptrStrCmp() and omni::strCmp().
+//
 // Revision 1.1.2.8  2001/05/29 17:10:14  dpg1
 // Support for in process identity.
 //
@@ -101,17 +104,17 @@ private:
 const char*
 Py_omniObjRef::_localServantTarget()
 {
-  return "Py_omniServant";
+  return omniPy::string_Py_omniServant;
 }
 
 void*
 Py_omniObjRef::_ptrToObjRef(const char* target)
 {
-  if (!strcmp(target, CORBA::Object::_PD_repoId))
-    return (CORBA::Object_ptr)this;
-
-  if (!strcmp(target, "Py_omniObjRef"))
+  if (omni::ptrStrMatch(target, omniPy::string_Py_omniObjRef))
     return (Py_omniObjRef*)this;
+
+  if (omni::ptrStrMatch(target, CORBA::Object::_PD_repoId))
+    return (CORBA::Object_ptr)this;
 
   return 0;
 }
@@ -138,8 +141,8 @@ omniPy::createPyCorbaObjRef(const char*             targetRepoId,
   objrefClass = PyDict_GetItemString(pyomniORBobjrefMap, (char*)actualRepoId);
 
   if (targetRepoId &&
-      strcmp(targetRepoId, actualRepoId) &&
-      strcmp(targetRepoId, CORBA::Object::_PD_repoId)) {
+      !omni::ptrStrMatch(targetRepoId, actualRepoId) &&
+      !omni::ptrStrMatch(targetRepoId, CORBA::Object::_PD_repoId)) {
 
     // targetRepoId is not plain CORBA::Object, and is different from
     // actualRepoId
@@ -231,7 +234,8 @@ omniPy::createObjRef(const char*    	targetRepoId,
 
   if (!id) {
     ior->duplicate();  // consumed by createIdentity
-    id = omni::createIdentity(ior, local_id, "Py_omniServant", locked);
+    id = omni::createIdentity(ior, local_id, omniPy::string_Py_omniServant,
+			      locked);
     if (!id) {
       ior->release();
       return 0;
@@ -248,7 +252,9 @@ omniPy::createObjRef(const char*    	targetRepoId,
 
   omniObjRef* objref = new Py_omniObjRef(targetRepoId, ior, id, local_id);
 
-  if (!type_verified && strcmp(targetRepoId, CORBA::Object::_PD_repoId))
+  if (!type_verified &&
+      !omni::ptrStrMatch(targetRepoId, CORBA::Object::_PD_repoId))
+
     objref->pd_flags.type_verified = 0;
 
   {
@@ -283,9 +289,9 @@ omniPy::createObjRef(const char*        mostDerivedRepoId,
 
     while (objref) {
 
-      if (!strcmp(mostDerivedRepoId, objref->_mostDerivedRepoId()) &&
-	  objref->_ptrToObjRef("Py_omniObjRef") &&
-	  !strcmp(targetRepoId, objref->pd_intfRepoId)) {
+      if (omni::ptrStrMatch(mostDerivedRepoId, objref->_mostDerivedRepoId()) &&
+	  objref->_ptrToObjRef(omniPy::string_Py_omniObjRef) &&
+	  omni::ptrStrMatch(targetRepoId, objref->pd_intfRepoId)) {
 
 	omniORB::logs(15, "omniPy::createObjRef -- reusing reference"
 		      " from local ref list.");
