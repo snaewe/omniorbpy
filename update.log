@@ -1,3 +1,13 @@
+Tue Feb 19 13:46:31 GMT 2002 dpg1
+=================================
+
+- Missed some autoconf things.
+
+external_merge/acinclude.m4				-- new
+external_merge/aclocal.m4				-- new
+external_merge/configure				-- new
+
+
 Tue Feb 19 12:41:01 GMT 2002 dpg1
 =================================
 
