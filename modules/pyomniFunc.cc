@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.15  2004/07/26 11:12:28  dgrisby
+// Support new traceExceptions function.
+//
 // Revision 1.1.2.14  2004/03/02 15:33:57  dgrisby
 // Support persistent server id.
 //
@@ -453,6 +456,31 @@ extern "C" {
     return 0;
   }
 
+  static char traceExceptions_doc [] =
+  "traceExceptions(int) -> None\n"
+  "traceExceptions()    -> int\n"
+  "\n"
+  "Set or get the omniORB exception tracing flag.\n";
+
+  static PyObject* pyomni_traceExceptions(PyObject* self, PyObject* args)
+  {
+    if (PyTuple_GET_SIZE(args) == 0) {
+      return PyInt_FromLong(omniORB::traceExceptions);
+    }
+    else if (PyTuple_GET_SIZE(args) == 1) {
+      PyObject* pytl = PyTuple_GET_ITEM(args, 0);
+
+      if (PyInt_Check(pytl)) {
+	omniORB::traceExceptions = PyInt_AS_LONG(pytl);
+	Py_INCREF(Py_None);
+	return Py_None;
+      }
+    }
+    PyErr_SetString(PyExc_TypeError,
+		    (char*)"Operation requires a single integer argument");
+    return 0;
+  }
+
   static char traceInvocations_doc [] =
   "traceInvocations(int) -> None\n"
   "traceInvocations()    -> int\n"
@@ -763,6 +791,10 @@ extern "C" {
     {(char*)"traceLevel",
      pyomni_traceLevel,
      METH_VARARGS, traceLevel_doc},
+
+    {(char*)"traceExceptions",
+     pyomni_traceExceptions,
+     METH_VARARGS, traceExceptions_doc},
 
     {(char*)"traceInvocations",
      pyomni_traceInvocations,
