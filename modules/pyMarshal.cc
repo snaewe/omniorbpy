@@ -29,6 +29,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.2.13  2002/03/18 17:05:50  dpg1
+// Correct exceptions for lack of wstring in GIOP 1.0.
+//
 // Revision 1.1.2.12  2001/09/24 10:48:26  dpg1
 // Meaningful minor codes.
 //
@@ -2292,9 +2295,7 @@ static void
 marshalPyObjectWChar(cdrStream& stream, PyObject* d_o, PyObject* a_o)
 {
 #ifdef PY_HAS_UNICODE
-  if (!stream.TCS_W())
-    OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WCharTCSNotKnown,
-		  (CORBA::CompletionStatus)stream.completion());
+  OMNIORB_CHECK_TCS_W_FOR_MARSHAL(stream.TCS_W(), stream);
   Py_UNICODE* str = PyUnicode_AS_UNICODE(a_o);
   stream.TCS_W()->marshalWChar(stream, str[0]);
 #else
@@ -2306,9 +2307,7 @@ static void
 marshalPyObjectWString(cdrStream& stream, PyObject* d_o, PyObject* a_o)
 {
 #ifdef PY_HAS_UNICODE
-  if (!stream.TCS_W())
-    OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WCharTCSNotKnown,
-		  (CORBA::CompletionStatus)stream.completion());
+  OMNIORB_CHECK_TCS_W_FOR_MARSHAL(stream.TCS_W(), stream);
   Py_UNICODE* str = PyUnicode_AS_UNICODE(a_o);
   stream.TCS_W()->marshalWString(stream,
 				 PyUnicode_GET_SIZE(a_o),
@@ -3080,9 +3079,7 @@ static PyObject*
 unmarshalPyObjectWChar(cdrStream& stream, PyObject* d_o)
 {
 #ifdef PY_HAS_UNICODE
-  if (!stream.TCS_W())
-    OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WCharTCSNotKnown,
-		  (CORBA::CompletionStatus)stream.completion());
+  OMNIORB_CHECK_TCS_W_FOR_UNMARSHAL(stream.TCS_W(), stream);
 
   Py_UNICODE  c   = stream.TCS_W()->unmarshalWChar(stream);
   PyObject*   r_o = PyUnicode_FromUnicode(0, 1);
@@ -3102,9 +3099,7 @@ unmarshalPyObjectWString(cdrStream& stream, PyObject* d_o)
 { // max_length
 
 #ifdef PY_HAS_UNICODE
-  if (!stream.TCS_W())
-    OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WCharTCSNotKnown,
-		  (CORBA::CompletionStatus)stream.completion());
+  OMNIORB_CHECK_TCS_W_FOR_UNMARSHAL(stream.TCS_W(), stream);
 
   PyObject* t_o = PyTuple_GET_ITEM(d_o, 1);
 
