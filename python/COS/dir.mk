@@ -1,5 +1,5 @@
 PYLIBROOT= $(EXPORT_TREE)/lib/python
-PYLIBDIR = $(PYLIBROOT)/omniORB
+PYLIBDIR = $(PYLIBROOT)/omniORB/COS
 INSTALLPYLIBDIR = $(INSTALLPYTHONDIR)/omniORB/COS
 
 # Where to look for IDL files.
@@ -7,9 +7,12 @@ INSTALLPYLIBDIR = $(INSTALLPYTHONDIR)/omniORB/COS
 
 IDLDIRS = $(OMNIORB_ROOT)/share/idl/omniORB/COS \
           $(OMNIORB_ROOT)/share/idl/omniORB \
-          $(BASE_OMNI_TREE)/idl \
           $(OMNIORB_ROOT)/idl/omniORB \
-          $(DATADIR)/idl/omniORB
+          $(OMNIORB_ROOT)/idl/omniORB/COS \
+          $(BASE_OMNI_TREE)/idl \
+          $(BASE_OMNI_TREE)/idl/COS \
+          $(DATADIR)/idl/omniORB \
+          $(DATADIR)/idl/omniORB/COS
 
 # We list IDL files below and use the vpath to find them.
 # Another possibility is to use $(wildcard $(IDLPATH)/*.idl)
