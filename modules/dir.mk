@@ -22,6 +22,7 @@ CXXSRCS = omnipy.cc \
           pyomniFunc.cc \
 	  pyFixed.cc \
           pyContext.cc \
+          pyInterceptors.cc \
           cxxAPI.cc
 
 OBJS =    omnipy.o \
@@ -39,6 +40,7 @@ OBJS =    omnipy.o \
           pyomniFunc.o \
 	  pyFixed.o \
 	  pyContext.o \
+          pyInterceptors.o \
           cxxAPI.o
 
 

@@ -31,6 +31,9 @@
 #define _omnipy_h_
 
 // $Log$
+// Revision 1.2.4.21  2003/05/28 10:13:01  dgrisby
+// Preliminary interceptor support. General clean-up.
+//
 // Revision 1.2.4.20  2003/03/12 11:17:02  dgrisby
 // Registration of external pseudo object creation functions.
 //
@@ -159,7 +162,7 @@ public:
   static PyObject* pyEmptyTuple;       // Zero element tuple
 
   ////////////////////////////////////////////////////////////////////////////
-  // Twin name strings                                                      //
+  // Twin names and other 'static' strings                                  //
   ////////////////////////////////////////////////////////////////////////////
 
   static PyObject* pyORB_TWIN;
@@ -168,6 +171,7 @@ public:
   static PyObject* pyPOA_TWIN;
   static PyObject* pyPOAMANAGER_TWIN;
   static PyObject* pyPOACURRENT_TWIN;
+  static PyObject* pyNP_RepositoryId;
 
   ////////////////////////////////////////////////////////////////////////////
   // Constant strings to facilitate comparison by pointer                   //
@@ -229,11 +233,12 @@ public:
   // Module initialisation functions                                        //
   ////////////////////////////////////////////////////////////////////////////
 
-  static void initORBFunc       (PyObject* d);
-  static void initPOAFunc       (PyObject* d);
-  static void initPOAManagerFunc(PyObject* d);
-  static void initPOACurrentFunc(PyObject* d);
-  static void initomniFunc      (PyObject* d);
+  static void initORBFunc        (PyObject* d);
+  static void initPOAFunc        (PyObject* d);
+  static void initPOAManagerFunc (PyObject* d);
+  static void initPOACurrentFunc (PyObject* d);
+  static void initInterceptorFunc(PyObject* d);
+  static void initomniFunc       (PyObject* d);
 
 
   ////////////////////////////////////////////////////////////////////////////
@@ -253,6 +258,18 @@ public:
   // Throw a C++ system exception equivalent to the given Python exception
   static
   void produceSystemException(PyObject* eobj, PyObject* erepoId);
+
+  // Handle the current Python exception. An exception must have
+  // occurred. Deals with system exceptions and
+  // omniORB.LocationForward; all other exceptions print a traceback
+  // and raise UNKNOWN.
+  static
+  void handlePythonException();
+
+  // Handle the omniORB.LocationForward exception in the argument.
+  static
+  void handleLocationForward(PyObject* evalue);
+  
 
   // Ensure there is an omni_thread associated with the calling thread.
   static
@@ -480,6 +497,29 @@ public:
     return 0; // For dumb compilers
   }
 
+  static inline
+  void marshalRawPyString(cdrStream& stream, PyObject* pystring)
+  {
+    CORBA::ULong slen = PyString_GET_SIZE(pystring) + 1;
+    slen >>= stream;
+    char* str = PyString_AS_STRING(pystring);
+    stream.put_octet_array((const CORBA::Octet*)((const char*)str), slen);
+  }
+
+  static inline PyObject*
+  unmarshalRawPyString(cdrStream& stream)
+  {
+    CORBA::ULong len; len <<= stream;
+
+    if (!stream.checkInputOverrun(1, len))
+      OMNIORB_THROW(MARSHAL, MARSHAL_PassEndOfMessage,
+		    (CORBA::CompletionStatus)stream.completion());
+
+    PyObject* pystring = PyString_FromStringAndSize(0, len - 1);
+
+    stream.get_octet_array((_CORBA_Octet*)PyString_AS_STRING(pystring), len);
+    return pystring;
+  }
 
   ////////////////////////////////////////////////////////////////////////////
   // TypeCode and Any support functions                                     //
@@ -512,6 +552,15 @@ public:
   // Filter context c_o according to pattern list p_o. Returns a new Context.
   static
   PyObject* filterContext(PyObject* p_o, PyObject* c_o);
+
+
+  ////////////////////////////////////////////////////////////////////////////
+  // Interceptor functions                                                  //
+  ////////////////////////////////////////////////////////////////////////////
+
+  // Register ORB interceptors if need be
+  static
+  void registerInterceptors();
 
 
   ////////////////////////////////////////////////////////////////////////////

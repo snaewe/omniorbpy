@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.9  2003/05/28 10:13:01  dgrisby
+// Preliminary interceptor support. General clean-up.
+//
 // Revision 1.1.2.8  2001/10/18 15:48:39  dpg1
 // Track ORB core changes.
 //
@@ -138,6 +141,85 @@ omniPy::produceSystemException(PyObject* eobj, PyObject* erepoId)
 				    UNKNOWN_SystemException,
 				    CORBA::COMPLETED_MAYBE);
 }
+
+
+void
+omniPy::handlePythonException()
+{
+  OMNIORB_ASSERT(PyErr_Occurred());
+
+  PyObject *etype, *evalue, *etraceback;
+  PyObject *erepoId = 0;
+  PyErr_Fetch(&etype, &evalue, &etraceback);
+  OMNIORB_ASSERT(etype);
+
+  if (evalue && PyInstance_Check(evalue))
+    erepoId = PyObject_GetAttrString(evalue, (char*)"_NP_RepositoryId");
+
+  if (!(erepoId && PyString_Check(erepoId))) {
+    Py_XDECREF(erepoId);
+    if (omniORB::trace(1)) {
+      {
+	omniORB::logger l;
+	l << "Caught an unexpected Python exception during up-call.\n";
+      }
+      PyErr_Restore(etype, evalue, etraceback);
+      PyErr_Print();
+    }
+    OMNIORB_THROW(UNKNOWN, UNKNOWN_PythonException,
+		  CORBA::COMPLETED_MAYBE);
+  }
+
+  Py_DECREF(etype);
+  Py_XDECREF(etraceback);
+
+  // Is it a LOCATION_FORWARD?
+  if (omni::strMatch(PyString_AS_STRING(erepoId),
+		     "omniORB.LOCATION_FORWARD")) {
+    Py_DECREF(erepoId);
+    omniPy::handleLocationForward(evalue);
+  }
+
+  // System exception
+  omniPy::produceSystemException(evalue, erepoId);
+}
+
+
+void
+omniPy::handleLocationForward(PyObject* evalue)
+{
+  PyObject* pyfwd  = PyObject_GetAttrString(evalue, (char*)"_forward");
+  PyObject* pyperm = PyObject_GetAttrString(evalue, (char*)"_perm");
+  OMNIORB_ASSERT(pyfwd);
+  OMNIORB_ASSERT(pyperm);
+
+  CORBA::Boolean perm;
+
+  if (PyInt_Check(pyperm)) {
+    perm = PyInt_AS_LONG(pyperm) ? 1 : 0;
+  }
+  else {
+    omniORB::logs(1, "Bad 'permanent' field in LOCATION_FORWARD. "
+		  "Using FALSE.");
+    perm = 0;
+  }
+  CORBA::Object_ptr fwd =
+    (CORBA::Object_ptr)omniPy::getTwin(pyfwd, OBJREF_TWIN);
+
+  Py_DECREF(pyfwd);
+  Py_DECREF(pyperm);
+  Py_DECREF(evalue);
+  if (fwd)
+    throw omniORB::LOCATION_FORWARD(CORBA::Object::_duplicate(fwd), perm);
+  else {
+    omniORB::logs(1, "Invalid object reference inside "
+		  "omniORB.LOCATION_FORWARD exception");
+    OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, CORBA::COMPLETED_NO);
+  }
+}
+
+
+
 
 
 //

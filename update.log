@@ -1,3 +1,20 @@
+Wed May 28 11:04:11 BST 2003 dgrisby
+====================================
+
+- Preliminary interceptor support. General clean-up.
+
+modules/dir.mk
+modules/omnipy.cc
+modules/omnipy.h
+modules/pyContext.cc
+modules/pyExceptions.cc
+modules/pyInterceptors.cc      -- new
+modules/pyServant.cc
+modules/pyTypeCode.cc
+python/omniORB/dir.mk
+python/omniORB/interceptors.py -- new
+
+
 Fri Apr 25 16:11:06 BST 2003 dgrisby
 ====================================
 
