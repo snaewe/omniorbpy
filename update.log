@@ -1,3 +1,16 @@
+Thu May  3 15:30:03 BST 2001 dpg1
+=================================
+
+- Various places released object references while holding the
+  interpreter lock. Object reference deletion locks
+  omni::internalLock, so this could cause deadlocks against
+  Servant::_add_ref().
+
+modules/omni30/pyObjectRef.cc
+modules/omni30/pyPOAFunc.cc
+modules/omni30/pyServant.cc
+
+
 Tue May  1 12:14:57 BST 2001 dpg1
 =================================
 
