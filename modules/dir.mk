@@ -195,6 +195,7 @@ PYPREFIX  := $(subst program files,progra~1,$(PYPREFIX1))
 PYVERSION := $(shell $(PYTHON) -c 'import sys; print sys.version[:3]')
 PYINCDIR  := $(PYPREFIX)/include
 PYLIBDIR  := $(PYPREFIX)/libs
+PYLIB     := python$(subst .,,$(PYVERSION)).lib
 
 DIR_CPPFLAGS += -I$(PYINCDIR) -I$(PYINCDIR)/python$(PYVERSION) \
                 -DPYTHON_INCLUDE="<Python.h>"
@@ -221,7 +222,7 @@ $(lib): $(OBJS)
          fi; \
 	 set -x; \
 	 $(RM) $@; \
-	 libs="$(OMNIORB_LIB) python15.lib"; \
+	 libs="$(OMNIORB_LIB) $(PYLIB)"; \
 	 $(CXXLINK) -out:$@ -DLL $(CXXLINKOPTIONS) $(IMPORT_LIBRARY_FLAGS) $(PYLIBPATH) $(OBJS) $$libs; \
 	)
 
@@ -230,7 +231,7 @@ else
 $(lib): $(OBJS)
 	(set -x; \
 	 $(RM) $@; \
-	 libs="$(OMNIORB_LIB) python15.lib"; \
+	 libs="$(OMNIORB_LIB) $(PYLIB)"; \
 	 $(CXXLINK) -out:$@ -DLL $(CXXLINKOPTIONS) $(IMPORT_LIBRARY_FLAGS) $(PYLIBPATH) $(OBJS) $$libs; \
 	)
 endif
@@ -254,7 +255,7 @@ DIR_CPPFLAGS += $(CORBA_CPPFLAGS)
 
 lib = _omnipymodule.so
 libinit = init_omnipy
-py_exp = /usr/local/lib/python1.5/config/python.exp
+py_exp = /usr/local/lib/python$(PYVERSION)/config/python.exp
 
 ifeq ($(notdir $(CXX)),xlC_r)
 
