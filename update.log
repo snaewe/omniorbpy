@@ -1,3 +1,11 @@
+Mon May 14 15:48:32 BST 2001 dpg1
+=================================
+
+- Fix get_compact_typecode() and equivalent()
+
+python/omniORB/tcInternal.py
+
+
 Mon May 14 13:44:51 BST 2001 dpg1
 =================================
 
