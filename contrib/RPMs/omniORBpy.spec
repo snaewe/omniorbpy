@@ -1,13 +1,13 @@
 Summary:  Python Language Mapping for omniORB
 Name:     omniORBpy
-Version:  2.3
-Release:  4
+Version:  2.4
+Release:  1
 License:  GPL / LGPL
 Group:    System/Libraries
 Source0:  %{name}-%{version}.tar.gz
 Prefix:   /usr
 URL:      http://omniorb.sourceforge.net/
-Requires: omniORB = 4.0.3
+Requires: omniORB = 4.0.4
 BuildRequires: omniORB-devel python
 Buildroot: %{_tmppath}/%{name}-%{version}-root
 
@@ -106,6 +106,9 @@ rm -rf $RPM_BUILD_ROOT
 %doc doc/* 
 
 %changelog
+* Mon Jul 26 2004 Duncan Grisby <duncan@grisby.org> 2.4
+- Bump version number to 2.4.
+
 * Wed Nov 19 2003 Duncan Grisby <duncan@grisby.org> 2.3
 - Merge contributed updates, bump version number.
 

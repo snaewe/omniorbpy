@@ -1,3 +1,15 @@
+Mon Jul 26 12:11:36 BST 2004 dgrisby
+====================================
+
+- Support new traceExceptions function.
+
+modules/pyomniFunc.cc
+
+- Bump RPM version number.
+
+contrib/RPMs/omniORBpy.spec
+
+
 Tue Jun 15 17:29:20 BST 2004 dgrisby
 ====================================
 
