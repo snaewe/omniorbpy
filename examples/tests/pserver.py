@@ -6,6 +6,7 @@ import PerfTest, POA_PerfTest
 
 class I_i (POA_PerfTest.I):
 
+    def op0(self,l): return l
     def op1(self,a): return a
     def op2(self,a): return a
     def op3(self,a): return a
@@ -30,5 +31,6 @@ if "-l" in sys.argv:
     print "Running locally...\n\n"
     import pclient
     pclient.doTests(orb, poa, io)
+    orb.shutdown(1)
 else:
     orb.run()

@@ -8,6 +8,18 @@ cycles = 10000
 
 def doTests(orb, poa, io):
     l = range(200)
+
+    print "single long:    ",
+    sys.stdout.flush()
+
+    i = cycles
+    b = time.time()
+    while (i):
+        r = io.op0(i)
+        i = i - 1
+    a = time.time()
+    print a-b
+
     s = string.join(map(chr, l), "")
 
     print "octet sequence: ",

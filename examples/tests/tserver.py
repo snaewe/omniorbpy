@@ -128,5 +128,7 @@ if "-l" in sys.argv:
         while 1:
             tclient.doTests(orb, poa, io)
 
+    orb.destroy()
+
 else:
     orb.run()

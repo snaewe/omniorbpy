@@ -17,6 +17,7 @@ module PerfTest {
   typedef double doublea[200];
 
   interface I {
+    long    op0(in long    l);
     octets  op1(in octets  a);
     octeta  op2(in octeta  a);
     shorts  op3(in shorts  a);
