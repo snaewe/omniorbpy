@@ -28,6 +28,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.27.2.11  2002/07/04 13:07:45  dgrisby
+# Bug with string escapes in Windows filenames.
+#
 # Revision 1.27.2.10  2002/05/27 01:43:15  dgrisby
 # Fix AttributeError bug with nested structs/unions.
 #
@@ -208,8 +211,8 @@ module_start = """
 # Start of module "@sname@"
 #
 __name__ = "@package@@sname@"
-_0_@sname@ = omniORB.openModule("@package@@sname@", "@filename@")
-_0_@s_sname@ = omniORB.openModule("@package@@s_sname@", "@filename@")
+_0_@sname@ = omniORB.openModule("@package@@sname@", r"@filename@")
+_0_@s_sname@ = omniORB.openModule("@package@@s_sname@", r"@filename@")
 """
 
 module_end = """

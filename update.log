@@ -1,3 +1,11 @@
+Thu Jul  4 14:03:08 BST 2002 dgrisby
+====================================
+
+- Bug with string escapes in Windows filenames.
+
+omniidl_be/python.py
+
+
 Tue Jun  4 00:30:39 BST 2002 dgrisby
 ====================================
 

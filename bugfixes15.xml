@@ -8,6 +8,13 @@
 
 <buglist version="1.5">
 
-<nobugs/>
+<bug id="1" date="Thu Jul  4 14:03:08 BST 2002" user="dgrisby">
+  <summary>Bug in omniidl output with certain Windows filenames</summary>
+  <reported>Richard Gruet</reported>
+  <text>
+  Filenames with \ characters could be interpreted as having \ escape
+  characters, upsetting the Python parser.
+  </text>
+</bug>
 
 </buglist>
