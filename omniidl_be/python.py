@@ -28,6 +28,10 @@
 
 # $Id$
 # $Log$
+# Revision 1.27.2.9  2001/06/21 09:36:36  dpg1
+# New "inline" argument to importIDL(). objref classes no longer
+# needlessly call base class constructors.
+#
 # Revision 1.27.2.8  2001/06/12 10:56:01  dpg1
 # Scoping bug in stub code.
 #
@@ -266,14 +270,7 @@ class _objref_@ifid@ @inherits@:
     def __del__(self):
         if _omnipy is not None:
             _omnipy.releaseObjref(self)
-
-    def __init__(self):"""
-
-objref_inherit_init = """\
-        @inclass@.__init__(self)"""
-
-objref_object_init = """\
-        CORBA.Object.__init__(self)"""
+"""
 
 objref_attribute_get = """
     def _get_@attr@(self, *args):
@@ -817,12 +814,6 @@ class PythonVisitor:
 
         self.st.out(objref_class, ifid=ifid, inherits=inherits)
 
-        if len(node.inherits()) > 0:
-            for inclass in inheritl:
-                self.st.out(objref_inherit_init, inclass=inclass)
-        else:
-            self.st.out(objref_object_init)
-
         # Operations and attributes
         methodl = []
 
@@ -1223,7 +1214,6 @@ class PythonVisitor:
                             repoId  = node.repoId(),
                             modname = self.modname)
             else:
-                scopedName = node.scopedName()
                 self.st.out(recursive_union_descr,
                             uname   = uname,
                             repoId  = node.repoId(),
