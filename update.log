@@ -1,3 +1,60 @@
+Fri Oct 13 14:44:24 BST 2000 dpg1
+=================================
+
+- Add support for omniORB 4
+- Remove support for everything else :-)
+
+external_merge/modules/common/GNUmakefile  -- deleted
+external_merge/modules/omni28/GNUmakefile  -- deleted
+external_merge/modules/omni30/GNUmakefile  -- deleted
+modules/dir.mk
+modules/omnipy.cc                          -- new
+modules/omnipy.h
+modules/omnipy_sysdep.h                    -- new
+modules/pyCallDescriptor.cc                -- new
+modules/pyExceptions.cc                    -- new
+modules/pyMarshal.cc                       -- new
+modules/pyORBFunc.cc                       -- new
+modules/pyObjectRef.cc                     -- new
+modules/pyPOAFunc.cc                       -- new
+modules/pyPOAManagerFunc.cc                -- new
+modules/pyServant.cc                       -- new
+modules/pyThreadCache.cc                   -- new
+modules/pyThreadCache.h                    -- new
+modules/pyTypeCode.cc                      -- new
+modules/pyomniFunc.cc                      -- new
+modules/common/dir.mk                      -- deleted
+modules/common/pyExceptions.cc             -- deleted
+modules/common/pyMarshal.cc                -- deleted
+modules/common/pyThreadCache.cc            -- deleted
+modules/common/pyThreadCache.h             -- deleted
+modules/common/pyTypeCode.cc               -- deleted
+modules/common/pyomniFunc.cc               -- deleted
+modules/omni28/dir.mk                      -- deleted
+modules/omni28/omnipy.cc                   -- deleted
+modules/omni28/omnipy28.h                  -- deleted
+modules/omni28/omnipy28_sysdep.h           -- deleted
+modules/omni28/pyCallDescriptor.cc         -- deleted
+modules/omni28/pyORBFunc.cc                -- deleted
+modules/omni28/pyObjectRef.cc              -- deleted
+modules/omni28/pyPOAFunc.cc                -- deleted
+modules/omni28/pyPOAManagerFunc.cc         -- deleted
+modules/omni28/pyServant.cc                -- deleted
+modules/omni30/dir.mk                      -- deleted
+modules/omni30/omnipy.cc                   -- deleted
+modules/omni30/omnipy30.h                  -- deleted
+modules/omni30/omnipy30_sysdep.h           -- deleted
+modules/omni30/pyCallDescriptor.cc         -- deleted
+modules/omni30/pyORBFunc.cc                -- deleted
+modules/omni30/pyObjectRef.cc              -- deleted
+modules/omni30/pyPOAFunc.cc                -- deleted
+modules/omni30/pyPOAManagerFunc.cc         -- deleted
+modules/omni30/pyServant.cc                -- deleted
+omniidl_be/python.py
+python/omniORB/CORBA.py
+python/omniORB/__init__.py
+
+
 Tue Oct  3 12:07:26 BST 2000 dpg1
 =================================
 

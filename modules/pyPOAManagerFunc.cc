@@ -30,16 +30,8 @@
 // $Id$
 
 // $Log$
-// Revision 1.3  2000/03/24 16:48:57  dpg1
-// Local calls now have proper pass-by-value semantics.
-// Lots of little stability improvements.
-// Memory leaks fixed.
-//
-// Revision 1.2  2000/03/06 18:46:55  dpg1
-// (char*)s for Solaris.
-//
-// Revision 1.1  2000/03/03 17:41:41  dpg1
-// Major reorganisation to support omniORB 3.0 as well as 2.8.
+// Revision 1.1.2.1  2000/10/13 13:55:26  dpg1
+// Initial support for omniORB 4.
 //
 
 #include <omnipy.h>

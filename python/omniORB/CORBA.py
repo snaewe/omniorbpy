@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.28.2.1  2000/10/13 13:55:30  dpg1
+# Initial support for omniORB 4.
+#
 # Revision 1.28  2000/08/21 10:20:19  dpg1
 # Merge from omnipy1_develop for 1.1 release
 #
@@ -451,8 +454,12 @@ _d_any = tcInternal.tv_any
 
 if _omnipy.coreVersion() == "2.8.0":
     ORB_ID = "omniORB2"
-else:
+elif _omnipy.coreVersion()[0] == "3":
     ORB_ID = "omniORB3"
+elif _omnipy.coreVersion()[0] == "4":
+    ORB_ID = "omniORB4"
+else:
+    ORB_ID = "UnknownORB"
 
 def ORB_init(argv=[], orb_identifier = ORB_ID):
     omniORB.orb_lock.acquire()

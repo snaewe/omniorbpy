@@ -1,12 +1,6 @@
 # Version number
-OMNIPY_MAJOR = 0
-OMNIPY_MINOR = 5
-
-ifeq ($(OMNIORB_VERSION),)
-OMNIORB_VERSION = 2.8.0
-OMNIORB_MAJOR_VERSION = 2
-OMNIORB_MINOR_VERSION = 8
-endif
+OMNIPY_MAJOR = 2
+OMNIPY_MINOR = 0
 
 DIR_CPPFLAGS += -DOMNIPY_MAJOR=$(OMNIPY_MAJOR) -DOMNIPY_MINOR=$(OMNIPY_MINOR)
 DIR_CPPFLAGS += -DOMNIORB_VERSION_STRING=\"$(OMNIORB_VERSION)\"
@@ -15,63 +9,36 @@ OMNIORB_VERSION_NOMICRO := $(OMNIORB_MAJOR_VERSION).$(OMNIORB_MINOR_VERSION)
 
 # Test which omniORB version we're using
 
-ifeq ($(OMNIORB_VERSION_NOMICRO), 2.8)
-VERSIONDIR = omni28
-DIR_CPPFLAGS += -DOMNIORBPY_FOR_28
 
-OMNIORB_LIB              = $(OMNIORB2_LIB)
-OMNIORB_LIB_NODYN        = $(OMNIORB2_LIB_NODYN)
-OMNIORB_LIB_NODYN_DEPEND = $(OMNIORB2_LIB_NODYN_DEPEND)
-endif
+CXXSRCS = omnipy.cc \
+          pyORBFunc.cc \
+          pyPOAFunc.cc \
+          pyPOAManagerFunc.cc \
+          pyObjectRef.cc \
+          pyCallDescriptor.cc \
+          pyServant.cc \
+          pyExceptions.cc \
+          pyMarshal.cc \
+          pyTypeCode.cc \
+          pyThreadCache.cc \
+          pyomniFunc.cc
 
-ifeq ($(OMNIORB_VERSION_NOMICRO), 3.1)
-VERSIONDIR = omni30
-DIR_CPPFLAGS += -DOMNIORBPY_FOR_30
-endif
-
-ifeq ($(OMNIORB_VERSION_NOMICRO), 3.0)
-VERSIONDIR = omni30
-DIR_CPPFLAGS += -DOMNIORBPY_FOR_30
-endif
-
-
-SUBDIRS = $(VERSIONDIR) common
-all::
-	@$(MakeSubdirs)
-export::
-	@$(MakeSubdirs)
-
-
-CXXSRCS = $(VERSIONDIR)/omnipy.cc \
-          $(VERSIONDIR)/pyORBFunc.cc \
-          $(VERSIONDIR)/pyPOAFunc.cc \
-          $(VERSIONDIR)/pyPOAManagerFunc.cc \
-          $(VERSIONDIR)/pyObjectRef.cc \
-          $(VERSIONDIR)/pyCallDescriptor.cc \
-          $(VERSIONDIR)/pyServant.cc \
-          common/pyExceptions.cc \
-          common/pyMarshal.cc \
-          common/pyTypeCode.cc \
-          common/pyThreadCache.cc \
-          common/pyomniFunc.cc
-
-OBJS =    $(VERSIONDIR)/omnipy.o \
-          $(VERSIONDIR)/pyORBFunc.o \
-          $(VERSIONDIR)/pyPOAFunc.o \
-          $(VERSIONDIR)/pyPOAManagerFunc.o \
-          $(VERSIONDIR)/pyObjectRef.o \
-          $(VERSIONDIR)/pyCallDescriptor.o \
-          $(VERSIONDIR)/pyServant.o \
-          common/pyExceptions.o \
-          common/pyMarshal.o \
-          common/pyTypeCode.o \
-          common/pyThreadCache.o \
-          common/pyomniFunc.o
+OBJS =    omnipy.o \
+          pyORBFunc.o \
+          pyPOAFunc.o \
+          pyPOAManagerFunc.o \
+          pyObjectRef.o \
+          pyCallDescriptor.o \
+          pyServant.o \
+          pyExceptions.o \
+          pyMarshal.o \
+          pyTypeCode.o \
+          pyThreadCache.o \
+          pyomniFunc.o
 
 
-
-DIR_CPPFLAGS += $(patsubst %,-I%/src/lib/omniORB2,$(IMPORT_TREES))
-DIR_CPPFLAGS += $(patsubst %,-I%/src/lib/omniORB2/orbcore,$(IMPORT_TREES))
+DIR_CPPFLAGS += $(patsubst %,-I%/src/lib/omniORB,$(IMPORT_TREES))
+DIR_CPPFLAGS += $(patsubst %,-I%/src/lib/omniORB/orbcore,$(IMPORT_TREES))
 
 
 #############################################################################

@@ -30,136 +30,10 @@
 // $Id$
 
 // $Log$
-// Revision 1.38  2000/08/21 10:20:21  dpg1
-// Merge from omnipy1_develop for 1.1 release
+// Revision 1.1.2.1  2000/10/13 13:55:23  dpg1
+// Initial support for omniORB 4.
 //
-// Revision 1.37.2.1  2000/08/14 16:10:32  dpg1
-// Missed out some explicit casts to (char*) for string constants.
-//
-// Revision 1.37  2000/06/27 15:12:21  dpg1
-// Change error message for version clash
-//
-// Revision 1.36  2000/06/12 15:36:08  dpg1
-// Support for exception handler functions. Under omniORB 3, local
-// operation dispatch modified so exceptions handlers are run.
-//
-// Revision 1.35  2000/05/26 15:33:31  dpg1
-// Python thread states are now cached. Operation dispatch time is
-// roughly halved!
-//
-// Revision 1.34  2000/04/27 11:04:35  dpg1
-// Catch exceptions thrown by ORB_init().
-//
-// Revision 1.33  2000/03/24 16:48:58  dpg1
-// Local calls now have proper pass-by-value semantics.
-// Lots of little stability improvements.
-// Memory leaks fixed.
-//
-// Revision 1.32  2000/03/07 16:52:17  dpg1
-// Support for compilers which do not allow exceptions to be caught by
-// base class. (Like MSVC 5, surprise surprise.)
-//
-// Revision 1.31  2000/03/06 18:45:34  dpg1
-// Additions to compile on Solaris.
-//
-// Revision 1.30  2000/03/03 17:55:54  dpg1
-// Big swathe of obsolete code removed.
-//
-// Revision 1.29  2000/03/03 17:41:43  dpg1
-// Major reorganisation to support omniORB 3.0 as well as 2.8.
-//
-// Revision 1.28  2000/02/04 12:17:11  dpg1
-// Support for VMS.
-//
-// Revision 1.27  1999/12/15 12:17:20  dpg1
-// Changes to compile with SunPro CC 5.0.
-//
-// Revision 1.26  1999/12/14 15:28:40  dpg1
-// Catch ORB::InvalidName exception in resolve_initial_references().
-//
-// Revision 1.25  1999/12/02 17:35:57  dpg1
-// _narrow, _is_a, _is_equivalent weren't unlocking the interpreter.
-//
-// Revision 1.24  1999/11/25 11:49:32  dpg1
-// Minor version number bumped since server-side _is_a() required an
-// incompatible change.
-//
-// Revision 1.23  1999/11/16 17:32:36  dpg1
-// Changes for AIX.
-//
-// Revision 1.22  1999/11/09 17:27:34  dpg1
-// narrow() now properly handles CORBA system exceptions.
-//
-// Revision 1.21  1999/11/08 11:43:35  dpg1
-// Changes for NT support.
-//
-// Revision 1.20  1999/10/15 17:07:23  dpg1
-// Narrow now properly returns nil if the object is not of the right
-// type.
-//
-// Revision 1.19  1999/10/15 16:25:46  dpg1
-// Fixed refcounting bug with Python servants.
-//
-// Revision 1.18  1999/10/01 11:07:21  dpg1
-// Error reporting if up-call raises an unexpected exception.
-//
-// Revision 1.17  1999/09/29 15:46:51  dpg1
-// lockWithNewThreadState now creates a dummy threading.Thread object so
-// threading doesn't get upset that it's not there. Very dependent on the
-// implementation of threading.py.
-//
-// Revision 1.16  1999/09/29 11:25:56  dpg1
-// Nil objects now map to None. They work too, which is more than can be
-// said for the old mapping...
-//
-// Revision 1.15  1999/09/29 09:05:03  dpg1
-// Now releases the Python interpreter lock before invoke's call to
-// _is_a().
-//
-// Revision 1.14  1999/09/28 16:19:41  dpg1
-// Small memory management issues fixed.
-//
-// Revision 1.13  1999/09/27 09:20:49  dpg1
-// Fixed bug in stringToObject() exception handling.
-//
-// Revision 1.12  1999/09/24 09:22:04  dpg1
-// Added copyright notices.
-//
-// Revision 1.11  1999/09/23 16:29:45  dpg1
-// Forgot to update initial references code with twin changes,
-//
-// Revision 1.10  1999/09/23 16:27:45  dpg1
-// Initial references support was accidentally missed out. Replaced.
-//
-// Revision 1.9  1999/09/22 15:46:13  dpg1
-// Fake POA implemented.
-//
-// Revision 1.8  1999/07/29 14:18:48  dpg1
-// Server side.
-//
-// Revision 1.7  1999/07/19 15:50:38  dpg1
-// Things put into module omniPy. Small fixes.
-//
-// Revision 1.6  1999/06/07 14:58:45  dpg1
-// Descriptors unflattened again.
-//
-// Revision 1.5  1999/06/07 10:11:18  dpg1
-// Split into separate files.
-//
-// Revision 1.4  1999/06/04 16:34:29  dpg1
-// Descriptors flattened.
-//
-// Revision 1.3  1999/06/04 13:59:54  dpg1
-// Structs, enums and sequences.
-//
-// Revision 1.2  1999/06/03 10:36:51  dpg1
-// Different proxy scheme.
-// Thread control.
-// All simple types.
-//
-// Revision 1.1  1999/06/01 11:44:49  dpg1
-// Initial revision
-//
+
 
 #ifdef __WIN32__
 #define DLL_EXPORT _declspec(dllexport)
@@ -168,7 +42,7 @@
 #endif
 
 #include <omnipy.h>
-#include <common/pyThreadCache.h>
+#include <pyThreadCache.h>
 
 
 ////////////////////////////////////////////////////////////////////////////
@@ -284,14 +158,16 @@ extern "C" {
       return 0;
 
     if (maj != OMNIPY_MAJOR || (maj == 0 && min != OMNIPY_MINOR)) {
-      omniORB::log << "omniORBpy: ***\n"
-		   << "omniORBpy: *** WARNING! _omnipy module version "
-		   << OMNIPY_MAJOR << "." << OMNIPY_MINOR << "\n"
-		   << "omniORBpy: *** Stubs in " << mod << " are version "
-		   << maj << "." << min << "\n"
-		   << "omniORBpy: *** You may experience strange errors "
-		   << "until you fix the mismatch\n";
-      omniORB::log.flush();
+      if (omniORB::trace(1)) {
+	omniORB::log << "omniORBpy: ***\n"
+		     << "omniORBpy: *** WARNING! _omnipy module version "
+		     << OMNIPY_MAJOR << "." << OMNIPY_MINOR << "\n"
+		     << "omniORBpy: *** Stubs in " << mod << " are version "
+		     << maj << "." << min << "\n"
+		     << "omniORBpy: *** You may experience strange errors "
+		     << "until you fix the mismatch\n";
+	omniORB::log.flush();
+      }
     }
     Py_INCREF(Py_None);
     return Py_None;
@@ -388,8 +264,6 @@ extern "C" {
     OMNIORB_ASSERT(PyMethod_Check(omniPy::pyWorkerThreadDel));
     OMNIORB_ASSERT(omniPy::pyEmptyTuple);
 
-    //    cout << "Python objects registered." << endl;
-
     Py_INCREF(Py_None);
     return Py_None;
   }
@@ -476,6 +350,9 @@ extern "C" {
   static PyObject*
   omnipy_cdrMarshal(PyObject* self, PyObject* args)
   {
+    OMNIORB_ASSERT(0);
+    return 0;
+    /* ***
     PyObject *desc, *data;
 
     if (!PyArg_ParseTuple(args, (char*)"OO", &desc, &data)) return 0;
@@ -490,11 +367,15 @@ extern "C" {
 					stream.alreadyWritten());
     }
     OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
+    */
   }
 
   static PyObject*
   omnipy_cdrUnmarshal(PyObject* self, PyObject* args)
   {
+    OMNIORB_ASSERT(0);
+    return 0;
+    /* ***
     PyObject* desc;
     char*     encap;
     size_t    size;
@@ -510,7 +391,9 @@ extern "C" {
       return omniPy::unmarshalPyObject(stream, desc);
     }
     OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
+    */
   }
+
 
   ////////////////////////////////////////////////////////////////////////////
   // Functions operating on object references                               //
@@ -530,7 +413,7 @@ extern "C" {
     size_t op_len;
 
     /*
-    if (!PyArg_ParseTuple(args, (char*)"Os#(OOO)O", &pyobjref, &op, &op_len,
+    if (!PyArg_ParseTuple(args, "Os#(OOO)O", &pyobjref, &op, &op_len,
 			  &in_d, &out_d, &exc_d, &op_args))
       return 0;
     */
@@ -566,76 +449,41 @@ extern "C" {
     CORBA::Object_ptr cxxobjref =
       (CORBA::Object_ptr)omniPy::getTwin(pyobjref, OBJREF_TWIN);
 
-    omniObject* oobj = cxxobjref->PR_getobj();
+    omniObjRef*    oobjref   = cxxobjref->_PR_getobj();
+    CORBA::Boolean is_oneway = (out_d == Py_None);
 
-    if (oobj->is_proxy()) {
-
-      if (out_d != Py_None) {
-	CORBA::Boolean has_exc = (exc_d != Py_None);
-
-	omniPy::Py_OmniProxyCallDesc call_desc(op, op_len + 1, has_exc,
-					       in_d, out_d, exc_d,
-					       op_args);
-	try {
-	  call_desc.releaseInterpreterLock();
-	  OmniProxyCallWrapper::invoke(oobj, call_desc);
-	  return call_desc.result();
-	}
-#ifdef HAS_Cplusplus_catch_exception_by_base
-	catch (const CORBA::SystemException& ex) {
-	  call_desc.systemException(ex);
-	}
-#else
-#define DO_CALL_DESC_SYSTEM_EXCEPTON(exc) \
-        catch (const CORBA::exc& ex) { \
-          call_desc.systemException(ex); \
-        }
-OMNIORB_FOR_EACH_SYS_EXCEPTION(DO_CALL_DESC_SYSTEM_EXCEPTON)
-#undef DO_CALL_DESC_SYSTEM_EXCEPTON
-#endif
-	catch (const omniPy::UserExceptionHandled& ex) {
-	  // Exception has been handled by the call descriptor
-	}
+    omniPy::Py_omniCallDescriptor call_desc(op, op_len + 1, is_oneway,
+					    in_d, out_d, exc_d, op_args, 0);
+    try {
+      call_desc.releaseInterpreterLock();
+      oobjref->_invoke(call_desc);
+      call_desc.reacquireInterpreterLock();
+      if (!is_oneway) {
+	return call_desc.result();
       }
       else {
-	// Operation is oneway
-	omniPy::Py_OmniOWProxyCallDesc call_desc(op, op_len + 1,
-						 in_d, op_args);
-	try {
-	  call_desc.releaseInterpreterLock();
-	  OmniProxyCallWrapper::one_way(oobj, call_desc);
-	  call_desc.reacquireInterpreterLock();
-
-	  Py_INCREF(Py_None);
-	  return Py_None;
-	}
+	Py_INCREF(Py_None);
+	return Py_None;
+      }
+    }
 #ifdef HAS_Cplusplus_catch_exception_by_base
-	catch (const CORBA::SystemException& ex) {
-	  call_desc.systemException(ex);
-	}
+    catch (const CORBA::SystemException& ex) {
+      // systemException() reacquires the interpreter lock if necessary
+      call_desc.systemException(ex);
+    }
 #else
 #define DO_CALL_DESC_SYSTEM_EXCEPTON(exc) \
-        catch (const CORBA::exc& ex) { \
-          call_desc.systemException(ex); \
-        }
+    catch (const CORBA::exc& ex) { \
+      call_desc.systemException(ex); \
+    }
 OMNIORB_FOR_EACH_SYS_EXCEPTION(DO_CALL_DESC_SYSTEM_EXCEPTON)
 #undef DO_CALL_DESC_SYSTEM_EXCEPTON
 #endif
-      }
-      return 0;
+    catch (const omniPy::UserExceptionHandled& ex) {
+      // Exception has been handled by the call descriptor
+      call_desc.reacquireInterpreterLock();
     }
-    else {
-      // Local object
-      omniPy::Py_Servant* local = (omniPy::Py_Servant*)
-	oobj->_widenFromTheMostDerivedIntf("Py_Servant", 1);
-
-      OMNIORB_ASSERT(local);
-      int out_l = (out_d == Py_None) ? -1 : PyTuple_GET_SIZE(out_d);
-      return local->local_dispatch(op,
-				   in_d,  PyTuple_GET_SIZE(in_d),
-				   out_d, out_l,
-				   exc_d, op_args);
-    }
+    return 0;
   }
 
   static PyObject*
@@ -645,6 +493,8 @@ OMNIORB_FOR_EACH_SYS_EXCEPTION(DO_CALL_DESC_SYSTEM_EXCEPTON)
 
     if (!PyArg_ParseTuple(args, (char*)"O", &pyobjref))
       return 0;
+
+    OMNIORB_ASSERT(PyInstance_Check(pyobjref));
 
     CORBA::Object_ptr cxxobjref =
       (CORBA::Object_ptr)omniPy::getTwin(pyobjref, OBJREF_TWIN);
@@ -668,6 +518,8 @@ OMNIORB_FOR_EACH_SYS_EXCEPTION(DO_CALL_DESC_SYSTEM_EXCEPTON)
 
     if (!PyArg_ParseTuple(args, (char*)"Os", &pyobjref, &repoId))
       return 0;
+
+    RAISE_PY_BAD_PARAM_IF(!PyInstance_Check(pyobjref));
 
     CORBA::Object_ptr cxxobjref =
       (CORBA::Object_ptr)omniPy::getTwin(pyobjref, OBJREF_TWIN);
@@ -718,9 +570,10 @@ OMNIORB_FOR_EACH_SYS_EXCEPTION(DO_CALL_DESC_SYSTEM_EXCEPTON)
 			  !PyInstance_Check(pyobjref2));
 
     CORBA::Object_ptr cxxobjref1, cxxobjref2;
-
     cxxobjref1 = (CORBA::Object_ptr)omniPy::getTwin(pyobjref1, OBJREF_TWIN);
     cxxobjref2 = (CORBA::Object_ptr)omniPy::getTwin(pyobjref2, OBJREF_TWIN);
+
+    RAISE_PY_BAD_PARAM_IF(!cxxobjref1 || !cxxobjref2);
 
     try {
       omniPy::InterpreterUnlocker ul;
@@ -775,12 +628,11 @@ OMNIORB_FOR_EACH_SYS_EXCEPTION(DO_CALL_DESC_SYSTEM_EXCEPTON)
     OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
 
     if (isa) {
-      omniObject* oosource = cxxsource->PR_getobj();
-      omniObject* oodest = omniPy::createObjRef(oosource->NP_IRRepositoryId(),
-						repoId,
-						oosource->iopProfiles(), 0);
+      omniObjRef* oosource = cxxsource->_PR_getobj();
+      omniObjRef* oodest = omniPy::createObjRef(repoId,
+						oosource->_getIOR(), 0, 0);
       CORBA::Object_ptr cxxdest =
-	(CORBA::Object_ptr)(oodest->_widenFromTheMostDerivedIntf(0));
+	(CORBA::Object_ptr)(oodest->_ptrToObjRef(CORBA::Object::_PD_repoId));
 
       return omniPy::createPyCorbaObjRef(repoId, cxxdest);
     }
@@ -825,11 +677,10 @@ OMNIORB_FOR_EACH_SYS_EXCEPTION(DO_CALL_DESC_SYSTEM_EXCEPTON)
 
     omniPy::pyInterpreterLock = new omni_mutex;
 
-    PyObject *m  = Py_InitModule((char*)"_omnipy", omnipy_methods);
-    PyObject *d = PyModule_GetDict(m);
+    PyObject* m = Py_InitModule((char*)"_omnipy", omnipy_methods);
+    PyObject* d = PyModule_GetDict(m);
     PyDict_SetItemString(d, (char*)"omnipyTwinType",
 			 (PyObject*)&omnipyTwinType);
-
     omniPy::initORBFunc(d);
     omniPy::initPOAFunc(d);
     omniPy::initPOAManagerFunc(d);

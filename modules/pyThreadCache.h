@@ -31,15 +31,8 @@
 // $Id$
 
 // $Log$
-// Revision 1.2  2000/10/02 17:35:01  dpg1
-// Merge for 1.2 release
-//
-// Revision 1.1.2.1  2000/09/27 15:57:21  dpg1
-// #include<python1.5/pythread.h> generalised for other Python versions
-//
-// Revision 1.1  2000/05/26 15:33:31  dpg1
-// Python thread states are now cached. Operation dispatch time is
-// roughly halved!
+// Revision 1.1.2.1  2000/10/13 13:55:27  dpg1
+// Initial support for omniORB 4.
 //
 
 #if defined(__VMS)
@@ -63,7 +56,8 @@ public:
     PyObject*      workerThread;
 
     CORBA::Boolean used;
-    CORBA::Boolean active;
+    CORBA::Boolean can_scavenge;
+    int            active;
 
     CacheNode*     next;
     CacheNode**    back;
@@ -108,17 +102,19 @@ public:
       while (cn && cn->id != id) cn = cn->next;
       if (!cn) cn = addNewNode(id, hash);
 
-      cn->used   = 1;
-      cn->active = 1;
+      cn->used = 1;
+      cn->active++;
     }
     return cn;
   }
 
   static inline void releaseNode(CacheNode* cn) {
     omni_mutex_lock _l(*guard);
-    cn->used   = 1;
-    cn->active = 0;
+    cn->used = 1;
+    cn->active--;
   }
 
   static CacheNode* addNewNode(long id, unsigned int hash);
+
+  static void threadExit();
 };

@@ -1,6 +1,6 @@
 // -*- Mode: C++; -*-
 //                            Package   : omniORBpy
-// omnipy28_sysdep.h          Created on: 2000/03/07
+// omnipy30_sysdep.h          Created on: 2000/03/07
 //                            Author    : Duncan Grisby (dpg1)
 //
 //    Copyright (C) 2000 AT&T Laboratories Cambridge
@@ -25,17 +25,24 @@
 //
 //
 // Description:
-//    Additional system dependencies for omniORB2.8 version
+//    Additional system dependencies
 
-#ifndef _omnipy28_sysdep_h_
-#define _omnipy28_sysdep_h_
+#ifndef _omnipy_sysdep_h_
+#define _omnipy_sysdep_h_
 
-#define HAS_Cplusplus_catch_exception_by_base
+// Defaults for things we'd like to do
 
+#define PY_OMNISERVANT_BASE omniPy::Py_omniServant
+
+
+// Things that are broken
 
 #if defined(_MSC_VER)
 #  undef HAS_Cplusplus_catch_exception_by_base
+
+#  undef  PY_OMNISERVANT_BASE
+#  define PY_OMNISERVANT_BASE Py_omniServant
+
 #endif
 
-
-#endif // _omnipy28_sysdep_h_
+#endif // _omnipy_sysdep_h_

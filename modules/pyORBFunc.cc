@@ -30,35 +30,13 @@
 // $Id$
 
 // $Log$
-// Revision 1.7  2000/06/02 14:25:51  dpg1
-// orb.run() now properly exits when the ORB is shut down
-//
-// Revision 1.6  2000/05/26 15:33:32  dpg1
-// Python thread states are now cached. Operation dispatch time is
-// roughly halved!
-//
-// Revision 1.5  2000/04/28 15:31:05  dpg1
-// Accidentally broke resolve_initial_references() for pseudo objects.
-//
-// Revision 1.4  2000/04/27 11:04:00  dpg1
-// Support for ORB core Interoperable Naming Service changes.
-// Add shutdown() and destroy() operations.
-//
-// Revision 1.3  2000/03/17 15:57:07  dpg1
-// Correct, and more consistent handling of invalid strings in
-// string_to_object().
-//
-// Revision 1.2  2000/03/07 16:52:16  dpg1
-// Support for compilers which do not allow exceptions to be caught by
-// base class. (Like MSVC 5, surprise surprise.)
-//
-// Revision 1.1  2000/03/03 17:41:42  dpg1
-// Major reorganisation to support omniORB 3.0 as well as 2.8.
+// Revision 1.1.2.1  2000/10/13 13:55:25  dpg1
+// Initial support for omniORB 4.
 //
 
 
 #include <omnipy.h>
-#include <common/pyThreadCache.h>
+#include <pyThreadCache.h>
 #include <initialiser.h>
 
 extern "C" {
@@ -171,10 +149,8 @@ extern "C" {
 
     if (!objref->_NP_is_pseudo()) {
       omniObjRef* cxxref = objref->_PR_getobj();
-      omniObjRef* pyref  = omniPy::createObjRef(cxxref->_mostDerivedRepoId(),
-						CORBA::Object::_PD_repoId,
-						cxxref->_iopProfiles(),
-						0, 0);
+      omniObjRef* pyref  = omniPy::createObjRef(CORBA::Object::_PD_repoId,
+						cxxref->_getIOR(), 0, 0);
       CORBA::release(objref);
       objref =
 	(CORBA::Object_ptr)pyref->_ptrToObjRef(CORBA::Object::_PD_repoId);

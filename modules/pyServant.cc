@@ -28,106 +28,15 @@
 //    Implementation of Python servant object
 
 // $Id$
+
 // $Log$
-// Revision 1.26  2000/10/02 17:35:01  dpg1
-// Merge for 1.2 release
-//
-// Revision 1.24.2.4  2000/09/21 11:05:49  dpg1
-// Fix race condition with Py_omniServant deletion.
-//
-// Revision 1.24.2.3  2000/09/19 09:24:16  dpg1
-// More paranoid about clearing Python error status
-//
-// Revision 1.24.2.2  2000/09/01 14:13:01  dpg1
-// Memory leak when returning invalid data
-//
-// Revision 1.24.2.1  2000/08/17 08:46:06  dpg1
-// Support for omniORB.LOCATION_FORWARD exception
-//
-// Revision 1.24  2000/06/12 15:36:09  dpg1
-// Support for exception handler functions. Under omniORB 3, local
-// operation dispatch modified so exceptions handlers are run.
-//
-// Revision 1.23  2000/05/26 15:33:32  dpg1
-// Python thread states are now cached. Operation dispatch time is
-// roughly halved!
-//
-// Revision 1.22  2000/05/11 11:58:25  dpg1
-// Throw system exceptions with OMNIORB_THROW.
-//
-// Revision 1.21  2000/04/06 14:12:39  dpg1
-// Incorrect format character in PyObject_CallMethod() caused a reference
-// count leak.
-//
-// Revision 1.20  2000/04/03 11:02:51  dpg1
-// Error report if a method does not exist on upcall.
-//
-// Revision 1.19  2000/04/03 09:18:59  dpg1
-// Missed a few places which should have changed in 1.17.
-//
-// Revision 1.18  2000/03/30 13:01:14  dpg1
-// Locking fixed for ~Py_omniServant().
-//
-// Revision 1.17  2000/03/24 17:10:51  dpg1
-// Work-around for conflict between VC++ and xlC bugs.
-//
-// Revision 1.16  2000/03/24 16:48:57  dpg1
-// Local calls now have proper pass-by-value semantics.
-// Lots of little stability improvements.
-// Memory leaks fixed.
-//
-// Revision 1.15  2000/03/06 18:48:28  dpg1
-// Support for our favourite compiler, MSVC.
-//
-// Revision 1.14  2000/03/06 16:38:45  dpg1
-// Additions to compile on Solaris.
-//
-// Revision 1.13  2000/03/03 17:41:41  dpg1
-// Major reorganisation to support omniORB 3.0 as well as 2.8.
-//
-// Revision 1.12  1999/12/15 12:17:19  dpg1
-// Changes to compile with SunPro CC 5.0.
-//
-// Revision 1.11  1999/11/25 11:21:36  dpg1
-// Proper support for server-side _is_a().
-//
-// Revision 1.10  1999/11/16 17:32:36  dpg1
-// Changes for AIX.
-//
-// Revision 1.9  1999/11/08 11:43:35  dpg1
-// Changes for NT support.
-//
-// Revision 1.8  1999/10/01 11:07:20  dpg1
-// Error reporting if up-call raises an unexpected exception.
-//
-// Revision 1.7  1999/09/29 15:46:50  dpg1
-// lockWithNewThreadState now creates a dummy threading.Thread object so
-// threading doesn't get upset that it's not there. Very dependent on the
-// implementation of threading.py.
-//
-// Revision 1.6  1999/09/29 11:38:29  dpg1
-// Comments removed.
-//
-// Revision 1.5  1999/09/29 09:53:23  dpg1
-// Workaround to Python's lack of concurrency control on its
-// PyInterpreterState.
-//
-// Revision 1.4  1999/09/24 09:22:02  dpg1
-// Added copyright notices.
-//
-// Revision 1.3  1999/09/22 15:46:12  dpg1
-// Fake POA implemented.
-//
-// Revision 1.2  1999/09/20 14:56:12  dpg1
-// GCC 2.95 is more pedantic than egcs.
-//
-// Revision 1.1  1999/07/29 14:20:49  dpg1
-// Initial revision
+// Revision 1.1.2.1  2000/10/13 13:55:27  dpg1
+// Initial support for omniORB 4.
 //
 
 
 #include <omnipy.h>
-#include <common/pyThreadCache.h>
+#include <pyThreadCache.h>
 
 
 // Implementation classes for ServantManagers and AdapterActivator
@@ -390,6 +299,40 @@ Py_omniServant::py_this()
 }
 
 
+static void
+HandleLocationForward(PyObject* evalue)
+{
+  PyObject* pyfwd  = PyObject_GetAttrString(evalue, (char*)"_forward");
+  PyObject* pyperm = PyObject_GetAttrString(evalue, (char*)"_perm");
+  OMNIORB_ASSERT(pyfwd);
+  OMNIORB_ASSERT(pyperm);
+
+  CORBA::Boolean perm;
+
+  if (PyInt_Check(pyperm)) {
+    perm = PyInt_AS_LONG(pyperm) ? 1 : 0;
+  }
+  else {
+    omniORB::logs(1, "Bad 'permanent' field in LOCATION_FORWARD. "
+		  "Using FALSE.");
+    perm = 0;
+  }
+  CORBA::Object_ptr fwd =
+    (CORBA::Object_ptr)omniPy::getTwin(pyfwd, OBJREF_TWIN);
+
+  Py_DECREF(pyfwd);
+  Py_DECREF(pyperm);
+  Py_DECREF(evalue);
+  if (fwd)
+    throw omniORB::LOCATION_FORWARD(CORBA::Object::_duplicate(fwd), perm);
+  else {
+    omniORB::logs(1, "Invalid object reference inside "
+		  "omniORB.LOCATION_FORWARD exception");
+    OMNIORB_THROW(BAD_PARAM,0,CORBA::COMPLETED_NO);
+  }
+}
+
+
 CORBA::Boolean
 omniPy::
 Py_omniServant::_is_a(const char* logical_type_id)
@@ -451,21 +394,8 @@ Py_omniServant::_is_a(const char* logical_type_id)
 
 	// Is it a LOCATION_FORWARD?
 	if (!strcmp(PyString_AS_STRING(erepoId), "omniORB.LOCATION_FORWARD")) {
-	  PyObject* pyfwd = PyObject_GetAttrString(evalue, (char*)"_forward");
-	  OMNIORB_ASSERT(pyfwd);
-
-	  CORBA::Object_ptr fwd = (CORBA::Object_ptr)getTwin(pyfwd,
-							     OBJREF_TWIN);
-	  Py_DECREF(pyfwd);
-	  Py_DECREF(evalue);
 	  Py_DECREF(erepoId);
-	  if (fwd)
-	    throw omniORB::LOCATION_FORWARD(CORBA::Object::_duplicate(fwd));
-	  else {
-	    omniORB::logs(1, "Invalid object reference inside "
-			  "omniORB.LOCATION_FORWARD exception");
-	    OMNIORB_THROW(BAD_PARAM,0,CORBA::COMPLETED_NO);
-	  }
+	  HandleLocationForward(evalue);
 	}
 
 	// System exception
@@ -477,6 +407,20 @@ Py_omniServant::_is_a(const char* logical_type_id)
 }
 
 
+class Py_UserException_Marshaller : public giopMarshaller {
+public:
+  Py_UserException_Marshaller(PyObject* edesc, PyObject* evalue)
+    : edesc_(edesc), evalue_(evalue) {}
+
+  void marshal(cdrStream& s) {
+    omniPy::marshalPyObject(s, edesc_, evalue_);
+  }
+private:
+  PyObject* edesc_;
+  PyObject* evalue_;
+};
+
+
 CORBA::Boolean
 omniPy::
 Py_omniServant::_dispatch(GIOP_S& giop_s)
@@ -484,103 +428,54 @@ Py_omniServant::_dispatch(GIOP_S& giop_s)
   int i;
   omnipyThreadCache::lock _t;
 
-  PyObject* desc = PyDict_GetItemString(opdict_, (char*)giop_s.operation());
+  PyObject* desc =
+    PyDict_GetItemString(opdict_, (char*)giop_s.invokeInfo().operation());
 
   if (!desc) return 0; // Unknown operation name
 
   OMNIORB_ASSERT(PyTuple_Check(desc));
 
-  PyObject *in_d, *out_d, *exc_d;
-  int       in_l,  out_l;
+  PyObject* in_d  = PyTuple_GET_ITEM(desc,0);
+  PyObject* out_d = PyTuple_GET_ITEM(desc,1);
+  PyObject* exc_d = PyTuple_GET_ITEM(desc,2);
 
-  in_d    = PyTuple_GET_ITEM(desc,0);
-  out_d   = PyTuple_GET_ITEM(desc,1);
-  exc_d   = PyTuple_GET_ITEM(desc,2);
+  Py_omniCallDescriptor call_desc(giop_s.invokeInfo().operation(), 0,
+				  (out_d == Py_None),
+				  in_d, out_d, exc_d, 0, 1);
 
-  OMNIORB_ASSERT(PyTuple_Check(in_d));
-
-  in_l  = PyTuple_GET_SIZE(in_d);
-
-  if (out_d == Py_None)
-    out_l = -1;
-  else
-    out_l = PyTuple_GET_SIZE(out_d);
-
-  // Unmarshal in arguments
-  PyObject* argtuple = PyTuple_New(in_l);
-
-  for (i=0; i < in_l; i++) {
-    PyTuple_SET_ITEM(argtuple, i,
-		     omniPy::unmarshalPyObject(giop_s,
-					       PyTuple_GET_ITEM(in_d, i)));
-  }
-
+  call_desc.unmarshalArguments((cdrStream&)giop_s);
   giop_s.RequestReceived();
 
   // Do the up-call
-  PyObject* method = PyObject_GetAttrString(pyservant_,
-					    (char*)giop_s.operation());
+  PyObject* method =
+    PyObject_GetAttrString(pyservant_, (char*)giop_s.invokeInfo().operation());
 
   if (!method) {
     if (omniORB::trace(1)) {
       omniORB::logger l;
       l << "Python servant for `" << repoId_ << "' has no method named `"
-	<< giop_s.operation() << "'.\n";
+	<< giop_s.invokeInfo().operation() << "'.\n";
     }
     PyErr_Clear();
-    Py_DECREF(argtuple);
+    Py_DECREF(call_desc.args());
     OMNIORB_THROW(NO_IMPLEMENT, 0, CORBA::COMPLETED_NO);
   }
 
-  PyObject* result = PyEval_CallObject(method, argtuple);
+  PyObject* result = PyEval_CallObject(method, call_desc.args());
   Py_DECREF(method);
-  Py_DECREF(argtuple);
+  Py_DECREF(call_desc.args());
 
   if (result) {
     // No exception was thrown. Marshal the return value
-    if (out_l >= 0) {
-      CORBA::ULong msgsize = GIOP_S::ReplyHeaderSize();
-
+    if (!call_desc.is_oneway()) {
       try {
-	if (out_l == 1) {
-	  msgsize = omniPy::alignedSize(msgsize,
-					PyTuple_GET_ITEM(out_d, 0),
-					result,
-					CORBA::COMPLETED_MAYBE);
-	}
-	else if (out_l > 1) {
-	  for (i=0; i < out_l; i++) {
-	    msgsize = omniPy::alignedSize(msgsize,
-					  PyTuple_GET_ITEM(out_d,  i),
-					  PyTuple_GET_ITEM(result, i),
-					  CORBA::COMPLETED_MAYBE);
-	  }
-	}
+	call_desc.validateReturnedValues(result);
+	omniServerCallMarshaller m(call_desc);
+	giop_s.InitialiseReply(GIOP::NO_EXCEPTION, m);
       }
       catch (...) {
-	// alignedSize() can throw BAD_PARAM and others
 	Py_DECREF(result);
 	throw;
-      }
-      giop_s.InitialiseReply(GIOP::NO_EXCEPTION, msgsize);
-
-      if (out_l == 1) {
-	omniPy::marshalPyObject(giop_s,
-				PyTuple_GET_ITEM(out_d, 0),
-				result);
-      }
-      else if (out_l > 1) {
-	for (i=0; i < out_l; i++) {
-	  omniPy::marshalPyObject(giop_s,
-				  PyTuple_GET_ITEM(out_d,  i),
-				  PyTuple_GET_ITEM(result, i));
-	}
-      }
-    }
-    else {
-      if (giop_s.response_expected()) {
-	Py_DECREF(result);
-	OMNIORB_THROW(BAD_OPERATION, 0, CORBA::COMPLETED_MAYBE);
       }
     }
     Py_DECREF(result);
@@ -619,11 +514,9 @@ Py_omniServant::_dispatch(GIOP_S& giop_s)
       PyObject* edesc = PyDict_GetItem(exc_d, erepoId);
 
       if (edesc) {
-	CORBA::ULong msgsize = GIOP_S::ReplyHeaderSize();
-	msgsize = omniPy::alignedSize(msgsize, edesc, evalue,
-				      CORBA::COMPLETED_MAYBE);
-	giop_s.InitialiseReply(GIOP::USER_EXCEPTION, msgsize);
-	omniPy::marshalPyObject(giop_s, edesc, evalue);
+	omniPy::validateType(edesc, evalue, CORBA::COMPLETED_MAYBE);
+	Py_UserException_Marshaller m(edesc, evalue);
+	giop_s.InitialiseReply(GIOP::USER_EXCEPTION, m);
 	giop_s.ReplyCompleted();
 	Py_DECREF(erepoId);
 	Py_DECREF(evalue);
@@ -633,20 +526,8 @@ Py_omniServant::_dispatch(GIOP_S& giop_s)
 
     // Is it a LOCATION_FORWARD?
     if (!strcmp(PyString_AS_STRING(erepoId), "omniORB.LOCATION_FORWARD")) {
-      PyObject* pyfwd = PyObject_GetAttrString(evalue, (char*)"_forward");
-      OMNIORB_ASSERT(pyfwd);
-
-      CORBA::Object_ptr fwd = (CORBA::Object_ptr)getTwin(pyfwd, OBJREF_TWIN);
-      Py_DECREF(pyfwd);
-      Py_DECREF(evalue);
       Py_DECREF(erepoId);
-      if (fwd)
-	throw omniORB::LOCATION_FORWARD(CORBA::Object::_duplicate(fwd));
-      else {
-	omniORB::logs(1, "Invalid object reference inside "
-		      "omniORB.LOCATION_FORWARD exception");
-	OMNIORB_THROW(BAD_PARAM,0,CORBA::COMPLETED_NO);
-      }
+      HandleLocationForward(evalue);
     }
 
     // System exception or unknown user exception
@@ -789,20 +670,8 @@ Py_omniServant::local_dispatch(const char* op,
 
       // Is it a LOCATION_FORWARD?
       if (!strcmp(PyString_AS_STRING(erepoId), "omniORB.LOCATION_FORWARD")) {
-	PyObject* pyfwd = PyObject_GetAttrString(evalue, (char*)"_forward");
-	OMNIORB_ASSERT(pyfwd);
-
-	CORBA::Object_ptr fwd = (CORBA::Object_ptr)getTwin(pyfwd, OBJREF_TWIN);
-	Py_DECREF(pyfwd);
-	Py_DECREF(evalue);
 	Py_DECREF(erepoId);
-	if (fwd)
-	  throw omniORB::LOCATION_FORWARD(CORBA::Object::_duplicate(fwd));
-	else {
-	  omniORB::logs(1, "Invalid object reference inside "
-			"omniORB.LOCATION_FORWARD exception");
-	  OMNIORB_THROW(BAD_PARAM,0,CORBA::COMPLETED_NO);
-	}
+	HandleLocationForward(evalue);
       }
 
       // System exception or unknown user exception
@@ -914,21 +783,8 @@ Py_ServantActivator::incarnate(const PortableServer::ObjectId& oid,
 
     // Is it a LOCATION_FORWARD?
     if (!strcmp(PyString_AS_STRING(erepoId), "omniORB.LOCATION_FORWARD")) {
-      PyObject* pyfwd = PyObject_GetAttrString(evalue, (char*)"_forward");
-      OMNIORB_ASSERT(pyfwd);
-
-      CORBA::Object_ptr fwd = (CORBA::Object_ptr)
-	                                  omniPy::getTwin(pyfwd, OBJREF_TWIN);
-      Py_DECREF(pyfwd);
-      Py_DECREF(evalue);
       Py_DECREF(erepoId);
-      if (fwd)
-	throw omniORB::LOCATION_FORWARD(CORBA::Object::_duplicate(fwd));
-      else {
-	omniORB::logs(1, "Invalid object reference inside "
-		      "omniORB.LOCATION_FORWARD exception");
-	OMNIORB_THROW(BAD_PARAM,0,CORBA::COMPLETED_NO);
-      }
+      HandleLocationForward(evalue);
     }
 
     // System exception or unknown user exception
@@ -1113,21 +969,8 @@ Py_ServantLocator::preinvoke(const PortableServer::ObjectId& oid,
     }
     // Is it a LOCATION_FORWARD?
     if (!strcmp(PyString_AS_STRING(erepoId), "omniORB.LOCATION_FORWARD")) {
-      PyObject* pyfwd = PyObject_GetAttrString(evalue, (char*)"_forward");
-      OMNIORB_ASSERT(pyfwd);
-
-      CORBA::Object_ptr fwd = (CORBA::Object_ptr)
-	                                 omniPy::getTwin(pyfwd, OBJREF_TWIN);
-      Py_DECREF(pyfwd);
-      Py_DECREF(evalue);
       Py_DECREF(erepoId);
-      if (fwd)
-	throw omniORB::LOCATION_FORWARD(CORBA::Object::_duplicate(fwd));
-      else {
-	omniORB::logs(1, "Invalid object reference inside "
-		      "omniORB.LOCATION_FORWARD exception");
-	OMNIORB_THROW(BAD_PARAM,0,CORBA::COMPLETED_NO);
-      }
+      HandleLocationForward(evalue);
     }
 
     // System exception or unknown user exception

@@ -30,66 +30,53 @@
 // $Id$
 
 // $Log$
-// Revision 1.17  2000/06/12 15:36:08  dpg1
-// Support for exception handler functions. Under omniORB 3, local
-// operation dispatch modified so exceptions handlers are run.
-//
-// Revision 1.16  2000/05/11 11:58:25  dpg1
-// Throw system exceptions with OMNIORB_THROW.
-//
-// Revision 1.15  2000/04/25 13:36:17  dpg1
-// If an object is deactivated while invocations on it are happening, the
-// deletion is performed by a callback at the end of the invoke(). The
-// Python interpreter lock was being held at this time, causing a
-// deadlock.
-//
-// Revision 1.14  2000/03/24 16:48:57  dpg1
-// Local calls now have proper pass-by-value semantics.
-// Lots of little stability improvements.
-// Memory leaks fixed.
-//
-// Revision 1.13  2000/03/03 17:41:42  dpg1
-// Major reorganisation to support omniORB 3.0 as well as 2.8.
+// Revision 1.1.2.1  2000/10/13 13:55:24  dpg1
+// Initial support for omniORB 4.
 //
 
 #include <omnipy.h>
 
 
-CORBA::ULong
-omniPy::Py_omniCallDescriptor::alignedSize(CORBA::ULong msgsize)
+void
+omniPy::Py_omniCallDescriptor::initialiseCall(cdrStream&)
 {
-  // alignedSize() is called with the interpreter lock
+  // initialiseCall() is called with the interpreter lock
   // released. Reacquire it so we can touch the descriptor objects
   // safely
   reacquireInterpreterLock();
 
   for (int i=0; i < in_l_; i++)
-    msgsize = omniPy::alignedSize(msgsize,
-				  PyTuple_GET_ITEM(in_d_,i),
-				  PyTuple_GET_ITEM(args_,i),
-				  CORBA::COMPLETED_NO);
-  return msgsize;
+    omniPy::validateType(PyTuple_GET_ITEM(in_d_,i),
+			 PyTuple_GET_ITEM(args_,i),
+			 CORBA::COMPLETED_NO);
 }
 
 
 void
-omniPy::Py_omniCallDescriptor::marshalArguments(GIOP_C& giop_client)
+omniPy::Py_omniCallDescriptor::marshalArguments(cdrStream& giop_client)
 {
   // We should always hold the interpreter lock when entering this
   // function. The call to releaseInterpreterLock() will assert that
   // this is true. It's very unlikely that we will crash in the
   // mean-time if something has gone wrong.
 
+  CORBA::Boolean reentered = in_marshal_;
+
+  in_marshal_ = 1;
+
   for (int i=0; i < in_l_; i++)
     omniPy::marshalPyObject(giop_client,
 			    PyTuple_GET_ITEM(in_d_,i),
 			    PyTuple_GET_ITEM(args_,i));
-  releaseInterpreterLock();
+  if (!reentered) {
+    in_marshal_ = 0;
+    releaseInterpreterLock();
+  }
 }
 
 
 void
-omniPy::Py_omniCallDescriptor::unmarshalReturnedValues(GIOP_C& giop_client)
+omniPy::Py_omniCallDescriptor::unmarshalReturnedValues(cdrStream& giop_client)
 {
   if (out_l_ == -1) return;  // Oneway operation
 
@@ -104,7 +91,7 @@ omniPy::Py_omniCallDescriptor::unmarshalReturnedValues(GIOP_C& giop_client)
 					PyTuple_GET_ITEM(out_d_, 0));
   else {
     result_ = PyTuple_New(out_l_);
-    if (!result_) OMNIORB_THROW(NO_MEMORY,0,CORBA::COMPLETED_NO);
+    if (!result_) OMNIORB_THROW(NO_MEMORY,0,CORBA::COMPLETED_MAYBE);
 
     for (int i=0; i < out_l_; i++) {
       PyTuple_SET_ITEM(result_, i,
@@ -117,7 +104,7 @@ omniPy::Py_omniCallDescriptor::unmarshalReturnedValues(GIOP_C& giop_client)
 
 
 void
-omniPy::Py_omniCallDescriptor::userException(GIOP_C&     giop_client,
+omniPy::Py_omniCallDescriptor::userException(GIOP_C& giop_client,
 					     const char* repoId)
 {
   reacquireInterpreterLock();
@@ -136,17 +123,25 @@ omniPy::Py_omniCallDescriptor::userException(GIOP_C&     giop_client,
     PyObject* exctuple = PyTuple_New(cnt);
 
     int i, j;
-    for (i=0, j=5; i < cnt; i++, j+=2) {
-      PyTuple_SET_ITEM(exctuple, i,
-		       unmarshalPyObject(giop_client,
-					 PyTuple_GET_ITEM(d_o, j)));
+    try {
+      for (i=0, j=5; i < cnt; i++, j+=2) {
+	PyTuple_SET_ITEM(exctuple, i,
+			 unmarshalPyObject(giop_client,
+					   PyTuple_GET_ITEM(d_o, j)));
+      }
+    }
+    catch (...) {
+      Py_DECREF(exctuple);
+      releaseInterpreterLock();
+      giop_client.RequestCompleted();
+      throw;
     }
     PyObject* exc_i = PyEval_CallObject(excclass, exctuple);
     Py_DECREF(exctuple);
 
     if (exc_i) {
       PyErr_SetObject(excclass, exc_i);
-      Py_DECREF(exc_i); // *** Find out why I don't need to Py_DECREF(excclass)
+      Py_DECREF(exc_i);
     }
     releaseInterpreterLock();
     giop_client.RequestCompleted();
@@ -188,5 +183,57 @@ omniPy::Py_localCallBackFunction(omniCallDescriptor* cd, omniServant* svnt)
 					 pycd->in_d_,  pycd->in_l_,
 					 pycd->out_d_, pycd->out_l_,
 					 pycd->exc_d_, pycd->args_);
+  }
+}
+
+
+void
+omniPy::Py_omniCallDescriptor::unmarshalArguments(cdrStream& giop_s)
+{
+  OMNIORB_ASSERT(args_ == 0);
+
+  args_ = PyTuple_New(in_l_);
+
+  for (int i=0; i < in_l_; i++) {
+    PyTuple_SET_ITEM(args_, i,
+		     omniPy::unmarshalPyObject(giop_s,
+					       PyTuple_GET_ITEM(in_d_, i)));
+  }
+}
+
+void
+omniPy::Py_omniCallDescriptor::validateReturnedValues(PyObject* result)
+{
+  OMNIORB_ASSERT(result_ == 0);
+  result_ = result;
+
+  if (out_l_ == 1) {
+    omniPy::validateType(PyTuple_GET_ITEM(out_d_,0),
+			 result,
+			 CORBA::COMPLETED_MAYBE);
+  }
+  else {
+    for (int i=0; i < out_l_; i++) {
+      omniPy::validateType(PyTuple_GET_ITEM(out_d_,i),
+			   PyTuple_GET_ITEM(result,i),
+			   CORBA::COMPLETED_MAYBE);
+    }
+  }
+}
+
+void
+omniPy::Py_omniCallDescriptor::marshalReturnedValues(cdrStream& giop_s)
+{
+  if (out_l_ == 1) {
+    omniPy::marshalPyObject(giop_s,
+			    PyTuple_GET_ITEM(out_d_, 0),
+			    result_);
+  }
+  else {
+    for (int i=0; i < out_l_; i++) {
+      omniPy::marshalPyObject(giop_s,
+			      PyTuple_GET_ITEM(out_d_,i),
+			      PyTuple_GET_ITEM(result_,i));
+    }
   }
 }

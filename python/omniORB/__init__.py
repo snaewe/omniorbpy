@@ -30,6 +30,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.26.2.1  2000/10/13 13:55:31  dpg1
+# Initial support for omniORB 4.
+#
 # Revision 1.26  2000/10/02 17:34:58  dpg1
 # Merge for 1.2 release
 #
@@ -764,19 +767,21 @@ keywordMapping = {
 # LOCATION_FORWARD exception, only avaiable with omniORB 3 up
 if _coreVersion != "2.8.0":
     class LOCATION_FORWARD (exceptions.Exception):
-        """LOCATION_FORWARD(objref)
+        """LOCATION_FORWARD(objref, permanent=0)
 
 This exception may be thrown inside any operation implementation. It
 causes the ORB the return a LOCATION_FORWARD message to the caller, so
-the invocation is retried on the given object reference."""
+the invocation is retried on the given object reference. If permanent
+is set to 1, a permanent location forward is requested."""
 
         _NP_RepositoryId = "omniORB.LOCATION_FORWARD" # Not really a CORBA type
 
-        def __init__(self, objref):
+        def __init__(self, objref, perm=0):
             if not isinstance(objref, CORBA.Object):
                 raise CORBA.BAD_PARAM(0,CORBA.COMPLETED_NO)
             
             self._forward = objref
+            self._perm    = perm
 
         def __str__(self):
             return "Location forward exception"
@@ -787,7 +792,7 @@ else:
 
 The LOCATION_FORWARD exception is not supported with omniORB 2.8.0."""
 
-        def __init__(self, objref):
+        def __init__(self, objref, perm=0):
             raise CORBA.NO_IMPLEMENT(0,CORBA.COMPLETED_NO)
 
 

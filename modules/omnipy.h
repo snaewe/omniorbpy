@@ -30,15 +30,528 @@
 #ifndef _omnipy_h_
 #define _omnipy_h_
 
-
-#if   defined(OMNIORBPY_FOR_30)
-#  include "omni30/omnipy30.h"
-#elif defined(OMNIORBPY_FOR_28)
-#  include "omni28/omnipy28.h"
+#if defined(__VMS)
+#include <Python.h>
 #else
-#  error "No omniORB version specified!"
+#include PYTHON_INCLUDE
 #endif
 
+#include <omniORB4/CORBA.h>
+#include <omniORB4/callDescriptor.h>
+#include <exceptiondefs.h>
+#include "omnipy_sysdep.h"
+
+
+////////////////////////////////////////////////////////////////////////////
+// Data structure to manage C++ twins of Python objects                   //
+////////////////////////////////////////////////////////////////////////////
+
+extern "C" {
+  struct omnipyTwin {
+    PyObject_VAR_HEAD
+    void* ob_twin;
+  };
+}
+
+// Twin attribute names
+#define ORB_TWIN        (char*)"__omni_orb"           // ORB_ptr
+#define OBJREF_TWIN     (char*)"__omni_obj"           // Object_ptr
+#define SERVANT_TWIN    (char*)"__omni_svt"           // Py_omniServant
+#define POA_TWIN        (char*)"__omni_poa"           // POA_ptr
+#define POAMANAGER_TWIN (char*)"__omni_poaManager"    // POAManager_ptr
+
+
+// Useful macro
+#define RAISE_PY_BAD_PARAM_IF(x) \
+  if (x) { \
+    CORBA::BAD_PARAM _ex; \
+    return omniPy::handleSystemException(_ex); \
+  }
+
+class omniPy {
+public:
+
+  ////////////////////////////////////////////////////////////////////////////
+  // The global Python interpreter state                                    //
+  ////////////////////////////////////////////////////////////////////////////
+
+  static PyInterpreterState* pyInterpreter;
+  static omni_mutex*         pyInterpreterLock;
+
+  ////////////////////////////////////////////////////////////////////////////
+  // Global pointers to Python objects                                      //
+  ////////////////////////////////////////////////////////////////////////////
+
+  static PyObject* pyCORBAmodule;      // The CORBA module
+  static PyObject* pyCORBAsysExcMap;   //  The system exception map
+  static PyObject* pyCORBAAnyClass;    //  Any class
+  static PyObject* pyomniORBmodule;    // The omniORB module
+  static PyObject* pyomniORBobjrefMap; //  The objref class map
+  static PyObject* pyomniORBtypeMap;   //  Type map
+  static PyObject* pyomniORBwordMap;   //  Reserved word map
+  static PyObject* pyPortableServerModule; // Portable server module
+  static PyObject* pyServantClass;     // Servant class
+  static PyObject* pyCreateTypeCode;   // Function to create a TypeCode object
+  static PyObject* pyWorkerThreadClass;// Worker thread class
+  static PyObject* pyWorkerThreadDel;  // Method to delete worker thread
+  static PyObject* pyEmptyTuple;       // Zero element tuple
+
+  ////////////////////////////////////////////////////////////////////////////
+  // Pointer to the ORB                                                     //
+  ////////////////////////////////////////////////////////////////////////////
+
+  static CORBA::ORB_ptr orb;
+
+  ////////////////////////////////////////////////////////////////////////////
+  // Twin object handling                                                   //
+  ////////////////////////////////////////////////////////////////////////////
+
+  static PyObject* newTwin(void* twin);
+
+  static
+  inline void
+  setTwin(PyObject* obj, void* twin, char* name)
+  {
+    PyObject* ot = newTwin(twin);
+
+    PyDict_SetItemString(((PyInstanceObject*)obj)->in_dict,
+			 name, ot);
+    Py_DECREF(ot);
+  }
+
+  static
+  inline void*
+  getTwin(PyObject* obj, char* name)
+  {
+    PyObject* ot = PyDict_GetItemString(((PyInstanceObject*)obj)->in_dict,
+					name);
+    if (ot)
+      return ((omnipyTwin*)ot)->ob_twin;
+    else
+      return 0;
+  }
+
+  static
+  inline void
+  remTwin(PyObject* obj, char* name)
+  {
+    PyDict_DelItemString(((PyInstanceObject*)obj)->in_dict, name);
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  // Module initialisation functions                                        //
+  ////////////////////////////////////////////////////////////////////////////
+
+  static void initORBFunc       (PyObject* d);
+  static void initPOAFunc       (PyObject* d);
+  static void initPOAManagerFunc(PyObject* d);
+  static void initomniFunc      (PyObject* d);
+
+
+  ////////////////////////////////////////////////////////////////////////////
+  // Utility functions                                                      //
+  ////////////////////////////////////////////////////////////////////////////
+
+  // Set the Python execution state to handle a system exception.
+  // Returns a NULL PyObject so you can say
+  //   return handleSystemException(ex).
+  static
+  PyObject* handleSystemException(const CORBA::SystemException& ex);
+
+  // Create a new Python object for the given system exception
+  static
+  PyObject* createPySystemException(const CORBA::SystemException& ex);
+
+  // Throw a C++ system exception equivalent to the given Python exception
+  static
+  void produceSystemException(PyObject* eobj, PyObject* erepoId);
+
+
+  ////////////////////////////////////////////////////////////////////////////
+  // Python object creation functions                                       //
+  ////////////////////////////////////////////////////////////////////////////
+
+  static
+  PyObject* createPyPOAObject(const PortableServer::POA_ptr poa);
+
+  static
+  PyObject* createPyPOAManagerObject(const PortableServer::POAManager_ptr pm);
+
+
+  ////////////////////////////////////////////////////////////////////////////
+  // Object reference functions                                             //
+  ////////////////////////////////////////////////////////////////////////////
+
+  // Create the Python object relating to a CORBA object reference:
+  static
+  PyObject* createPyCorbaObjRef(const char* targetRepoId,
+				const CORBA::Object_ptr objref);
+
+  static
+  PyObject* createPyPseudoObjRef(const CORBA::Object_ptr objref);
+
+
+  // Functions which mirror omni::createObjRef(). These versions don't
+  // look for C++ proxy factories, and spot local Python servants.
+  static
+  omniObjRef* createObjRef(const char*        targetRepoId,
+			   omniIOR*           ior,
+			   CORBA::Boolean     locked,
+			   CORBA::Boolean     type_verified = 0);
+
+  static
+  omniObjRef* createObjRef(const char*        targetRepoId,
+			   omniLocalIdentity* id,
+			   omniIOR*           ior,
+			   CORBA::Boolean     type_verified = 0);
+
+  // When a POA creates a reference to a Python servant, it does not
+  // have a proxy object factory for it, so it creates an
+  // omniAnonObjRef. This function converts one of them into a
+  // Py_omniObjRef with a reference to the local servant. It
+  // decrements the refcount of the original objref.
+  static
+  CORBA::Object_ptr makeLocalObjRef(const char* targetRepoId,
+				    CORBA::Object_ptr objref);
+
+  // Copy a Python object reference in an argument or return value.
+  // Compares the type of the objref with the target type, and creates
+  // a new objref of the target type if they are not compatible. Sets
+  // Python exception status to BAD_PARAM and returns 0 if the Python
+  // object is not an object reference.
+  static
+  PyObject* copyObjRefArgument(PyObject*               pytargetRepoId,
+			       PyObject*               pyobjref,
+			       CORBA::CompletionStatus compstatus);
+
+  // Mirror of omniURI::stringToObject()
+  static
+  CORBA::Object_ptr stringToObject(const char* uri);
+
+  // Mirror of CORBA::UnMarshalObjRef()
+  static
+  CORBA::Object_ptr UnMarshalObjRef(const char* repoId, cdrStream& s);
+
+
+
+  ////////////////////////////////////////////////////////////////////////////
+  // Recursive marshalling functions                                        //
+  ////////////////////////////////////////////////////////////////////////////
+  
+  // Helper function to return the TypeCode kind of a descriptor
+  static inline
+  CORBA::ULong descriptorToTK(PyObject* d_o)
+  {
+    if (PyInt_Check(d_o))
+      return PyInt_AS_LONG(d_o);
+    else
+      return PyInt_AS_LONG(PyTuple_GET_ITEM(d_o, 0));
+  }
+
+  // Validate that the argument has the type specified by the
+  // descriptor. If it has not, throw CORBA::BAD_PARAM with the given
+  // completion status.
+  //
+  typedef void (*ValidateTypeFn)(PyObject*, PyObject*,
+				 CORBA::CompletionStatus);
+
+  static const ValidateTypeFn validateTypeFns[];
+
+  static inline
+  void validateType(PyObject*               d_o,
+		    PyObject*               a_o,
+		    CORBA::CompletionStatus compstatus)
+  {
+    CORBA::ULong tk = descriptorToTK(d_o);
+
+    if (tk <= 32) { // tk_abstract_interface
+      validateTypeFns[tk](d_o, a_o, compstatus);
+    }
+    else if (tk == 0xffffffff) { // Indirection
+      PyObject* t_o = PyTuple_GET_ITEM(d_o, 1);
+      OMNIORB_ASSERT(PyList_Check(t_o));
+      validateType(PyList_GET_ITEM(t_o, 0), a_o, compstatus);
+    }
+    else OMNIORB_THROW(BAD_TYPECODE, 0, compstatus);
+  }
+
+  // Marshal the given argument object a_o, which has the type
+  // specified by d_o. This function MUST NOT be called without having
+  // first called validateType() with the same arguments, since it
+  // performs no argument type checking.
+  //
+  typedef void (*MarshalPyObjectFn)(cdrStream& stream, PyObject*, PyObject*);
+
+  static const MarshalPyObjectFn marshalPyObjectFns[];
+
+  static inline
+  void marshalPyObject(cdrStream& stream,
+		       PyObject*  d_o,
+		       PyObject*  a_o)
+  {
+    CORBA::ULong tk = descriptorToTK(d_o);
+
+    if (tk <= 32) { // tk_abstract_interface
+      marshalPyObjectFns[tk](stream, d_o, a_o);
+    }
+    else if (tk == 0xffffffff) { // Indirection
+      PyObject* t_o = PyTuple_GET_ITEM(d_o, 1);
+      OMNIORB_ASSERT(PyList_Check(t_o));
+      marshalPyObject(stream, PyList_GET_ITEM(t_o, 0), a_o);
+    }
+    else OMNIORB_ASSERT(0);
+  }
+
+  // Unmarshal a PyObject, which has the type specified by d_o.
+  //
+  typedef PyObject* (*UnmarshalPyObjectFn)(cdrStream& stream, PyObject*);
+
+  static const UnmarshalPyObjectFn unmarshalPyObjectFns[];
+
+  static inline
+  PyObject* unmarshalPyObject(cdrStream& stream,
+			      PyObject*  d_o)
+  {
+    CORBA::ULong tk = descriptorToTK(d_o);
+
+    if (tk <= 32) { // tk_abstract_interface
+      return unmarshalPyObjectFns[tk](stream, d_o);
+    }
+    else if (tk == 0xffffffff) { // Indirection
+      PyObject* t_o = PyTuple_GET_ITEM(d_o, 1);
+      OMNIORB_ASSERT(PyList_Check(t_o));
+      return unmarshalPyObject(stream, PyList_GET_ITEM(t_o, 0));
+    }
+    else OMNIORB_THROW(BAD_TYPECODE, 0, CORBA::COMPLETED_NO);
+    return 0;
+  }
+
+  // Take a descriptor and an argument object, and return a "copy" of
+  // the argument. Immutable types need not be copied. If the argument
+  // does not match the descriptor, set Python's exception status to
+  // BAD_PARAM and return 0.
+  //
+  typedef PyObject* (*CopyArgumentFn)(PyObject*, PyObject*,
+				      CORBA::CompletionStatus);
+
+  static const CopyArgumentFn copyArgumentFns[];
+
+  static inline
+  PyObject* copyArgument(PyObject* d_o, PyObject* a_o,
+			 CORBA::CompletionStatus compstatus)
+  {
+    CORBA::ULong tk = descriptorToTK(d_o);
+
+    if (tk <= 32) { // tk_abstract_interface
+      return copyArgumentFns[tk](d_o, a_o, compstatus);
+    }
+    else if (tk == 0xffffffff) { // Indirection
+      PyObject* t_o = PyTuple_GET_ITEM(d_o, 1);
+      OMNIORB_ASSERT(PyList_Check(t_o));
+      return copyArgument(PyList_GET_ITEM(t_o, 0), a_o, compstatus);
+    }
+    else OMNIORB_THROW(BAD_TYPECODE, 0, CORBA::COMPLETED_NO);
+    return 0;
+  }
+
+#if 0
+  static
+  PyObject* copyArgument(PyObject*               d_o,
+			 PyObject*               a_o,
+			 CORBA::CompletionStatus compstatus);
+#endif
+
+  ////////////////////////////////////////////////////////////////////////////
+  // TypeCode and Any support functions                                     //
+  ////////////////////////////////////////////////////////////////////////////
+
+  // Marshal a type descriptor as a TypeCode:
+  static
+  void marshalTypeCode(cdrStream& stream, PyObject* d_o);
+
+  // Unmarshal a TypeCode, returning a descriptor:
+  static
+  PyObject* unmarshalTypeCode(cdrStream& stream);
+
+
+  ////////////////////////////////////////////////////////////////////////////
+  // Proxy call descriptor object                                           //
+  ////////////////////////////////////////////////////////////////////////////
+
+  static
+  void Py_localCallBackFunction(omniCallDescriptor* cd, omniServant* svnt);
+
+  class Py_omniCallDescriptor : public omniCallDescriptor {
+  public:
+
+    inline Py_omniCallDescriptor(const char* op, int op_len,
+				 CORBA::Boolean oneway,
+				 PyObject* in_d, PyObject* out_d,
+				 PyObject* exc_d, PyObject* args,
+				 CORBA::Boolean is_upcall)
+
+      : omniCallDescriptor(Py_localCallBackFunction, op, op_len,
+			   oneway, 0, 0, is_upcall),
+      in_d_(in_d),
+      out_d_(out_d),
+      exc_d_(exc_d),
+      args_(args),
+      result_(0),
+      in_marshal_(0)
+    {
+      OMNIORB_ASSERT(PyTuple_Check(in_d));
+      tstate_ = 0;
+      in_l_   = PyTuple_GET_SIZE(in_d_);
+      if (oneway) {
+	OMNIORB_ASSERT(out_d_ == Py_None);
+	out_l_ = -1;
+      }
+      else {
+	OMNIORB_ASSERT(PyTuple_Check(out_d));
+	out_l_ = PyTuple_GET_SIZE(out_d_);
+      }
+    }
+
+    virtual ~Py_omniCallDescriptor() {
+      OMNIORB_ASSERT(!tstate_);
+    }
+
+    inline void releaseInterpreterLock() {
+      OMNIORB_ASSERT(!tstate_);
+      tstate_ = PyEval_SaveThread();
+    }
+
+    inline void reacquireInterpreterLock() {
+      OMNIORB_ASSERT(tstate_);
+      PyEval_RestoreThread(tstate_);
+      tstate_ = 0;
+    }
+
+    // Client side methods
+    virtual void initialiseCall(cdrStream&);
+    virtual void marshalArguments(cdrStream& giop_c);
+    virtual void unmarshalReturnedValues(cdrStream& giop_c);
+    virtual void userException(GIOP_C& giop_client, const char* repoId);
+
+    inline void systemException(const CORBA::SystemException& ex) {
+      if (tstate_) {
+	PyEval_RestoreThread(tstate_);
+	tstate_ = 0;
+      }
+      handleSystemException(ex);
+    }
+
+    inline PyObject* args()   { return args_;   }
+    inline PyObject* result() { return result_; }
+
+    // Server side methods
+    virtual void unmarshalArguments(cdrStream& giop_s);
+    void         validateReturnedValues(PyObject* result);
+    virtual void marshalReturnedValues(cdrStream& giop_s);
+
+    // These should be private, but MSVC won't let me declare
+    // Py_localCallBackFunction to be a friend :-(
+  public:
+    PyObject*      in_d_;
+    int            in_l_;
+    PyObject*      out_d_;
+    int            out_l_;
+    PyObject*      exc_d_;
+    PyObject*      args_;
+    PyObject*      result_;
+
+  private:
+    PyThreadState* tstate_;
+    CORBA::Boolean in_marshal_;
+
+    Py_omniCallDescriptor(const Py_omniCallDescriptor&);
+    Py_omniCallDescriptor& operator=(const Py_omniCallDescriptor&);
+  };
+
+
+  ////////////////////////////////////////////////////////////////////////////
+  // Servant object                                                         //
+  ////////////////////////////////////////////////////////////////////////////
+
+  class Py_omniServant : public virtual PortableServer::ServantBase {
+
+  public:
+
+    Py_omniServant(PyObject* pyservant, PyObject* opdict, const char* repoId);
+
+    virtual ~Py_omniServant();
+
+    virtual CORBA::Boolean _dispatch(GIOP_S& giop_s);
+
+    PyObject* local_dispatch(const char* op,
+			     PyObject*   in_d,  int in_l,
+			     PyObject*   out_d, int out_l,
+			     PyObject*   exc_d,
+			     PyObject*   args);
+
+    PyObject* py_this();
+
+    virtual void*                   _ptrToInterface(const char* repoId);
+    virtual const char*             _mostDerivedRepoId();
+    virtual CORBA::Boolean          _is_a(const char* logical_type_id);
+    virtual PortableServer::POA_ptr _default_POA();
+
+    inline PyObject* pyServant() { Py_INCREF(pyservant_); return pyservant_; }
+
+    // _add_ref and _remove_ref lock the Python interpreter lock
+    // _locked versions assume the interpreter lock is already locked
+    virtual void                    _add_ref();
+    virtual void                    _remove_ref();
+    void                            _locked_add_ref();
+    void                            _locked_remove_ref();
+
+  private:
+    PyObject* pyservant_;	// Python servant object
+    PyObject* opdict_;		// Operation descriptor dictionary
+    PyObject* pyskeleton_;	// Skeleton class object
+    char*     repoId_;
+    int       refcount_;
+
+    // Not implemented:
+    Py_omniServant(const Py_omniServant&);
+    Py_omniServant& operator=(const Py_omniServant&);
+  };
+
+  // Function to find or create a Py_omniServant object for a Python
+  // servant object. If the Python object is not an instance of a
+  // class derived from PortableServer.Servant, returns 0.
+  //
+  // Caller must hold the Python interpreter lock.
+  static Py_omniServant* getServantForPyObject(PyObject* pyservant);
+
+
+  ////////////////////////////////////////////////////////////////////////////
+  // InterpreterUnlocker releases the Python interpreter lock               //
+  ////////////////////////////////////////////////////////////////////////////
+
+  class InterpreterUnlocker {
+  public:
+    InterpreterUnlocker() {
+      tstate_ = PyEval_SaveThread();
+    }
+    ~InterpreterUnlocker() {
+      PyEval_RestoreThread(tstate_);
+    }
+  private:
+    PyThreadState* tstate_;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  // UserExceptionHandled is thrown when we've handled a user exception     //
+  ////////////////////////////////////////////////////////////////////////////
+
+  class UserExceptionHandled {
+  public:
+    UserExceptionHandled() { }
+    ~UserExceptionHandled() { }
+  };
+
+};
 
 #ifdef HAS_Cplusplus_catch_exception_by_base
 
@@ -47,42 +560,6 @@ catch (const CORBA::SystemException& ex) { \
   return omniPy::handleSystemException(ex); \
 }
 #else
-
-#ifndef OMNIORB_FOR_EACH_SYS_EXCEPTION
-#define OMNIORB_FOR_EACH_SYS_EXCEPTION(doit) \
- \
-doit (UNKNOWN) \
-doit (BAD_PARAM) \
-doit (NO_MEMORY) \
-doit (IMP_LIMIT) \
-doit (COMM_FAILURE) \
-doit (INV_OBJREF) \
-doit (OBJECT_NOT_EXIST) \
-doit (NO_PERMISSION) \
-doit (INTERNAL) \
-doit (MARSHAL) \
-doit (INITIALIZE) \
-doit (NO_IMPLEMENT) \
-doit (BAD_TYPECODE) \
-doit (BAD_OPERATION) \
-doit (NO_RESOURCES) \
-doit (NO_RESPONSE) \
-doit (PERSIST_STORE) \
-doit (BAD_INV_ORDER) \
-doit (TRANSIENT) \
-doit (FREE_MEM) \
-doit (INV_IDENT) \
-doit (INV_FLAG) \
-doit (INTF_REPOS) \
-doit (BAD_CONTEXT) \
-doit (OBJ_ADAPTER) \
-doit (DATA_CONVERSION) \
-doit (TRANSACTION_REQUIRED) \
-doit (TRANSACTION_ROLLEDBACK) \
-doit (INVALID_TRANSACTION) \
-doit (WRONG_TRANSACTION)
-
-#endif
 
 #define OMNIPY_CATCH_AND_HANDLE_SPECIFIED_EXCEPTION(exc) \
 catch (const CORBA::exc& ex) { \

@@ -28,53 +28,10 @@
 //    POA functions
 
 // $Id$
+
 // $Log$
-// Revision 1.13  2000/10/02 17:35:01  dpg1
-// Merge for 1.2 release
-//
-// Revision 1.12.2.1  2000/09/21 11:05:49  dpg1
-// Fix race condition with Py_omniServant deletion.
-//
-// Revision 1.12  2000/05/26 15:33:32  dpg1
-// Python thread states are now cached. Operation dispatch time is
-// roughly halved!
-//
-// Revision 1.11  2000/05/24 11:11:24  dpg1
-// POA functions now properly release servant references when exceptions
-// are thrown.
-//
-// Revision 1.10  2000/05/24 10:35:38  dpg1
-// _this() wasn't catching exceptions.
-//
-// Revision 1.9  2000/05/11 11:58:25  dpg1
-// Throw system exceptions with OMNIORB_THROW.
-//
-// Revision 1.8  2000/03/31 17:25:59  dpg1
-// Refcounting bug in _get_the_children().
-//
-// Revision 1.7  2000/03/31 15:09:29  dpg1
-// Revision 1.5 introduced a bug into reference_to_servant().
-//
-// Revision 1.6  2000/03/31 14:20:18  dpg1
-// Arguments to activate_object_with_id() were in the wrong order.
-//
-// Revision 1.5  2000/03/30 13:01:14  dpg1
-// Locking fixed for ~Py_omniServant().
-//
-// Revision 1.4  2000/03/24 16:48:57  dpg1
-// Local calls now have proper pass-by-value semantics.
-// Lots of little stability improvements.
-// Memory leaks fixed.
-//
-// Revision 1.3  2000/03/07 16:52:16  dpg1
-// Support for compilers which do not allow exceptions to be caught by
-// base class. (Like MSVC 5, surprise surprise.)
-//
-// Revision 1.2  2000/03/06 18:48:28  dpg1
-// Support for our favourite compiler, MSVC.
-//
-// Revision 1.1  2000/03/03 17:41:42  dpg1
-// Major reorganisation to support omniORB 3.0 as well as 2.8.
+// Revision 1.1.2.1  2000/10/13 13:55:26  dpg1
+// Initial support for omniORB 4.
 //
 
 #include <omnipy.h>

@@ -28,6 +28,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.29.2.1  2000/10/13 13:55:30  dpg1
+# Initial support for omniORB 4.
+#
 # Revision 1.29  2000/10/02 17:34:58  dpg1
 # Merge for 1.2 release
 #
@@ -175,7 +178,7 @@ import omniORB, _omnipy
 from omniORB import CORBA, PortableServer
 _0_CORBA = CORBA
 
-_omnipy.checkVersion(0,5, __file__)
+_omnipy.checkVersion(2,0, __file__)
 """
 
 file_end = """\

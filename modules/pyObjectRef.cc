@@ -31,63 +31,8 @@
 // $Id$
 
 // $Log$
-// Revision 1.17  2000/06/27 15:13:12  dpg1
-// New copyObjRefArgument() function
-//
-// Revision 1.16  2000/06/16 17:33:18  dpg1
-// When creating an object reference with target type A, when the object
-// claims to be B, but A and B are unrelated, now creates a reference of
-// type A, where before it would be B.
-//
-// Revision 1.15  2000/05/11 11:58:25  dpg1
-// Throw system exceptions with OMNIORB_THROW.
-//
-// Revision 1.14  2000/04/27 11:03:40  dpg1
-// Support for ORB core Interoperable Naming Service changes.
-//
-// Revision 1.13  2000/03/28 11:03:37  dpg1
-// Failed to copy IOP profiles if release_profiles was false.
-//
-// Revision 1.12  2000/03/24 16:48:57  dpg1
-// Local calls now have proper pass-by-value semantics.
-// Lots of little stability improvements.
-// Memory leaks fixed.
-//
-// Revision 1.11  2000/03/17 15:57:07  dpg1
-// Correct, and more consistent handling of invalid strings in
-// string_to_object().
-//
-// Revision 1.10  2000/03/03 17:41:42  dpg1
-// Major reorganisation to support omniORB 3.0 as well as 2.8.
-//
-// Revision 1.9  1999/12/15 12:17:19  dpg1
-// Changes to compile with SunPro CC 5.0.
-//
-// Revision 1.8  1999/11/16 17:32:36  dpg1
-// Changes for AIX.
-//
-// Revision 1.7  1999/10/11 16:52:51  dpg1
-// Fixed reference counting bug when receiving a reference to a local C++
-// object.
-//
-// Revision 1.6  1999/09/29 11:25:55  dpg1
-// Nil objects now map to None. They work too, which is more than can be
-// said for the old mapping...
-//
-// Revision 1.5  1999/09/24 09:22:03  dpg1
-// Added copyright notices.
-//
-// Revision 1.4  1999/09/22 15:46:12  dpg1
-// Fake POA implemented.
-//
-// Revision 1.3  1999/09/20 16:01:54  dpg1
-// *** empty log message ***
-//
-// Revision 1.2  1999/09/20 14:55:04  dpg1
-// GCC 2.95 is more pedantic than egcs.
-//
-// Revision 1.1  1999/07/29 14:20:05  dpg1
-// Initial revision
+// Revision 1.1.2.1  2000/10/13 13:55:26  dpg1
+// Initial support for omniORB 4.
 //
 
 #include <omnipy.h>
@@ -97,7 +42,7 @@
 #include <localIdentity.h>
 #include <remoteIdentity.h>
 #include <objectAdapter.h>
-#include <omniORB3/omniURI.h>
+#include <omniORB4/omniURI.h>
 
 
 #if defined(HAS_Cplusplus_Namespace)
@@ -109,13 +54,12 @@ class Py_omniObjRef : public virtual CORBA::Object,
 		      public virtual omniObjRef
 {
 public:
-  Py_omniObjRef(const char* repoId,
-		const char* mdri,
-		IOP::TaggedProfileList* p,
-		omniIdentity* id,
+  Py_omniObjRef(const char*        repoId,
+		omniIOR*           ior,
+		omniIdentity*      id,
 		omniLocalIdentity* lid)
 
-    : omniObjRef(repoId, mdri, p, id, lid)
+    : omniObjRef(repoId, ior, id, lid)
   {
     _PR_setobj(this);
   }
@@ -254,33 +198,27 @@ omniPy::createPyPseudoObjRef(const CORBA::Object_ptr objref)
 
 
 omniObjRef*
-omniPy::createObjRef(const char*             mostDerivedRepoId,
-		     const char*             targetRepoId,
-		     IOP::TaggedProfileList* profiles,
-		     CORBA::Boolean          release_profiles,
-		     CORBA::Boolean          locked,
-		     CORBA::Boolean          type_verified)
+omniPy::createObjRef(const char*    targetRepoId,
+		     omniIOR*       ior,
+		     CORBA::Boolean locked,
+		     CORBA::Boolean type_verified)
 {
   ASSERT_OMNI_TRACEDMUTEX_HELD(*omni::internalLock, locked);
-  OMNIORB_ASSERT(mostDerivedRepoId);
   OMNIORB_ASSERT(targetRepoId);
-  OMNIORB_ASSERT(profiles);
+  OMNIORB_ASSERT(ior);
 
-  // NB. <mostDerivedRepoId> can be the empty string "".
-
-  int            keysize = 0;
-  CORBA::Octet*  key = 0;
   Rope*          rope = 0;
   CORBA::Boolean is_local = 0;
 
-  if (!ropeFactory::iopProfilesToRope(*profiles, key, keysize,
-				      rope, is_local)) {
-    if (release_profiles) delete profiles;
+  if (!ropeFactory::iorToRope(ior, rope, is_local)) {
+    ior->release();
     return 0;
   }
 
   if (is_local) {
-    CORBA::ULong hashv = omni::hash(key, keysize);
+    CORBA::Octet* key     = ior->iiop.object_key.get_buffer();
+    int           keysize = ior->iiop.object_key.length();
+    CORBA::ULong  hashv   = omni::hash(key, keysize);
 
     omni_optional_lock sync(*omni::internalLock, locked, locked);
 
@@ -289,22 +227,20 @@ omniPy::createObjRef(const char*             mostDerivedRepoId,
 
     omniLocalIdentity* local_id = omni::locateIdentity(key, keysize, hashv, 1);
 
-    return omniPy::createObjRef(mostDerivedRepoId, targetRepoId, local_id,
-				profiles, release_profiles, key,
-				type_verified);
+    return omniPy::createObjRef(targetRepoId, local_id, ior, type_verified);
   }
 
-  if (!release_profiles) profiles = new IOP::TaggedProfileList(*profiles);
-  omniRemoteIdentity*    id       = new omniRemoteIdentity(rope, key, keysize);
+  ior->duplicate();
+
+  omniRemoteIdentity* id = new omniRemoteIdentity(ior, rope);
 
   if (omniORB::trace(10)) {
     omniORB::logger l;
     l << "Creating Python ref to remote: " << id << "\n"
       " target id      : " << targetRepoId << "\n"
-      " most derived id: " << mostDerivedRepoId << "\n";
+      " most derived id: " << (const char*)ior->repositoryID << "\n";
   }
-  omniObjRef* objref = new Py_omniObjRef(targetRepoId, mostDerivedRepoId,
-					 profiles, id, 0);
+  omniObjRef* objref = new Py_omniObjRef(targetRepoId, ior, id, 0);
 
   if (!type_verified && strcmp(targetRepoId, CORBA::Object::_PD_repoId))
     objref->pd_flags.type_verified = 0;
@@ -318,19 +254,14 @@ omniPy::createObjRef(const char*             mostDerivedRepoId,
 
 
 omniObjRef*
-omniPy::createObjRef(const char*             mostDerivedRepoId,
-		     const char*             targetRepoId,
-		     omniLocalIdentity*      local_id,
-		     IOP::TaggedProfileList* profiles,
-		     CORBA::Boolean          release_profiles,
-		     CORBA::Octet*           key,
-		     CORBA::Boolean          type_verified)
+omniPy::createObjRef(const char*        targetRepoId,
+		     omniLocalIdentity* local_id,
+		     omniIOR*           ior,
+		     CORBA::Boolean     type_verified)
 {
   ASSERT_OMNI_TRACEDMUTEX_HELD(*omni::internalLock, 1);
-  OMNIORB_ASSERT(mostDerivedRepoId);
   OMNIORB_ASSERT(targetRepoId);
-
-  // NB. <mostDerivedRepoId> can be the empty string "".
+  OMNIORB_ASSERT(ior);
 
   omniIdentity* remote_id = 0;
 
@@ -342,7 +273,7 @@ omniPy::createObjRef(const char*             mostDerivedRepoId,
 
     while (objref) {
 
-      if (!strcmp(mostDerivedRepoId, objref->_mostDerivedRepoId()) &&
+      if (!strcmp(ior->repositoryID, objref->_mostDerivedRepoId()) &&
 	  objref->_ptrToObjRef("Py_omniObjRef") &&
 	  !strcmp(targetRepoId, objref->pd_intfRepoId)) {
 
@@ -359,8 +290,7 @@ omniPy::createObjRef(const char*             mostDerivedRepoId,
 	omni::objref_rc_lock->unlock();
 
 	if (!dying) {
-	  if (key) delete[] key;
-	  if (profiles && release_profiles) delete profiles;
+	  ior->release();
 	  return objref;
 	}
       }
@@ -380,7 +310,7 @@ omniPy::createObjRef(const char*             mostDerivedRepoId,
     omniORB::logger l;
     l << "Creating Python ref to local: " << local_id << "\n"
       " target id      : " << targetRepoId << "\n"
-      " most derived id: " << mostDerivedRepoId << "\n";
+      " most derived id: " << ior->repositoryID << "\n";
   }
 
   if (servant && !servant->_ptrToInterface("Py_omniServant"))
@@ -388,7 +318,6 @@ omniPy::createObjRef(const char*             mostDerivedRepoId,
 
   if (servant) {
     remote_id = 0;
-    if (key) delete[] key;
   }
   else {
 
@@ -406,36 +335,13 @@ omniPy::createObjRef(const char*             mostDerivedRepoId,
     if (!remote_id) {
       Rope* rope = omniObjAdapter::defaultLoopBack();
       rope->incrRefCount();
-      if (!key) {
-	key = new CORBA::Octet[local_id->keysize()];
-	memcpy(key, local_id->key(), local_id->keysize());
-      }
-      remote_id = new omniRemoteIdentity(rope, key, local_id->keysize());
-    }
-    else
-      if (key) delete[] key;
-  }
-
-  if (profiles) {
-    if (!release_profiles)  profiles = new IOP::TaggedProfileList(*profiles);
-  }
-  else {
-    omniObjRef* other_local_ref = local_id->localRefList();
-    if (other_local_ref)
-      profiles = new IOP::TaggedProfileList(*other_local_ref->_iopProfiles());
-    else {
-      profiles = new IOP::TaggedProfileList;
-      ropeFactory_iterator iter(omniObjAdapter::incomingRopeFactories());
-      incomingRopeFactory* rp;
-      while ((rp = (incomingRopeFactory*) iter()))
-	rp->getIncomingIOPprofiles(local_id->key(),
-				   local_id->keysize(),
-				   *profiles);
+      ior->duplicate();
+      remote_id = new omniRemoteIdentity(ior, rope);
     }
   }
 
-  omniObjRef* objref = new Py_omniObjRef(targetRepoId, mostDerivedRepoId,
-					 profiles,
+  omniObjRef* objref = new Py_omniObjRef(targetRepoId,
+					 ior,
 					 remote_id ? remote_id : local_id,
 					 local_id);
 
@@ -460,12 +366,8 @@ omniPy::makeLocalObjRef(const char* targetRepoId, CORBA::Object_ptr objref)
 
   {
     omni_tracedmutex_lock sync(*omni::internalLock);
-    ooref->_getTheKey(key, 1);
-    newooref = omniPy::createObjRef(ooref->_mostDerivedRepoId(),
-				    targetRepoId,
-				    ooref->_localId(),
-				    ooref->_iopProfiles(), 0,
-				    key.return_key(), 1);
+    newooref = omniPy::createObjRef(targetRepoId, ooref->_localId(),
+				    ooref->_getIOR(), 1);
   }
   CORBA::release(objref);
   return (CORBA::Object_ptr)newooref->_ptrToObjRef(CORBA::Object::_PD_repoId);
@@ -532,15 +434,12 @@ omniPy::copyObjRefArgument(PyObject* pytargetRepoId, PyObject* pyobjref,
   }
   // Create new C++ and Python objrefs with the right target type
   omniObjRef* ooref        = objref->_PR_getobj();
-  const char* actualRepoId = ooref->_mostDerivedRepoId();
   const char* targetRepoId = PyString_AS_STRING(pytargetRepoId);
 
   if (targetRepoId[0] == '\0') targetRepoId = CORBA::Object::_PD_repoId;
 
-  omniObjRef* newooref     = omniPy::createObjRef(actualRepoId,
-						  targetRepoId,
-						  ooref->_iopProfiles(), 0,
-						  0, 0);
+  omniObjRef* newooref     = omniPy::createObjRef(targetRepoId,
+						  ooref->_getIOR(), 0, 0);
   return createPyCorbaObjRef(targetRepoId,
 			     (CORBA::Object_ptr)newooref->
 			             _ptrToObjRef(CORBA::Object::_PD_repoId));
@@ -558,176 +457,42 @@ omniPy::stringToObject(const char* uri)
     return cxxobj;
   }
   omniObjRef* cxxobjref = cxxobj->_PR_getobj();
-  omniObjRef* objref    = omniPy::createObjRef(cxxobjref->_mostDerivedRepoId(),
-					       CORBA::Object::_PD_repoId,
-					       cxxobjref->_iopProfiles(),
-					       0, 0);
+  omniObjRef* objref    = omniPy::createObjRef(CORBA::Object::_PD_repoId,
+					       cxxobjref->_getIOR(), 0, 0);
   CORBA::release(cxxobj);
   return (CORBA::Object_ptr)objref->_ptrToObjRef(CORBA::Object::_PD_repoId);
 }
 
 
 CORBA::Object_ptr
-omniPy::UnMarshalObjRef(const char* repoId, NetBufferedStream& s)
+omniPy::UnMarshalObjRef(const char* repoId, cdrStream& s)
 {
-  OMNIORB_ASSERT(repoId);
+  CORBA::String_var          id;
+  IOP::TaggedProfileList_var profiles;
 
-  CORBA::ULong idlen;
-  CORBA::Char* id = 0;
-  IOP::TaggedProfileList* profiles = 0;
+  id = IOP::IOR::unmarshaltype_id(s);
 
-  try {
-    idlen <<= s;
+  profiles = new IOP::TaggedProfileList();
+  (IOP::TaggedProfileList&)profiles <<= s;
 
-    switch (idlen) {
-
-    case 0:
-      // According to the CORBA specification 2.0 section 10.6.2:
-      //   Null object references are indicated by an empty set of
-      //   profiles, and by a NULL type ID (a string which contain
-      //   only *** a single terminating character ***).
-      //
-      // Therefore the idlen should be 1.
-      // Visibroker for C++ (Orbeline) 2.0 Release 1.51 gets it wrong
-      // and sends out a 0 len string.
-      id = new CORBA::Char[1];
-      id[0] = (CORBA::Char)'\0';
-      break;
-
-    case 1:
-      id = new CORBA::Char[1];
-      id[0] <<= s;
-      if (id[0] != (CORBA::Char)'\0')
-	OMNIORB_THROW(MARSHAL,0,CORBA::COMPLETED_MAYBE);
-      idlen = 0;
-      break;
-
-    default:
-      if (idlen > s.RdMessageUnRead())
-	OMNIORB_THROW(MARSHAL,0,CORBA::COMPLETED_MAYBE);
-      id = new CORBA::Char[idlen];
-      if (!id) OMNIORB_THROW(NO_MEMORY,0,CORBA::COMPLETED_MAYBE);
-      s.get_char_array(id, idlen);
-      if (id[idlen - 1] != '\0')
-	OMNIORB_THROW(MARSHAL,0,CORBA::COMPLETED_MAYBE);
-      break;
-    }
-
-    profiles = new IOP::TaggedProfileList();
-    if (!profiles) OMNIORB_THROW(NO_MEMORY,0,CORBA::COMPLETED_MAYBE);
-    *profiles <<= s;
-
-    if (profiles->length() == 0 && idlen == 0) {
-      // This is a nil object reference
-      delete profiles;
-      delete[] id;
-      return CORBA::Object::_nil();
-    }
-    else {
-      // It is possible that we reach here with the id string = '\0'.
-      // That is alright because the actual type of the object will be
-      // verified using _is_a() at the first invocation on the object.
-      //
-      // Apparently, some ORBs such as ExperSoft's do that. Furthermore,
-      // this has been accepted as a valid behaviour in GIOP 1.1/IIOP 1.1.
-      // 
-      omniObjRef* objref = omniPy::createObjRef((const char*) id, repoId,
-						profiles, 1, 0);
-      profiles = 0;
-      delete [] id;
-      id = 0;
-
-      if (!objref) OMNIORB_THROW(MARSHAL,0, CORBA::COMPLETED_MAYBE);
-      return 
-	(CORBA::Object_ptr)objref->_ptrToObjRef(CORBA::Object::_PD_repoId);
-    }
+  if (profiles->length() == 0 && strlen(id) == 0) {
+    // Nil object reference
+    return CORBA::Object::_nil();
   }
-  catch (...) {
-    if (id)        delete[] id;
-    if (profiles)  delete profiles;
-    throw;
+  else {
+    // It is possible that we reach here with the id string = '\0'.
+    // That is alright because the actual type of the object will be
+    // verified using _is_a() at the first invocation on the object.
+    //
+    // Apparently, some ORBs such as ExperSoft's do that. Furthermore,
+    // this has been accepted as a valid behaviour in GIOP 1.1/IIOP 1.1.
+    // 
+    omniIOR* ior = new omniIOR(id._retn(),profiles._retn());
+    omniObjRef* objref = omniPy::createObjRef(repoId,ior,0);
+
+    if (!objref) OMNIORB_THROW(MARSHAL,0, CORBA::COMPLETED_MAYBE);
+    return 
+      (CORBA::Object_ptr)objref->_ptrToObjRef(CORBA::Object::_PD_repoId);
   }
-}
-
-
-CORBA::Object_ptr
-omniPy::UnMarshalObjRef(const char* repoId, MemBufferedStream& s)
-{
-  OMNIORB_ASSERT(repoId);
-
-  CORBA::ULong idlen;
-  CORBA::Char* id = 0;
-  IOP::TaggedProfileList* profiles = 0;
-
-  try {
-    idlen <<= s;
-
-    switch (idlen) {
-
-    case 0:
-      // According to the CORBA specification 2.0 section 10.6.2:
-      //   Null object references are indicated by an empty set of
-      //   profiles, and by a NULL type ID (a string which contain
-      //   only *** a single terminating character ***).
-      //
-      // Therefore the idlen should be 1.
-      // Visibroker for C++ (Orbeline) 2.0 Release 1.51 gets it wrong
-      // and sends out a 0 len string.
-      id = new CORBA::Char[1];
-      id[0] = (CORBA::Char)'\0';
-      break;
-
-    case 1:
-      id = new CORBA::Char[1];
-      id[0] <<= s;
-      if (id[0] != (CORBA::Char)'\0')
-	OMNIORB_THROW(MARSHAL,0,CORBA::COMPLETED_MAYBE);
-      idlen = 0;
-      break;
-
-    default:
-      if (idlen > s.RdMessageUnRead())
-	OMNIORB_THROW(MARSHAL,0,CORBA::COMPLETED_MAYBE);
-      id = new CORBA::Char[idlen];
-      if (!id) OMNIORB_THROW(NO_MEMORY,0,CORBA::COMPLETED_MAYBE);
-      s.get_char_array(id, idlen);
-      if (id[idlen - 1] != '\0')
-	OMNIORB_THROW(MARSHAL,0,CORBA::COMPLETED_MAYBE);
-      break;
-    }
-
-    profiles = new IOP::TaggedProfileList();
-    if (!profiles) OMNIORB_THROW(NO_MEMORY,0,CORBA::COMPLETED_MAYBE);
-    *profiles <<= s;
-
-    if (profiles->length() == 0 && idlen == 0) {
-      // This is a nil object reference
-      delete profiles;
-      delete[] id;
-      return CORBA::Object::_nil();
-    }
-    else {
-      // It is possible that we reach here with the id string = '\0'.
-      // That is alright because the actual type of the object will be
-      // verified using _is_a() at the first invocation on the object.
-      //
-      // Apparently, some ORBs such as ExperSoft's do that. Furthermore,
-      // this has been accepted as a valid behaviour in GIOP 1.1/IIOP 1.1.
-      // 
-      omniObjRef* objref = omniPy::createObjRef((const char*) id, repoId,
-						profiles, 1, 0);
-      profiles = 0;
-      delete [] id;
-      id = 0;
-
-      if (!objref) OMNIORB_THROW(MARSHAL,0, CORBA::COMPLETED_MAYBE);
-      return 
-	(CORBA::Object_ptr)objref->_ptrToObjRef(CORBA::Object::_PD_repoId);
-    }
-  }
-  catch (...) {
-    if (id)        delete[] id;
-    if (profiles)  delete profiles;
-    throw;
-  }
+  return 0; // To shut GCC up
 }

@@ -31,45 +31,8 @@
 // $Id$
 
 // $Log$
-// Revision 1.11  2000/10/02 17:35:01  dpg1
-// Merge for 1.2 release
-//
-// Revision 1.9.2.2  2000/08/22 16:12:44  dpg1
-// Properly clear Python error status after unexpected user exception
-//
-// Revision 1.9.2.1  2000/08/17 08:43:34  dpg1
-// Fix possible obscure assertion failure with unexpected user exception
-// containing a member named "minor".
-//
-// Revision 1.9  2000/06/12 15:36:08  dpg1
-// Support for exception handler functions. Under omniORB 3, local
-// operation dispatch modified so exceptions handlers are run.
-//
-// Revision 1.8  2000/05/11 11:58:24  dpg1
-// Throw system exceptions with OMNIORB_THROW.
-//
-// Revision 1.7  2000/03/24 16:48:58  dpg1
-// Local calls now have proper pass-by-value semantics.
-// Lots of little stability improvements.
-// Memory leaks fixed.
-//
-// Revision 1.6  2000/03/03 17:41:43  dpg1
-// Major reorganisation to support omniORB 3.0 as well as 2.8.
-//
-// Revision 1.5  2000/01/31 10:51:42  dpg1
-// Fix to exception throwing.
-//
-// Revision 1.4  1999/12/15 12:17:20  dpg1
-// Changes to compile with SunPro CC 5.0.
-//
-// Revision 1.3  1999/09/24 09:22:03  dpg1
-// Added copyright notices.
-//
-// Revision 1.2  1999/09/20 14:54:19  dpg1
-// GCC 2.95 is more pedantic than egcs.
-//
-// Revision 1.1  1999/07/29 14:18:58  dpg1
-// Initial revision
+// Revision 1.1.2.1  2000/10/13 13:55:24  dpg1
+// Initial support for omniORB 4.
 //
 
 #include <omnipy.h>

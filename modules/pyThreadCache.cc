@@ -31,19 +31,8 @@
 // $Id$
 
 // $Log$
-// Revision 1.4  2000/06/02 14:25:50  dpg1
-// orb.run() now properly exits when the ORB is shut down
-//
-// Revision 1.3  2000/06/02 09:59:53  dpg1
-// Thread cache now calls PyThreadState_Clear() when it is deleting a
-// thread state
-//
-// Revision 1.2  2000/05/30 08:57:10  dpg1
-// Accidentally set hash table size to 3 elements.
-//
-// Revision 1.1  2000/05/26 15:33:31  dpg1
-// Python thread states are now cached. Operation dispatch time is
-// roughly halved!
+// Revision 1.1.2.1  2000/10/13 13:55:27  dpg1
+// Initial support for omniORB 4.
 //
 
 
@@ -80,18 +69,28 @@ private:
   PyObject*      workerThread_;
 };
 
+class omnipyThreadData : public omni_thread::value_t {
+public:
+  ~omnipyThreadData() {
+    omnipyThreadCache::threadExit();
+  }
+};
+
+
 static omnipyThreadScavenger* the_scavenger = 0;
+static omni_thread::key_t     omnithread_key;
 
 
 void
 omnipyThreadCache::
 init()
 {
-  guard         = new omni_mutex();
-  table         = new CacheNode*[tableSize];
+  omnithread_key = omni_thread::allocate_key();
+  guard          = new omni_mutex();
+  table          = new CacheNode*[tableSize];
   for (unsigned int i=0; i < tableSize; i++) table[i] = 0;
 
-  the_scavenger = new omnipyThreadScavenger();
+  the_scavenger  = new omnipyThreadScavenger();
 }
 
 
@@ -128,6 +127,7 @@ addNewNode(long id, unsigned int hash)
 
   cn->used         = 0;
   cn->active       = 0;
+  cn->can_scavenge = 1;
 
   // Insert into hash table
   CacheNode* he = table[hash];
@@ -140,7 +140,63 @@ addNewNode(long id, unsigned int hash)
     omniORB::logger l;
     l << "Creating new Python state for thread id " << id << "\n";
   }
+
+  omni_thread* ot = omni_thread::self();
+  if (ot) {
+    if (ot->set_value(omnithread_key, new omnipyThreadData)) {
+      cn->can_scavenge = 0;
+    }
+  }
   return cn;
+}
+
+
+void
+omnipyThreadCache::
+threadExit()
+{
+  if (table) {
+    long         id   = PyThread_get_thread_ident();
+    unsigned int hash = id % tableSize; 
+
+    {
+      omni_mutex_lock _l(*guard);
+      CacheNode* cn = table[hash];
+      while (cn && cn->id != id) cn = cn->next;
+
+      if (cn) {
+	OMNIORB_ASSERT(!cn->active);
+	if (omniORB::trace(20)) {
+	  omniORB::logger l;
+	  l << "Deleting Python state for thread id " << cn->id
+	    << " (thread exit)\n";
+	}
+
+	// Acquire Python thread lock and remove Python-world things
+	PyEval_AcquireLock();
+	PyThreadState* oldState = PyThreadState_Swap(cn->threadState);
+	if (cn->workerThread) {
+	  PyObject* argtuple = PyTuple_New(1);
+	  PyTuple_SET_ITEM(argtuple, 0, cn->workerThread);
+
+	  PyObject* tmp = PyEval_CallObject(omniPy::pyWorkerThreadDel,
+					    argtuple);
+	  Py_XDECREF(tmp);
+	  Py_DECREF(argtuple);
+	}
+	PyThreadState_Swap(oldState);
+	PyThreadState_Clear(cn->threadState);
+	PyThreadState_Delete(cn->threadState);
+	PyEval_ReleaseLock();
+
+	// Remove the CacheNode
+	CacheNode* cnn = cn->next;
+	*(cn->back) = cnn;
+	if (cnn) cnn->back = cn->back;
+	delete cn;
+      }
+    }
+  }
 }
 
 
@@ -180,13 +236,14 @@ run_undetached(void*)
       cn = omnipyThreadCache::table[i];
 
       while (cn) {
-	if (!cn->active) {
+	if (cn->can_scavenge && !cn->active) {
 	  if (cn->used)
 	    cn->used = 0;
 	  else {
 	    if (omniORB::trace(20)) {
 	      omniORB::logger l;
-	      l << "Deleting Python state for thread id " << cn->id << "\n";
+	      l << "Deleting Python state for thread id "
+		<< cn->id << " (scavenged)\n";
 	    }
 
 	    // Acquire Python thread lock and remove Python-world things
@@ -230,7 +287,8 @@ run_undetached(void*)
     while (cn) {
       if (omniORB::trace(20)) {
 	omniORB::logger l;
-	l << "Deleting Python state for thread id " << cn->id << "\n";
+	l << "Deleting Python state for thread id "
+	  << cn->id << " (shutdown)\n";
       }
 
       if (cn->workerThread) {
