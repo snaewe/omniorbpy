@@ -1,3 +1,12 @@
+Tue Jul  3 12:28:07 BST 2001 dpg1
+=================================
+
+- Tweaks to compile on Solaris.
+
+modules/dir.mk
+modules/pyMarshal.cc
+
+
 Fri Jun 29 10:52:37 BST 2001 dpg1
 =================================
 

@@ -54,6 +54,7 @@ PYINCDIR  := $(PYPREFIX)/include
 PYINCFILE := "<python$(PYVERSION)/Python.h>"
 PYINCTHRD := "<python$(PYVERSION)/pythread.h>"
 DIR_CPPFLAGS += -I$(PYINCDIR) -DPYTHON_INCLUDE=$(PYINCFILE) -DPYTHON_THREAD_INC=$(PYINCTHRD)
+DIR_CPPFLAGS += $(CORBA_CPPFLAGS)
 
 endif
 
@@ -197,8 +198,6 @@ endif
 ifdef AIX
 
 CXXOPTIONS += -I. -I/usr/local/include
-
-DIR_CPPFLAGS += $(CORBA_CPPFLAGS)
 
 lib = _omnipymodule.so
 libinit = init_omnipy
