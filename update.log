@@ -1,3 +1,16 @@
+Mon Feb 16 09:56:57 GMT 2004 dgrisby
+====================================
+
+- omniORB version number was wrong.
+
+mk/beforeauto.mk.in
+
+- Support reinitialising of Python interpreter.
+
+modules/omnipy.cc
+python/omniORB/__init__.py
+
+
 Wed Feb 11 15:38:25 GMT 2004 dgrisby
 ====================================
 

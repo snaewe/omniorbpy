@@ -30,6 +30,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.26.2.21  2004/02/16 09:55:09  dgrisby
+# Support reinitialising of Python interpreter.
+#
 # Revision 1.26.2.20  2004/02/11 11:02:01  dgrisby
 # Enum __cmp__ didn't work with comparisons with other object types.
 #
@@ -197,6 +200,18 @@ Error: your Python executable was not built with thread support.
 import _omnipy
 
 _coreVersion = _omnipy.coreVersion()
+
+# Make sure _omnipy submodules are in sys.modules. They may not be if
+# someone has messed with sys.modules, or the interpreter has been
+# stopped and restarted.
+
+for k, v in _omnipy.__dict__.items():
+    if k[-5:] == "_func" and isinstance(v, types.ModuleType):
+        sub = "_omnipy." + k
+        if not sys.modules.has_key(sub):
+            sys.modules[sub] = v
+        del sub
+del k, v
 
 
 # Add path to COS stubs if need be
@@ -869,6 +884,18 @@ is set to 1, a permanent location forward is requested."""
     def __str__(self):
         return "Location forward exception"
 
+# "Static" objects required by the _omnipy module. They are here so
+# memory management works correctly if the omniORB modules are
+# unloaded.
+
+_emptyTuple      = ()
+_ORB_TWIN        = "__omni_orb"
+_OBJREF_TWIN     = "__omni_obj"
+_SERVANT_TWIN    = "__omni_svt"
+_POA_TWIN        = "__omni_poa"
+_POAMANAGER_TWIN = "__omni_mgr"
+_POACURRENT_TWIN = "__omni_pct"
+_NP_RepositoryId = "_NP_RepositoryId"
 
 
 # Register this module and the threading module with omnipy:

@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.26  2004/02/16 09:55:09  dgrisby
+// Support reinitialising of Python interpreter.
+//
 // Revision 1.1.2.25  2003/09/25 13:16:25  dgrisby
 // Ensure command line arguments are strings.
 //
@@ -311,6 +314,9 @@ extern "C" {
     return Py_BuildValue((char*)"s", cv);
   }
 
+#define OMNIPY_ATTR(x) \
+  PyObject_GetAttrString(omniPy::pyomniORBmodule, (char*)x);
+
   static PyObject*
   omnipy_registerPyObjects(PyObject* self, PyObject* args)
   {
@@ -325,18 +331,12 @@ extern "C" {
 
     OMNIORB_ASSERT(PyModule_Check(omniPy::pyomniORBmodule));
 
-    omniPy::pyCORBAmodule =
-      PyObject_GetAttrString(omniPy::pyomniORBmodule, (char*)"CORBA");
+    omniPy::pyCORBAmodule = OMNIPY_ATTR("CORBA");
 
     OMNIORB_ASSERT(omniPy::pyCORBAmodule &&
 		   PyModule_Check(omniPy::pyCORBAmodule));
 
-    omniPy::pyCORBAsysExcMap =
-      PyObject_GetAttrString(omniPy::pyomniORBmodule,
-			     (char*)"sysExceptionMapping");
-
-    temp =
-      PyObject_GetAttrString(omniPy::pyCORBAmodule, (char*)"Object");
+    omniPy::pyCORBAsysExcMap = OMNIPY_ATTR("sysExceptionMapping");
 
     omniPy::pyCORBAAnyClass =
       PyObject_GetAttrString(omniPy::pyCORBAmodule, (char*)"Any");
@@ -344,17 +344,10 @@ extern "C" {
     omniPy::pyCORBAContextClass =
       PyObject_GetAttrString(omniPy::pyCORBAmodule, (char*)"Context");
 
-    omniPy::pyomniORBobjrefMap =
-      PyObject_GetAttrString(omniPy::pyomniORBmodule, (char*)"objrefMapping");
-
-    omniPy::pyomniORBtypeMap =
-      PyObject_GetAttrString(omniPy::pyomniORBmodule, (char*)"typeMapping");
-
-    omniPy::pyomniORBwordMap =
-      PyObject_GetAttrString(omniPy::pyomniORBmodule, (char*)"keywordMapping");
-
-    omniPy::pyPortableServerModule =
-      PyObject_GetAttrString(omniPy::pyomniORBmodule, (char*)"PortableServer");
+    omniPy::pyomniORBobjrefMap     = OMNIPY_ATTR("objrefMapping");
+    omniPy::pyomniORBtypeMap       = OMNIPY_ATTR("typeMapping");
+    omniPy::pyomniORBwordMap       = OMNIPY_ATTR("keywordMapping");
+    omniPy::pyPortableServerModule = OMNIPY_ATTR("PortableServer");
 
     OMNIORB_ASSERT(omniPy::pyPortableServerModule);
     OMNIORB_ASSERT(PyModule_Check(omniPy::pyPortableServerModule));
@@ -362,19 +355,17 @@ extern "C" {
     omniPy::pyServantClass =
       PyObject_GetAttrString(omniPy::pyPortableServerModule, (char*)"Servant");
 
-    temp =
-      PyObject_GetAttrString(omniPy::pyomniORBmodule, (char*)"tcInternal");
+    temp = OMNIPY_ATTR("tcInternal");
 
     omniPy::pyCreateTypeCode = PyObject_GetAttrString(temp,
 						      (char*)"createTypeCode");
 
-    omniPy::pyWorkerThreadClass =
-      PyObject_GetAttrString(omniPy::pyomniORBmodule, (char*)"WorkerThread");
+    omniPy::pyWorkerThreadClass = OMNIPY_ATTR("WorkerThread");
 
     omniPy::pyWorkerThreadDel =
       PyObject_GetAttrString(omniPy::pyWorkerThreadClass, (char*)"delete");
 
-    omniPy::pyEmptyTuple = PyTuple_New(0);
+    omniPy::pyEmptyTuple = OMNIPY_ATTR("_emptyTuple");
 
     OMNIORB_ASSERT(omniPy::pyCORBAsysExcMap);
     OMNIORB_ASSERT(PyDict_Check(omniPy::pyCORBAsysExcMap));
@@ -396,14 +387,15 @@ extern "C" {
     OMNIORB_ASSERT(omniPy::pyWorkerThreadDel);
     OMNIORB_ASSERT(PyMethod_Check(omniPy::pyWorkerThreadDel));
     OMNIORB_ASSERT(omniPy::pyEmptyTuple);
+    OMNIORB_ASSERT(PyTuple_Check(omniPy::pyEmptyTuple));
 
-    omniPy::pyORB_TWIN        = PyString_FromString((char*)"__omni_orb");
-    omniPy::pyOBJREF_TWIN     = PyString_FromString((char*)"__omni_obj");
-    omniPy::pySERVANT_TWIN    = PyString_FromString((char*)"__omni_svt");
-    omniPy::pyPOA_TWIN        = PyString_FromString((char*)"__omni_poa");
-    omniPy::pyPOAMANAGER_TWIN = PyString_FromString((char*)"__omni_mgr");
-    omniPy::pyPOACURRENT_TWIN = PyString_FromString((char*)"__omni_pct");
-    omniPy::pyNP_RepositoryId = PyString_FromString((char*)"_NP_RepositoryId");
+    omniPy::pyORB_TWIN        = OMNIPY_ATTR("_ORB_TWIN");
+    omniPy::pyOBJREF_TWIN     = OMNIPY_ATTR("_OBJREF_TWIN");
+    omniPy::pySERVANT_TWIN    = OMNIPY_ATTR("_SERVANT_TWIN");
+    omniPy::pyPOA_TWIN        = OMNIPY_ATTR("_POA_TWIN");
+    omniPy::pyPOAMANAGER_TWIN = OMNIPY_ATTR("_POAMANAGER_TWIN");
+    omniPy::pyPOACURRENT_TWIN = OMNIPY_ATTR("_POACURRENT_TWIN");
+    omniPy::pyNP_RepositoryId = OMNIPY_ATTR("_NP_RepositoryId");
 
     OMNIORB_ASSERT(omniPy::pyORB_TWIN);
     OMNIORB_ASSERT(omniPy::pyOBJREF_TWIN);
@@ -411,6 +403,13 @@ extern "C" {
     OMNIORB_ASSERT(omniPy::pyPOA_TWIN);
     OMNIORB_ASSERT(omniPy::pyPOAMANAGER_TWIN);
     OMNIORB_ASSERT(omniPy::pyPOACURRENT_TWIN);
+
+    OMNIORB_ASSERT(PyString_Check(omniPy::pyORB_TWIN));
+    OMNIORB_ASSERT(PyString_Check(omniPy::pyOBJREF_TWIN));
+    OMNIORB_ASSERT(PyString_Check(omniPy::pySERVANT_TWIN));
+    OMNIORB_ASSERT(PyString_Check(omniPy::pyPOA_TWIN));
+    OMNIORB_ASSERT(PyString_Check(omniPy::pyPOAMANAGER_TWIN));
+    OMNIORB_ASSERT(PyString_Check(omniPy::pyPOACURRENT_TWIN));
 
     Py_INCREF(Py_None);
     return Py_None;
