@@ -31,6 +31,10 @@
 // $Id$
 
 // $Log$
+// Revision 1.19  2000/03/07 16:52:17  dpg1
+// Support for compilers which do not allow exceptions to be caught by
+// base class. (Like MSVC 5, surprise surprise.)
+//
 // Revision 1.18  2000/03/03 17:41:43  dpg1
 // Major reorganisation to support omniORB 3.0 as well as 2.8.
 //
@@ -103,6 +107,7 @@
 
 #include <omniORB2/CORBA.h>
 #include <omniORB2/proxyCall.h>
+#include "omnipy28_sysdep.h"
 
 #ifndef OMNIORB_ASSERT
 #include <assert.h>

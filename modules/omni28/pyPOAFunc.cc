@@ -29,6 +29,10 @@
 
 // $Id$
 // $Log$
+// Revision 1.3  2000/03/07 16:52:17  dpg1
+// Support for compilers which do not allow exceptions to be caught by
+// base class. (Like MSVC 5, surprise surprise.)
+//
 // Revision 1.2  2000/03/06 18:45:53  dpg1
 // Support for deactivate_object().
 //
@@ -165,9 +169,7 @@ extern "C" {
       Py_INCREF(Py_None);
       return Py_None;
     }
-    catch (CORBA::SystemException& ex) {
-      return omniPy::handleSystemException(ex);
-    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
   }
 
   static PyObject* pyPOA_get_the_name(PyObject* self, PyObject* args)
@@ -243,9 +245,8 @@ extern "C" {
       pyos = omniPy::getServantForPyObject(pyServant);
       RAISE_PY_BAD_PARAM_IF(!pyos);
     }
-    catch (CORBA::SystemException& ex) {
-      return omniPy::handleSystemException(ex);
-    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
+
     omniObject* oobj = pyos->PR_getobj();
 
     CORBA::Octet* key;
@@ -326,9 +327,8 @@ extern "C" {
       pyos = omniPy::getServantForPyObject(pyServant);
       RAISE_PY_BAD_PARAM_IF(!pyos);
     }
-    catch (CORBA::SystemException& ex) {
-      return omniPy::handleSystemException(ex);
-    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
+
     omniObject* oobj = pyos->PR_getobj();
 
     CORBA::Octet* key;
@@ -359,9 +359,8 @@ extern "C" {
       pyos = omniPy::getServantForPyObject(pyservant);
       RAISE_PY_BAD_PARAM_IF(!pyos);
     }
-    catch (CORBA::SystemException& ex) {
-      return omniPy::handleSystemException(ex);
-    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
+
     PyObject* pyobjref = PyObject_GetAttrString(pyservant,
 						(char*)"_omni_objref");
     OMNIORB_ASSERT(pyobjref);
@@ -528,9 +527,8 @@ extern "C" {
       pyos = omniPy::getServantForPyObject(pyservant);
       RAISE_PY_BAD_PARAM_IF(!pyos);
     }
-    catch (CORBA::SystemException& ex) {
-      return omniPy::handleSystemException(ex);
-    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
+
     PyObject* pyobjref = PyObject_GetAttrString(pyservant,
 						(char*)"_omni_objref");
     OMNIORB_ASSERT(pyobjref);

@@ -31,6 +31,10 @@
 // $Id$
 
 // $Log$
+// Revision 1.20  2000/03/07 16:52:16  dpg1
+// Support for compilers which do not allow exceptions to be caught by
+// base class. (Like MSVC 5, surprise surprise.)
+//
 // Revision 1.19  2000/03/06 18:48:28  dpg1
 // Support for our favourite compiler, MSVC.
 //
@@ -106,7 +110,7 @@
 
 #include <omniORB3/CORBA.h>
 #include <omniORB3/callDescriptor.h>
-
+#include "omnipy30_sysdep.h"
 
 ////////////////////////////////////////////////////////////////////////////
 // Data structure to manage C++ twins of Python objects                   //

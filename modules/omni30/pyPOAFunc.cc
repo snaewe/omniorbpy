@@ -29,6 +29,10 @@
 
 // $Id$
 // $Log$
+// Revision 1.3  2000/03/07 16:52:16  dpg1
+// Support for compilers which do not allow exceptions to be caught by
+// base class. (Like MSVC 5, surprise surprise.)
+//
 // Revision 1.2  2000/03/06 18:48:28  dpg1
 // Support for our favourite compiler, MSVC.
 //
@@ -213,9 +217,7 @@ extern "C" {
       PyErr_SetObject(excc, exci);
       return 0;
     }
-    catch (CORBA::SystemException& ex) {
-      return omniPy::handleSystemException(ex);
-    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
   }
 
   static PyObject* pyPOA_find_POA(PyObject* self, PyObject* args)
@@ -243,9 +245,7 @@ extern "C" {
     catch (PortableServer::POA::AdapterNonExistent& ex) {
       return raisePOAException(pyPOA, "AdapterNonExistent");
     }
-    catch (CORBA::SystemException& ex) {
-      return omniPy::handleSystemException(ex);
-    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
   }
 
   static PyObject* pyPOA_destroy(PyObject* self, PyObject* args)
@@ -269,9 +269,7 @@ extern "C" {
       Py_INCREF(Py_None);
       return Py_None;
     }
-    catch (CORBA::SystemException& ex) {
-      return omniPy::handleSystemException(ex);
-    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
   }
 
   static PyObject* pyPOA_get_the_name(PyObject* self, PyObject* args)
@@ -286,9 +284,7 @@ extern "C" {
     try {
       return PyString_FromString(poa->the_name());
     }
-    catch (CORBA::SystemException& ex) {
-      return omniPy::handleSystemException(ex);
-    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
   }
 
   static PyObject* pyPOA_get_the_parent(PyObject* self, PyObject* args)
@@ -303,9 +299,7 @@ extern "C" {
     try {
       return omniPy::createPyPOAObject(poa->the_parent());
     }
-    catch (CORBA::SystemException& ex) {
-      return omniPy::handleSystemException(ex);
-    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
   }
 
   static PyObject* pyPOA_get_the_children(PyObject* self, PyObject* args)
@@ -327,9 +321,7 @@ extern "C" {
 
       return pypl;
     }
-    catch (CORBA::SystemException& ex) {
-      return omniPy::handleSystemException(ex);
-    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
   }
 
   static PyObject* pyPOA_get_the_POAManager(PyObject* self, PyObject* args)
@@ -344,9 +336,7 @@ extern "C" {
     try {
       return omniPy::createPyPOAManagerObject(poa->the_POAManager());
     }
-    catch (CORBA::SystemException& ex) {
-      return omniPy::handleSystemException(ex);
-    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
   }
 
   static PyObject* pyPOA_get_the_activator(PyObject* self, PyObject* args)
@@ -371,9 +361,7 @@ extern "C" {
 	return omniPy::createPyCorbaObjRef(repoId, lobjref);
       }
     }
-    catch (CORBA::SystemException& ex) {
-      return omniPy::handleSystemException(ex);
-    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
   }
 
   static PyObject* pyPOA_set_the_activator(PyObject* self, PyObject* args)
@@ -401,9 +389,7 @@ extern "C" {
       Py_INCREF(Py_None);
       return Py_None;
     }
-    catch (CORBA::SystemException& ex) {
-      return omniPy::handleSystemException(ex);
-    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
   }
 
   static PyObject* pyPOA_get_servant_manager(PyObject* self, PyObject* args)
@@ -431,9 +417,7 @@ extern "C" {
     catch (PortableServer::POA::WrongPolicy& ex) {
       return raisePOAException(pyPOA, "WrongPolicy");
     }
-    catch (CORBA::SystemException& ex) {
-      return omniPy::handleSystemException(ex);
-    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
   }
 
   static PyObject* pyPOA_set_servant_manager(PyObject* self, PyObject* args)
@@ -464,9 +448,7 @@ extern "C" {
     catch (PortableServer::POA::WrongPolicy& ex) {
       return raisePOAException(pyPOA, "WrongPolicy");
     }
-    catch (CORBA::SystemException& ex) {
-      return omniPy::handleSystemException(ex);
-    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
   }
 
   static PyObject* pyPOA_get_servant(PyObject* self, PyObject* args)
@@ -506,9 +488,7 @@ extern "C" {
     catch (PortableServer::POA::WrongPolicy& ex) {
       return raisePOAException(pyPOA, "WrongPolicy");
     }
-    catch (CORBA::SystemException& ex) {
-      return omniPy::handleSystemException(ex);
-    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
   }
 
   static PyObject* pyPOA_set_servant(PyObject* self, PyObject* args)
@@ -537,9 +517,7 @@ extern "C" {
     catch (PortableServer::POA::WrongPolicy& ex) {
       return raisePOAException(pyPOA, "WrongPolicy");
     }
-    catch (CORBA::SystemException& ex) {
-      return omniPy::handleSystemException(ex);
-    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
   }
 
   static PyObject* pyPOA_activate_object(PyObject* self, PyObject* args)
@@ -573,9 +551,7 @@ extern "C" {
     catch (PortableServer::POA::WrongPolicy& ex) {
       return raisePOAException(pyPOA, "WrongPolicy");
     }
-    catch (CORBA::SystemException& ex) {
-      return omniPy::handleSystemException(ex);
-    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
   }
 
   static PyObject* pyPOA_activate_object_with_id(PyObject* self,
@@ -616,9 +592,7 @@ extern "C" {
     catch (PortableServer::POA::WrongPolicy& ex) {
       return raisePOAException(pyPOA, "WrongPolicy");
     }
-    catch (CORBA::SystemException& ex) {
-      return omniPy::handleSystemException(ex);
-    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
   }
 
   static PyObject* pyPOA_deactivate_object(PyObject* self, PyObject* args)
@@ -649,9 +623,7 @@ extern "C" {
     catch (PortableServer::POA::WrongPolicy& ex) {
       return raisePOAException(pyPOA, "WrongPolicy");
     }
-    catch (CORBA::SystemException& ex) {
-      return omniPy::handleSystemException(ex);
-    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
   }
 
   static PyObject* pyPOA_create_reference(PyObject* self, PyObject* args)
@@ -678,9 +650,7 @@ extern "C" {
     catch (PortableServer::POA::WrongPolicy& ex) {
       return raisePOAException(pyPOA, "WrongPolicy");
     }
-    catch (CORBA::SystemException& ex) {
-      return omniPy::handleSystemException(ex);
-    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
   }
 
   static PyObject* pyPOA_create_reference_with_id(PyObject* self,
@@ -712,9 +682,7 @@ extern "C" {
     catch (PortableServer::POA::WrongPolicy& ex) {
       return raisePOAException(pyPOA, "WrongPolicy");
     }
-    catch (CORBA::SystemException& ex) {
-      return omniPy::handleSystemException(ex);
-    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
   }
 
   static PyObject* pyPOA_servant_to_id(PyObject* self, PyObject* args)
@@ -748,9 +716,7 @@ extern "C" {
     catch (PortableServer::POA::WrongPolicy& ex) {
       return raisePOAException(pyPOA, "WrongPolicy");
     }
-    catch (CORBA::SystemException& ex) {
-      return omniPy::handleSystemException(ex);
-    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
   }
 
   static PyObject* pyPOA_servant_to_reference(PyObject* self, PyObject* args)
@@ -788,9 +754,7 @@ extern "C" {
     catch (PortableServer::POA::WrongPolicy& ex) {
       return raisePOAException(pyPOA, "WrongPolicy");
     }
-    catch (CORBA::SystemException& ex) {
-      return omniPy::handleSystemException(ex);
-    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
   }
 
   static PyObject* pyPOA_reference_to_servant(PyObject* self, PyObject* args)
@@ -841,9 +805,7 @@ extern "C" {
     catch (PortableServer::POA::WrongPolicy& ex) {
       return raisePOAException(pyPOA, "WrongPolicy");
     }
-    catch (CORBA::SystemException& ex) {
-      return omniPy::handleSystemException(ex);
-    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
   }
 
   static PyObject* pyPOA_reference_to_id(PyObject* self, PyObject* args)
@@ -880,9 +842,7 @@ extern "C" {
     catch (PortableServer::POA::WrongPolicy& ex) {
       return raisePOAException(pyPOA, "WrongPolicy");
     }
-    catch (CORBA::SystemException& ex) {
-      return omniPy::handleSystemException(ex);
-    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
   }
 
   static PyObject* pyPOA_id_to_servant(PyObject* self, PyObject* args)
@@ -926,9 +886,7 @@ extern "C" {
     catch (PortableServer::POA::WrongPolicy& ex) {
       return raisePOAException(pyPOA, "WrongPolicy");
     }
-    catch (CORBA::SystemException& ex) {
-      return omniPy::handleSystemException(ex);
-    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
   }
 
   static PyObject* pyPOA_id_to_reference(PyObject* self, PyObject* args)
@@ -961,9 +919,7 @@ extern "C" {
     catch (PortableServer::POA::WrongPolicy& ex) {
       return raisePOAException(pyPOA, "WrongPolicy");
     }
-    catch (CORBA::SystemException& ex) {
-      return omniPy::handleSystemException(ex);
-    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
   }
 
   static PyObject* pyPOA_releaseRef(PyObject* self, PyObject* args)

@@ -30,6 +30,10 @@
 // $Id$
 
 // $Log$
+// Revision 1.32  2000/03/07 16:52:17  dpg1
+// Support for compilers which do not allow exceptions to be caught by
+// base class. (Like MSVC 5, surprise surprise.)
+//
 // Revision 1.31  2000/03/06 18:45:34  dpg1
 // Additions to compile on Solaris.
 //
@@ -451,9 +455,7 @@ extern "C" {
       return PyString_FromStringAndSize((char*)stream.data(),
 					stream.alreadyWritten());
     }
-    catch (CORBA::SystemException& ex) {
-      return omniPy::handleSystemException(ex);
-    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
   }
 
   static PyObject*
@@ -473,9 +475,7 @@ extern "C" {
       stream.byteOrder(byteOrder);
       return omniPy::unmarshalPyObject(stream, desc);
     }
-    catch (CORBA::SystemException& ex) {
-      return omniPy::handleSystemException(ex);
-    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
   }
 
   ////////////////////////////////////////////////////////////////////////////
@@ -547,10 +547,19 @@ extern "C" {
 	  OmniProxyCallWrapper::invoke(oobj, call_desc);
 	  return call_desc.result();
 	}
+#ifdef HAS_Cplusplus_catch_exception_by_base
 	catch (const CORBA::SystemException& ex) {
 	  call_desc.systemException(ex);
 	}
-	catch (const CORBA::UserException& ex) {
+#else
+#define DO_CALL_DESC_SYSTEM_EXCEPTON(exc) \
+        catch (const CORBA::exc& ex) { \
+          call_desc.systemException(ex); \
+        }
+OMNIORB_FOR_EACH_SYS_EXCEPTION(DO_CALL_DESC_SYSTEM_EXCEPTON)
+#undef DO_CALL_DESC_SYSTEM_EXCEPTON
+#endif
+	catch (const omniPy::UserExceptionHandled& ex) {
 	  // Exception has been handled by the call descriptor
 	}
       }
@@ -566,9 +575,18 @@ extern "C" {
 	  Py_INCREF(Py_None);
 	  return Py_None;
 	}
+#ifdef HAS_Cplusplus_catch_exception_by_base
 	catch (const CORBA::SystemException& ex) {
 	  call_desc.systemException(ex);
 	}
+#else
+#define DO_CALL_DESC_SYSTEM_EXCEPTON(exc) \
+        catch (const CORBA::exc& ex) { \
+          call_desc.systemException(ex); \
+        }
+OMNIORB_FOR_EACH_SYS_EXCEPTION(DO_CALL_DESC_SYSTEM_EXCEPTON)
+#undef DO_CALL_DESC_SYSTEM_EXCEPTON
+#endif
       }
       return 0;
     }
@@ -620,9 +638,7 @@ extern "C" {
       CORBA::Boolean isa = cxxobjref->_is_a(repoId);
       return PyInt_FromLong(isa);
     }
-    catch (const CORBA::SystemException& ex) {
-      return omniPy::handleSystemException(ex);
-    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
   }
 
   static PyObject*
@@ -645,9 +661,7 @@ extern "C" {
       CORBA::Boolean nex = cxxobjref->_non_existent();
       return PyInt_FromLong(nex);
     }
-    catch (const CORBA::SystemException& ex) {
-      return omniPy::handleSystemException(ex);
-    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
   }
 
   static PyObject*
@@ -672,9 +686,7 @@ extern "C" {
       CORBA::Boolean ise = cxxobjref1->_is_equivalent(cxxobjref2);
       return PyInt_FromLong(ise);
     }
-    catch (const CORBA::SystemException& ex) {
-      return omniPy::handleSystemException(ex);
-    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
   }
 
   static PyObject*
@@ -719,9 +731,8 @@ extern "C" {
       omniPy::InterpreterUnlocker ul;
       isa = cxxsource->_is_a(repoId);
     }
-    catch (const CORBA::SystemException& ex) {
-      return omniPy::handleSystemException(ex);
-    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
+
     if (isa) {
       omniObject* oosource = cxxsource->PR_getobj();
       omniObject* oodest = omniPy::createObjRef(oosource->NP_IRRepositoryId(),

@@ -30,6 +30,7 @@
 #ifndef _omnipy_h_
 #define _omnipy_h_
 
+
 #if   defined(OMNIORBPY_FOR_30)
 #  include "omni30/omnipy30.h"
 #elif defined(OMNIORBPY_FOR_28)
@@ -37,5 +38,60 @@
 #else
 #  error "No omniORB version specified!"
 #endif
+
+
+#ifdef HAS_Cplusplus_catch_exception_by_base
+
+#define OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS \
+catch (const CORBA::SystemException& ex) { \
+  return omniPy::handleSystemException(ex); \
+}
+#else
+
+#ifndef OMNIORB_FOR_EACH_SYS_EXCEPTION
+#define OMNIORB_FOR_EACH_SYS_EXCEPTION(doit) \
+ \
+doit (UNKNOWN) \
+doit (BAD_PARAM) \
+doit (NO_MEMORY) \
+doit (IMP_LIMIT) \
+doit (COMM_FAILURE) \
+doit (INV_OBJREF) \
+doit (OBJECT_NOT_EXIST) \
+doit (NO_PERMISSION) \
+doit (INTERNAL) \
+doit (MARSHAL) \
+doit (INITIALIZE) \
+doit (NO_IMPLEMENT) \
+doit (BAD_TYPECODE) \
+doit (BAD_OPERATION) \
+doit (NO_RESOURCES) \
+doit (NO_RESPONSE) \
+doit (PERSIST_STORE) \
+doit (BAD_INV_ORDER) \
+doit (TRANSIENT) \
+doit (FREE_MEM) \
+doit (INV_IDENT) \
+doit (INV_FLAG) \
+doit (INTF_REPOS) \
+doit (BAD_CONTEXT) \
+doit (OBJ_ADAPTER) \
+doit (DATA_CONVERSION) \
+doit (TRANSACTION_REQUIRED) \
+doit (TRANSACTION_ROLLEDBACK) \
+doit (INVALID_TRANSACTION) \
+doit (WRONG_TRANSACTION)
+
+#endif
+
+#define OMNIPY_CATCH_AND_HANDLE_SPECIFIED_EXCEPTION(exc) \
+catch (const CORBA::exc& ex) { \
+  return omniPy::handleSystemException(ex); \
+}
+#define OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS \
+  OMNIORB_FOR_EACH_SYS_EXCEPTION(OMNIPY_CATCH_AND_HANDLE_SPECIFIED_EXCEPTION)
+
+#endif
+
 
 #endif // _omnipy_h_
