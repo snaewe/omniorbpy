@@ -1,0 +1,14 @@
+Thu May  4 10:52:09 BST 2000 dpg1
+=================================
+
+- Created a long-overdue update log.
+- Added some test examples
+
+update.log
+examples/tests/PerfTest.idl
+examples/tests/TypeTest.idl
+examples/tests/TypeTestSK.cc
+examples/tests/pclient.py
+examples/tests/pserver.py
+examples/tests/tclient.py
+examples/tests/tserver.py
