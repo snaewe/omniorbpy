@@ -77,6 +77,10 @@ INSTALLEDFILES += $(foreach f, $(filter CosNaming%, $(FILES)), $(INSTALLPYTHONDI
 EXPORTEDFILES += $(foreach f, $(FILES), $(PYLIBDIR)/$(f))
 EXPORTEDFILES += $(foreach f, $(filter CosNaming%, $(FILES)), $(PYLIBROOT)/$(f))
 
+# __init__.py to make it a package
+FILES += __init__.py
+INSTALLEDFILES += $(INSTALLPYTHONDIR)/__init__.py
+
 # A .pth file to expose omniORB/COS to the global namespace
 FILES += omniORB.pth
 INSTALLEDFILES += $(INSTALLPYTHONDIR)/omniORB.pth
@@ -109,6 +113,9 @@ $(INSTALLPYTHONDIR)/CosNaming%: CosNaming%
 # requiring that they be installed there. Note that the
 # .pth file is only respected in python's standard area.
 $(INSTALLPYTHONDIR)/omniORB.pth: omniORB.pth
+	@(dir="$(dir $@)"; file="$^"; $(ExportFileToDir))
+
+$(INSTALLPYTHONDIR)/__init__.py: __init__.py
 	@(dir="$(dir $@)"; file="$^"; $(ExportFileToDir))
 
 # Generic rule to install files.

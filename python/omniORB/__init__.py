@@ -30,6 +30,10 @@
 
 # $Id$
 # $Log$
+# Revision 1.26.2.19  2003/11/19 14:23:42  dgrisby
+# Make COS directory a Python package; add it to sys.path if it's not
+# already there.
+#
 # Revision 1.26.2.18  2003/11/10 16:50:29  dgrisby
 # Last checking broke hashability.
 #
@@ -190,6 +194,14 @@ Error: your Python executable was not built with thread support.
 import _omnipy
 
 _coreVersion = _omnipy.coreVersion()
+
+
+# Add path to COS stubs if need be
+_cospath = os.path.join(os.path.dirname(__file__), "COS")
+if _cospath not in sys.path:
+    sys.path.append(_cospath)
+del _cospath
+
 
 # Public functions
 
