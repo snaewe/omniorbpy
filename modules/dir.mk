@@ -254,3 +254,37 @@ export:: $(lib)
           ln -s $(soname) $(libname); \
          )
 endif
+
+
+#############################################################################
+#   Make rules for NextStep                                                 #
+#############################################################################
+
+ifdef NextStep
+
+PYPREFIX = $(shell python -c "import sys;print sys.exec_prefix")
+CXXOPTIONS += -I$(PYPREFIX)/include
+CXXLINKOPTIONS += -nostdlib -r
+SO = .so
+libname = _omnipymodule$(SO)
+soname  = $(libname).$(OMNIPY_MAJOR)
+lib     = $(soname).$(OMNIPY_MINOR)
+
+$(lib): $(OBJS)
+      $(CXXLINK) $(CXXLINKOPTIONS) $(OBJS) $(OMNIORB2_LIB_NODYN_DEPEND) -o $(lib)
+
+all:: $(lib)
+
+clean::
+      $(RM) $(lib)
+
+export:: $(lib)
+      @$(ExportLibrary)
+      @(set -x; 
+              cd $(EXPORT_TREE)/$(LIBDIR); 
+              $(RM) $(soname); 
+              ln -s $(lib) $(soname); 
+              $(RM) $(libname); 
+              ln -s $(soname) $(libname); 
+      )
+endif
