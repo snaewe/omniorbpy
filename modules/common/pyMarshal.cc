@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.18  2000/03/14 10:58:18  dpg1
+// Bug with unmarshalling plain CORBA::Object with omniORB 3.0.
+//
 // Revision 1.17  2000/03/03 17:41:43  dpg1
 // Major reorganisation to support omniORB 3.0 as well as 2.8.
 //
@@ -1791,8 +1794,13 @@ omniPy::unmarshalPyObject(NetBufferedStream& stream,
       else {
 	OMNIORB_ASSERT(PyString_Check(t_o));
 	targetRepoId = PyString_AS_STRING(t_o);
-	if (targetRepoId[0] == '\0') // Empty string => CORBA.Object
+	if (targetRepoId[0] == '\0') { // Empty string => CORBA.Object
+#ifdef OMNIORBPY_FOR_28
 	  targetRepoId = 0;
+#else
+	  targetRepoId = CORBA::Object::_PD_repoId;
+#endif
+	}
       }
 
       CORBA::Object_ptr obj = omniPy::UnMarshalObjRef(targetRepoId,
@@ -2227,8 +2235,13 @@ omniPy::unmarshalPyObject(MemBufferedStream& stream,
       else {
 	OMNIORB_ASSERT(PyString_Check(t_o));
 	targetRepoId = PyString_AS_STRING(t_o);
-	if (targetRepoId[0] == '\0') // Empty string => CORBA.Object
+	if (targetRepoId[0] == '\0') { // Empty string => CORBA.Object
+#ifdef OMNIORBPY_FOR_28
 	  targetRepoId = 0;
+#else
+	  targetRepoId = CORBA::Object::_PD_repoId;
+#endif
+	}
       }
 
       CORBA::Object_ptr obj = omniPy::UnMarshalObjRef(targetRepoId,
