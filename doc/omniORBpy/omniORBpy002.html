@@ -43,7 +43,7 @@ module Example {
 <TT>Example</TT>. The reason for this will become clear in a moment.<BR>
 <BR>
 If you are new to IDL, you can learn about its syntax in Chapter 3 of
-the CORBA specification 2.3&nbsp;[<A HREF="omniORBpy009.html#corba23-spec"><CITE>OMG99a</CITE></A>]. For the moment, you
+the CORBA specification 2.3&nbsp;[<A HREF="omniORBpy009.html#corba23-spec"><CITE>OMG99</CITE></A>]. For the moment, you
 only need to know that the interface consists of a single operation,
 <TT>echoString()</TT>, which takes a string as an argument and returns a
 copy of the same string.<BR>
@@ -58,7 +58,7 @@ extension `<TT>.idl</TT>', although omniORB does not enforce this.<BR>
 Python stubs for that IDL. The stubs contain Python declarations for
 all the interfaces and types declared in the IDL, as required by the
 Python mapping. It is possible to generate stubs dynamically at
-run-time, as described in section&nbsp;<A HREF="omniORBpy006.html#sec:importIDL">6.11</A>, but it is more
+run-time, as described in section&nbsp;<A HREF="omniORBpy006.html#sec:importIDL">6.12</A>, but it is more
 efficient to generate them statically.<BR>
 <BR>
 To generate the stubs, we use a command line like<BR>
@@ -177,7 +177,7 @@ POA</I>, rather than creating any child POAs. The Root POA is found with
 <BR>
 A POA's behaviour is governed by its <I>policies</I>. The Root POA has
 suitable policies for many simple servers. Chapter 11 of the CORBA 2.3
-specification [<A HREF="omniORBpy009.html#corba23-spec"><CITE>OMG99a</CITE></A>] has details of all the POA policies
+specification [<A HREF="omniORBpy009.html#corba23-spec"><CITE>OMG99</CITE></A>] has details of all the POA policies
 which are available.<BR>
 <BR>
 When omniORBpy is used with omniORB 2.8, <EM>only</EM> the Root POA is
@@ -346,7 +346,7 @@ type. This means that <TT>_narrow()</TT> can also raise
 <TT>CORBA.COMM_FAILURE</TT>, <TT>CORBA.OBJECT_NOT_EXIST</TT>, and
 <TT>CORBA.TRANSIENT</TT>.<BR>
 <BR>
-Section&nbsp;<A HREF="omniORBpy006.html#sec:exHandlers">6.9</A> describes how exception handlers can be
+Section&nbsp;<A HREF="omniORBpy006.html#sec:exHandlers">6.10</A> describes how exception handlers can be
 installed for all the various system exceptions, to avoid surrounding
 all code with <TT>try</TT>...<TT>except</TT> blocks.<BR>
 <BR>
@@ -591,7 +591,7 @@ can be activated on demand with an adapter activator.
 with id and kind fields which contain `.' and `/' characters. See
 chapter&nbsp;<A HREF="omniORBpy004.html#chap:ins">4</A> of this manual, and chapter 3 of the CORBA
 services specification, as updated for the Interoperable Naming
-Service&nbsp;[<A HREF="omniORBpy009.html#inschapters"><CITE>OMG99b</CITE></A>].
+Service&nbsp;[<A HREF="omniORBpy009.html#inschapters"><CITE>OMG00a</CITE></A>].
 
 <DT><A NAME="note8" HREF="#text8"><FONT SIZE=5>5</FONT></A><DD> If you are on-the-ball, you
 will have noticed that we didn't call <TT>_narrow()</TT> when resolving the

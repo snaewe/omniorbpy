@@ -31,15 +31,21 @@
 // $Id$
 
 // $Log$
+// Revision 1.2  2000/10/02 17:35:01  dpg1
+// Merge for 1.2 release
+//
+// Revision 1.1.2.1  2000/09/27 15:57:21  dpg1
+// #include<python1.5/pythread.h> generalised for other Python versions
+//
 // Revision 1.1  2000/05/26 15:33:31  dpg1
 // Python thread states are now cached. Operation dispatch time is
 // roughly halved!
 //
 
-#if defined(__WIN32__) || defined(__VMS)
+#if defined(__VMS)
 #include <pythread.h>
 #else
-#include <python1.5/pythread.h>
+#include PYTHON_THREAD_INC
 #endif
 
 

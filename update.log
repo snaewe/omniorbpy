@@ -1,3 +1,230 @@
+Mon Oct  2 17:35:57 BST 2000 dpg1
+=================================
+
+- Updates for 1.2 release
+
+src/lib/omniORBpy/bugfixes.xml
+src/lib/omniORBpy/bugfixes.xsl
+src/lib/omniORBpy/bugfixes10.xml                         -- new
+src/lib/omniORBpy/bugfixes11.xml                         -- new
+src/lib/omniORBpy/doc/tex/omniORBpy.tex
+src/lib/omniORBpy/external_merge/ReleaseNote
+src/lib/omniORBpy/external_merge/THIS_IS_OMNIORBPY_1_1   -- deleted
+src/lib/omniORBpy/external_merge/THIS_IS_OMNIORBPY_1_2   -- new
+src/lib/omniORBpy/external_merge/doc/omniORBpy.pdf
+src/lib/omniORBpy/external_merge/doc/omniORBpy.ps
+src/lib/omniORBpy/external_merge/doc/omniORBpy/index.html
+
+
+Thu Sep 28 10:21:51 BST 2000 dpg1
+=================================
+
+- Last update broke Windows build
+
+modules/dir.mk
+
+Wed Sep 27 16:49:41 BST 2000 dpg1
+=================================
+
+- #include<python1.5/pythread.h> generalised for other Python versions
+
+modules/dir.mk
+modules/common/pyThreadCache.h
+
+
+Tue Sep 26 14:18:34 BST 2000 dpg1
+=================================
+
+- Missed some omniidl updates from omniORB 3
+
+omniidl/cxx/idlutil.cc
+
+
+Thu Sep 21 14:14:30 BST 2000 dpg1
+=================================
+
+- Silly bug marshalling sequences of anys and TypeCodes
+
+modules/common/pyMarshal.cc
+
+
+Thu Sep 21 11:53:11 BST 2000 dpg1
+=================================
+
+- Fix race condition in Py_omniServant deletion.
+
+modules/omni30/omnipy30.h
+modules/omni30/pyPOAFunc.cc
+modules/omni30/pyServant.cc
+
+
+Tue Sep 19 12:24:15 BST 2000 dpg1
+=================================
+
+- Minor documentation updates: new INS spec, omniidl -T,
+  OMNIORB_PRINCIPAL.
+
+doc/tex/omniORBpy.bib
+doc/tex/omniORBpy.tex
+external_merge/doc/omniORBpy.pdf
+external_merge/doc/omniORBpy.ps
+external_merge/doc/omniORBpy/index.html
+external_merge/doc/omniORBpy/omniORBpy001.html
+external_merge/doc/omniORBpy/omniORBpy002.html
+external_merge/doc/omniORBpy/omniORBpy003.html
+external_merge/doc/omniORBpy/omniORBpy004.html
+external_merge/doc/omniORBpy/omniORBpy005.html
+external_merge/doc/omniORBpy/omniORBpy006.html
+external_merge/doc/omniORBpy/omniORBpy007.html
+external_merge/doc/omniORBpy/omniORBpy009.html
+
+
+Tue Sep 19 10:22:39 BST 2000 dpg1
+=================================
+
+- More paranoid about clearing Python error status
+
+modules/common/pyomniFunc.cc
+modules/omni30/pyServant.cc
+
+- Rename Scope::Entry::Kind to Scope::Entry::EntryKind to avoid
+  compiler bugs.
+
+omniidl/cxx/idlscope.cc
+omniidl/cxx/idlscope.h
+
+
+Mon Sep 11 15:12:38 BST 2000 dpg1
+=================================
+
+- Fix name tags in bugfixes stylesheet
+
+bugfixes.xsl
+
+- New -T flag to omniidl, to use a temporary file instead of a pipe
+  between omnicpp and omniidl. This works-around the bug seen of some
+  Win98 machines.
+
+omniidl/python/omniidl/main.py
+
+
+Thu Sep  7 17:20:37 BST 2000 dpg1
+=================================
+
+- Yesterday's Python 1.6+ update broke on Windows.
+
+modules/dir.mk
+omniidl/cxx/dir.mk
+
+
+Wed Sep  6 12:13:30 BST 2000 dpg1
+=================================
+
+- Minor changes to support Python versions above 1.5.2
+
+external_merge/README.Python -- new 
+modules/dir.mk
+modules/omni28/omnipy28.h
+modules/omni30/omnipy30.h
+omniidl/cxx/dir.mk
+omniidl/cxx/idlpython.cc
+omniidl/python/omniidl/main.py
+omniidl/python/scripts/omniidlrun.py
+
+
+Fri Sep  1 15:07:45 BST 2000 dpg1
+=================================
+
+- Memory leak when returning invalid data (bug 4)
+
+modules/omni28/pyServant.cc
+modules/omni30/pyServant.cc
+
+
+Wed Aug 30 19:10:01 BST 2000 dpg1
+=================================
+
+- Register operation declarations so they can be found with
+  findDecl().
+
+omniidl/cxx/idlpython.cc
+
+
+Tue Aug 29 16:17:38 BST 2000 dpg1
+=================================
+
+- New relativeScope() function.
+- New -i flag to enter interactive loop after parsing
+
+omniidl/cxx/idlpython.cc
+omniidl/cxx/idlscope.cc
+omniidl/cxx/idlscope.h
+omniidl/python/omniidl/idlutil.py
+omniidl/python/omniidl/main.py
+
+
+Tue Aug 29 11:17:26 BST 2000 dpg1
+=================================
+
+- In omniidl, operations and attributes now have repository ids.
+
+omniidl/cxx/idlast.cc
+omniidl/cxx/idlast.h
+omniidl/cxx/idldump.cc
+omniidl/cxx/idlpython.cc
+omniidl/cxx/idlrepoId.cc
+omniidl/cxx/lex.yy.cc
+omniidl/cxx/y.tab.cc
+omniidl/python/omniidl/idlast.py
+
+
+Fri Aug 25 14:25:20 BST 2000 dpg1
+=================================
+
+- Multiple comments preceding a declaration are now properly attached
+  on all platforms
+
+omniidl/cxx/idlast.cc
+
+
+Thu Aug 24 12:26:28 BST 2000 dpg1
+=================================
+
+- Typo in error message % format string
+
+omniidl/cxx/idlscope.cc
+
+
+Wed Aug 23 10:15:43 BST 2000 dpg1
+=================================
+
+- Fix loading of IfR stubs when doing "import CORBA" rather than "from
+  omniORB import CORBA".
+
+python/omniORB/__init__.py
+
+- Bugs list referred to a non-existent styles.css
+
+bugfixes.xsl
+
+
+Tue Aug 22 17:01:50 BST 2000 dpg1
+=================================
+
+- Properly clear Python error status after unexpected user exception
+
+modules/common/pyExceptions.cc
+
+
+Tue Aug 22 12:44:57 BST 2000 dpg1
+=================================
+
+- Generate inherited classes for typedefs to struct and unions
+- Cope better with nasty symbols in IDL file names
+
+omniidl_be/python.py
+
+
 Mon Aug 21 11:08:38 BST 2000 dpg1
 =================================
 

@@ -29,10 +29,12 @@
 
 
 // $Id$
-
 // $Log$
-// Revision 1.18  2000/08/21 10:20:21  dpg1
-// Merge from omnipy1_develop for 1.1 release
+// Revision 1.19  2000/10/02 17:35:01  dpg1
+// Merge for 1.2 release
+//
+// Revision 1.17.2.2  2000/09/01 14:13:00  dpg1
+// Memory leak when returning invalid data
 //
 // Revision 1.17.2.1  2000/08/14 16:10:32  dpg1
 // Missed out some explicit casts to (char*) for string constants.
@@ -238,19 +240,26 @@ Py_Servant::dispatch(GIOP_S&        giop_server,
     if (out_l >= 0) {
       CORBA::ULong msgsize = GIOP_S::ReplyHeaderSize();
 
-      if (out_l == 1) {
-	msgsize = omniPy::alignedSize(msgsize,
-				      PyTuple_GET_ITEM(out_d, 0),
-				      result,
-				      CORBA::COMPLETED_MAYBE);
-      }
-      else if (out_l > 1) {
-	for (i=0; i < out_l; i++) {
+      try {
+	if (out_l == 1) {
 	  msgsize = omniPy::alignedSize(msgsize,
-					PyTuple_GET_ITEM(out_d,  i),
-					PyTuple_GET_ITEM(result, i),
+					PyTuple_GET_ITEM(out_d, 0),
+					result,
 					CORBA::COMPLETED_MAYBE);
 	}
+	else if (out_l > 1) {
+	  for (i=0; i < out_l; i++) {
+	    msgsize = omniPy::alignedSize(msgsize,
+					  PyTuple_GET_ITEM(out_d,  i),
+					  PyTuple_GET_ITEM(result, i),
+					  CORBA::COMPLETED_MAYBE);
+	  }
+	}
+      }
+      catch (...) {
+	// alignedSize() can throw BAD_PARAM and others
+	Py_DECREF(result);
+	throw;
       }
       giop_server.InitialiseReply(GIOP::NO_EXCEPTION, msgsize);
 

@@ -10,7 +10,7 @@
   <html>
   <head>
   <title>omniORBpy bugs</title>
-  <link REL="stylesheet" HREF="../styles.css" TYPE="text/css"/>
+  <link REL="stylesheet" HREF="../../styles.css" TYPE="text/css"/>
   </head>
   <body background="../images/sidebarbg.gif">
 
@@ -19,7 +19,7 @@
   <tr>
     <td width="15%"><img src="omniORBpylogo.gif"/></td>
     <td align="center" bgcolor="#000000"><h1 class="banner">
-        <font color="#FFFFFF"><em>omniORBpy 1.1 Bug List</em></font></h1>
+        <font color="#FFFFFF"><em>omniORBpy 1.2 Bug List</em></font></h1>
     </td>
 
     <td width="15%"><p align="center">
@@ -70,13 +70,13 @@
         <tr><td>
 
 	  <p>
-	  The following bugs in omniORBpy 1.1 have been fixed. You can
+	  The following bugs in omniORBpy 1.2 have been fixed. You can
 	  get the fixes in three ways:</p>
 
           <ul><li>Update from <a href="../cvs.html">CVS</a> in the
                   <code>"omnipy1_develop"</code> branch.</li>
 
-              <li>Apply <a href="ftp://ftp.uk.research.att.com/pub/omniORB/omniORBpy/omniORBpy_1_1_bugfixes.patch">this
+              <li>Apply <a href="ftp://ftp.uk.research.att.com/pub/omniORB/omniORBpy/omniORBpy_1_2_bugfixes.patch">this
                   patch</a> to the omniORBpy 1.1 distribution.</li>
 
               <li>Download the latest <a
@@ -85,8 +85,9 @@
           </ul>
 
           <p>
-          The bugs page for earlier versions can be found here:
+          The bugs pages for earlier versions can be found here:
           <ul> 
+              <li><a href="bugfixes11.html">omniORBpy 1.1</a></li>
               <li><a href="bugfixes10.html">omniORBpy 1.0</a></li>
           </ul>
           </p>
@@ -125,12 +126,13 @@
 
 <xsl:template match="bug">
 
-    <a><xsl:attribute name="name">bug<xsl:value-of select="@id"/>
-       </xsl:attribute>
-    </a>
     <tr><td>Summary:</td>
         <td><b><xsl:value-of select="summary"/></b>
-            (bug number <xsl:value-of select="@id"/>)</td>
+            (bug number <xsl:value-of select="@id"/>)
+            <a><xsl:attribute name="name">bug<xsl:value-of select="@id"/>
+               </xsl:attribute>
+            </a>
+        </td>
     </tr>
 
     <tr><td>Date:      </td><td><xsl:value-of select="@date"/></td></tr>

@@ -30,8 +30,11 @@
 // $Id$
 
 // $Log$
-// Revision 1.24  2000/08/21 10:20:22  dpg1
-// Merge from omnipy1_develop for 1.1 release
+// Revision 1.25  2000/10/02 17:35:01  dpg1
+// Merge for 1.2 release
+//
+// Revision 1.23.2.4  2000/09/21 13:20:15  dpg1
+// Silly bug marshalling sequences of anys and TypeCodes
 //
 // Revision 1.23.2.3  2000/08/17 08:44:08  dpg1
 // Updates for long long were broken on platforms without it
@@ -154,6 +157,22 @@ static inline PyObject* MyPyLong_FromLongLong(_CORBA_LongLong ll)
 #  endif
 #endif
 
+
+// Small function to indicate whether a descriptor represents a type
+// for which we have unrolled sequence marshalling code
+static inline int
+sequenceOptimisedType(PyObject* desc)
+{
+  if (PyInt_Check(desc)) {
+    CORBA::ULong tk = PyInt_AS_LONG(desc);
+
+    return !(tk == CORBA::tk_any ||
+	     tk == CORBA::tk_TypeCode ||
+	     tk == CORBA::tk_Principal);
+  }
+  return 0;
+}
+	
 
 
 #define AS_THROW_BAD_PARAM OMNIORB_THROW(BAD_PARAM, 0,compstatus)
@@ -559,7 +578,7 @@ omniPy::alignedSize(CORBA::ULong            msgsize,
       long          long_val;
       unsigned long ulong_val;
 
-      if (PyInt_Check(elm_desc)) { // Simple type
+      if (sequenceOptimisedType(elm_desc)) {
 	CORBA::ULong etk = PyInt_AS_LONG(elm_desc);
 
 	if (etk == CORBA::tk_octet || etk == CORBA::tk_char) {
@@ -922,7 +941,7 @@ omniPy::alignedSize(CORBA::ULong            msgsize,
       long          long_val;
       unsigned long ulong_val;
 
-      if (PyInt_Check(elm_desc)) { // Simple type
+      if (sequenceOptimisedType(elm_desc)) {
 	CORBA::ULong etk = PyInt_AS_LONG(elm_desc);
 
 	if (etk == CORBA::tk_octet || etk == CORBA::tk_char) {
@@ -1621,7 +1640,7 @@ omniPy::marshalPyObject(NetBufferedStream& stream,
 
       CORBA::ULong i, len;
 
-      if (PyInt_Check(elm_desc)) {
+      if (sequenceOptimisedType(elm_desc)) {
 	CORBA::ULong etk = PyInt_AS_LONG(elm_desc);
 
 	if (etk == CORBA::tk_octet) {
@@ -1917,7 +1936,7 @@ omniPy::marshalPyObject(NetBufferedStream& stream,
 
       CORBA::ULong i, len;
 
-      if (PyInt_Check(elm_desc)) {
+      if (sequenceOptimisedType(elm_desc)) {
 	CORBA::ULong etk = PyInt_AS_LONG(elm_desc);
 
 	if (etk == CORBA::tk_octet) {
@@ -2544,7 +2563,7 @@ omniPy::marshalPyObject(MemBufferedStream& stream,
 
       CORBA::ULong i, len;
 
-      if (PyInt_Check(elm_desc)) {
+      if (sequenceOptimisedType(elm_desc)) {
 	CORBA::ULong etk = PyInt_AS_LONG(elm_desc);
 
 	if (etk == CORBA::tk_octet) {
@@ -2840,7 +2859,7 @@ omniPy::marshalPyObject(MemBufferedStream& stream,
 
       CORBA::ULong i, len;
 
-      if (PyInt_Check(elm_desc)) {
+      if (sequenceOptimisedType(elm_desc)) {
 	CORBA::ULong etk = PyInt_AS_LONG(elm_desc);
 
 	if (etk == CORBA::tk_octet) {
@@ -3447,7 +3466,7 @@ omniPy::unmarshalPyObject(NetBufferedStream& stream,
 
       CORBA::ULong i;
 
-      if (PyInt_Check(elm_desc)) {
+      if (sequenceOptimisedType(elm_desc)) {
 	CORBA::ULong etk = PyInt_AS_LONG(elm_desc);
 
 	if (etk == CORBA::tk_octet) {
@@ -3603,7 +3622,7 @@ omniPy::unmarshalPyObject(NetBufferedStream& stream,
 
       CORBA::ULong i;
 
-      if (PyInt_Check(elm_desc)) {
+      if (sequenceOptimisedType(elm_desc)) {
 	CORBA::ULong etk = PyInt_AS_LONG(elm_desc);
 
 	if (etk == CORBA::tk_octet) {
@@ -4130,7 +4149,7 @@ omniPy::unmarshalPyObject(MemBufferedStream& stream,
 
       CORBA::ULong i;
 
-      if (PyInt_Check(elm_desc)) {
+      if (sequenceOptimisedType(elm_desc)) {
 	CORBA::ULong etk = PyInt_AS_LONG(elm_desc);
 
 	if (etk == CORBA::tk_octet) {
@@ -4286,7 +4305,7 @@ omniPy::unmarshalPyObject(MemBufferedStream& stream,
 
       CORBA::ULong i;
 
-      if (PyInt_Check(elm_desc)) {
+      if (sequenceOptimisedType(elm_desc)) {
 	CORBA::ULong etk = PyInt_AS_LONG(elm_desc);
 
 	if (etk == CORBA::tk_octet) {
@@ -4961,7 +4980,7 @@ omniPy::copyArgument(PyObject*               d_o,
 
       CORBA::ULong len, i;
 
-      if (PyInt_Check(elm_desc)) { // Simple type
+      if (sequenceOptimisedType(elm_desc)) { // Simple type
 	CORBA::ULong etk = PyInt_AS_LONG(elm_desc);
 
 	if (etk == CORBA::tk_octet || etk == CORBA::tk_char) {
@@ -5435,7 +5454,7 @@ omniPy::copyArgument(PyObject*               d_o,
 
       CORBA::ULong len, i;
 
-      if (PyInt_Check(elm_desc)) { // Simple type
+      if (sequenceOptimisedType(elm_desc)) { // Simple type
 	CORBA::ULong etk = PyInt_AS_LONG(elm_desc);
 
 	if (etk == CORBA::tk_octet || etk == CORBA::tk_char) {

@@ -81,9 +81,13 @@ DIR_CPPFLAGS += $(patsubst %,-I%/src/lib/omniORB2/orbcore,$(IMPORT_TREES))
 ifdef UnixPlatform
 #CXXDEBUGFLAGS = -g
 
-PYPREFIX := $(shell python -c 'import sys; print sys.exec_prefix')
-PYINCDIR := $(PYPREFIX)/include
-DIR_CPPFLAGS += -I$(PYINCDIR)
+PYPREFIX  := $(shell python -c 'import sys; print sys.exec_prefix')
+PYVERSION := $(shell $(PYTHON) -c 'import sys; print sys.version[:3]')
+PYINCDIR  := $(PYPREFIX)/include
+PYINCFILE := "<python$(PYVERSION)/Python.h>"
+PYINCTHRD := "<python$(PYVERSION)/pythread.h>"
+DIR_CPPFLAGS += -I$(PYINCDIR) -DPYTHON_INCLUDE=$(PYINCFILE) -DPYTHON_THREAD_INC=$(PYINCTHRD)
+
 endif
 
 #############################################################################
@@ -188,13 +192,17 @@ endif
 
 ifdef Win32Platform
 
-PYPREFIX1 := $(shell python -c 'import sys,string; sys.stdout.write(string.lower(sys.prefix))')
-PYPREFIX  := $(subst program files,progra~1,$(PYPREFIX1))
+PYPREFIX1 := "$(shell python -c 'import sys,string; sys.stdout.write(string.lower(sys.prefix))')"
+PYPREFIX  := $(subst program files,progra~1,$(subst \,/,$(PYPREFIX1)))
+PYVERSION := $(shell $(PYTHON) -c 'import sys; sys.stdout.write(sys.version[:3])')
 PYINCDIR  := $(PYPREFIX)/include
 PYLIBDIR  := $(PYPREFIX)/libs
+PYLIB     := python$(subst .,,$(PYVERSION)).lib
 
-DIR_CPPFLAGS += -I"$(PYINCDIR)"
-PYLIBPATH = -libpath:"$(PYLIBDIR)"
+DIR_CPPFLAGS += -I$(PYINCDIR) -I$(PYINCDIR)/python$(PYVERSION) \
+                -DPYTHON_INCLUDE="<Python.h>" -DPYTHON_THREAD_INC="<pythread.h>"
+
+PYLIBPATH = $(patsubst %,-libpath:%,$(PYLIBDIR))
 
 implib = _omnipy.lib
 lib = $(patsubst %.lib,%.pyd,$(implib))
@@ -217,7 +225,7 @@ $(lib): $(OBJS)
          fi; \
 	 set -x; \
 	 $(RM) $@; \
-	 libs="$(OMNIORB_LIB) python15.lib"; \
+	 libs="$(OMNIORB_LIB) $(PYLIB)"; \
 	 $(CXXLINK) -out:$@ -DLL $(CXXLINKOPTIONS) $(IMPORT_LIBRARY_FLAGS) $(PYLIBPATH) $(OBJS) $$libs; \
 	)
 
@@ -226,7 +234,7 @@ else
 $(lib): $(OBJS)
 	(set -x; \
 	 $(RM) $@; \
-	 libs="$(OMNIORB_LIB) python15.lib"; \
+	 libs="$(OMNIORB_LIB) $(PYLIB)"; \
 	 $(CXXLINK) -out:$@ -DLL $(CXXLINKOPTIONS) $(IMPORT_LIBRARY_FLAGS) $(PYLIBPATH) $(OBJS) $$libs; \
 	)
 endif
@@ -250,7 +258,7 @@ DIR_CPPFLAGS += $(CORBA_CPPFLAGS)
 
 lib = _omnipymodule.so
 libinit = init_omnipy
-py_exp = /usr/local/lib/python1.5/config/python.exp
+py_exp = /usr/local/lib/python$(PYVERSION)/config/python.exp
 
 ifeq ($(notdir $(CXX)),xlC_r)
 

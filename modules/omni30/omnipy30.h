@@ -30,6 +30,15 @@
 // $Id$
 
 // $Log$
+// Revision 1.26  2000/10/02 17:35:01  dpg1
+// Merge for 1.2 release
+//
+// Revision 1.25.2.2  2000/09/21 11:05:49  dpg1
+// Fix race condition with Py_omniServant deletion.
+//
+// Revision 1.25.2.1  2000/09/06 11:20:49  dpg1
+// Support for Python 1.6 and 2.0b1.
+//
 // Revision 1.25  2000/06/27 15:13:11  dpg1
 // New copyObjRefArgument() function
 //
@@ -121,10 +130,10 @@
 #ifndef _omnipy30_h_
 #define _omnipy30_h_
 
-#if defined(__WIN32__) || defined(__VMS)
+#if defined(__VMS)
 #include <Python.h>
 #else
-#include <python1.5/Python.h>
+#include PYTHON_INCLUDE
 #endif
 
 #include <omniORB3/CORBA.h>
@@ -491,7 +500,7 @@ public:
   // Servant object                                                         //
   ////////////////////////////////////////////////////////////////////////////
 
-  class Py_omniServant : public virtual PortableServer::RefCountServantBase {
+  class Py_omniServant : public virtual PortableServer::ServantBase {
 
   public:
 
@@ -516,12 +525,19 @@ public:
 
     inline PyObject* pyServant() { Py_INCREF(pyservant_); return pyservant_; }
 
-  private:
+    // _add_ref and _remove_ref lock the Python interpreter lock
+    // _locked versions assume the interpreter lock is already locked
+    virtual void                    _add_ref();
+    virtual void                    _remove_ref();
+    void                            _locked_add_ref();
+    void                            _locked_remove_ref();
 
+  private:
     PyObject* pyservant_;	// Python servant object
     PyObject* opdict_;		// Operation descriptor dictionary
     PyObject* pyskeleton_;	// Skeleton class object
     char*     repoId_;
+    int       refcount_;
 
     // Not implemented:
     Py_omniServant(const Py_omniServant&);
@@ -531,6 +547,8 @@ public:
   // Function to find or create a Py_omniServant object for a Python
   // servant object. If the Python object is not an instance of a
   // class derived from PortableServer.Servant, returns 0.
+  //
+  // Caller must hold the Python interpreter lock.
   static Py_omniServant* getServantForPyObject(PyObject* pyservant);
 
 

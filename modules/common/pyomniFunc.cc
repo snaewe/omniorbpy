@@ -29,8 +29,11 @@
 
 // $Id$
 // $Log$
-// Revision 1.2  2000/08/21 10:20:22  dpg1
-// Merge from omnipy1_develop for 1.1 release
+// Revision 1.3  2000/10/02 17:35:01  dpg1
+// Merge for 1.2 release
+//
+// Revision 1.1.2.3  2000/09/19 09:24:16  dpg1
+// More paranoid about clearing Python error status
 //
 // Revision 1.1.2.2  2000/08/18 11:40:01  dpg1
 // New omniORB.traceLevel function
@@ -80,6 +83,8 @@ static CORBA::Boolean transientEH(void* cookie, CORBA::ULong retries,
 		      "Traceback follows:");
 	PyErr_Print();
       }
+      else
+	PyErr_Clear();
       return 0;
     }
     if (!PyInt_Check(r)) {
@@ -124,6 +129,8 @@ static CORBA::Boolean commFailureEH(void* cookie, CORBA::ULong retries,
 		      "Traceback follows:");
 	PyErr_Print();
       }
+      else
+	PyErr_Clear();
       return 0;
     }
     if (!PyInt_Check(r)) {
@@ -167,6 +174,8 @@ static CORBA::Boolean systemEH(void* cookie, CORBA::ULong retries,
 		      "Traceback follows:");
 	PyErr_Print();
       }
+      else
+	PyErr_Clear();
       return 0;
     }
     if (!PyInt_Check(r)) {

@@ -28,8 +28,11 @@
 
 // $Id$
 // $Log$
-// Revision 1.6  2000/08/21 10:20:20  dpg1
-// Merge from omnipy1_develop for 1.1 release
+// Revision 1.7  2000/10/02 17:35:00  dpg1
+// Merge for 1.2 release
+//
+// Revision 1.5.2.2  2000/09/26 13:24:59  dpg1
+// Missed some omniidl updates from omniORB 3
 //
 // Revision 1.5.2.1  2000/08/21 09:10:48  dpg1
 // Merge omniidl long long support from omniORB 3
@@ -48,6 +51,8 @@
 //
 
 #include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include <idlutil.h>
 
 char* idl_strdup(const char* s)
@@ -119,7 +124,7 @@ int strcasecmp(const char* s1, const char* s2)
 
 #ifdef HAS_LongLong
 
-#  ifdef __WIN32__
+#  if defined(__WIN32__)
 
 IdlIntLiteral
 idl_strtoul(const char* text, int base)
@@ -139,6 +144,14 @@ idl_strtoul(const char* text, int base)
     abort();
   }
   return ull;
+}
+
+#  elif defined(__osf1__)
+
+IdlIntLiteral
+idl_strtoul(const char* text, int base)
+{
+  return strtoul(text, 0, base);
 }
 
 #  else

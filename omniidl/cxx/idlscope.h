@@ -28,6 +28,17 @@
 
 // $Id$
 // $Log$
+// Revision 1.6  2000/10/02 17:35:00  dpg1
+// Merge for 1.2 release
+//
+// Revision 1.5.2.2  2000/09/19 09:25:20  dpg1
+// Rename Scope::Entry::Kind to Scope::Entry::EntryKind to avoid compiler
+// bugs.
+//
+// Revision 1.5.2.1  2000/08/29 15:20:28  dpg1
+// New relativeScope() function. New -i flag to enter interactive loop
+// after parsing
+//
 // Revision 1.5  2000/03/03 17:41:38  dpg1
 // Major reorganisation to support omniORB 3.0 as well as 2.8.
 //
@@ -61,8 +72,8 @@ public:
       delete [] identifier_;
     }
 
-    inline const char* identifier() { return identifier_; }
-    inline Fragment*   next()       { return next_; };
+    inline const char* identifier() const { return identifier_; }
+    inline Fragment*   next()       const { return next_; };
 
   protected:
     Fragment* next_;
@@ -75,8 +86,9 @@ public:
 
   ScopedName(const char* identifier, _CORBA_Boolean absolute);
 
-  // Copy constructor
+  // Copy constructors
   ScopedName(const ScopedName* sn);
+  ScopedName(const Fragment*   frags, _CORBA_Boolean absolute);
 
   ~ScopedName();
 
@@ -182,15 +194,23 @@ public:
   EntryList* iFindWithInheritance(const char* identifier) const;
 
   // Find an entry based on a ScopedName. File and line requesting the
-  // find are given so errors can be reported nicely.
+  // find are given so errors can be reported nicely. If file and line
+  // are zero, do not report errors.
   const Entry* findScopedName(const ScopedName* sn,
-			      const char* file, int line) const;
+			      const char* file = 0, int line = 0) const;
 
   // Find an entry based on a ScopedName, and mark it as used in this
   // scope (and any parent scopes with nestedUse true).
   const Entry* findForUse(const ScopedName* sn, const char* file, int line);
 
   void addUse(const ScopedName* sn, const char* file, int line);
+
+  // Given source and destination ScopedNames, construct a relative or
+  // absolute ScopedName which uniquely identifies the destination
+  // from within the scope of the source. Returns 0 if either scoped
+  // name does not exist, or is not absolute.
+  static ScopedName* relativeScopedName(const ScopedName* from,
+					const ScopedName* to);
 
 
   // The following add functions take identifiers with _ escape
@@ -231,7 +251,7 @@ public:
   class Entry {
   public:
 
-    enum Kind {
+    enum EntryKind {
       E_MODULE,			// Module
       E_DECL,			// Declaration
       E_CALLABLE,		// Operation or attribute
@@ -241,14 +261,14 @@ public:
       E_PARENT			// Name of enclosing scope
     };
 
-    Entry(const Scope* container, Kind kind, const char* identifier,
+    Entry(const Scope* container, EntryKind kind, const char* identifier,
 	  Scope* scope, Decl* decl, IdlType* idltype, Entry* inh_from,
 	  const char* file, int line);
 
     ~Entry();
 
     const Scope*      container()  const { return container_; }
-    Kind              kind()       const { return kind_; }
+    EntryKind         kind()       const { return kind_; }
     const char*       identifier() const { return identifier_; }
     const ScopedName* scopedName() const { return scopedName_; }
     const char*       file()       const { return file_; }
@@ -266,7 +286,7 @@ public:
 
   private:
     const Scope*      container_;
-    Kind              kind_;
+    EntryKind         kind_;
     char*             identifier_;
     ScopedName*       scopedName_;
     Scope*            scope_;

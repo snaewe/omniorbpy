@@ -15,7 +15,7 @@
 
 <H1>Chapter&nbsp;1&nbsp;&nbsp; Introduction</H1>
 omniORBpy is an Object Request Broker (ORB) that implements the CORBA
-2.3 Python mapping&nbsp;[<A HREF="omniORBpy009.html#pythonmapping"><CITE>OMG00</CITE></A>]. It is designed for use with
+2.3 Python mapping&nbsp;[<A HREF="omniORBpy009.html#pythonmapping"><CITE>OMG00b</CITE></A>]. It is designed for use with
 omniORB 3, but it can also be used with omniORB 2.8. If you use
 omniORB 3.0, the full POA functionality is available; with omniORB 2.8
 many POA functions are not supported.<BR>
@@ -107,7 +107,9 @@ On Unix platforms, set <TT>PYTHONPATH</TT> with a command like:<BR>
 omniORB tree.)<BR>
 <BR>
 You should also add the <TT>bin/</TT><TT>$</TT><TT>FARCH</TT> directory
-to your <TT>PATH</TT>, so you can run the IDL compiler, omniidl.<BR>
+to your <TT>PATH</TT>, so you can run the IDL compiler, omniidl.
+Finally, add the <TT>lib/</TT><TT>$</TT><TT>FARCH</TT> directory to
+<TT>LD_LIBRARY_PATH</TT>, so the omniORB core library can be found.<BR>
 <BR>
 
 <H3>1.2.2&nbsp;&nbsp; Configuration file</H3><UL>
