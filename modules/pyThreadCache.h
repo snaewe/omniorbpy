@@ -31,6 +31,11 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.4  2005/02/22 11:02:37  dgrisby
+// On Python >= 2.3, the thread state cache could incorrectly cache
+// thread state for a thread that had exited, and a new one started with
+// the same id.
+//
 // Revision 1.1.2.3  2005/01/24 17:28:58  dgrisby
 // Unbelievably unlikely race condition in thread cache / Python worker
 // thread creation. Of course it happened anyway.
@@ -112,6 +117,12 @@ public:
       if (cn) {
 	cn->used = 1;
 	cn->active++;
+#if PY_VERSION_HEX >= 0x02030000
+	if (cn->reused_state) {
+	  cn->threadState = PyGILState_GetThisThreadState();
+	  OMNIORB_ASSERT(cn->threadState);
+	}
+#endif
 	return cn;
       }
     }
