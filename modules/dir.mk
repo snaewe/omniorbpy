@@ -46,8 +46,8 @@ lib     = $(soname).$(OMNIPY_MINOR)
 $(lib): $(OBJS)
 	(set -x; \
 	$(RM) $@; \
-	$(CXXLINK) $(CXXLINKOPTIONS) -shared -o $@ -Wl,-soname,$(soname) $(IMPORT_LIBRARY_FLAGS) $(CORBA_LIB_DEPEND)\
-	 $(filter-out $(LibSuffixPattern),$^) $(CORBA_LIB)\
+	$(CXXLINK) $(CXXLINKOPTIONS) -shared -o $@ -Wl,-soname,$(soname) $(IMPORT_LIBRARY_FLAGS) $(OMNIORB2_LIB_NODYN_DEPEND)\
+	 $(filter-out $(LibSuffixPattern),$^) $(OMNIORB2_LIB_NODYN)\
 	)
 
 all:: $(lib)
@@ -84,7 +84,7 @@ $(lib): $(OBJS)
 	$(RM) $@; \
         $(CXX) -G -o $@ -h $(soname) $(IMPORT_LIBRARY_FLAGS) \
          $(patsubst %,-R %,$(IMPORT_LIBRARY_DIRS)) \
-         $(filter-out $(LibSuffixPattern),$^) -lomnithread -lpthread -lposix4 -mt -lsocket -lnsl -lomniORB2 -lomniDynamic2 -ltcpwrapGK -lC \
+         $(filter-out $(LibSuffixPattern),$^) -lomnithread -lpthread -lposix4 -mt -lsocket -lnsl -lomniORB2 -ltcpwrapGK -lC \
 	)
 
 all:: $(lib)
@@ -132,12 +132,56 @@ $(lib): $(OBJS)
          fi; \
 	 set -x; \
 	 $(RM) $@; \
-	 libs="$(CORBA_LIB) python15.lib"; \
+	 libs="$(OMNIORB2_LIB) python15.lib"; \
 	 $(CXXLINK) -out:$@ -DLL $(CXXLINKOPTIONS) $(IMPORT_LIBRARY_FLAGS) $(PYLIBPATH) $(OBJS) $$libs; \
 	)
 
 export:: $(lib)
 	@$(ExportLibrary)
 
+
+endif
+
+
+#############################################################################
+#   Make rules for AIX                                                      #
+#############################################################################
+
+ifdef AIX
+
+CXXOPTIONS += -I. -I/usr/local/include
+
+DIR_CPPFLAGS += $(CORBA_CPPFLAGS)
+
+lib = _omnipymodule.so
+libinit = init_omnipy
+py_exp = /usr/local/lib/python1.5/config/python.exp
+
+ifeq ($(notdir $(CXX)),xlC_r)
+
+$(lib): $(OBJS) $(PYOBJS)
+	@(set -x; \
+	$(RM) $@; \
+	$(MAKECPPSHAREDLIB) \
+	     -o $(lib) \
+	     -bI:$(py_exp) \
+	     -n $(libinit) \
+	     $(IMPORT_LIBRARY_FLAGS) \
+	     -lomnithread2 -lomniORB28 \
+	     -bhalt:4 -T512 -H512 \
+	     $(filter-out $(LibSuffixPattern),$^) \
+	     -p 40 \
+	 ; \
+       )
+
+endif
+
+all:: $(lib)
+
+clean::
+	$(RM) $(lib)
+
+export:: $(lib)
+	@$(ExportLibrary)
 
 endif

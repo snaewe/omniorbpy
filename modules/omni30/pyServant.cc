@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.10  1999/11/16 17:32:36  dpg1
+// Changes for AIX.
+//
 // Revision 1.9  1999/11/08 11:43:35  dpg1
 // Changes for NT support.
 //
@@ -65,12 +68,12 @@
 
 #include <omnipy.h>
 
-#include <iostream.h>
+//#include <iostream.h>
 
 
 // Helper class to create a Python ThreadState object and grab the
 // Python interpreter lock, then release the lock and delete the
-// object when it goes out of state.
+// object when it goes out of scope.
 
 class lockWithNewThreadState {
 public:
@@ -88,7 +91,7 @@ public:
     // is happy. *** This is very dependent on the implementation of
     // the threading module.
     dummy_thread_ = PyEval_CallObject(omniPy::pyDummyThreadClass,
-				      empty_tuple_);
+				      omniPy::pyEmptyTuple);
     assert(dummy_thread_);
   }
 
@@ -96,7 +99,7 @@ public:
     // Remove the dummy Thread object
     PyObject* meth = PyObject_GetAttrString(dummy_thread_, "_Thread__delete");
     assert(meth);
-    PyEval_CallObject(meth, empty_tuple_);
+    PyEval_CallObject(meth, omniPy::pyEmptyTuple);
     Py_DECREF(meth);
     Py_DECREF(dummy_thread_);
 
@@ -123,10 +126,7 @@ private:
   PyThreadState*   newstate_;
   PyThreadState*   oldstate_;
   PyObject*        dummy_thread_;
-  static PyObject* empty_tuple_;
 };
-
-PyObject* lockWithNewThreadState::empty_tuple_ = PyTuple_New(0);
 
 
 omniPy::
@@ -229,7 +229,7 @@ Py_Servant::dispatch(GIOP_S&        giop_server,
   PyObject* method = PyObject_GetAttrString(pyservant_, (char*)op);
 
   if (!method) {
-    cerr << "Couldn't find method called " << op << "!" << endl;
+    //    cerr << "Couldn't find method called " << op << "!" << endl;
     Py_DECREF(argtuple);
     throw CORBA::NO_IMPLEMENT(0,CORBA::COMPLETED_NO);
   }

@@ -32,6 +32,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.8  1999/11/16 17:32:36  dpg1
+// Changes for AIX.
+//
 // Revision 1.7  1999/10/11 16:52:51  dpg1
 // Fixed reference counting bug when receiving a reference to a local C++
 // object.
@@ -101,9 +104,7 @@ omniPy::createPyCorbaObjRef(const char*             targetRepoId,
 
   assert(objrefClass); // Couldn't even find CORBA.Object!
 
-  PyObject* arglist    = PyTuple_New(0);
-  PyObject* pyobjref   = PyEval_CallObject(objrefClass, arglist);
-  Py_DECREF(arglist);
+  PyObject* pyobjref = PyEval_CallObject(objrefClass, omniPy::pyEmptyTuple);
 
   assert(PyInstance_Check(pyobjref));
 

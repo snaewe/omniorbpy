@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.23  1999/11/16 17:32:36  dpg1
+// Changes for AIX.
+//
 // Revision 1.22  1999/11/09 17:27:34  dpg1
 // narrow() now properly handles CORBA system exceptions.
 //
@@ -134,6 +137,7 @@ PyObject* pyomniORBtypeMap;     //  The repoId to descriptor mapping
 PyObject* pyomniORBwordMap;     //  Reserved word map
 PyObject* pyCreateTypeCode;	// Function to create a TypeCode object
 PyObject* pyDummyThreadClass;   // threading module dummy thread class
+PyObject* pyEmptyTuple;         // Zero element tuple
 }
 
 #else
@@ -150,6 +154,7 @@ PyObject* omniPy::pyomniORBwordMap;     //  Reserved word map
 PyObject* omniPy::pyCreateTypeCode;	// Function to create a TypeCode object
 PyObject* omniPy::pyDummyThreadClass;   // threading module dummy
                                         //  thread class
+PyObject* omniPy::pyEmptyTuple;         // Zero element tuple.
 #endif
 
 
@@ -230,6 +235,7 @@ extern "C" {
 
     omniPy::pyDummyThreadClass = PyObject_GetAttrString(pythreading,
 							"_DummyThread");
+    omniPy::pyEmptyTuple = PyTuple_New(0);
 
     assert(omniPy::pyCORBAsysExcMap);
     assert(PyDict_Check(omniPy::pyCORBAsysExcMap));
@@ -245,6 +251,7 @@ extern "C" {
     assert(PyFunction_Check(omniPy::pyCreateTypeCode));
     assert(omniPy::pyDummyThreadClass);
     assert(PyClass_Check(omniPy::pyDummyThreadClass));
+    assert(omniPy::pyEmptyTuple);
 
     //    cout << "Python objects registered." << endl;
 
