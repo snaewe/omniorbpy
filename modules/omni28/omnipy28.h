@@ -31,6 +31,10 @@
 // $Id$
 
 // $Log$
+// Revision 1.8  1999/09/29 09:05:03  dpg1
+// Now releases the Python interpreter lock before invoke's call to
+// _is_a().
+//
 // Revision 1.7  1999/09/28 14:23:30  dpg1
 // Fixed some bugs in handling the Python interpreter lock.
 //
@@ -323,6 +327,21 @@ public:
     //    cout << "Py_OmniProxyCallDesc created: " << op << " " << len << endl;
   }
 
+  virtual ~Py_OmniProxyCallDesc() {
+    assert(!tstate_);
+  }
+
+  inline void releaseInterpreterLock() {
+    assert(!tstate_);
+    tstate_ = PyEval_SaveThread();
+  }
+
+  inline void reacquireInterpreterLock() {
+    assert(tstate_);
+    PyEval_RestoreThread(tstate_);
+    tstate_ = 0;
+  }
+
   virtual CORBA::ULong alignedSize(CORBA::ULong msgsize);
 
   virtual void marshalArguments(GIOP_C& giop_client);
@@ -374,7 +393,17 @@ public:
   }
 
   virtual ~Py_OmniOWProxyCallDesc() {
-    if (tstate_) PyEval_RestoreThread(tstate_);
+    assert(!tstate_);
+  }
+
+  inline void releaseInterpreterLock() {
+    tstate_ = PyEval_SaveThread();
+  }
+
+  inline void reacquireInterpreterLock() {
+    assert(tstate_);
+    PyEval_RestoreThread(tstate_);
+    tstate_ = 0;
   }
 
   virtual CORBA::ULong alignedSize(CORBA::ULong msgsize);

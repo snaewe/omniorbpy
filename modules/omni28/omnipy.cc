@@ -31,6 +31,10 @@
 // $Id$
 
 // $Log$
+// Revision 1.15  1999/09/29 09:05:03  dpg1
+// Now releases the Python interpreter lock before invoke's call to
+// _is_a().
+//
 // Revision 1.14  1999/09/28 16:19:41  dpg1
 // Small memory management issues fixed.
 //
@@ -651,6 +655,7 @@ extern "C" {
 					       in_d, out_d, exc_d,
 					       op_args);
 	try {
+	  call_desc.releaseInterpreterLock();
 	  OmniProxyCallWrapper::invoke(oobj, call_desc);
 	  return call_desc.result();
 	}
@@ -666,7 +671,9 @@ extern "C" {
 	omniPy::Py_OmniOWProxyCallDesc call_desc(op, op_len + 1,
 						 in_d, op_args);
 	try {
+	  call_desc.releaseInterpreterLock();
 	  OmniProxyCallWrapper::one_way(oobj, call_desc);
+	  call_desc.reacquireInterpreterLock();
 
 	  Py_INCREF(Py_None);
 	  return Py_None;

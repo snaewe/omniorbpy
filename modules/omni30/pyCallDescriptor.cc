@@ -31,6 +31,10 @@
 // $Id$
 
 // $Log$
+// Revision 1.11  1999/09/29 09:05:03  dpg1
+// Now releases the Python interpreter lock before invoke's call to
+// _is_a().
+//
 // Revision 1.10  1999/09/28 14:23:30  dpg1
 // Fixed some bugs in handling the Python interpreter lock.
 //
@@ -70,15 +74,10 @@
 CORBA::ULong
 omniPy::Py_OmniProxyCallDesc::alignedSize(CORBA::ULong msgsize)
 {
-  // If a system exception was handled by a system exception handler,
-  // or we get location forwarded, the proxy call wrapper will re-call
-  // alignedSize() after the Python interpreter lock has been released
-  // by marshalArguments(). We must re-lock it before looking at the
-  // call descriptors.
-  if (tstate_) {
-    PyEval_RestoreThread(tstate_);
-    tstate_ = 0;
-  }
+  // alignedSize() is called with the interpreter lock
+  // released. Reacquire it so we can touch the descriptor objects
+  // safely
+  reacquireInterpreterLock();
 
   for (int i=0; i < in_l_; i++)
     msgsize = omniPy::alignedSize(msgsize,
@@ -92,24 +91,22 @@ void
 omniPy::Py_OmniProxyCallDesc::marshalArguments(GIOP_C& giop_client)
 {
   // We should always hold the interpreter lock when entering this
-  // function.
-  assert(!tstate_);
+  // function. The call to releaseInterpreterLock() will assert that
+  // this is true. It's very unlikely that we will crash in the
+  // mean-time if something has gone wrong.
 
   for (int i=0; i < in_l_; i++)
     omniPy::marshalPyObject(giop_client,
 			    PyTuple_GET_ITEM(in_d_,i),
 			    PyTuple_GET_ITEM(args_,i));
-
-  tstate_ = PyEval_SaveThread();
+  releaseInterpreterLock();
 }
 
 
 void
 omniPy::Py_OmniProxyCallDesc::unmarshalReturnedValues(GIOP_C& giop_client)
 {
-  assert(tstate_);
-  PyEval_RestoreThread(tstate_);
-  tstate_ = 0;
+  reacquireInterpreterLock();
 
   assert(out_l_ >= 0);
   // out_l_ == -1 if it's a oneway operation, but we should never
@@ -139,9 +136,7 @@ void
 omniPy::Py_OmniProxyCallDesc::userException(GIOP_C&     giop_client,
 					    const char* repoId)
 {
-  assert(tstate_);
-  PyEval_RestoreThread(tstate_);
-  tstate_ = 0;
+  reacquireInterpreterLock();
 
   PyObject* d_o = PyDict_GetItemString(exc_d_, (char*)repoId);
 
@@ -178,10 +173,7 @@ omniPy::Py_OmniProxyCallDesc::userException(GIOP_C&     giop_client,
 CORBA::ULong
 omniPy::Py_OmniOWProxyCallDesc::alignedSize(CORBA::ULong msgsize)
 {
-  if (tstate_) {
-    PyEval_RestoreThread(tstate_);
-    tstate_ = 0;
-  }
+  reacquireInterpreterLock();
 
   for (int i=0; i < in_l_; i++)
     msgsize = omniPy::alignedSize(msgsize,
@@ -194,12 +186,9 @@ omniPy::Py_OmniOWProxyCallDesc::alignedSize(CORBA::ULong msgsize)
 void
 omniPy::Py_OmniOWProxyCallDesc::marshalArguments(GIOP_C& giop_client)
 {
-  assert(!tstate_);
-
   for (int i=0; i < in_l_; i++)
     omniPy::marshalPyObject(giop_client,
 			    PyTuple_GET_ITEM(in_d_,i),
 			    PyTuple_GET_ITEM(args_,i));
-
-  tstate_ = PyEval_SaveThread();
+  releaseInterpreterLock();
 }
