@@ -28,6 +28,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.3  1999/11/02 10:01:46  dpg1
+# Minor fixes.
+#
 # Revision 1.2  1999/11/01 20:19:55  dpg1
 # Support for union switch types declared inside the switch statement.
 #
@@ -105,8 +108,9 @@ forward_interface = """\
 interface_class = """\
 
 # interface @ifid@
+@modname@._d_@ifid@ = (omniORB.tcInternal.tv_objref, "@repoId@", "@ifid@")
 class @ifid@ @inherits@:
-    _NP_RepositoryId = "@repoId@"
+    _NP_RepositoryId = @modname@._d_@ifid@[1]
 
     def __init__(self):
         raise RuntimeError("Cannot construct objects of this type.")
@@ -116,7 +120,6 @@ class @ifid@ @inherits@:
 
 interface_descriptor = """
 @modname@.@ifid@ = @ifid@
-@modname@._d_@ifid@  = (omniORB.tcInternal.tv_objref, @ifid@._NP_RepositoryId, "@ifid@")
 @modname@._tc_@ifid@ = omniORB.tcInternal.createTypeCode(@modname@._d_@ifid@)
 omniORB.registerType(@ifid@._NP_RepositoryId, @modname@._d_@ifid@, @modname@._tc_@ifid@)"""
 
@@ -443,8 +446,9 @@ class PythonVisitor:
 
         assert self.at_module_scope
 
+        sname = dotName(node.scopedName())
+
         if node.mainFile():
-            sname = dotName(node.scopedName())
             self.st.out(module_start, sname=sname, filename=node.file())
 
         parentmodname = self.modname
@@ -504,7 +508,7 @@ class PythonVisitor:
 
         # Class header
         self.st.out(interface_class, ifid=ifid, inherits=inherits,
-                    repoId=node.repoId())
+                    repoId=node.repoId(), modname=self.modname)
 
         # Declarations within the interface
         if len(node.declarations()) > 0:
@@ -686,9 +690,9 @@ class PythonVisitor:
         cname = mangle(node.identifier())
 
         if self.at_module_scope:
-            value = valueToString(node.value(), node.constType().kind(), [])
+            value = valueToString(node.value(), node.constKind(), [])
         else:
-            value = valueToString(node.value(), node.constType().kind(),
+            value = valueToString(node.value(), node.constKind(),
                                   self.currentScope)
         if self.at_module_scope:
             self.st.out(constant_at_module_scope,
@@ -833,7 +837,7 @@ class PythonVisitor:
                 self.st.inc_indent()
                 ams = self.at_module_scope
                 self.at_module_scope = 0
-                self.currentScope.append(node.identfier())
+                self.currentScope.append(node.identifier())
                 
                 mem.memberType().decl().accept(self)
 
@@ -883,7 +887,10 @@ class PythonVisitor:
         if self.handleImported(node): return
 
         uname = mangle(node.identifier())
-        stype = typeToDescriptor(node.switchType(), self.currentScope)
+        if self.at_module_scope:
+            stype = typeToDescriptor(node.switchType(), [])
+        else:
+            stype = typeToDescriptor(node.switchType(), self.currentScope)
 
         if node.recursive():
             if self.at_module_scope:
@@ -928,7 +935,7 @@ class PythonVisitor:
                 self.st.inc_indent()
                 ams = self.at_module_scope
                 self.at_module_scope = 0
-                self.currentScope.append(node.identfier())
+                self.currentScope.append(node.identifier())
                 
                 case.caseType().decl().accept(self)
 
@@ -951,20 +958,28 @@ class PythonVisitor:
             for label in case.labels():
                 if label.default():
                     def_m  = '"' + cname + '"'
-                    def_d  = valueToString(label.value(), label.labelKind(),
-                                           self.currentScope)
                     defpos = str(i)
                     if self.at_module_scope:
+                        def_d  = valueToString(label.value(),
+                                               label.labelKind(), [])
                         m_def  = self.modname + "._m_" + uname + \
                                  "[" + defpos + "]"
                     else:
+                        def_d  = valueToString(label.value(),
+                                               label.labelKind(),
+                                               self.currentScope)
                         m_def  = "_m_" + uname + "[" + defpos + "]"
 
                     m_un_l.append('(-1, "' + cname + '", ' +\
                                   ctype + ')')
                 else:
-                    slabel = valueToString(label.value(), label.labelKind(),
-                                           self.currentScope)
+                    if self.at_module_scope:
+                        slabel = valueToString(label.value(),
+                                               label.labelKind(), [])
+                    else:
+                        slabel = valueToString(label.value(),
+                                               label.labelKind(),
+                                               self.currentScope)
 
                     m_to_d_l.append('"' + cname + '": ' + slabel)
                     d_to_m_l.append(slabel + ': "' + cname + '"')
@@ -1201,9 +1216,10 @@ def typeAndDeclaratorToDescriptor(tspec, decl, from_scope, is_typedef=0):
     return desc
 
 def dotName(scopedName, our_scope=[]):
-    if scopedName[:-1] == our_scope:
-        return mangle(scopedName[-1])
-    l = map(mangle, scopedName)
+    if scopedName[:len(our_scope)] == our_scope:
+        l = map(mangle, scopedName[len(our_scope):])
+    else:
+        l = map(mangle, scopedName)
     return string.join(l, ".")
 
 def mangle(name):
