@@ -3,6 +3,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.3  1999/07/29 14:17:18  dpg1
+# TypeCode creation interface.
+#
 # Revision 1.2  1999/07/19 15:48:40  dpg1
 # All sorts of fixes.
 #
@@ -90,16 +93,116 @@ def typecode(t):
     return createTypeCode(d)
 
 
+# Implementations of public ORB TypeCode creation functions
+
+def createStructTC(id, name, members):
+    dlist  = [tv_struct, None, id, name]
+    mnames = []
+    for m in members:
+        mnames.append(m.name)
+        dlist.append(m.name)
+        dlist.append(m.type._d)
+    str = omniORB.createUnknownStruct(id, mnames)
+    dlist[1] = str
+    d = tuple(dlist)
+    insertIndirections(d)
+    return createTypeCode(d)
+
+def createUnionTC(id, name, discriminator_type, members):
+    mlist   = []
+    count   = 0
+    defused = -1
+    mmap    = {}
+    for m in members:
+        val = m.label.value()
+        if m.label.typecode().kind() == CORBA.tk_octet and val == 0:
+            val     = -1
+            defused = count
+
+        tup = (val, m.name, m.type._d)
+        if defused != count: mmap[val] = tup
+        mlist.append(tup)
+        count = count + 1
+
+    union = omniORB.createUnknownUnion(id, defused, mlist)
+
+    if defused >= 0:
+        default = mlist[defused]
+    else:
+        default = None
+
+    d = (tv_union, union, id, name, discriminator_type._k._v,
+         defused, tuple(mlist), default, mmap)
+    insertIndirections(d)
+    return createTypeCode(d)
+
+def createEnumTC(id, name, members):
+    mlist = []
+    count = 0
+
+    for m in members:
+        mlist.append(omniORB.EnumItem(m, count))
+        count = count + 1
+
+    d = (tv_enum, id, name, tuple(mlist))
+    insertIndirections(d)
+    return createTypeCode(d)
+
+def createAliasTC(id, name, original_type):
+    d = (tv_alias, id, name, original_type._d)
+    insertIndirections(d)
+    return createTypeCode(d)
+
+def createExceptionTC(id, name, members):
+    dlist  = [tv_except, None, id, name]
+    mnames = []
+    for m in members:
+        mnames.append(m.name)
+        dlist.append(m.name)
+        dlist.append(m.type._d)
+    exc = omniORB.createUnknownException(id, mnames)
+    dlist[1] = exc
+    d = tuple(dlist)
+    insertIndirections(d)
+    return createTypeCode(d)
+
+def createInterfaceTC(id, name):
+    d = (tv_objref, id, name)
+    insertIndirections(d)
+    return createTypeCode(d)
+
+def createStringTC(bound):
+    d = (tv_string, bound)
+    insertIndirections(d)
+    return createTypeCode(d)
+
+def createSequenceTC(bound, element_type):
+    d = (tv_sequence, element_type._d, bound)
+    insertIndirections(d)
+    return createTypeCode(d)
+
+def createArrayTC(length, element_type):
+    d = (tv_array, element_type._d, length)
+    insertIndirections(d)
+    return createTypeCode(d)
+
+def createRecursiveTC(id):
+    class recursivePlaceHolder: pass
+    recursivePlaceHolder._d = (tv__indirect, [id])
+    return recursivePlaceHolder()
+
+
+
 # Function to create a TypeCode object given a descriptor. Returns a
 # static (stub generated) TypeCode object if possible.
 
 def createTypeCode(d, parent=None):
-    if type(d) == types.TupleType:
+    if type(d) is types.TupleType:
         k = d[0]
     else:
         k = d
 
-    print "createTypeCode():", d
+#    print "createTypeCode():", d
     
     if   k == tv_null:      return TypeCode_empty(d)
     elif k == tv_void:      return TypeCode_empty(d)
@@ -166,7 +269,7 @@ def createTypeCode(d, parent=None):
 
 class TypeCode_empty (CORBA.TypeCode):
     def __init__(self, desc):
-        if type(desc) != types.IntType: raise CORBA.INTERNAL
+        if type(desc) is not types.IntType: raise CORBA.INTERNAL
         if desc != tv_null       and \
            desc != tv_void       and \
            desc != tv_short      and \
@@ -189,7 +292,7 @@ class TypeCode_empty (CORBA.TypeCode):
 # string:
 class TypeCode_string (CORBA.TypeCode):
     def __init__(self, desc):
-        if type(desc) != types.TupleType or \
+        if type(desc) is not types.TupleType or \
            desc[0] != tv_string:
             raise CORBA.INTERNAL
         self._d = desc
@@ -202,20 +305,25 @@ class TypeCode_string (CORBA.TypeCode):
 # objref:
 class TypeCode_objref (CORBA.TypeCode):
     def __init__(self, desc):
-        if type(desc) != types.TupleType or \
+        if type(desc) is not types.TupleType or \
            desc[0] != tv_objref:
             raise CORBA.INTERNAL
         self._d = desc
         self._k = CORBA.tk_objref
 
-    def id(self):   return self._d[1]
+    def id(self):
+        if self._d[1] is not None:
+            return self._d[1]
+        else:
+            return "IDL:omg.org/CORBA/Object:1.0"
+        
     def name(self): return self._d[2]
 
 
 # struct:
 class TypeCode_struct (CORBA.TypeCode):
     def __init__(self, desc, parent):
-        if type(desc) != types.TupleType or \
+        if type(desc) is not types.TupleType or \
            desc[0] != tv_struct:
             raise CORBA.INTERNAL
         self._d = desc
@@ -252,7 +360,7 @@ class TypeCode_struct (CORBA.TypeCode):
 # union:
 class TypeCode_union (CORBA.TypeCode):
     def __init__(self, desc, parent):
-        if type(desc) != types.TupleType or \
+        if type(desc) is not types.TupleType or \
            desc[0] != tv_union:
             raise CORBA.INTERNAL
         self._d = desc
@@ -287,8 +395,8 @@ class TypeCode_union (CORBA.TypeCode):
 
     def member_label(self, index):
         if index < 0 or index >= len(self._d[6]): raise CORBA.TypeCode.Bounds
-        if index == self._d[5]: return 0
-        return self._d[6][index][0]
+        if index == self._d[5]: return CORBA.Any(CORBA._tc_octet, 0)
+        return CORBA.Any(createTypeCode(self._d[4]), self._d[6][index][0])
 
     def discriminator_type(self): return createTypeCode(self._d[4])
 
@@ -299,7 +407,7 @@ class TypeCode_union (CORBA.TypeCode):
 # enum:
 class TypeCode_enum (CORBA.TypeCode):
     def __init__(self, desc):
-        if type(desc) != types.TupleType or \
+        if type(desc) is not types.TupleType or \
            desc[0] != tv_enum:
             raise CORBA.INTERNAL
         self._d = desc
@@ -323,7 +431,7 @@ class TypeCode_enum (CORBA.TypeCode):
 # sequence:
 class TypeCode_sequence (CORBA.TypeCode):
     def __init__(self, desc, parent):
-        if type(desc) != types.TupleType or \
+        if type(desc) is not types.TupleType or \
            desc[0] != tv_sequence:
             raise CORBA.INTERNAL
         self._d = desc
@@ -351,7 +459,7 @@ class TypeCode_sequence (CORBA.TypeCode):
 # array:
 class TypeCode_array (CORBA.TypeCode):
     def __init__(self, desc, parent):
-        if type(desc) != types.TupleType or \
+        if type(desc) is not types.TupleType or \
            desc[0] != tv_array:
             raise CORBA.INTERNAL
         self._d = desc
@@ -375,7 +483,7 @@ class TypeCode_array (CORBA.TypeCode):
 # alias:
 class TypeCode_alias (CORBA.TypeCode):
     def __init__(self, desc, parent):
-        if type(desc) != types.TupleType or \
+        if type(desc) is not types.TupleType or \
            desc[0] != tv_alias:
             raise CORBA.INTERNAL
         self._d = desc
@@ -400,7 +508,7 @@ class TypeCode_alias (CORBA.TypeCode):
 # except:
 class TypeCode_except (CORBA.TypeCode):
     def __init__(self, desc, parent):
-        if type(desc) != types.TupleType or \
+        if type(desc) is not types.TupleType or \
            desc[0] != tv_except:
             raise CORBA.INTERNAL
         self._d = desc
@@ -451,7 +559,7 @@ def getCompactDescriptor(d):
     return r
 
 def r_getCompactDescriptor(d, seen, ind):
-    if type(d) == types.TupleType:
+    if type(d) is types.TupleType:
         k = d[0]
     else:
         k = d
@@ -537,7 +645,7 @@ def r_getCompactDescriptor(d, seen, ind):
 # collected by Python's reference counting garbage collector:
 
 def removeIndirections(desc):
-    if type(desc) != types.TupleType: return
+    if type(desc) is not types.TupleType: return
 
     k = desc[0]
 
@@ -566,3 +674,51 @@ def removeIndirections(desc):
 
     elif k == tv__indirect:
         del(desc[1][0])
+
+
+# Function to insert indirections into a descriptor, replacing repoIds
+# with references
+
+def insertIndirections(d):
+    seen = {}
+    ind  = []
+    r_insertIndirections(d, seen, ind)
+
+    # Fix up indirections:
+    for i in ind:
+        try:
+            i[0] = seen[i[0]]
+        except KeyError:
+            pass
+
+def r_insertIndirections(d, seen, ind):
+    if type(d) is not types.TupleType: return
+    k = d[0]
+
+    if k == tv_struct:
+        seen[d[2]] = d
+        for i in range(4, len(d), 2):
+            r_insertIndirections(d[i+1], seen, ind)
+    
+    elif k == tv_union:
+        seen[d[2]] = d
+        for u in d[6]:
+            r_insertIndirections(u[2], seen, ind)
+        
+    elif k == tv_sequence:
+        r_insertIndirections(d[1], seen, ind)
+        
+    elif k == tv_array:
+        r_insertIndirections(d[1], seen, ind)
+
+    elif k == tv_alias:
+        seen[d[1]] = d
+        r_insertIndirections(d[3], seen, ind)
+
+    elif k == tv_except:
+        seen[d[2]] = d
+        for i in range(4, len(d), 2):
+            r_insertIndirections(d[i+1], seen, ind)
+
+    elif k == tv__indirect:
+        ind.append(d[1])
