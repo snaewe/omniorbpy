@@ -452,3 +452,43 @@ export:: $(lib)
 
 endif
 endif
+
+#############################################################################
+#   Make rules for Digital Unix 4/Tru64 5.0                                 #
+#############################################################################
+
+ifdef OSF1
+
+CXXOPTIONS += 
+
+libname = _omnipymodule.so
+soname  = $(libname).$(OMNIPY_MAJOR)
+lib     = $(soname).$(OMNIPY_MINOR)
+
+$(lib): $(OBJS)
+	(set -x; \
+         $(RM) $@; \
+         $(LINK.cc) -shared \
+           -Wl,-set_version,$(soname) -Wl,-rpath,$(LIBDIR) \
+           -Wl,-expect_unresolved,"Py*",-expect_unresolved,"_Py*" \
+           -o $@ $(IMPORT_LIBRARY_FLAGS) \
+           $(filter-out $(LibSuffixPattern),$^) $(OMNIORB_LIB_NODYN)\
+           $(LDLIBS); \
+        )
+
+all:: $(lib)
+
+clean::
+	$(RM) $(lib)
+
+export:: $(lib)
+	@$(ExportLibrary)
+	@(set -x; \
+          cd $(EXPORT_TREE)/$(LIBDIR); \
+          $(RM) $(soname); \
+          ln -s $(lib) $(soname); \
+          $(RM) $(libname); \
+          ln -s $(soname) $(libname); \
+         )
+
+endif

@@ -1,3 +1,10 @@
+Thu Nov 23 11:30:06 GMT 2000 sll
+================================
+
+- Added shared library rule for DU/Tru64.
+
+modules/dir.mk
+
 Mon Oct  2 17:35:57 BST 2000 dpg1
 =================================
 
