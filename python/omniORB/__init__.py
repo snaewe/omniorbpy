@@ -3,6 +3,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.3  1999/08/03 09:03:46  dpg1
+# Unions with no default member fixed.
+#
 # Revision 1.2  1999/07/29 14:16:03  dpg1
 # Server side support.
 #
@@ -116,8 +119,7 @@ class Union:
                 return "_d = " + str(self._d) + ", " + self._def_m + \
                        " = " + str(self._v)
             else:
-                return "_d = " + str(self._d) + ", " + str(self._v) + \
-                       " (malformed)"
+                return "_d = " + str(self._d)
 
     def __getattr__(self, mem):
         try:

@@ -5,6 +5,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.4  1999/08/03 09:03:34  dpg1
+// Unions with no default member fixed.
+//
 // Revision 1.3  1999/07/29 14:19:57  dpg1
 // Various fixes.
 //
@@ -216,7 +219,6 @@ omniPy::alignedSize(CORBA::ULong msgsize,
 	  assert(PyTuple_Check(t_o));
 	  msgsize = alignedSize(msgsize, PyTuple_GET_ITEM(t_o, 2), value);
 	}
-	else throw CORBA::BAD_PARAM();
       }
     }
     break;
@@ -671,7 +673,6 @@ omniPy::marshalPyObject(NetBufferedStream& stream,
 	if (t_o != Py_None) {
 	  marshalPyObject(stream, PyTuple_GET_ITEM(t_o, 2), value);
 	}
-	else throw CORBA::BAD_PARAM();
       }
     }
     break;
@@ -1054,7 +1055,6 @@ omniPy::marshalPyObject(MemBufferedStream& stream,
 	if (t_o != Py_None) {
 	  marshalPyObject(stream, PyTuple_GET_ITEM(t_o, 2), value);
 	}
-	else throw CORBA::BAD_PARAM();
       }
     }
     break;
@@ -1445,7 +1445,6 @@ omniPy::unmarshalPyObject(NetBufferedStream& stream,
 	  assert(PyTuple_Check(t_o));
 	  value = unmarshalPyObject(stream, PyTuple_GET_ITEM(t_o, 2));
 	}
-	else throw CORBA::MARSHAL();
       }
 
       PyObject* untuple = PyTuple_New(2);
@@ -1868,7 +1867,6 @@ omniPy::unmarshalPyObject(MemBufferedStream& stream,
 	  assert(PyTuple_Check(t_o));
 	  value = unmarshalPyObject(stream, PyTuple_GET_ITEM(t_o, 2));
 	}
-	else throw CORBA::MARSHAL();
       }
 
       PyObject* untuple = PyTuple_New(2);
