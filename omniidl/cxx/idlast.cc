@@ -28,8 +28,11 @@
 
 // $Id$
 // $Log$
-// Revision 1.17  2000/03/06 15:15:54  dpg1
-// Minor bug fixes to omniidl. New -nf and -k flags.
+// Revision 1.18  2000/03/07 10:35:14  dpg1
+// More sensible idea of the "most recent" declaration.
+//
+// Revision 1.14.2.2  2000/03/07 10:31:26  dpg1
+// More sensible idea of the "most recent" declaration.
 //
 // Revision 1.14.2.1  2000/03/06 15:03:49  dpg1
 // Minor bug fixes to omniidl. New -nf and -k flags.
@@ -336,6 +339,7 @@ finishConstruction(Decl* defs)
   definitions_ = defs;
   Prefix::endScope();
   Scope::endScope();
+  mostRecent_ = this;
 }
 
 
@@ -520,6 +524,7 @@ finishConstruction(Decl* decls)
   contents_ = decls;
   Prefix::endScope();
   Scope::endScope();
+  mostRecent_ = this;
 }
 
 
@@ -922,6 +927,7 @@ finishConstruction(Member* members)
   Prefix::endScope();
   Scope::endScope();
   finished_ = 1;
+  mostRecent_ = this;
 }
 
 
@@ -953,6 +959,7 @@ finishConstruction(Member* members)
   members_ = members;
   Prefix::endScope();
   Scope::endScope();
+  mostRecent_ = this;
 }
 
 
@@ -1093,6 +1100,7 @@ UnionCase::
 finishConstruction(CaseLabel* labels)
 {
   labels_ = labels;
+  mostRecent_ = this;
 }
 
 
@@ -1239,6 +1247,7 @@ finishConstruction(IdlType* switchType, _CORBA_Boolean constrType,
 
   Prefix::endScope();
   Scope::endScope();
+  mostRecent_ = this;
 }
 
 
@@ -1294,6 +1303,7 @@ finishConstruction(Enumerator* enumerators)
 
   for (Enumerator* e = enumerators; e; e = (Enumerator*)e->next())
     e->finishConstruction(this);
+  mostRecent_ = this;
 }
 
 
@@ -1489,6 +1499,7 @@ finishConstruction(Parameter* parameters, RaisesSpec* raises,
     }
   }
   Scope::endScope();
+  mostRecent_ = this;
 }
 
 
@@ -1568,6 +1579,7 @@ finishConstruction(Parameter* parameters)
 {
   parameters_ = parameters_;
   Scope::endScope();
+  mostRecent_ = this;
 }
 
 ValueBase::
@@ -1890,6 +1902,7 @@ finishConstruction(Decl* contents)
   contents_ = contents;
   Prefix::endScope();
   Scope::endScope();
+  mostRecent_ = this;
 }
 
 Value::
@@ -2014,4 +2027,5 @@ finishConstruction(Decl* contents)
   contents_ = contents;
   Prefix::endScope();
   Scope::endScope();
+  mostRecent_ = this;
 }
