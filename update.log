@@ -1,3 +1,12 @@
+Sun Jun  2 16:55:56 BST 2002 dgrisby
+====================================
+
+- Better comments in embed example.
+
+examples/embed/embed.cc
+examples/embed/embed.py
+
+
 Tue May 28 22:52:49 BST 2002 dgrisby
 ====================================
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# embed.py -- Python part of embedding test
+# embed.py -- Python part of embedding example
 
 import sys
 import CORBA, PortableServer

@@ -1,4 +1,4 @@
-// embed.cc -- C++ part of embedding test
+// embed.cc -- C++ part of embedding example
 
 #include <iostream.h>
 #include <echo.hh>
@@ -40,6 +40,25 @@ private:
   PyThreadState* tstate_;
 };
 
+
+// This function retrieves the omniORBpyAPI struct from the _omnipy
+// Python module.
+static omniORBpyAPI*
+getAPI()
+{
+  PyObject* omnipy = PyImport_ImportModule((char*)"_omnipy");
+  if (!omnipy) {
+    PyErr_SetString(PyExc_ImportError,
+		    (char*)"Cannot import _omnipy");
+    return 0;
+  }
+  PyObject* pyapi = PyObject_GetAttrString(omnipy, (char*)"API");
+  omniORBpyAPI* api = (omniORBpyAPI*)PyCObject_AsVoidPtr(pyapi);
+  Py_DECREF(pyapi);
+  return api;
+}
+
+
 extern "C" {
 
   static PyObject* EmbedGetObjRef(PyObject* self, PyObject* args)
@@ -47,19 +66,15 @@ extern "C" {
     PyObject* pyorb;
     if (!PyArg_ParseTuple(args, (char*)"O", &pyorb)) return 0;
 
-    PyObject* omnipy = PyImport_ImportModule((char*)"_omnipy");
-    if (!omnipy) {
-      PyErr_SetString(PyExc_ImportError,
-		      (char*)"Cannot import _omnipy");
-    }
-    PyObject* pyapi = PyObject_GetAttrString(omnipy, (char*)"API");
-    omniORBpyAPI* api = (omniORBpyAPI*)PyCObject_AsVoidPtr(pyapi);
-    Py_DECREF(pyapi);
+    omniORBpyAPI* api = getAPI();
+    if (!api)
+      return 0;
 
     CORBA::Object_var obj;
     CORBA::ORB_var    orb;
 
     try {
+      // Python code gave us the ORB reference; convert it to the C++ reference
       obj = api->pyObjRefToCxxObjRef(pyorb, 1);
       orb = CORBA::ORB::_narrow(obj);
     }
@@ -68,6 +83,7 @@ extern "C" {
 		      (char*)"getObjRef() expects ORB as its argument");
       return 0;
     }
+    // Activate an Echo object in the Root POA
     obj = orb->resolve_initial_references("RootPOA");
     PortableServer::POA_var poa = PortableServer::POA::_narrow(obj);
 
@@ -81,6 +97,7 @@ extern "C" {
     PortableServer::POAManager_var pman = poa->the_POAManager();
     pman->activate();
 
+    // Return the Echo reference to Python
     PyObject* ret = api->cxxObjRefToPyObjRef(obj, 1);
     return ret;
   }
@@ -90,14 +107,9 @@ extern "C" {
     PyObject* pyobj;
     if (!PyArg_ParseTuple(args, (char*)"O", &pyobj)) return 0;
 
-    PyObject* omnipy = PyImport_ImportModule((char*)"_omnipy");
-    if (!omnipy) {
-      PyErr_SetString(PyExc_ImportError,
-		      (char*)"Cannot import _omnipy");
-    }
-    PyObject* pyapi = PyObject_GetAttrString(omnipy, (char*)"API");
-    omniORBpyAPI* api = (omniORBpyAPI*)PyCObject_AsVoidPtr(pyapi);
-    Py_DECREF(pyapi);
+    omniORBpyAPI* api = getAPI();
+    if (!api)
+      return 0;
 
     CORBA::Object_var obj;
     Echo_var eobj;
@@ -116,6 +128,9 @@ extern "C" {
       return 0;
     }
     {
+      // To do the call into Python, we must release the Python
+      // interpreter lock, since the code doing the upcall acquires
+      // it. The InterpreterUnlocker class deals with it for us.
       InterpreterUnlocker _u;
       cout << "\nTrying call to Python object..." << endl;
       CORBA::String_var ret = eobj->echoString("Hello from C++");
