@@ -1,29 +1,16 @@
-Release Notes for omniORBpy 1.2  (2 October 2000)
+Release Notes for omniORBpy 2.x  (August 2002)
 ===============================
 
-This is omniORBpy 1.2, a robust high-performance CORBA ORB for Python.
+This is omniORBpy 2, a robust high-performance CORBA ORB for Python.
 
 The bindings adhere to the standard IDL to Python mapping which you
-may find at http://cgi.omg.org/cgi-bin/doc?ptc/00-04-08.
+may find at
+
+  http://www.omg.org/technology/documents/formal/python_language_mapping.htm
 
 
-----------------------------------------------------------------------
-                               WARNING!
-
-The mapping for server-side skeletons has changed since pre-release 2.
-Server-side code written for omniORBpy before pre-release 3 MUST be
-updated to work with omniORBpy 1.0 and above.
-
-This unfortunate state of affairs is due to an internal contradiction
-in drafts of the Python mapping. See below for full details.
-
-----------------------------------------------------------------------
-
-
-omniORBpy makes use of the C++ omniORB library. It can use either
-omniORB 3.0 or omniORB 2.8. If you use omniORB 3.0, the full POA
-functionality is available; with omniORB 2.8 many POA functions are
-not supported.
+omniORBpy makes use of the C++ omniORB library. omniORBpy version 2
+can only be used with omniORB 4.0.x.
 
 omniORBpy is currently available for many Unix platforms and Windows.
 It has been ported to a number of other operating systems by outside
@@ -31,107 +18,48 @@ contributors.
 
 It is a good idea to subscribe to the omniORB mailing list. See
 
-    http://www.uk.research.att.com/omniORB/intouch.html
+    http://omniorb.sourceforge.net/list.html
 
 
-Please report any bugs you find to the mailing list, or directly to
-Duncan Grisby,
-                                         dgrisby@uk.research.att.com
-
-
-Summary of changes from omniORBpy 1.1
--------------------------------------
-
-- Bug fixes. For details, see:
-
-    http://www.uk.research.att.com/omniORB/omniORBpy/bugfixes.html
-
-- Support for Python versions beyond 1.5.2.
-
-
-
-Summary of changes from omniORBpy 1.0
--------------------------------------
-
-- Bug fixes. For details, see:
-
-    http://www.uk.research.att.com/omniORB/omniORBpy/bugfixes.html
-
-- Long long support
-
-    Available with omniORB 3.0.1 and above, provided your C++ compiler
-    supports 64-bit types.
-
-- New omniORB.LOCATION_FORWARD exception
-
-
-
-Summary of changes from pre-release 3
--------------------------------------
-
-- A few small tweaks.
-
-
-Summary of changes from pre-release 2
--------------------------------------
-
-- Skeleton package names have changed
-
-    The draft Python mapping specification contradicted itself about
-    whether the skeleton package for IDL module M should be named
-    POA_M or M__POA. Previous omniORBpy pre-releases used the POA_M
-    mapping. Unfortunately, the Python mapping has now been clarified
-    to use M__POA.
-
-    To avoid the runtime and development overhead of
-    backwards-compatibility, the old naming scheme is no longer
-    supported. omniidl will issue a warning if it encounters packages
-    with the old names, and code which imports the packages will fail
-    with an ImportError.
-
-    To update your code, simply replace all occurrences of
-    POA_<module> with <module>__POA. Note that for interfaces in
-    nested modules, M1::M2::I is mapped to M1__POA.M2.I.
-
-- Performance improvements
-
-    Server-side operation dispatch is now around twice as fast as it
-    was before.
-
-- Full mapping compliance
-
-    Minor details to meet the finalized Python mapping specification.
-    All changes (other than the skeleton naming) are additions, so no
-    code needs to be changed. All facilities offered by omniORBpy now
-    follow the standard mapping.
-
-- omniORB API additions
-
-    Support for exception handler functions, URI handling functions,
-    and other minor things.
-
-- Bug fixes
-
-    Mostly fixes for obscure contrived situations which will almost
-    certainly never arise in real life.
-
-- Manual
-
-    A full user guide.
-
+Please report any bugs you find to the mailing list.
 
 
 Building
 --------
 
-You must install the omniORBpy source in the $TOP/src/lib directory of
-a working omniORB 3.0 or 2.8 tree. Then, in the $TOP/src/lib/omniORBpy
-directory, simply do a gnumake export.
+If you are using a Unix platform, the Autoconf configure script will
+probably work for you. Simply create a directory for the build and run
+the configure script, followed by make:
 
-On Windows only, if you are using omniORB 2.8, one of the omniORB
-header files (omniInternal.h) has to be updated. You must get the
-latest version of the omni2_8_develop branch from CVS or the ftp
-snapshots.
+  $ cd [omniORBpy directory]
+  $ mkdir build
+  $ cd build
+  $ ../configure [configure options]
+  $ make
+  $ make install
+
+Run configure --help to get a list of configuration options. Most
+options are standard Autoconf ones. The most commonly required is
+--prefix, used to select the install location. The default is
+/usr/local. To change it, use, for example
+
+  ../configure --prefix=/home/fred/omni_inst
+
+If you use a different prefix to the omniORB install, you must give
+the location to omniORB with the --with-omniorb= option.
+
+The configure script tries to figure out the location of the C and C++
+compilers and Python. It will always choose gcc over the platform's
+native compiler if it is available. To change the choices it makes,
+use variables CC, CXX and PYTHON, e.g.:
+
+  ../configure CXX=/usr/bin/platform_c++ PYTHON=/usr/local/bin/python2.2
+
+
+If you do not have Autoconf support on your platform, you must install
+the omniORBpy source in the $TOP/src/lib directory of a working
+omniORB 4.0 tree. Then, in the $TOP/src/lib/omniORBpy directory,
+simply do a gnumake export.
 
 
 Using omniORBpy
@@ -148,11 +76,11 @@ name you selected in config.mk.
 You should also have $TOP/bin/$FARCH in your PATH, so you can run the
 IDL compiler, omniidl.
 
-omniORBpy requires Python version 1.5.2. The Python interpreter must
-be compiled with thread support.
+omniORBpy requires Python version 1.5.2 or later. The Python
+interpreter must be compiled with thread support.
 
-Full documentation, in a variety of formats, can be found in the
-src/lib/omniORBpy/doc directory.
+Full documentation, in a variety of formats, can be found in the doc
+directory.
 
 
 Missing features
@@ -164,12 +92,4 @@ The following features are currently missing from omniORBpy.
 1. There is no support for DII and DSI. Since you can write IDL and
    Python code on-the-fly, this is not a significant limitation.
 
-2. The long double, wchar, and wstring types are not yet supported.
-
-3. When using omniORB 2.8, the majority of POA functions are not
-   supported, since the Python POA is actually implemented with the
-   C++ BOA. With omniORB 3.0, the full POA functionality is available.
-
-4. Context is not supported.
-
-5. Objects by value are not supported.
+2. Objects by value are not supported.

@@ -1,3 +1,18 @@
+Fri Aug 16 20:53:53 BST 2002 dgrisby
+====================================
+
+- Updates for release.
+
+README
+ReleaseNote
+bugfixes.xml
+bugfixes.xsl
+bugfixes10.xml
+bugfixes11.xml
+configure
+configure.ac
+
+
 Fri Aug 16 20:21:15 BST 2002 dgrisby
 ====================================
 
