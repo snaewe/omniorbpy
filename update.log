@@ -1,3 +1,18 @@
+Wed Nov 19 14:20:40 GMT 2003 dgrisby
+====================================
+
+- Make COS directory a Python package; add it to sys.path if it's not
+  already there.
+
+python/COS/__init__.py     -- new
+python/COS/dir.mk
+python/omniORB/__init__.py
+
+- New omniORBpy-standard package containing top-level CORBA, etc. modules.
+
+contrib/RPMs/omniORBpy.spec
+
+
 Wed Nov 19 01:14:11 GMT 2003 dgrisby
 ====================================
 

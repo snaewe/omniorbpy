@@ -15,6 +15,18 @@ Buildroot: %{_tmppath}/%{name}-%{version}-root
 omniORBpy is a Python language mapping for the omniORB CORBA
 Object Request Broker (ORB).
 
+# "standard" part of the bundle
+
+%package -n %{name}-standard
+Summary:  Files to provide standard top-level CORBA module for %{name}
+Group:    Development/Python
+Provides: libomniorbpy-standard = %{version}-%{release} %{name}-standard = %{version}-%{release}
+
+%description -n %{name}-standard
+The CORBA to Python mapping standard requires top-level CORBA and
+PortableServer modules. This provides those standard modules for
+%{name}. It will clash with similar packages for other Python ORBs.
+
 # devel part of the bundle
 
 %package -n %{name}-devel
@@ -53,6 +65,9 @@ make IMPORT_CPPFLAGS+="$RPM_OPT_FLAGS" all
 
 %install
 make DESTDIR=$RPM_BUILD_ROOT install
+
+# omit omniidl_be/__init__.py because it is a duplicate of the file
+# already provided by omniORB.
 rm -rf $RPM_BUILD_ROOT%{prefix}/lib/python%{py_ver}/site-packages/omniidl_be/__init__.py*
 
 
@@ -70,19 +85,20 @@ rm -rf $RPM_BUILD_ROOT
 %doc COPYING.LIB
 %doc bugfixes*
 %prefix/lib/python%{py_ver}/site-packages/_omni*.so*
-%prefix/lib/python%{py_ver}/site-packages/*.py*
-%prefix/lib/python%{py_ver}/site-packages/CosNaming/*.py*
-%prefix/lib/python%{py_ver}/site-packages/CosNaming__POA/*.py*
-%prefix/lib/python%{py_ver}/site-packages/omniORB.pth
 %prefix/lib/python%{py_ver}/site-packages/omniORB
+
+%files -n %{name}-standard
+%defattr(-,root,root)
+%prefix/lib/python%{py_ver}/site-packages/*.py*
+%prefix/lib/python%{py_ver}/site-packages/omniORB.pth
+%prefix/lib/python%{py_ver}/site-packages/CosNaming
+%prefix/lib/python%{py_ver}/site-packages/CosNaming__POA
 
 %files -n %{name}-devel
 %defattr(-,root,root)
 %doc README* ReleaseNotes* update.log
 %prefix/include/omniORBpy.h
 %prefix/include/omniORB4/pydistdate.hh
-# omit omniidl_be/__init__.py because it is a duplicate of the file
-# already provided by omniORB.
 %prefix/lib/python%{py_ver}/site-packages/omniidl_be/python.py*
 
 %files -n %{name}-doc
