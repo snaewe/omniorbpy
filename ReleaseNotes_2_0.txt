@@ -1,7 +1,7 @@
-RELEASE NOTES for omniORBpy 2.0 release candidate
-=================================================
+RELEASE NOTES for omniORBpy 2.0
+===============================
 
-This is the first release candidate of omniORBpy 2.0.
+This is omniORBpy 2.0. It is a stable release.
 
 See README for building instructions.
 
@@ -28,11 +28,7 @@ And many other improvements.
 Known issues
 ------------
 
-This release candidate has the following known issues and omissions.
-
- - No known issues preventing the 4.0.0 release.
-
-These issues will not be resolved before the 2.0 release, but will be
-fixed by 2.1:
+This release has the following known issues and omissions. They are
+planned for the 2.1 release:
 
  - The planned per-thread call timeout is not implemented.
