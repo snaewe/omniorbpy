@@ -91,4 +91,41 @@ clean::
 
 endif
 
+#############################################################################
+#   Make rules for Windows                                                  #
+#############################################################################
+
+ifdef Win32Platform
+
+PYPREFIX1 := "$(shell $(PYTHON) -c 'import sys,string; sys.stdout.write(string.lower(sys.prefix))')"
+PYPREFIX  := $(subst program files,progra~1,$(subst \,/,$(PYPREFIX1)))
+PYVERSION := $(shell $(PYTHON) -c 'import sys; sys.stdout.write(sys.version[:3])')
+PYINCDIR  := $(PYPREFIX)/include
+PYLIBDIR  := $(PYPREFIX)/libs
+PYLIB     := python$(subst .,,$(PYVERSION)).lib
+
+DIR_CPPFLAGS += -I$(PYINCDIR) -I$(PYINCDIR)/python$(PYVERSION) \
+                -DPYTHON_INCLUDE="<Python.h>"
+
+PYLIBPATH = $(patsubst %,-libpath:%,$(PYLIBDIR))
+
+implib = _embed.lib
+lib = $(patsubst %.lib,%.pyd,$(implib))
+
+all:: $(lib)
+
+$(lib): $(OBJS) $(CORBA_STATIC_STUB_OBJS) $(CORBA_LIB_DEPEND)
+	(set -x; \
+	 $(RM) $@; \
+	 libs="$(OMNIORB_LIB_NODYN) $(PYLIB)"; \
+	 $(CXXLINK) -out:$@ -DLL $(CXXLINKOPTIONS) $(IMPORT_LIBRARY_FLAGS) $(PYLIBPATH) $(OBJS) $(CORBA_STATIC_STUB_OBJS) $$libs; \
+	)
+
+export:: $(lib)
+	@$(ExportLibrary)
+
+
+endif
+
+
 endif

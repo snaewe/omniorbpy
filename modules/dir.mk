@@ -45,6 +45,7 @@ OBJS =    omnipy.o \
 DIR_CPPFLAGS += $(patsubst %,-I%/include,$(OMNIORB_ROOT))
 DIR_CPPFLAGS += $(patsubst %,-I%/include/omniORB4/internal,$(OMNIORB_ROOT))
 DIR_CPPFLAGS += $(patsubst %,-I%/include/omniORB4/internal,$(IMPORT_TREES))
+DIR_CPPFLAGS += -I../include
 
 
 all:: pydistdate.hh

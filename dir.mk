@@ -1,4 +1,4 @@
-SUBDIRS = modules omniidl_be python
+SUBDIRS = modules omniidl_be python include
 
 all::
 	@$(MakeSubdirs)
@@ -7,7 +7,6 @@ export::
 	@$(MakeSubdirs)
 
 ifdef INSTALLTARGET
-SUBDIRS += include
 install::
 	@$(MakeSubdirs)
 endif
