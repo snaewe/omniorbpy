@@ -1,3 +1,11 @@
+Sun Jul 27 00:16:23 BST 2003 dgrisby
+====================================
+
+- Avoid spurious warning about lack of return value.
+
+modules/pyInterceptors.cc
+
+
 Sat Jul 26 22:49:24 BST 2003 dgrisby
 ====================================
 
