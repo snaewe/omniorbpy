@@ -8,6 +8,13 @@
 
 <buglist>
 
+<bug id="7" date="Thu Sep 21 14:14:30 BST 2000" user="dpg1">
+
+  <summary>Assertion failure mashalling sequence of any</summary>
+  <reported>Carsten Seibert</reported>
+  <link href="http://www.uk.research.att.com/omniORB/archives/2000-09/0109.html"/>
+</bug>
+
 <bug id="6" date="Thu Sep 21 11:53:11 BST 2000" user="dpg1">
 
   <summary>Race condition in C++ servant deletion</summary>
