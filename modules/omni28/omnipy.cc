@@ -3,6 +3,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.10  1999/09/23 16:27:45  dpg1
+// Initial references support was accidentally missed out. Replaced.
+//
 // Revision 1.9  1999/09/22 15:46:13  dpg1
 // Fake POA implemented.
 //
@@ -359,6 +362,52 @@ extern "C" {
 
     return PyString_FromString((char*)str);
   }
+
+  static PyObject*
+  omnipy_listInitialServices(PyObject* self, PyObject* args)
+  {
+    PyObject* pyorb;
+
+    if (!PyArg_ParseTuple(args, "O", &pyorb))
+      return NULL;
+
+    CORBA::ORB_ptr orb = (CORBA::ORB_ptr)omniPy::getTwin(pyorb);
+    assert(orb);
+
+    CORBA::ORB::ObjectIdList_var ids = orb->list_initial_services();
+
+    PyObject* pyids = PyList_New(ids->length());
+
+    for (CORBA::ULong i=0; i<ids->length(); i++) {
+      PyList_SetItem(pyids, i, PyString_FromString(ids[i]));
+    }
+    return pyids;
+  }
+
+  static PyObject*
+  omnipy_resolveInitialReferences(PyObject* self, PyObject* args)
+  {
+    PyObject* pyorb;
+    char*     id;
+
+    if (!PyArg_ParseTuple(args, "Os", &pyorb, &id))
+      return NULL;
+
+    CORBA::ORB_ptr orb = (CORBA::ORB_ptr)omniPy::getTwin(pyorb);
+    assert(orb);
+
+    CORBA::Object_ptr objref;
+
+    try {
+      objref = orb->resolve_initial_references(id);
+    }
+    catch (const CORBA::SystemException& ex) {
+      omniPy::handleSystemException(ex);
+      return 0;
+    }
+    return omniPy::createPyCorbaObjRef(0, objref);
+  }
+
 
 
   ////////////////////////////////////////////////////////////////////////////
@@ -733,33 +782,35 @@ extern "C" {
   static PyMethodDef omnipy_methods[] = {
 
     // omnipy specific things:
-    {"checkVersion",      omnipy_checkVersion,      METH_VARARGS},
-    {"registerPyObjects", omnipy_registerPyObjects, METH_VARARGS},
+    {"checkVersion",             omnipy_checkVersion,            METH_VARARGS},
+    {"registerPyObjects",        omnipy_registerPyObjects,       METH_VARARGS},
 
     // Wrappers for functions in CORBA::
-    {"ORB_init",          omnipy_ORB_init,          METH_VARARGS},
+    {"ORB_init",                 omnipy_ORB_init,                METH_VARARGS},
 
     // Wrappers for functions in CORBA::ORB::
-    {"BOA_init",          omnipy_BOA_init,          METH_VARARGS},
-    {"stringToObject",    omnipy_stringToObject,    METH_VARARGS},
-    {"objectToString",    omnipy_objectToString,    METH_VARARGS},
+    {"BOA_init",                 omnipy_BOA_init,                METH_VARARGS},
+    {"stringToObject",           omnipy_stringToObject,          METH_VARARGS},
+    {"objectToString",           omnipy_objectToString,          METH_VARARGS},
+    {"listInitialServices",      omnipy_listInitialServices,     METH_VARARGS},
+    {"resolveInitialReferences", omnipy_resolveInitialReferences,METH_VARARGS},
 
     // Wrappers for functions in CORBA::BOA::
-    {"objectIsReady",     omnipy_objectIsReady,     METH_VARARGS},
-    {"implIsReady",       omnipy_implIsReady,       METH_VARARGS},
+    {"objectIsReady",            omnipy_objectIsReady,           METH_VARARGS},
+    {"implIsReady",              omnipy_implIsReady,             METH_VARARGS},
 
     // Wrappers for POA functions
-    {"referenceToServant",omnipy_referenceToServant,METH_VARARGS},
-    {"referenceToId",     omnipy_referenceToId,     METH_VARARGS},
+    {"referenceToServant",       omnipy_referenceToServant,      METH_VARARGS},
+    {"referenceToId",            omnipy_referenceToId,           METH_VARARGS},
 
     // Functions for CORBA objects:
-    {"invokeOp",          omnipy_invokeOp,          METH_VARARGS},
-    {"releaseObjref",     omnipy_releaseObjref,     METH_VARARGS},
-    {"isA",               omnipy_isA,               METH_VARARGS},
-    {"nonExistent",       omnipy_nonExistent,       METH_VARARGS},
-    {"isEquivalent",      omnipy_isEquivalent,      METH_VARARGS},
-    {"hash",              omnipy_hash,              METH_VARARGS},
-    {"narrow",            omnipy_narrow,            METH_VARARGS},
+    {"invokeOp",                 omnipy_invokeOp,                METH_VARARGS},
+    {"releaseObjref",            omnipy_releaseObjref,           METH_VARARGS},
+    {"isA",                      omnipy_isA,                     METH_VARARGS},
+    {"nonExistent",              omnipy_nonExistent,             METH_VARARGS},
+    {"isEquivalent",             omnipy_isEquivalent,            METH_VARARGS},
+    {"hash",                     omnipy_hash,                    METH_VARARGS},
+    {"narrow",                   omnipy_narrow,                  METH_VARARGS},
     {NULL,NULL}
   };
 
