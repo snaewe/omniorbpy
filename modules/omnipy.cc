@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.29  2005/03/15 09:41:08  dgrisby
+// Use new omniORB::versionString function; Mac OS X changes.
+//
 // Revision 1.1.2.28  2005/03/02 11:32:45  dgrisby
 // New optional endian parameter to cdrMarshal / cdrUnmarshal.
 //
@@ -314,10 +317,8 @@ extern "C" {
   static PyObject*
   omnipy_coreVersion(PyObject* self, PyObject* args)
   {
-    static char* cv = (char*)OMNIORB_VERSION_STRING;
-
     if (!PyArg_ParseTuple(args, (char*)"")) return 0;
-    return Py_BuildValue((char*)"s", cv);
+    return Py_BuildValue((char*)"s", omniORB::versionString());
   }
 
 #define OMNIPY_ATTR(x) \

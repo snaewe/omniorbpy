@@ -43,14 +43,15 @@ endif
 # Directories for installation
 #
 
-prefix        	 := $(DESTDIR)@prefix@
+prefix        	 := @prefix@
 exec_prefix   	 := @exec_prefix@
 INSTALLTARGET 	 := 1
-INSTALLINCDIR 	 := @includedir@
-INSTALLBINDIR 	 := @bindir@
-INSTALLLIBDIR 	 := @libdir@
-INSTALLPYTHONDIR := @pythondir@
-INSTALLPYEXECDIR := @pyexecdir@
+INSTALLINCDIR 	 := $(DESTDIR)@includedir@
+INSTALLBINDIR 	 := $(DESTDIR)@bindir@
+INSTALLLIBDIR 	 := $(DESTDIR)@libdir@
+INSTALLPYTHONDIR := $(DESTDIR)@pythondir@
+INSTALLPYEXECDIR := $(DESTDIR)@pyexecdir@
+INSTALLIDLDIR    := $(DESTDIR)@datadir@/idl
 
 #############################################################################
 #
@@ -90,9 +91,8 @@ comma := ,
 #
 
 IMPORT_CPPFLAGS += -I. $(patsubst %,-I%,$(VPATH)) \
-                   -I$(TOP)/include -I$(BASE_OMNI_TREE)/include
-
-IMPORT_CPPFLAGS += -D__OSVERSION__=@OSVERSION@
+                   -I$(TOP)/include -I$(BASE_OMNI_TREE)/include \
+                   -D__OSVERSION__=@OSVERSION@
 
 CPPFLAGS = $(DIR_CPPFLAGS) $(IMPORT_CPPFLAGS)
 
@@ -258,6 +258,8 @@ endef
 #
 # CORBA stuff
 #
+
+include $(BASE_OMNI_TREE)/mk/version.mk
 
 # It is now possible to compile interfaces and stubs that depend on
 # idl from import trees without generating headers and stubs for those
@@ -456,11 +458,6 @@ OMNITHREAD_PLATFORM_LIB = $(filter-out $(patsubst %,$(LibSearchPattern),\
 #
 
 CorbaImplementation = OMNIORB
-
-OMNIORB_VERSION = 4.0.5
-OMNIORB_MAJOR_VERSION = $(word 1,$(subst ., ,$(OMNIORB_VERSION)))
-OMNIORB_MINOR_VERSION = $(word 2,$(subst ., ,$(OMNIORB_VERSION)))
-OMNIORB_MICRO_VERSION = $(word 3,$(subst ., ,$(OMNIORB_VERSION)))
 
 lib_depend := $(patsubst %,$(LibPattern),omniORB$(OMNIORB_MAJOR_VERSION))
 omniORB_lib_depend := $(GENERATE_LIB_DEPEND)
@@ -960,17 +957,21 @@ IMPORT_CPPFLAGS += -D__darwin__
 OMNITHREAD_POSIX_CPPFLAGS = -DPthreadDraftVersion=10 \
                             -DPthreadSupportThreadPriority -DNoNanoSleep
 
-SHAREDLIB_CPPFLAGS = -fno-common # compiler flag
+CXXOPTIONS = -fno-common -bind_at_load
 SHAREDLIB_SUFFIX = dylib
 
 SharedLibraryFullNameTemplate = lib$$1$$2.$$3.$$4.$(SHAREDLIB_SUFFIX)
 SharedLibrarySoNameTemplate = lib$$1$$2.$$3.$(SHAREDLIB_SUFFIX)
 SharedLibraryLibNameTemplate = lib$$1$$2.$(SHAREDLIB_SUFFIX)
-SharedLibraryPlatformLinkFlagsTemplate = -dynamiclib -flat_namespace \
+SharedLibraryPlatformLinkFlagsTemplate = -dynamiclib \
+                                         -install_name $(INSTALLLIBDIR)/$$soname \
+                                         -flat_namespace \
                                          -undefined suppress
 PythonLibraryPlatformLinkFlagsTemplate = -bundle -flat_namespace \
-                                         -undefined suppress
+                                         -undefined suppress \
+                                         -bind_at_load
 PythonSHAREDLIB_SUFFIX = so
+
 
 # Re-define 'ExportLibrary' to run 'ranlib' after the file is copied,
 # for static libraries as otherwise the linker complains: "table of 
