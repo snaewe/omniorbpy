@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.13  2000/03/28 11:03:37  dpg1
+// Failed to copy IOP profiles if release_profiles was false.
+//
 // Revision 1.12  2000/03/24 16:48:57  dpg1
 // Local calls now have proper pass-by-value semantics.
 // Lots of little stability improvements.
@@ -253,7 +256,8 @@ omniPy::createObjRef(const char*             mostDerivedRepoId,
 				type_verified);
   }
 
-  omniRemoteIdentity* id = new omniRemoteIdentity(rope, key, keysize);
+  if (!release_profiles) profiles = new IOP::TaggedProfileList(*profiles);
+  omniRemoteIdentity*    id       = new omniRemoteIdentity(rope, key, keysize);
 
   if (omniORB::trace(10)) {
     omniORB::logger l;
