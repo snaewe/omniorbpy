@@ -8,44 +8,4 @@
 
 <buglist>
 
-<bug id="4" date="Wed Jul 26 17:01:36 BST 2000" user="dpg1">
-
-  <summary>Possible segfault in invalid local calls</summary>
-  <text>
-  Passing an invalid sequence or array of unsigned longs in a local
-  call could lead to a segfault in the Python interpreter.
-  </text>
-
-</bug>
-
-<bug id="3" date="Wed Jul 19 18:03:11 BST 2000" user="dpg1">
-
-  <summary>ImportError due to undefined symbols</summary>
-  <text>
-  If you have patched omniORB 3.0.0 to fix <a
-  href="../omniORBbug.html#bug5">bug 5</a>, you will see undefined
-  symbols for things to do with tracedmutex or tracedcondition when
-  you try to import the omniORBpy modules. To fix this, make a clean
-  build of omniORBpy, with "<code>make clean; make export</code>".
-  </text>
-
-</bug>
-
-<bug id="2" date="Wed Jul 19 17:22:34 BST 2000" user="dpg1">
-
-  <summary>omniidl name look-up is more strict</summary>
-  <text>
-  When looking-up a name, omniidl now raises an error if a name which
-  differs only in case is found along the look-up path. Before, it
-  would ignore the name and continue until an exact match was found.
-  </text>
-</bug>
-
-<bug id="1" date="Tue Jul 18 16:19:27 BST 2000" user="dpg1">
-
-  <summary>IDL compiler bug -- inheritance from typedef</summary>
-  <reported>Renzo Tomaselli</reported>
-  <link href="http://www.uk.research.att.com/omniORB/archives/2000-07/0116.html"/>
-</bug>
-
 </buglist>
