@@ -90,8 +90,9 @@ comma := ,
 #
 
 IMPORT_CPPFLAGS += -I. $(patsubst %,-I%,$(VPATH)) \
-                   -I$(TOP)/include -I$(BASE_OMNI_TREE)/include \
-                   -D__OSVERSION__=@OSVERSION@
+                   -I$(TOP)/include -I$(BASE_OMNI_TREE)/include
+
+IMPORT_CPPFLAGS += -D__OSVERSION__=@OSVERSION@
 
 CPPFLAGS = $(DIR_CPPFLAGS) $(IMPORT_CPPFLAGS)
 
@@ -985,6 +986,54 @@ OMNITHREAD_POSIX_CPPFLAGS = -DPthreadDraftVersion=6 \
 			    -DPthreadSupportThreadPriority -DNoNanoSleep
 endif
 
+
+###################
+ifdef Cygwin
+extralibs += -L$(PYPREFIX)/lib/python$(PYVERSION)/config \
+ -lpython$(PYVERSION).dll
+IMPORT_CPPFLAGS += -D__linux__ -D__cygwin__
+SHAREDLIB_CPPFLAGS =
+OMNITHREAD_POSIX_CPPFLAGS = -DNoNanoSleep -DPthreadDraftVersion=10
+OMNITHREAD_CPPFLAGS = -D_REENTRANT
+OMNITHREAD_LIB += -lpthread
+BinPattern = %.exe
+
+SharedLibraryPlatformLinkFlagsTemplate = -shared -Wl,-soname,$$soname,--export-all-symbols,--enable-auto-import
+
+define ExportLibraryToDir
+(files="$^"; \
+ for file in $$files; do \
+   $(ExportExecutableFileToDir); \
+ done; \
+)
+endef
+
+define MakeCXXSharedLibrary
+ $(ParseNameSpec); \
+ soname=$(SharedLibrarySoNameTemplate); \
+ set -x; \
+ $(RM) $@; \
+ $(CXX) $(SharedLibraryPlatformLinkFlagsTemplate) -o $@ \
+ $(IMPORT_LIBRARY_FLAGS) $(filter-out $(LibSuffixPattern),$^) $$extralibs;
+endef
+
+define ExportSharedLibrary
+ dir="$(EXPORT_TREE)/$(BINDIR)"; \
+ $(ExportSharedLibraryToDir)
+endef
+
+define InstallSharedLibrary
+ dir="$(INSTALLBINDIR)"; \
+ $(ExportSharedLibraryToDir)
+endef
+
+SHAREDLIB_SUFFIX = dll
+
+SharedLibraryFullNameTemplate = lib$$1$$2.$(SHAREDLIB_SUFFIX).$$3.$$4
+SharedLibrarySoNameTemplate   = lib$$1$$2.$(SHAREDLIB_SUFFIX).$$3
+SharedLibraryLibNameTemplate  = lib$$1$$2.$(SHAREDLIB_SUFFIX)
+
+endif
 
 
 

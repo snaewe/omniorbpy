@@ -36,6 +36,7 @@ DIR_CPPFLAGS += $(CORBA_CPPFLAGS)
 
 endif
 
+
 #############################################################################
 #   Make rules for Autoconf builds                                          #
 #############################################################################
@@ -61,7 +62,7 @@ shlib := $(shell $(SharedLibraryFullName) $(namespec))
 DIR_CPPFLAGS += $(SHAREDLIB_CPPFLAGS)
 
 $(shlib): $(OBJS)
-	@(namespec="$(namespec)"; extralibs="$(OMNIORB_CODESETS_LIB)";\
+	@(namespec="$(namespec)"; extralibs="$(OMNIORB_CODESETS_LIB) $(extralibs)";\
           $(MakeCXXSharedLibrary))
 
 all:: $(shlib)

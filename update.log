@@ -1,3 +1,19 @@
+Wed Feb 11 13:44:10 GMT 2004 dgrisby
+====================================
+
+- Cygwin patches. Thanks Douglas Brown.
+
+configure
+configure.ac
+bin/scripts/omkdirhier
+examples/embed/dir.mk
+mk/beforeauto.mk.in
+modules/dir.mk
+modules/pyFixed.h
+modules/codesets/dir.mk
+modules/sslTP/dir.mk
+
+
 Wed Feb 11 11:03:52 GMT 2004 dgrisby
 ====================================
 

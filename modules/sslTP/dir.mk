@@ -36,6 +36,10 @@ DIR_CPPFLAGS += $(CORBA_CPPFLAGS)
 
 endif
 
+ifdef Cygwin
+extralibs += -lomniORB4 -lomnithread -lpthread
+endif
+
 #############################################################################
 #   Make rules for Autoconf builds                                          #
 #############################################################################
@@ -61,7 +65,7 @@ shlib := $(shell $(SharedLibraryFullName) $(namespec))
 DIR_CPPFLAGS += $(SHAREDLIB_CPPFLAGS)
 
 $(shlib): $(OBJS)
-	@(namespec="$(namespec)"; extralibs="$(OMNIORB_SSL_LIB)";\
+	@(namespec="$(namespec)"; extralibs="$(OMNIORB_SSL_LIB) $(extralibs)";\
           $(MakeCXXSharedLibrary))
 
 all:: $(shlib)

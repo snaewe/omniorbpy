@@ -39,7 +39,7 @@ shlib := $(shell $(SharedLibraryFullName) $(namespec))
 DIR_CPPFLAGS += $(SHAREDLIB_CPPFLAGS)
 
 $(shlib): $(OBJS) $(CORBA_STATIC_STUB_OBJS) $(CORBA_LIB_DEPEND)
-	@(namespec="$(namespec)"; extralibs="$(OMNIORB_LIB_NODYN)";\
+	@(namespec="$(namespec)"; extralibs="$(OMNIORB_LIB_NODYN) $(extralibs)";\
           $(MakeCXXSharedLibrary))
 
 all:: $(shlib)

@@ -29,10 +29,17 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.2.2  2004/02/11 13:42:36  dgrisby
+// Cygwin patches. Thanks Douglas Brown.
+//
 // Revision 1.1.2.1  2001/04/09 15:22:16  dpg1
 // Fixed point support.
 //
 
+#if defined(__cygwin__) && defined(DL_IMPORT)
+# undef DL_IMPORT
+# define DL_IMPORT(RTYPE) RTYPE
+#endif
 
 extern "C" {
 
