@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.34  2000/04/27 11:04:35  dpg1
+// Catch exceptions thrown by ORB_init().
+//
 // Revision 1.33  2000/03/24 16:48:58  dpg1
 // Local calls now have proper pass-by-value semantics.
 // Lots of little stability improvements.
@@ -408,7 +411,12 @@ extern "C" {
 
     int orig_argc = argc;
 
-    CORBA::ORB_ptr orb = CORBA::ORB_init(argc, argv, orbid);
+    CORBA::ORB_ptr orb;
+    try {
+      orb = CORBA::ORB_init(argc, argv, orbid);
+    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
+
     omniPy::orb = orb;
 
     // This is extremely horrid -- modify the Python list in place to
