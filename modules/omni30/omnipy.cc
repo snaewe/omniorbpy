@@ -5,6 +5,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.4  1999/06/04 16:34:29  dpg1
+// Descriptors flattened.
+//
 // Revision 1.3  1999/06/04 13:59:54  dpg1
 // Structs, enums and sequences.
 //
@@ -198,11 +201,11 @@ class Py_OmniProxyCallDesc : public OmniProxyCallDesc {
 public:
 
   Py_OmniProxyCallDesc(const char* op, size_t len, CORBA::Boolean has_exc,
-		       PyObject* in_d, size_t in_l,
-		       PyObject* out_d, size_t out_l,
+		       PyObject* in_d,  int in_l,
+		       PyObject* out_d, int out_l,
 		       PyObject* exc_d, PyObject* args)
     : OmniProxyCallDesc(op, len, has_exc),
-      in_d_(in_d), in_l_(in_l),
+      in_d_(in_d),   in_l_(in_l),
       out_d_(out_d), out_l_(out_l),
       exc_d_(exc_d),
       args_(args)
@@ -211,48 +214,52 @@ public:
     //    cout << "Py_OmniProxyCallDesc created: " << op << " " << len << endl;
   }
 
-  virtual CORBA::ULong alignedSize(CORBA::ULong msgsize) {
-    return r_alignedSize(msgsize, in_d_, args_);
-  }
+  virtual CORBA::ULong alignedSize(CORBA::ULong msgsize);
 
-  virtual void marshalArguments(GIOP_C& giop_client) {
-    r_marshalArguments(giop_client, in_d_, args_);
-    tstate_ = PyEval_SaveThread();
-  }
+  virtual void marshalArguments(GIOP_C& giop_client);
 
-  virtual void unmarshalReturnedValues(GIOP_C& giop_client) {
-    PyEval_RestoreThread(tstate_);
-    result_ = r_unmarshalReturnedValues(giop_client, out_d_, out_l_,
-					out_l_ != 1);
-  }
+  virtual void unmarshalReturnedValues(GIOP_C& giop_client);
 
   virtual void userException(GIOP_C& giop_client, const char* repoId);
-
-  inline PyObject* result() { return result_; }
 
   inline void systemException(const CORBA::SystemException& ex) {
     if (tstate_) PyEval_RestoreThread(tstate_);
     handleSystemException(ex);
   }
 
+  inline PyObject* result() { return result_; }
+
 private:
-  // Recursive marshalling functions:
+  // Recursive marshalling functions.
+
+  // Caculate aligned size of the given argument object a_o, which has
+  // the type specified by position d within the in_d tuple. Modify d
+  // to reflect the next type.
   CORBA::ULong r_alignedSize(CORBA::ULong msgsize,
-			     PyObject* in_d, PyObject* args,
-			     CORBA::Boolean tuple_args = 1);
+			     PyObject* in_d, int& d,
+			     PyObject* a_o);
 
-  void r_marshalArguments(GIOP_C& giop_client,
-			  PyObject* in_d, PyObject* args,
-			  CORBA::Boolean tuple_args = 1);
+  // Marshal the given argument object a_o, which has the type
+  // specified by position d within the in_d tuple. Modify d to
+  // reflect the next type.
+  void r_marshalArguments(GIOP_C&   giop_client,
+			  PyObject* in_d, int& d,
+			  PyObject* a_o);
 
-  PyObject* r_unmarshalReturnedValues(GIOP_C&        giop_client,
-				      PyObject*      out_d,
-				      size_t         r_l,
-				      CORBA::Boolean makeTuple = 1);
+  // Unmarshal the next return value, which has the type specified by
+  // position d within the out_d tuple. Modify d to reflect the next
+  // return type.
+  PyObject* r_unmarshalReturnedValues(GIOP_C&   giop_client,
+				      PyObject* out_d, int& d);
+
+  // Functions to skip a descriptor:
+  void skipInDescriptor(PyObject*  in_d,  int& d);
+  void skipOutDescriptor(PyObject* out_d, int& d);
+
   PyObject*      in_d_;
-  size_t         in_l_;
+  int            in_l_;
   PyObject*      out_d_;
-  size_t         out_l_;
+  int            out_l_;
   PyObject*      exc_d_;
   PyObject*      args_;
   PyObject*      result_;
@@ -260,208 +267,188 @@ private:
 };
 
 
+
+
 CORBA::ULong
-Py_OmniProxyCallDesc::r_alignedSize(CORBA::ULong   msgsize,
-				    PyObject*      in_d,
-				    PyObject*      args,
-				    CORBA::Boolean tuple_args)
+Py_OmniProxyCallDesc::alignedSize(CORBA::ULong msgsize)
 {
-  size_t        a, d, a_l, d_l;
+  int a;
+  int d = 0;
+
+  for (a=0; a < in_l_; a++)
+    msgsize = r_alignedSize(msgsize, in_d_, d, PyTuple_GET_ITEM(args_,a));
+
+  return msgsize;
+}
+
+
+CORBA::ULong
+Py_OmniProxyCallDesc::r_alignedSize(CORBA::ULong msgsize,
+				    PyObject*    in_d, int& d,
+				    PyObject*    a_o)
+{
   CORBA::ULong  tk;
-  PyObject*     a_o; // Current argument object
   PyObject*     d_o; // Current descriptor object
 
   //  cout << "alignedSize() adding to " << msgsize << "..." << endl;
 
-  if (tuple_args)
-    a_l = PyTuple_GET_SIZE(args);
-  else {
-    a_l = 1;
-    a_o = args;
-  }
+  d_o = PyTuple_GET_ITEM(in_d, d++);
+  tk  = PyInt_AS_LONG(d_o);
 
-  d_l = PyTuple_GET_SIZE(in_d);
+  switch (tk) {
 
-  for (a=0, d=0; a < a_l; a++) {
-    assert(d < d_l);
+    // Simple types
 
-    //    cout << "  processing arg " << a << "..." << endl;
-
-    if (tuple_args)
-      a_o = PyTuple_GET_ITEM(args, a);
-
-    d_o = PyTuple_GET_ITEM(in_d, d++);
-    tk  = PyInt_AS_LONG(d_o);
-
-    switch (tk) {
-
-      // Simple types
-
-    case CORBA::tk_short:
-      {
-	msgsize = omni::align_to(msgsize,omni::ALIGN_2);
-	msgsize += 2;
-      }
-      break;
-
-    case CORBA::tk_long:
-      {
-	msgsize = omni::align_to(msgsize,omni::ALIGN_4);
-	msgsize += 4;
-      }
-      break;
-
-    case CORBA::tk_ushort:
-      {
-	msgsize = omni::align_to(msgsize,omni::ALIGN_2);
-	msgsize += 2;
-      }
-      break;
-
-    case CORBA::tk_ulong:
-      {
-	msgsize = omni::align_to(msgsize,omni::ALIGN_4);
-	msgsize += 4;
-      }
-      break;
-
-    case CORBA::tk_float:
-      {
-	msgsize = omni::align_to(msgsize,omni::ALIGN_4);
-	msgsize += 4;
-      }
-      break;
-
-    case CORBA::tk_double:
-      {
-	msgsize = omni::align_to(msgsize,omni::ALIGN_8);
-	msgsize += 8;
-      }
-      break;
-
-    case CORBA::tk_boolean:
-      {
-	msgsize += 1;
-      }
-      break;
-
-    case CORBA::tk_char:
-      {
-	msgsize += 1;
-      }
-      break;
-
-    case CORBA::tk_octet:
-      {
-	msgsize += 1;
-      }
-      break;
-
-      // Complex types
-
-    case CORBA::tk_objref: // string repoId
-      {
-	d_o = PyTuple_GET_ITEM(in_d, d++); // IDL specified repoId
-
-	CORBA::Object_ptr obj = (CORBA::Object_ptr)getTwin(a_o);
-
-	if (!obj) throw CORBA::BAD_PARAM();
-
-	msgsize = CORBA::AlignedObjRef(obj,
-				       PyString_AS_STRING(d_o),
-				       PyString_GET_SIZE(d_o) + 1,
-				       msgsize);
-      }
-      break;
-
-    case CORBA::tk_struct: // tuple names, tuple descriptors
-      {
-	if (!PyInstance_Check(a_o)) throw CORBA::BAD_PARAM();
-
-	PyObject* names    = PyTuple_GET_ITEM(in_d, d++); // Member names
-	PyObject* descr    = PyTuple_GET_ITEM(in_d, d++); // Member descriptors
-
-	PyObject* sdict    = ((PyInstanceObject*)a_o)->in_dict;
-
-	int       namecnt  = PyTuple_GET_SIZE(names);
-	PyObject* strtuple = PyTuple_New(namecnt);
-
-	if (!strtuple) throw CORBA::NO_MEMORY();
-
-	PyObject* name;
-	PyObject* value;
-
-	// Construct tuple containing struct members in order
-	for (int n=0; n < namecnt; n++) {
-	  name  = PyTuple_GET_ITEM(names, n);
-	  value = PyDict_GetItem(sdict, name);
-	  Py_INCREF(value);
-	  PyTuple_SET_ITEM(strtuple, n, value);
-	}
-
-	// Record the tuple in the struct object so marshalArguments()
-	// can get it later
-	PyDict_SetItemString(sdict, "__omnipy_s", strtuple);
-
-	msgsize = r_alignedSize(msgsize, descr, strtuple);
-      }
-      break;
-
-
-    case CORBA::tk_enum:
-      {
-	msgsize = omni::align_to(msgsize,omni::ALIGN_4);
-	msgsize += 4;
-      }
-      break;
-
-    case CORBA::tk_sequence: // tuple element_desc, int max_length
-      {
-	PyObject*    descr   = PyTuple_GET_ITEM(in_d, d++);
-	d_o                  = PyTuple_GET_ITEM(in_d, d++);
-	CORBA::ULong max_len = PyInt_AS_LONG(d_o);
-
-	a_o = PyTuple_GET_ITEM(args, a);   // The list
-
-	if (!PyList_Check(a_o)) throw CORBA::BAD_PARAM();
-
-	CORBA::ULong list_len = PyList_GET_SIZE(a_o);
-
-	if (max_len > 0 && list_len > max_len) throw CORBA::BAD_PARAM();
-
-	msgsize = omni::align_to(msgsize,omni::ALIGN_4);
-	msgsize += 4;
-
-	if (list_len > 0) {
-	  for (CORBA::ULong i=0; i<list_len; i++) {
-	    msgsize = r_alignedSize(msgsize, descr,
-				    PyList_GET_ITEM(a_o, i), 0);
-	  }
-	}
-      }
-      break;
-
-
-    case CORBA::tk_string: // int max_length
-      {
-	CORBA::Long max_len;
-	d_o     = PyTuple_GET_ITEM(in_d, d++);
-	max_len = PyInt_AS_LONG(d_o);
-
-	if (!PyString_Check(a_o)) throw CORBA::BAD_PARAM();
-
-	if (max_len > 0 && PyString_GET_SIZE(a_o) > max_len)
-	  throw CORBA::BAD_PARAM();
-
-	msgsize  = omni::align_to(msgsize, omni::ALIGN_4);
-	msgsize += 4 + PyString_GET_SIZE(a_o) + 1;
-      }
-      break;
-
-    default:
-      cout << "!!! alignedSize(): unsupported typecode: "
-	   << (CORBA::ULong)tk << endl;
+  case CORBA::tk_short:
+    {
+      msgsize = omni::align_to(msgsize,omni::ALIGN_2);
+      msgsize += 2;
     }
+    break;
+
+  case CORBA::tk_long:
+    {
+      msgsize = omni::align_to(msgsize,omni::ALIGN_4);
+      msgsize += 4;
+    }
+    break;
+
+  case CORBA::tk_ushort:
+    {
+      msgsize = omni::align_to(msgsize,omni::ALIGN_2);
+      msgsize += 2;
+    }
+    break;
+
+  case CORBA::tk_ulong:
+    {
+      msgsize = omni::align_to(msgsize,omni::ALIGN_4);
+      msgsize += 4;
+    }
+    break;
+
+  case CORBA::tk_float:
+    {
+      msgsize = omni::align_to(msgsize,omni::ALIGN_4);
+      msgsize += 4;
+    }
+    break;
+
+  case CORBA::tk_double:
+    {
+      msgsize = omni::align_to(msgsize,omni::ALIGN_8);
+      msgsize += 8;
+    }
+    break;
+
+  case CORBA::tk_boolean:
+    {
+      msgsize += 1;
+    }
+    break;
+
+  case CORBA::tk_char:
+    {
+      msgsize += 1;
+    }
+    break;
+
+  case CORBA::tk_octet:
+    {
+      msgsize += 1;
+    }
+    break;
+
+    // Complex types
+
+  case CORBA::tk_objref: // repoId
+    {
+      d_o = PyTuple_GET_ITEM(in_d, d++); // IDL specified repoId
+
+      CORBA::Object_ptr obj = (CORBA::Object_ptr)getTwin(a_o);
+
+      if (!obj) throw CORBA::BAD_PARAM();
+
+      msgsize = CORBA::AlignedObjRef(obj,
+				     PyString_AS_STRING(d_o),
+				     PyString_GET_SIZE(d_o) + 1,
+				     msgsize);
+    }
+    break;
+
+  case CORBA::tk_struct: // (names), descriptors+
+    {
+      if (!PyInstance_Check(a_o)) throw CORBA::BAD_PARAM();
+
+      PyObject* names    = PyTuple_GET_ITEM(in_d, d++); // Member names
+      PyObject* sdict    = ((PyInstanceObject*)a_o)->in_dict;
+      int       namecnt  = PyTuple_GET_SIZE(names);
+
+      PyObject* name;
+      PyObject* value;
+
+      for (int n=0; n < namecnt; n++) {
+	name    = PyTuple_GET_ITEM(names, n);
+	value   = PyDict_GetItem(sdict, name);
+	msgsize = r_alignedSize(msgsize, in_d, d, value);
+      }
+    }
+    break;
+
+  case CORBA::tk_enum:
+    {
+      msgsize = omni::align_to(msgsize,omni::ALIGN_4);
+      msgsize += 4;
+    }
+    break;
+
+  case CORBA::tk_sequence: // max_length, element_desc
+    {
+      if (!PyList_Check(a_o)) throw CORBA::BAD_PARAM();
+
+      CORBA::ULong list_len = PyList_GET_SIZE(a_o);
+      
+      // Check the maximum length
+      d_o                  = PyTuple_GET_ITEM(in_d, d++);
+      CORBA::ULong max_len = PyInt_AS_LONG(d_o);
+
+      if (max_len > 0 && list_len > max_len) throw CORBA::BAD_PARAM();
+
+      // Space for list length
+      msgsize = omni::align_to(msgsize,omni::ALIGN_4);
+      msgsize += 4;
+
+      if (list_len > 0) {
+	int temp = d;
+	for (CORBA::ULong i=0; i < list_len; i++) {
+	  d = temp; // Reset d to the same typecode
+	  msgsize = r_alignedSize(msgsize, in_d, d, PyList_GET_ITEM(a_o, i));
+	}
+      }
+      else
+	skipInDescriptor(in_d, d);
+    }
+    break;
+
+
+  case CORBA::tk_string: // max_length
+    {
+      d_o                 = PyTuple_GET_ITEM(in_d, d++);
+      CORBA::Long max_len = PyInt_AS_LONG(d_o);
+
+      if (!PyString_Check(a_o)) throw CORBA::BAD_PARAM();
+
+      if (max_len > 0 && PyString_GET_SIZE(a_o) > max_len)
+	throw CORBA::BAD_PARAM();
+
+      msgsize  = omni::align_to(msgsize, omni::ALIGN_4);
+      msgsize += 4 + PyString_GET_SIZE(a_o) + 1;
+    }
+    break;
+
+  default:
+    cout << "!!! alignedSize(): unsupported typecode: "
+	 << (CORBA::ULong)tk << endl;
   }
   //  cout << "  alignedSize() returning " << msgsize << "." << endl;
   return msgsize;
@@ -470,422 +457,417 @@ Py_OmniProxyCallDesc::r_alignedSize(CORBA::ULong   msgsize,
 
 
 void
-Py_OmniProxyCallDesc::r_marshalArguments(GIOP_C&        giop_client,
-					 PyObject*      in_d,
-					 PyObject*      args,
-					 CORBA::Boolean tuple_args)
+Py_OmniProxyCallDesc::marshalArguments(GIOP_C& giop_client)
 {
-  size_t        a, d, a_l, d_l;
+  int a;
+  int d = 0;
+
+  for (a=0; a< in_l_; a++)
+    r_marshalArguments(giop_client, in_d_, d, PyTuple_GET_ITEM(args_,a));
+
+  tstate_ = PyEval_SaveThread();
+}
+
+
+void
+Py_OmniProxyCallDesc::r_marshalArguments(GIOP_C&   giop_client,
+					 PyObject* in_d, int& d,
+					 PyObject* a_o)
+{
   CORBA::ULong  tk;
-  PyObject*     a_o; // Current argument object
   PyObject*     d_o; // Current descriptor object
 
   //  cout << "marshalArguments()..." << endl;
 
-  if (tuple_args)
-    a_l = PyTuple_GET_SIZE(args);
-  else {
-    a_l = 1;
-    a_o = args;
-  }
+  d_o = PyTuple_GET_ITEM(in_d, d++);
+  tk  = PyInt_AS_LONG(d_o);
 
-  d_l = PyTuple_GET_SIZE(in_d);
+  switch (tk) {
 
-  for (a=0, d=0; a < a_l; a++) {
-    assert(d < d_l);
+    // Simple types
 
-    //    cout << "  processing arg " << a << "..." << endl;
+  case CORBA::tk_short:
+    {
+      if (!PyInt_Check(a_o)) throw CORBA::BAD_PARAM();
 
-    if (tuple_args)
-      a_o = PyTuple_GET_ITEM(args, a);
-
-    d_o = PyTuple_GET_ITEM(in_d, d++);
-    tk  = PyInt_AS_LONG(d_o);
-
-    switch (tk) {
-
-    case CORBA::tk_short:
-      {
-	if (!PyInt_Check(a_o)) throw CORBA::BAD_PARAM();
-
-	CORBA::Short s = PyInt_AS_LONG(a_o);
-	s >>= giop_client;
-      }
-      break;
-
-    case CORBA::tk_long:
-      {
-	if (!PyInt_Check(a_o)) throw CORBA::BAD_PARAM();
-
-	CORBA::Long l = PyInt_AS_LONG(a_o);
-	l >>= giop_client;
-      }
-      break;
-
-    case CORBA::tk_ushort:
-      {
-	if (!PyInt_Check(a_o)) throw CORBA::BAD_PARAM();
-
-	CORBA::UShort us = PyInt_AS_LONG(a_o);
-	us >>= giop_client;
-      }
-      break;
-
-    case CORBA::tk_ulong:
-      {
-	if (!PyInt_Check(a_o)) throw CORBA::BAD_PARAM();
-
-	CORBA::ULong ul = PyInt_AS_LONG(a_o);
-	ul >>= giop_client;
-      }
-      break;
-
-    case CORBA::tk_float:
-      {
-	if (!PyFloat_Check(a_o)) throw CORBA::BAD_PARAM();
-
-	CORBA::Float f = (CORBA::Float)PyFloat_AS_DOUBLE(a_o);
-	f >>= giop_client;
-      }
-      break;
-
-    case CORBA::tk_double:
-      {
-	if (!PyFloat_Check(a_o)) throw CORBA::BAD_PARAM();
-
-	CORBA::Double d = PyFloat_AS_DOUBLE(a_o);
-	d >>= giop_client;
-      }
-      break;
-
-    case CORBA::tk_boolean:
-      {
-	if (!PyInt_Check(a_o)) throw CORBA::BAD_PARAM();
-
-	CORBA::Boolean b = PyInt_AS_LONG(a_o) ? 1:0;
-	b >>= giop_client;
-      }
-      break;
-
-    case CORBA::tk_char:
-      {
-	if (!PyString_Check(a_o))        throw CORBA::BAD_PARAM();
-	if (PyString_GET_SIZE(a_o) != 1) throw CORBA::BAD_PARAM();
-
-	char *str = PyString_AS_STRING(a_o);
-
-	CORBA::Char c = str[0];
-	c >>= giop_client;
-      }
-      break;
-
-    case CORBA::tk_octet:
-      {
-	if (!PyInt_Check(a_o)) throw CORBA::BAD_PARAM();
-
-	CORBA::Octet o = PyInt_AS_LONG(a_o);
-	o >>= giop_client;
-      }
-      break;
-
-      // Complex types
-
-    case CORBA::tk_objref: // string repoId
-      {
-	d_o = PyTuple_GET_ITEM(in_d, d++); // IDL specified repoId
-
-	CORBA::Object_ptr obj = (CORBA::Object_ptr)getTwin(a_o);
-
-	if (!obj) throw CORBA::BAD_PARAM();
-
-	CORBA::MarshalObjRef(obj,
-			     PyString_AS_STRING(d_o),
-			     PyString_GET_SIZE(d_o) + 1,
-			     giop_client);
-      }
-      break;
-
-    case CORBA::tk_struct: // tuple names, tuple descriptors
-      {
-	d++; // Skip over member names
-	PyObject* descr    = PyTuple_GET_ITEM(in_d, d++);
-
-	PyObject* sdict    = ((PyInstanceObject*)a_o)->in_dict;
-	PyObject* strtuple = PyDict_GetItemString(sdict, "__omnipy_s");
-
-	r_marshalArguments(giop_client, descr, strtuple);
-
-	PyDict_DelItemString(sdict, "__omnipy_s");
-	Py_DECREF(strtuple);
-      }
-      break;
-
-    case CORBA::tk_enum:
-      {
-	if (!PyInstance_Check(a_o)) throw CORBA::BAD_PARAM();
-
-	PyObject* ev = PyDict_GetItemString(((PyInstanceObject*)a_o)->in_dict,
-					    "_v");
-	CORBA::ULong e = PyInt_AS_LONG(ev);
-	e >>= giop_client;
-      }
-      break;
-
-    case CORBA::tk_sequence: // tuple element_desc, int max_length
-      {
-	PyObject*    descr    = PyTuple_GET_ITEM(in_d, d++);
-
-	d++; // Skip max length.
-
-	CORBA::ULong list_len = PyList_GET_SIZE(a_o);
-
-	list_len >>= giop_client;
-
-	if (list_len > 0) {
-	  for (CORBA::ULong i=0; i<list_len; i++) {
-	    r_marshalArguments(giop_client, descr,
-			       PyList_GET_ITEM(a_o, i), 0);
-	  }
-	}
-      }
-      break;
-
-    case CORBA::tk_string: // int max_length
-      {
-	CORBA::Long max_len;
-	d_o     = PyTuple_GET_ITEM(in_d, d++);
-	max_len = PyInt_AS_LONG(d_o);
-
-	if (!PyString_Check(a_o)) throw CORBA::BAD_PARAM();
-
-	CORBA::Long slen = PyString_GET_SIZE(a_o) + 1;
-
-	slen >>= giop_client;
-
-	if (slen > 1) {
-	  char* str = PyString_AS_STRING(a_o);
-	  giop_client.put_char_array((const CORBA::Char*)((const char*)str),
-				     slen);
-	}
-	else {
-	  CORBA::Char('\0') >>= giop_client;
-	}
-      }
-      break;
-
-    default:
-      cout << "!!! marshalArguments(): unsupported typecode: "
-	   << (CORBA::ULong)tk << endl;
+      CORBA::Short s = PyInt_AS_LONG(a_o);
+      s >>= giop_client;
     }
+    break;
+
+  case CORBA::tk_long:
+    {
+      if (!PyInt_Check(a_o)) throw CORBA::BAD_PARAM();
+
+      CORBA::Long l = PyInt_AS_LONG(a_o);
+      l >>= giop_client;
+    }
+    break;
+
+  case CORBA::tk_ushort:
+    {
+      if (!PyInt_Check(a_o)) throw CORBA::BAD_PARAM();
+
+      CORBA::UShort us = PyInt_AS_LONG(a_o);
+      us >>= giop_client;
+    }
+    break;
+
+  case CORBA::tk_ulong:
+    {
+      if (!PyInt_Check(a_o)) throw CORBA::BAD_PARAM();
+
+      CORBA::ULong ul = PyInt_AS_LONG(a_o);
+      ul >>= giop_client;
+    }
+    break;
+
+  case CORBA::tk_float:
+    {
+      if (!PyFloat_Check(a_o)) throw CORBA::BAD_PARAM();
+
+      CORBA::Float f = (CORBA::Float)PyFloat_AS_DOUBLE(a_o);
+      f >>= giop_client;
+    }
+    break;
+
+  case CORBA::tk_double:
+    {
+      if (!PyFloat_Check(a_o)) throw CORBA::BAD_PARAM();
+
+      CORBA::Double d = PyFloat_AS_DOUBLE(a_o);
+      d >>= giop_client;
+    }
+    break;
+
+  case CORBA::tk_boolean:
+    {
+      if (!PyInt_Check(a_o)) throw CORBA::BAD_PARAM();
+
+      CORBA::Boolean b = PyInt_AS_LONG(a_o) ? 1:0;
+      b >>= giop_client;
+    }
+    break;
+
+  case CORBA::tk_char:
+    {
+      if (!PyString_Check(a_o))        throw CORBA::BAD_PARAM();
+      if (PyString_GET_SIZE(a_o) != 1) throw CORBA::BAD_PARAM();
+
+      char *str = PyString_AS_STRING(a_o);
+
+      CORBA::Char c = str[0];
+      c >>= giop_client;
+    }
+    break;
+
+  case CORBA::tk_octet:
+    {
+      if (!PyInt_Check(a_o)) throw CORBA::BAD_PARAM();
+
+      CORBA::Octet o = PyInt_AS_LONG(a_o);
+      o >>= giop_client;
+    }
+    break;
+
+    // Complex types
+
+  case CORBA::tk_objref: // repoId
+    {
+      d_o = PyTuple_GET_ITEM(in_d, d++); // IDL specified repoId
+
+      CORBA::Object_ptr obj = (CORBA::Object_ptr)getTwin(a_o);
+
+      if (!obj) throw CORBA::BAD_PARAM();
+
+      CORBA::MarshalObjRef(obj,
+			   PyString_AS_STRING(d_o),
+			   PyString_GET_SIZE(d_o) + 1,
+			   giop_client);
+    }
+    break;
+
+  case CORBA::tk_struct: // (names), descriptors+
+    {
+      PyObject* names   = PyTuple_GET_ITEM(in_d, d++); // Member names
+      PyObject* sdict   = ((PyInstanceObject*)a_o)->in_dict;
+      int       namecnt = PyTuple_GET_SIZE(names);
+
+      PyObject* name;
+      PyObject* value;
+
+      for (int n=0; n < namecnt; n++) {
+	name    = PyTuple_GET_ITEM(names, n);
+	value   = PyDict_GetItem(sdict, name);
+	r_marshalArguments(giop_client, in_d, d, value);
+      }
+    }
+    break;
+
+  case CORBA::tk_enum:
+    {
+      if (!PyInstance_Check(a_o)) throw CORBA::BAD_PARAM();
+
+      PyObject* ev = PyDict_GetItemString(((PyInstanceObject*)a_o)->in_dict,
+					  "_v");
+      CORBA::ULong e = PyInt_AS_LONG(ev);
+      e >>= giop_client;
+    }
+    break;
+
+  case CORBA::tk_sequence: // max_length, element_desc
+    {
+      d++; // Skip max length.
+
+      CORBA::ULong list_len = PyList_GET_SIZE(a_o);
+      list_len >>= giop_client;
+
+      if (list_len > 0) {
+	int temp = d;
+	for (CORBA::ULong i=0; i < list_len; i++) {
+	  d = temp; // Reset d to the same typecode
+	  r_marshalArguments(giop_client, in_d, d, PyList_GET_ITEM(a_o, i));
+	}
+      }
+      else
+	skipInDescriptor(in_d, d);
+    }
+    break;
+
+  case CORBA::tk_string: // max_length
+    {
+      d++; // Skip max length
+
+      CORBA::Long slen = PyString_GET_SIZE(a_o) + 1;
+
+      slen >>= giop_client;
+
+      if (slen > 1) {
+	char* str = PyString_AS_STRING(a_o);
+	giop_client.put_char_array((const CORBA::Char*)((const char*)str),
+				   slen);
+      }
+      else {
+	CORBA::Char('\0') >>= giop_client;
+      }
+    }
+    break;
+
+  default:
+    cout << "!!! marshalArguments(): unsupported typecode: "
+	 << (CORBA::ULong)tk << endl;
   }
   //  cout << "  marshalArguments done." << endl;
 }
   
 
-PyObject*
-Py_OmniProxyCallDesc::r_unmarshalReturnedValues(GIOP_C&        giop_client,
-						PyObject*      out_d,
-						size_t         r_l,
-						CORBA::Boolean makeTuple)
+
+void
+Py_OmniProxyCallDesc::unmarshalReturnedValues(GIOP_C& giop_client)
 {
-  size_t        r, d, d_l;
+  PyEval_RestoreThread(tstate_);
+  tstate_ = 0;
+
+  int r;
+  int d = 0;
+
+  if (out_l_ == 0) {
+    Py_INCREF(Py_None);
+    result_ = Py_None;
+  }
+  else if (out_l_ == 1)
+    result_ = r_unmarshalReturnedValues(giop_client, out_d_, d);
+  else {
+    result_ = PyTuple_New(out_l_);
+    if (!result_) throw CORBA::NO_MEMORY();
+
+    for (r=0; r < out_l_; r++) {
+      PyTuple_SET_ITEM(result_, r,
+		       r_unmarshalReturnedValues(giop_client, out_d_, d));
+    }
+  }
+}
+
+
+
+PyObject*
+Py_OmniProxyCallDesc::r_unmarshalReturnedValues(GIOP_C&   giop_client,
+						PyObject* out_d, int& d)
+{
   CORBA::ULong  tk;
   PyObject*     r_o = 0;	// Current result object
   PyObject*     d_o;		// Current descriptor object
-  PyObject*     result = 0;	// Complete result object
 
-  //  cout << "unmarshalReturnedValues()..." << endl;
+  d_o = PyTuple_GET_ITEM(out_d, d++);
+  tk  = PyInt_AS_LONG(d_o);
 
-  if (r_l == 0) {
-    Py_INCREF(Py_None);
-    return Py_None;
-  }
+  switch (tk) {
 
-  d_l = PyTuple_GET_SIZE(out_d);
-
-  if (makeTuple)
-    result = PyTuple_New(r_l);
-  else
-    assert(r_l == 1);
-
-  for (r=0,d=0; r < r_l; r++) {
-    assert(d < d_l);
-
-    //    cout << "  processing result " << r << "..." << endl;
-
-    d_o = PyTuple_GET_ITEM(out_d, d++);
-    tk  = PyInt_AS_LONG(d_o);
-
-    switch (tk) {
-
-    case CORBA::tk_short:
-      {
-	CORBA::Short s;
-	s <<= giop_client;
-	r_o = PyInt_FromLong(s);
-      }
-      break;
-
-    case CORBA::tk_long:
-      {
-	CORBA::Long l;
-	l <<= giop_client;
-	r_o = PyInt_FromLong(l);
-      }
-      break;
-
-    case CORBA::tk_ushort:
-      {
-	CORBA::UShort us;
-	us <<= giop_client;
-	r_o = PyInt_FromLong(us);
-      }
-      break;
-
-    case CORBA::tk_ulong:
-      {
-	CORBA::ULong ul;
-	ul <<= giop_client;
-	r_o = PyInt_FromLong(ul);
-      }
-      break;
-
-    case CORBA::tk_float:
-      {
-	CORBA::Float f;
-	f <<= giop_client;
-	r_o = PyFloat_FromDouble((double)f);
-      }
-      break;
-
-    case CORBA::tk_double:
-      {
-	CORBA::Double d;
-	d <<= giop_client;
-	r_o = PyFloat_FromDouble(d);
-      }
-      break;
-
-    case CORBA::tk_boolean:
-      {
-	CORBA::Boolean b;
-	b <<= giop_client;
-	r_o = PyInt_FromLong(b);
-      }
-      break;
-
-    case CORBA::tk_char:
-      {
-	CORBA::Char c;
-	c <<= giop_client;
-
-	char* str = new char[2];
-	str[0]    = c;
-	str[1]    = '\0';
-	r_o       = PyString_FromStringAndSize(str, 1);
-	delete [] str;
-      }
-      break;
-
-    case CORBA::tk_octet:
-      {
-	CORBA::Octet o;
-	o <<= giop_client;
-	r_o = PyInt_FromLong(o);
-      }
-      break;
-
-      // Complex types
-
-    case CORBA::tk_objref: // string repoId
-      {
-	d_o                   = PyTuple_GET_ITEM(out_d, d++);
-	char*  targetRepoId   = PyString_AS_STRING(d_o);
-
-	CORBA::Object_ptr obj = CORBA::UnMarshalObjRef(targetRepoId,
-						       giop_client);
-	r_o = createPyCorbaObject(targetRepoId, obj);
-      }
-      break;
-
-    case CORBA::tk_struct: // class struct_class, tuple descriptors, int count
-      {
-	PyObject* strclass = PyTuple_GET_ITEM(out_d, d++);
-	PyObject* descr    = PyTuple_GET_ITEM(out_d, d++);
-	d_o                = PyTuple_GET_ITEM(out_d, d++);
-	size_t    memcnt   = PyInt_AS_LONG(d_o);
-
-	PyObject* strtuple = r_unmarshalReturnedValues(giop_client,
-						       descr, memcnt);
-	r_o = PyEval_CallObject(strclass, strtuple);
-	Py_DECREF(strtuple);
-      }
-      break;
-
-    case CORBA::tk_enum: // list enum_items
-      {
-	d_o = PyTuple_GET_ITEM(out_d, d++);
-
-	CORBA::ULong e;
-	e <<= giop_client;
-	
-	PyObject* ev = PyList_GET_ITEM(d_o, e);
-	Py_INCREF(ev);
-	r_o = ev;
-      }
-      break;
-
-    case CORBA::tk_sequence: // tuple element_desc, int max_length
-      {
-	PyObject*    descr   = PyTuple_GET_ITEM(out_d, d++);
-	d_o                  = PyTuple_GET_ITEM(out_d, d++);
-	CORBA::ULong max_len = PyInt_AS_LONG(d_o);
-
-	CORBA::ULong seq_len;
-	seq_len <<= giop_client;
-
-	if (max_len > 0 && seq_len > max_len) throw CORBA::BAD_PARAM();
-
-	r_o = PyList_New(seq_len);
-
-	if (seq_len > 0) {
-	  for (CORBA::ULong i=0; i<seq_len; i++) {
-	    PyList_SET_ITEM(r_o, i,
-			    r_unmarshalReturnedValues(giop_client,
-						      descr, 1, 0));
-	  }
-	}
-      }
-      break;
-
-    case CORBA::tk_string: // int max_length
-      {
-	CORBA::Long max_len;
-	d_o     = PyTuple_GET_ITEM(out_d, d++);
-	max_len = PyInt_AS_LONG(d_o);
-
-	CORBA::String_member str_tmp;
-	str_tmp <<= giop_client;
-
-	r_o = PyString_FromString(str_tmp._ptr);
-
-	if (max_len > 0 && PyString_GET_SIZE(r_o) > max_len) {
-	  cerr << "  string longer than max length!" << endl;
-	}
-      }
-      break;
-
-    default:
-      cout << " !!! unmarshalReturnedValues(): unsupported typecode: "
-	   << (CORBA::ULong)tk << endl;
+  case CORBA::tk_short:
+    {
+      CORBA::Short s;
+      s <<= giop_client;
+      r_o = PyInt_FromLong(s);
     }
-    if (makeTuple)
-      PyTuple_SET_ITEM(result, r, r_o);
-    else
-      result = r_o;
+    break;
+
+  case CORBA::tk_long:
+    {
+      CORBA::Long l;
+      l <<= giop_client;
+      r_o = PyInt_FromLong(l);
+    }
+    break;
+
+  case CORBA::tk_ushort:
+    {
+      CORBA::UShort us;
+      us <<= giop_client;
+      r_o = PyInt_FromLong(us);
+    }
+    break;
+
+  case CORBA::tk_ulong:
+    {
+      CORBA::ULong ul;
+      ul <<= giop_client;
+      r_o = PyInt_FromLong(ul);
+    }
+    break;
+
+  case CORBA::tk_float:
+    {
+      CORBA::Float f;
+      f <<= giop_client;
+      r_o = PyFloat_FromDouble((double)f);
+    }
+    break;
+
+  case CORBA::tk_double:
+    {
+      CORBA::Double d;
+      d <<= giop_client;
+      r_o = PyFloat_FromDouble(d);
+    }
+    break;
+
+  case CORBA::tk_boolean:
+    {
+      CORBA::Boolean b;
+      b <<= giop_client;
+      r_o = PyInt_FromLong(b);
+    }
+    break;
+
+  case CORBA::tk_char:
+    {
+      CORBA::Char c;
+      c <<= giop_client;
+
+      char* str = new char[2];
+      str[0]    = c;
+      str[1]    = '\0';
+      r_o       = PyString_FromStringAndSize(str, 1);
+      delete [] str;
+    }
+    break;
+
+  case CORBA::tk_octet:
+    {
+      CORBA::Octet o;
+      o <<= giop_client;
+      r_o = PyInt_FromLong(o);
+    }
+    break;
+
+    // Complex types
+
+  case CORBA::tk_objref: // repoId
+    {
+      d_o                   = PyTuple_GET_ITEM(out_d, d++);
+      char*  targetRepoId   = PyString_AS_STRING(d_o);
+
+      CORBA::Object_ptr obj = CORBA::UnMarshalObjRef(targetRepoId,
+						     giop_client);
+      r_o = createPyCorbaObject(targetRepoId, obj);
+    }
+    break;
+
+  case CORBA::tk_struct: // struct_class, count, descriptors+
+    {
+      PyObject* strclass = PyTuple_GET_ITEM(out_d, d++);
+      d_o                = PyTuple_GET_ITEM(out_d, d++);
+      int       memcnt   = PyInt_AS_LONG(d_o);
+
+      PyObject* strtuple = PyTuple_New(memcnt);
+
+      for (int m=0; m < memcnt; m++) {
+	PyTuple_SET_ITEM(strtuple, m,
+			 r_unmarshalReturnedValues(giop_client, out_d, d));
+      }
+      r_o = PyEval_CallObject(strclass, strtuple);
+      Py_DECREF(strtuple);
+    }
+    break;
+
+  case CORBA::tk_enum: // list enum_items
+    {
+      d_o = PyTuple_GET_ITEM(out_d, d++);
+
+      CORBA::ULong e;
+      e <<= giop_client;
+	
+      PyObject* ev = PyList_GET_ITEM(d_o, e);
+      Py_INCREF(ev);
+      r_o = ev;
+    }
+    break;
+
+  case CORBA::tk_sequence: // max_length, element_desc
+    {
+      d_o                  = PyTuple_GET_ITEM(out_d, d++);
+      CORBA::ULong max_len = PyInt_AS_LONG(d_o);
+
+      CORBA::ULong seq_len;
+      seq_len <<= giop_client;
+
+      if (max_len > 0 && seq_len > max_len) throw CORBA::BAD_PARAM();
+
+      r_o = PyList_New(seq_len);
+
+      if (seq_len > 0) {
+	int temp = d;
+	for (CORBA::ULong i=0; i < seq_len; i++) {
+	  d = temp;
+	  PyList_SET_ITEM(r_o, i,
+			  r_unmarshalReturnedValues(giop_client, out_d, d));
+	}
+      }
+      else
+	skipOutDescriptor(out_d, d);
+    }
+    break;
+
+  case CORBA::tk_string: // max_length
+    {
+      d_o                 = PyTuple_GET_ITEM(out_d, d++);
+      CORBA::Long max_len = PyInt_AS_LONG(d_o);
+
+      CORBA::String_member str_tmp;
+      str_tmp <<= giop_client;
+
+      r_o = PyString_FromString(str_tmp._ptr);
+
+      if (max_len > 0 && PyString_GET_SIZE(r_o) > max_len)
+	throw CORBA::BAD_PARAM();
+    }
+    break;
+
+  default:
+    cout << " !!! unmarshalReturnedValues(): unsupported typecode: "
+	 << (CORBA::ULong)tk << endl;
   }
-  //  cout << "  unmarshalReturnedValues done." << endl;
-  return result;
+  return r_o;
 }
 
 
@@ -893,6 +875,7 @@ void
 Py_OmniProxyCallDesc::userException(GIOP_C& giop_client, const char* repoId)
 {
   PyEval_RestoreThread(tstate_);
+  tstate_ = 0;
 
   PyObject* o;
   PyObject* exc_t = PyDict_GetItemString(exc_d_, repoId);
@@ -901,14 +884,20 @@ Py_OmniProxyCallDesc::userException(GIOP_C& giop_client, const char* repoId)
     PyObject* exc_c = PyTuple_GET_ITEM(exc_t, 0);
     PyObject* exc_d = PyTuple_GET_ITEM(exc_t, 1);
     o               = PyTuple_GET_ITEM(exc_t, 2);
-    size_t    exc_l = PyInt_AS_LONG(o);
+    int       exc_l = PyInt_AS_LONG(o);
 
     PyObject* exc_a;
 
-    if (exc_l == 0)
-      exc_a = PyTuple_New(0);
-    else
-      exc_a = r_unmarshalReturnedValues(giop_client, exc_d, exc_l);
+    exc_a = PyTuple_New(exc_l);
+    if (!exc_a) throw CORBA::NO_MEMORY();
+
+    int r;
+    int d = 0;
+
+    for (r=0; r < exc_l; r++) {
+      PyTuple_SET_ITEM(exc_a, r,
+		       r_unmarshalReturnedValues(giop_client, exc_d, d));
+    }
 
     giop_client.RequestCompleted();
 
@@ -922,6 +911,120 @@ Py_OmniProxyCallDesc::userException(GIOP_C& giop_client, const char* repoId)
     throw CORBA::MARSHAL(0, CORBA::COMPLETED_MAYBE);
   }
 }
+
+void
+Py_OmniProxyCallDesc::skipInDescriptor(PyObject* in_d, int& d)
+{
+  CORBA::ULong  tk;
+  PyObject*     d_o; // Current descriptor object
+
+  d_o = PyTuple_GET_ITEM(in_d, d++);
+  tk  = PyInt_AS_LONG(d_o);
+
+  switch (tk) {
+
+  case CORBA::tk_short:
+  case CORBA::tk_long:
+  case CORBA::tk_ushort:
+  case CORBA::tk_ulong:
+  case CORBA::tk_float:
+  case CORBA::tk_double:
+  case CORBA::tk_boolean:
+  case CORBA::tk_char:
+  case CORBA::tk_octet:
+    break;
+
+  case CORBA::tk_objref: // repoId
+    d++; break;
+
+  case CORBA::tk_struct: // (names), descriptors+
+    {
+      PyObject* names    = PyTuple_GET_ITEM(in_d, d++); // Member names
+      int       namecnt  = PyTuple_GET_SIZE(names);
+
+      for (int n=0; n < namecnt; n++) {
+	skipInDescriptor(in_d, d);
+      }
+    }
+    break;
+
+  case CORBA::tk_enum:
+    break;
+
+  case CORBA::tk_sequence: // max_length, element_desc
+    {
+      d++;
+      skipInDescriptor(in_d, d);
+    }
+    break;
+
+  case CORBA::tk_string: // max_length
+    d++; break;
+
+  default:
+    cout << "!!! skipInDescriptor(): unsupported typecode: "
+	 << tk << endl;
+  }
+}
+
+
+void
+Py_OmniProxyCallDesc::skipOutDescriptor(PyObject* out_d, int& d)
+{
+  CORBA::ULong  tk;
+  PyObject*     d_o; // Current descriptor object
+
+  d_o = PyTuple_GET_ITEM(out_d, d++);
+  tk  = PyInt_AS_LONG(d_o);
+
+  switch (tk) {
+
+  case CORBA::tk_short:
+  case CORBA::tk_long:
+  case CORBA::tk_ushort:
+  case CORBA::tk_ulong:
+  case CORBA::tk_float:
+  case CORBA::tk_double:
+  case CORBA::tk_boolean:
+  case CORBA::tk_char:
+  case CORBA::tk_octet:
+    break;
+
+  case CORBA::tk_objref: // repoId
+    d++; break;
+
+  case CORBA::tk_struct: // struct_class, count, descriptors+
+    {
+      d++;
+      d_o     = PyTuple_GET_ITEM(out_d, d++);
+      int cnt = PyTuple_GET_SIZE(d_o);
+
+      for (int n=0; n < cnt; n++) {
+	skipOutDescriptor(out_d, d);
+      }
+    }
+    break;
+
+  case CORBA::tk_enum:
+    break;
+
+  case CORBA::tk_sequence: // max_length, element_desc
+    {
+      d++;
+      skipOutDescriptor(out_d, d);
+    }
+    break;
+
+  case CORBA::tk_string: // max_length
+    d++; break;
+
+  default:
+    cout << "!!! skipOutDescriptor(): unsupported typecode: "
+	 << tk << endl;
+  }
+}
+
+
 
 
 // Things visible to Python:
