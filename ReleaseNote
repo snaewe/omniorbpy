@@ -24,6 +24,10 @@ You must install the omniORBpy source in the $TOP/src/lib directory of
 a working omniORB 2.8 tree. Then, in the $TOP/src/lib/omniORBpy
 directory, simply do a gnumake export.
 
+On Windows NT only, one of the omniORB 2.8 header files
+(omniInternal.h) has to be updated. You must get the latest version of
+the omni2_8_develop branch from CVS or the ftp snapshots.
+
 
 Using omniORBpy
 ---------------
