@@ -9,8 +9,11 @@ export:: CORBA.py
 export:: PortableServer.py
 	@(file="PortableServer.py"; dir="$(PYLIBDIR)"; $(ExportFileToDir))
 
-export:: POA_PortableServer.py
-	@(file="POA_PortableServer.py"; dir="$(PYLIBDIR)"; $(ExportFileToDir))
+export:: PortableServer__POA.py
+	@(file="PortableServer__POA.py"; dir="$(PYLIBDIR)"; $(ExportFileToDir))
 
 export:: tcInternal.py
 	@(file="tcInternal.py"; dir="$(PYLIBDIR)"; $(ExportFileToDir))
+
+export:: URI.py
+	@(file="URI.py"; dir="$(PYLIBDIR)"; $(ExportFileToDir))

@@ -1,3 +1,3 @@
 TOP=../../../../..
-CURRENT=src/lib/omniORBpy/python/POA_CosNaming
+CURRENT=src/lib/omniORBpy/python/CosNaming__POA
 include $(TOP)/config/config.mk

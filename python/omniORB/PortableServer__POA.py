@@ -1,6 +1,6 @@
 # -*- Mode: Python; -*-
 #                            Package   : omniORBpy
-# POA_PortableServer.py      Created on: 2000/02/24
+# PortableServer__POA.py     Created on: 2000/02/24
 #                            Author    : Duncan Grisby (dpg1)
 #
 #    Copyright (C) 2000 AT&T Laboratories Cambridge
@@ -29,6 +29,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.1  2000/06/27 15:07:10  dpg1
+# Change from POA_M to M__POA mapping
+#
 # Revision 1.1  2000/03/03 17:41:28  dpg1
 # Major reorganisation to support omniORB 3.0 as well as 2.8.
 #
