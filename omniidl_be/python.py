@@ -28,6 +28,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.10  1999/11/19 11:03:49  dpg1
+# Extremely important spelling correction in a comment. :-)
+#
 # Revision 1.9  1999/11/12 15:53:48  dpg1
 # New functions omniORB.importIDL() and omniORB.importIDLString().
 #
@@ -70,7 +73,7 @@ module_directory = ""
 
 cpp_args = ["-D__OMNIIDL_PYTHON__"]
 
-#""" Uncomment this line to get syntax highlighthing on the output strings
+#""" Uncomment this line to get syntax highlighting on the output strings
 
 # Output strings
 
