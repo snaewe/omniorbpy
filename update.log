@@ -1,3 +1,11 @@
+Tue May 30 09:55:04 BST 2000 dpg1
+=================================
+
+- Accidentally used a 3 element hash table in the thread state cache.
+
+modules/common/pyThreadCache.cc
+
+
 Fri May 26 16:31:14 BST 2000 dpg1
 =================================
 

@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.2  2000/05/30 08:57:10  dpg1
+// Accidentally set hash table size to 3 elements.
+//
 // Revision 1.1  2000/05/26 15:33:31  dpg1
 // Python thread states are now cached. Operation dispatch time is
 // roughly halved!
@@ -42,7 +45,7 @@
 
 
 omni_mutex*                    omnipyThreadCache::guard      = 0;
-const unsigned int             omnipyThreadCache::tableSize  = 3;
+const unsigned int             omnipyThreadCache::tableSize  = 67;
 omnipyThreadCache::CacheNode** omnipyThreadCache::table      = 0;
 unsigned int                   omnipyThreadCache::scanPeriod = 30;
 
