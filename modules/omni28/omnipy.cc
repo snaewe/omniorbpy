@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.13  1999/09/27 09:20:49  dpg1
+// Fixed bug in stringToObject() exception handling.
+//
 // Revision 1.12  1999/09/24 09:22:04  dpg1
 // Added copyright notices.
 //
@@ -360,8 +363,9 @@ extern "C" {
       else
 	objref = CORBA::Object::_nil();
     }
-    catch (...) {
-      PyErr_SetString(PyExc_RuntimeError, "Error creating object reference");
+    catch (CORBA::SystemException& ex) {
+      omniPy::handleSystemException(ex);
+      return 0;
     }
 
     return omniPy::createPyCorbaObjRef(0, objref);
