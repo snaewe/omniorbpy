@@ -119,14 +119,14 @@ print orb.object_to_string(io)
 
 if "-l" in sys.argv:
     print "Running locally...\n\n"
-    import client
-    client.doTests(orb, poa, io)
+    import tclient
+    tclient.doTests(orb, poa, io)
 
     if "-r" in sys.argv:
         print "\nRepeating tests..."
-        client.output = 0
+        tclient.output = 0
         while 1:
-            client.doTests(orb, poa, io)
+            tclient.doTests(orb, poa, io)
 
 else:
     orb.run()
