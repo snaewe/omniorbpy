@@ -87,7 +87,7 @@ lib     = $(soname).$(OMNIPY_MINOR)
 $(lib): $(OBJS)
 	(set -x; \
 	$(RM) $@; \
-	$(CXXLINK) $(CXXLINKOPTIONS) -shared -o $@ -Wl,-soname,$(soname) $(IMPORT_LIBRARY_FLAGS) $(OMNIORB_LIB_NODYN_DEPEND)\
+	$(CXXLINK) $(CXXLINKOPTIONS) -shared -o $@ -Wl,-soname,$(soname) $(IMPORT_LIBRARY_FLAGS) \
 	 $(filter-out $(LibSuffixPattern),$^) $(OMNIORB_LIB_NODYN)\
 	)
 
@@ -144,7 +144,7 @@ CXXOPTIONS += -fPIC
 $(lib): $(OBJS)
 	(set -x; \
 	$(RM) $@; \
-	$(CXXLINK) $(CXXLINKOPTIONS) -shared -o $@ -Wl-soname,$(soname) $(IMPORT_LIBRARY_FLAGS) $(OMNIORB_LIB_NODYN_DEPEND)\
+	$(CXXLINK) $(CXXLINKOPTIONS) -shared -o $@ -Wl-soname,$(soname) $(IMPORT_LIBRARY_FLAGS) \
 	 $(filter-out $(LibSuffixPattern),$^) $(OMNIORB_LIB_NODYN)\
 	)
 
@@ -285,7 +285,7 @@ $(lib): $(OBJS)
        (set -x; \
        $(RM) $@; \
        $(CXXLINK) $(CXXLINKOPTIONS) -shared -o $@ -Wl,-soname,$(soname) $(IMPOR
-T_LIBRARY_FLAGS) $(OMNIORB_LIB_NODYN_DEPEND)\
+T_LIBRARY_FLAGS) \
         $(filter-out $(LibSuffixPattern),$^) $(OMNIORB_LIB)\
        )
 
@@ -321,7 +321,7 @@ soname  = $(libname).$(OMNIPY_MAJOR)
 lib     = $(soname).$(OMNIPY_MINOR)
 
 $(lib): $(OBJS)
-      $(CXXLINK) $(CXXLINKOPTIONS) $(OBJS) $(OMNIORB_LIB_NODYN_DEPEND) -o $(lib)
+      $(CXXLINK) $(CXXLINKOPTIONS) $(OBJS) $(OMNIORB_LIB_NODYN) -o $(lib)
 
 all:: $(lib)
 
