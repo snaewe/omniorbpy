@@ -1,3 +1,11 @@
+Wed Nov  1 11:21:45 GMT 2000 dpg1
+=================================
+
+- Recursive structs inside interfaces were broken
+
+omniidl_be/python.py
+
+
 Mon Oct 30 14:24:17 GMT 2000 dpg1
 =================================
 
