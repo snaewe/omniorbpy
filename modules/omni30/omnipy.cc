@@ -3,6 +3,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.6  1999/06/07 14:58:45  dpg1
+// Descriptors unflattened again.
+//
 // Revision 1.5  1999/06/07 10:11:18  dpg1
 // Split into separate files.
 //
@@ -341,18 +344,18 @@ extern "C" {
   omnipy_invokeOp(PyObject* self, PyObject* args)
   {
     // Arg format
-    //  (proxy, op_name, (in_desc, in_len, out_desc, out_len, exc_desc), args)
+    //  (proxy, op_name, (in_desc, out_desc, exc_desc), args)
     //
     //  exc_desc is a dictionary containing a mapping from repoIds to
     //  tuples of the form (exception class, marshal desc., param count)
 
     PyObject *pyproxy, *in_d, *out_d, *exc_d, *op_args, *result;
     char*  op;
-    size_t op_len, in_l, out_l;
+    size_t op_len;
 
     /*
-    if (!PyArg_ParseTuple(args, "Os#(OiOiO)O", &pyproxy, &op, &op_len,
-			  &in_d, &in_l, &out_d, &out_l, &exc_d, &op_args))
+    if (!PyArg_ParseTuple(args, "Os#(OOO)O", &pyproxy, &op, &op_len,
+			  &in_d, &out_d, &exc_d, &op_args))
       return NULL;
     */
     PyObject* o;
@@ -365,19 +368,19 @@ extern "C" {
     op_len  = PyString_GET_SIZE(o);
 
     desc    = PyTuple_GET_ITEM(args,2);
+
     in_d    = PyTuple_GET_ITEM(desc,0);
-    o       = PyTuple_GET_ITEM(desc,1);
-    in_l    = PyInt_AS_LONG(o);
-    out_d   = PyTuple_GET_ITEM(desc,2);
-    o       = PyTuple_GET_ITEM(desc,3);
-    out_l   = PyInt_AS_LONG(o);
-    exc_d   = PyTuple_GET_ITEM(desc,4);
+    out_d   = PyTuple_GET_ITEM(desc,1);
+    exc_d   = PyTuple_GET_ITEM(desc,2);
+
     op_args = PyTuple_GET_ITEM(args,3);
 
-    if ((size_t)(PyTuple_GET_SIZE(op_args)) != in_l) {
+    if (PyTuple_GET_SIZE(op_args) != PyTuple_GET_SIZE(in_d)) {
       char* err = new char[160];
-      snprintf(err, 159, "%s requires %d argument%s; %d given",
-	       op, in_l, (in_l == 1) ? "" : "s", PyTuple_GET_SIZE(op_args));
+      snprintf(err, 159, "%s requires %d argument%s; %d given", op,
+	       PyTuple_GET_SIZE(in_d),
+	       (PyTuple_GET_SIZE(in_d) == 1) ? "" : "s",
+	       PyTuple_GET_SIZE(op_args));
 
       PyErr_SetString(PyExc_TypeError, err);
       delete [] err;
@@ -389,7 +392,7 @@ extern "C" {
     CORBA::Boolean has_exc = (exc_d != Py_None);
 
     Py_OmniProxyCallDesc call_desc(op, op_len + 1, has_exc,
-				   in_d, in_l, out_d, out_l, exc_d,
+				   in_d, out_d, exc_d,
 				   op_args);
     try {
       OmniProxyCallWrapper::invoke(cxxproxy->PR_getobj(), call_desc);
