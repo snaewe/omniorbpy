@@ -28,6 +28,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.33.2.3  2003/07/10 22:13:25  dgrisby
+# Abstract interface support.
+#
 # Revision 1.33.2.2  2003/05/20 17:10:24  dgrisby
 # Preliminary valuetype support.
 #
@@ -249,15 +252,15 @@ _0_@s_imodname@ = omniORB.openModule("@package@@s_imodname@")"""
 
 forward_interface = """\
 
-# interface @ifid@;
-_0_@modname@._d_@ifid@ = (omniORB.tcInternal.tv_objref, "@repoId@", "@ifid@")
+# @abstract@interface @ifid@;
+_0_@modname@._d_@ifid@ = (omniORB.tcInternal.@tvkind@, "@repoId@", "@ifid@")
 omniORB.typeMapping["@repoId@"] = _0_@modname@._d_@ifid@"""
 
 
 interface_class = """\
 
-# interface @ifid@
-_0_@modname@._d_@ifid@ = (omniORB.tcInternal.tv_objref, "@repoId@", "@ifid@")
+# @abstract@interface @ifid@
+_0_@modname@._d_@ifid@ = (omniORB.tcInternal.@tvkind@, "@repoId@", "@ifid@")
 omniORB.typeMapping["@repoId@"] = _0_@modname@._d_@ifid@
 _0_@modname@.@ifid@ = omniORB.newEmptyClass()
 class @ifid@ @inherits@:
@@ -333,6 +336,7 @@ skeleton_inheritmap = """\
 skeleton_end = """
 @ifid@._omni_skeleton = @ifid@
 _0_@s_modname@.@ifid@ = @ifid@
+omniORB.registerSkeleton(@ifid@._NP_RepositoryId, @ifid@)
 del @ifid@
 __name__ = "@package@@modname@"\
 """
@@ -566,7 +570,7 @@ class @vname@ (@inherits@):
     def __init__(self, *args, **kwargs):
         if args:
             if len(args) != @arglen@:
-                raise TypeError("@vname@() takes @arglen@ arguments "
+                raise TypeError("@vname@() takes @arglen@ argument@s@ "
                                 "(%d given)" % len(args))
             @set_args@
         if kwargs:
@@ -835,29 +839,24 @@ class PythonVisitor:
     def visitForward(self, node):
         if self.handleImported(node): return
 
-        if node.abstract():
-            sys.stderr.write(node.file() + ":" + str(node.line()) + \
-                             ": omniORBpy does not support abstract " \
-                             "interfaces\n")
-            sys.exit(1)
-
         assert self.at_module_scope
         ifid   = mangle(node.identifier())
         repoId = node.repoId()
-        self.st.out(forward_interface, ifid=ifid,
-                    repoId=repoId, modname=self.modname)
+        if node.abstract():
+            tvkind = "tv_abstract_interface"
+            abstract = "abstract "
+        else:
+            tvkind = "tv_objref"
+            abstract = ""
+
+        self.st.out(forward_interface, ifid=ifid, tvkind=tvkind,
+                    repoId=repoId, abstract=abstract, modname=self.modname)
 
     #
     # Interface
     #
     def visitInterface(self, node):
         if self.handleImported(node): return
-
-        if node.abstract():
-            sys.stderr.write(node.file() + ":" + str(node.line()) + \
-                             ": omniORBpy does not support abstract " \
-                             "interfaces\n")
-            sys.exit(1)
 
         assert self.at_module_scope
         ifid = mangle(node.identifier())
@@ -873,9 +872,17 @@ class PythonVisitor:
         else:
             inherits = ""
 
+        if node.abstract():
+            tvkind = "tv_abstract_interface"
+            abstract = "abstract "
+        else:
+            tvkind = "tv_objref"
+            abstract = ""
+
         # Class header
-        self.st.out(interface_class, ifid=ifid, inherits=inherits,
-                    repoId=node.repoId(), modname=self.modname)
+        self.st.out(interface_class, ifid=ifid, tvkind=tvkind,
+                    inherits=inherits, repoId=node.repoId(),
+                    abstract=abstract, modname=self.modname)
 
         # Declarations within the interface
         if len(node.declarations()) > 0:
@@ -1713,10 +1720,15 @@ class PythonVisitor:
         else:
             set_args = "pass"
 
+        if len(set_argl) == 1:
+            s = ""
+        else:
+            s = "s"
+
         self.st.out(value_class,
                     vname=vname, scopedname=scopedname, repoId=node.repoId(),
                     inherits=inherits, set_args=set_args, arglen=len(set_argl),
-                    modname=self.modname)
+                    s=s, modname=self.modname)
 
         # Declarations within the value
         if len(node.declarations()) > 0:
@@ -1854,7 +1866,7 @@ class PythonVisitor:
 
 
 def docConst(node):
-    if isinstance(node, idlast.Const)     and \
+    if isinstance(node, idlast.Const)        and \
        node.constKind() == idltype.tk_string and \
        node.identifier()[-7:] == "__doc__":
         return node.identifier()[:-7]
@@ -2064,7 +2076,6 @@ ttdMap = {
 
 unsupportedMap = {
     idltype.tk_longdouble: "long double",
-    idltype.tk_abstract_interface: "abstract interface"
 }
 
 def typeToDescriptor(tspec, from_scope=[], is_typedef=0):

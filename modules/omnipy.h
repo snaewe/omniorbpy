@@ -31,6 +31,9 @@
 #define _omnipy_h_
 
 // $Log$
+// Revision 1.3.2.3  2003/07/10 22:13:25  dgrisby
+// Abstract interface support.
+//
 // Revision 1.3.2.2  2003/05/20 17:10:23  dgrisby
 // Preliminary valuetype support.
 //
@@ -153,9 +156,11 @@ public:
   static PyObject* pyCORBAsysExcMap;   	//  The system exception map
   static PyObject* pyCORBAAnyClass;    	//  Any class
   static PyObject* pyCORBAContextClass;	//  Context class
+  static PyObject* pyCORBAValueBase;    //  ValueBase class
   static PyObject* pyCORBAValueBaseDesc;//  Descriptor for ValueBase
   static PyObject* pyomniORBmodule;    	// The omniORB module
   static PyObject* pyomniORBobjrefMap; 	//  The objref class map
+  static PyObject* pyomniORBskeletonMap;//  The skeleton class map
   static PyObject* pyomniORBtypeMap;   	//  Type map
   static PyObject* pyomniORBvalueMap;  	//  Value factory map
   static PyObject* pyomniORBwordMap;   	//  Reserved word map
@@ -194,7 +199,7 @@ public:
 
 
   ////////////////////////////////////////////////////////////////////////////
-  // C++ API objrect                                                        //
+  // C++ API object                                                         //
   ////////////////////////////////////////////////////////////////////////////
 
   static omniORBpyAPI cxxAPI;
@@ -274,10 +279,22 @@ public:
   static
   void handleLocationForward(PyObject* evalue);
   
-
   // Ensure there is an omni_thread associated with the calling thread.
   static
   omni_thread* ensureOmniThread();
+
+  // IsInstance function for all Python versions.
+  static inline
+  CORBA::Boolean isInstance(PyObject* o, PyObject* c)
+  {
+#if PY_VERSION_HEX >= 0x02010000
+    return PyObject_IsInstance(o,c);
+#else
+    if (!PyInstance_Check(a_o)) return 0;
+    PyObject* acls = (PyObject*)((PyInstanceObject*)o)->in_class;
+    return PyClass_IsSubclass(acls, c);
+#endif
+  }
   
 
   ////////////////////////////////////////////////////////////////////////////
@@ -530,7 +547,7 @@ public:
 
 
   ////////////////////////////////////////////////////////////////////////////
-  // Valuetype marshalling functions                                        //
+  // Valuetype / abstract interface marshalling functions                   //
   ////////////////////////////////////////////////////////////////////////////
 
   static void
@@ -544,14 +561,26 @@ public:
 		       PyObject* track);
 
   static void
+  validateTypeAbstractInterface(PyObject* d_o, PyObject* a_o,
+				CORBA::CompletionStatus compstatus,
+				PyObject* track);
+
+  static void
   marshalPyObjectValue(cdrStream& stream, PyObject* d_o, PyObject* a_o);
 
   static void
   marshalPyObjectValueBox(cdrStream& stream, PyObject* d_o, PyObject* a_o);
 
+  static void
+  marshalPyObjectAbstractInterface(cdrStream& stream,
+				   PyObject* d_o, PyObject* a_o);
+
   static PyObject*
   unmarshalPyObjectValue(cdrStream& stream, PyObject* d_o);
   // Shared by Value and ValueBox
+
+  static PyObject*
+  unmarshalPyObjectAbstractInterface(cdrStream& stream, PyObject* d_o);
 
   static PyObject*
   copyArgumentValue(PyObject* d_o, PyObject* a_o,
@@ -560,6 +589,10 @@ public:
   static PyObject*
   copyArgumentValueBox(PyObject* d_o, PyObject* a_o,
 		       CORBA::CompletionStatus compstatus);
+
+  static PyObject*
+  copyArgumentAbstractInterface(PyObject* d_o, PyObject* a_o,
+				CORBA::CompletionStatus compstatus);
 
 
   ////////////////////////////////////////////////////////////////////////////

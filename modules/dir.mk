@@ -23,6 +23,7 @@ CXXSRCS = omnipy.cc \
 	  pyFixed.cc \
           pyContext.cc \
           pyValueType.cc \
+          pyAbstractIntf.cc \
           cxxAPI.cc
 
 OBJS =    omnipy.o \
@@ -41,6 +42,7 @@ OBJS =    omnipy.o \
 	  pyFixed.o \
 	  pyContext.o \
           pyValueType.o \
+          pyAbstractIntf.o \
           cxxAPI.o
 
 

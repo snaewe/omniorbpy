@@ -30,6 +30,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.30.2.3  2003/07/10 22:13:25  dgrisby
+# Abstract interface support.
+#
 # Revision 1.30.2.2  2003/05/20 17:10:25  dgrisby
 # Preliminary valuetype support.
 #
@@ -380,6 +383,7 @@ lock    = threading.Lock()
 
 # Maps for object reference classes and IDL-defined types:
 objrefMapping       = {}
+skeletonMapping     = {}
 typeMapping         = {}
 typeCodeMapping     = {}
 valueFactoryMapping = {}
@@ -387,6 +391,9 @@ valueFactoryMapping = {}
 
 def registerObjref(repoId, objref):
     objrefMapping[repoId] = objref
+
+def registerSkeleton(repoId, skel):
+    skeletonMapping[repoId] = skel
 
 def registerType(repoId, desc, tc):
     typeMapping[repoId]     = desc
