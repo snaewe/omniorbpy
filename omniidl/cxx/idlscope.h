@@ -28,6 +28,10 @@
 
 // $Id$
 // $Log$
+// Revision 1.5.2.2  2000/09/19 09:25:20  dpg1
+// Rename Scope::Entry::Kind to Scope::Entry::EntryKind to avoid compiler
+// bugs.
+//
 // Revision 1.5.2.1  2000/08/29 15:20:28  dpg1
 // New relativeScope() function. New -i flag to enter interactive loop
 // after parsing
@@ -244,7 +248,7 @@ public:
   class Entry {
   public:
 
-    enum Kind {
+    enum EntryKind {
       E_MODULE,			// Module
       E_DECL,			// Declaration
       E_CALLABLE,		// Operation or attribute
@@ -254,14 +258,14 @@ public:
       E_PARENT			// Name of enclosing scope
     };
 
-    Entry(const Scope* container, Kind kind, const char* identifier,
+    Entry(const Scope* container, EntryKind kind, const char* identifier,
 	  Scope* scope, Decl* decl, IdlType* idltype, Entry* inh_from,
 	  const char* file, int line);
 
     ~Entry();
 
     const Scope*      container()  const { return container_; }
-    Kind              kind()       const { return kind_; }
+    EntryKind         kind()       const { return kind_; }
     const char*       identifier() const { return identifier_; }
     const ScopedName* scopedName() const { return scopedName_; }
     const char*       file()       const { return file_; }
@@ -279,7 +283,7 @@ public:
 
   private:
     const Scope*      container_;
-    Kind              kind_;
+    EntryKind         kind_;
     char*             identifier_;
     ScopedName*       scopedName_;
     Scope*            scope_;
