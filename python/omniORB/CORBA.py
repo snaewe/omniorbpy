@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.26  2000/06/27 15:09:01  dpg1
+# Fix to _is_a(). CORBA.Object registered in the objref map.
+#
 # Revision 1.25  2000/06/02 14:25:51  dpg1
 # orb.run() now properly exits when the ORB is shut down
 #
@@ -581,7 +584,6 @@ class Object:
         raise NO_IMPLEMENT()
     
     def _is_a(self, repoId):
-        if omniORB.static_is_a(self.__class__, repoId): return TRUE
         return _omnipy.isA(self, repoId)
     
     def _non_existent(self):
@@ -609,6 +611,7 @@ class Object:
 _d_Object  = (omniORB.tcInternal.tv_objref, Object._NP_RepositoryId, "Object")
 _tc_Object = omniORB.tcInternal.createTypeCode(_d_Object)
 omniORB.registerType(Object._NP_RepositoryId, _d_Object, _tc_Object)
+omniORB.registerObjref(Object._NP_RepositoryId, Object)
 
 
 #############################################################################
