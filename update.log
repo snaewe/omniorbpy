@@ -1,3 +1,11 @@
+Tue Nov 21 10:46:54 GMT 2000 dpg1
+=================================
+
+- Segfault when string_to_object returns a nil objref
+
+src/lib/omniORBpy/modules/omni30/pyObjectRef.cc
+
+
 Thu Nov  2 17:41:22 GMT 2000p dpg1
 =================================
 

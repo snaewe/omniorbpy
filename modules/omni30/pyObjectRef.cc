@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.17.2.1  2000/11/21 10:59:58  dpg1
+// Segfault when string_to_object returns a nil objref.
+//
 // Revision 1.17  2000/06/27 15:13:12  dpg1
 // New copyObjRefArgument() function
 //
@@ -554,7 +557,7 @@ omniPy::stringToObject(const char* uri)
 
   cxxobj = omniURI::stringToObject(uri);
 
-  if (cxxobj->_NP_is_pseudo()) {
+  if (CORBA::is_nil(cxxobj) || cxxobj->_NP_is_pseudo()) {
     return cxxobj;
   }
   omniObjRef* cxxobjref = cxxobj->_PR_getobj();
@@ -637,7 +640,7 @@ omniPy::UnMarshalObjRef(const char* repoId, NetBufferedStream& s)
       delete [] id;
       id = 0;
 
-      if (!objref) OMNIORB_THROW(MARSHAL,0, CORBA::COMPLETED_MAYBE);
+      if (!objref) OMNIORB_THROW(INV_OBJREF,0, CORBA::COMPLETED_MAYBE);
       return 
 	(CORBA::Object_ptr)objref->_ptrToObjRef(CORBA::Object::_PD_repoId);
     }
