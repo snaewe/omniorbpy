@@ -14,6 +14,7 @@ CXXSRCS = omnipy.cc \
           pyORBFunc.cc \
           pyPOAFunc.cc \
           pyPOAManagerFunc.cc \
+          pyPOACurrentFunc.cc \
           pyObjectRef.cc \
           pyCallDescriptor.cc \
           pyServant.cc \
@@ -28,6 +29,7 @@ OBJS =    omnipy.o \
           pyORBFunc.o \
           pyPOAFunc.o \
           pyPOAManagerFunc.o \
+          pyPOACurrentFunc.o \
           pyObjectRef.o \
           pyCallDescriptor.o \
           pyServant.o \

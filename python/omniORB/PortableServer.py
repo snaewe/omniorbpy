@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.7.4.2  2001/06/11 13:06:26  dpg1
+# Support for PortableServer::Current.
+#
 # Revision 1.7.4.1  2000/11/28 14:51:11  dpg1
 # Typo in method name.
 #
@@ -398,6 +401,41 @@ class POA (CORBA.Object) :
     _tc_WrongPolicy = omniORB.tcInternal.createTypeCode(_d_WrongPolicy)
     omniORB.registerType(WrongPolicy._NP_RepositoryId,
                          _d_WrongPolicy, _tc_WrongPolicy)
+
+
+# interface Current
+class Current (CORBA.Object) :
+    _NP_RepositoryId = "IDL:omg.org/PortableServer/Current:1.0"
+
+    def __del__(self):
+        if _omnipy is not None and _omnipy.poacurrent_func is not None:
+            _omnipy.poacurrent_func.releaseRef(self)
+
+    def get_POA(self):
+        return _omnipy.poacurrent_func.get_POA(self)
+
+    def get_object_id(self):
+        return _omnipy.poacurrent_func.get_object_id(self)
+
+    def get_reference(self):
+        return _omnipy.poacurrent_func.get_reference(self)
+
+    def get_servant(self):
+        return _omnipy.poacurrent_func.get_servant(self)
+
+    __methods__ = ["get_POA", "get_object_id",
+                   "get_reference", "get_servant"] + CORBA.Object.__methods__
+
+    # Generated declarations
+
+    class NoContext (CORBA.UserException):
+        _NP_RepositoryId = "IDL:omg.org/PortableServer/Current/NoContext:1.0"
+
+    _d_NoContext  = (omniORB.tcInternal.tv_except, NoContext,
+                     NoContext._NP_RepositoryId, "NoContext")
+    _tc_NoContext = omniORB.tcInternal.createTypeCode(_d_NoContext)
+    omniORB.registerType(NoContext._NP_RepositoryId,
+                         _d_NoContext, _tc_NoContext)
 
 
 # Generated declarations

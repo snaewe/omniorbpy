@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.10  2001/06/11 13:06:26  dpg1
+// Support for PortableServer::Current.
+//
 // Revision 1.1.2.9  2001/06/01 11:09:26  dpg1
 // Make use of new omni::ptrStrCmp() and omni::strCmp().
 //
@@ -213,6 +216,10 @@ omniPy::createPyPseudoObjRef(const CORBA::Object_ptr objref)
     PortableServer::POAManager_var pm =
       PortableServer::POAManager::_narrow(objref);
     if (!CORBA::is_nil(pm)) return createPyPOAManagerObject(pm);
+  }
+  {
+    PortableServer::Current_var pc = PortableServer::Current::_narrow(objref);
+    if (!CORBA::is_nil(pc)) return createPyPOACurrentObject(pc);
   }
   CORBA::MARSHAL ex;
   return handleSystemException(ex);
