@@ -8,6 +8,17 @@
 
 <buglist version="2.1">
 
+<bug id="2" date="Thu Jul  3 14:48:17 BST 2003" user="dgrisby">
+  <summary>Assertion failure after exception</summary>
+  <reported>Fedorov Vsevolod</reported>
+  <listlink href="http://www.omniorb-support.com/pipermail/omniorb-list/2003-June/023794.html"/>
+  <text>
+  In some circumstances, an exception can cause an invocation to be
+  retried. Sometimes, a locking bug would result in an assertion
+  failure.
+  </text>
+</bug>
+
 <bug id="1" date="Fri Mar 28 17:31:12 GMT 2003" user="dgrisby">
   <summary>Mis-placed DECREF led to segfaults.</summary>
   <reported>Adam Kerrison</reported>
