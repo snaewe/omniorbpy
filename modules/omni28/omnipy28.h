@@ -31,6 +31,10 @@
 // $Id$
 
 // $Log$
+// Revision 1.12  1999/11/08 12:07:25  dpg1
+// Adding python1.5/ to #include path caused a conflict with thread.h on
+// Solaris.
+//
 // Revision 1.11  1999/11/08 11:43:35  dpg1
 // Changes for NT support.
 //
@@ -73,12 +77,14 @@
 #ifndef _omnipy_h_
 #define _omnipy_h_
 
-#include <iostream.h>
+#ifdef __WIN32__
 #include <Python.h>
+#else
+#include <python1.5/Python.h>
+#endif
 
 #include <omniORB2/CORBA.h>
 #include <omniORB2/proxyCall.h>
-
 
 ////////////////////////////////////////////////////////////////////////////
 // Data structures and functions to manage C++ twins of Python objects    //
