@@ -1,3 +1,14 @@
+Sun Apr 28 21:46:20 BST 2002 dgrisby
+====================================
+
+- autoconf updates.
+
+aclocal.m4
+configure
+mk/beforeauto.mk.in
+python/omniORB/dir.mk
+
+
 Mon Apr 15 17:12:13 BST 2002 dpg1
 =================================
 

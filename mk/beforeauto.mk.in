@@ -6,6 +6,7 @@
 
 platform         = autoconf
 OMNIORB_ROOT     = @OMNIORB_ROOT@
+DATADIR          = @datadir@
 MAKEFILE_INC_DIR = $(BASE_OMNI_TREE)/$(CURRENT)/
 IMPORT_TREES     = $(TOP) $(BASE_OMNI_TREE) $(OMNIORB_ROOT)
 THIS_IMPORT_TREE = $(TOP)
@@ -263,7 +264,8 @@ endef
 # need to preserve the old (idl-copying) behaviour for existing dir.mk
 # files.
 
-vpath %.idl $(IMPORT_TREES:%=%/idl) $(OMNIORB_ROOT)/idl/omniORB
+vpath %.idl $(IMPORT_TREES:%=%/idl) \
+            $(OMNIORB_ROOT)/idl/omniORB $(DATADIR)/idl/omniORB
 
 IMPORT_IDLFLAGS += -I. $(patsubst %,-I%,$(VPATH)) \
 		       $(patsubst %,-I%/idl,$(IMPORT_TREES))
