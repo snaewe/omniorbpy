@@ -35,14 +35,6 @@ _omnipy.checkVersion(0,2, __file__)
 
 
 #
-# Start of module _GlobalIDL
-#
-__name__ = "_GlobalIDL"
-_0__GlobalIDL     = omniORB.openModule("_GlobalIDL",     "Naming.idl")
-_0_POA__GlobalIDL = omniORB.openModule("POA__GlobalIDL", "Naming.idl")
-
-
-#
 # Start of module CosNaming
 #
 __name__ = "CosNaming"
@@ -345,12 +337,6 @@ __name__ = "CosNaming"
 
 #
 # End of module CosNaming
-#
-__name__ = "_GlobalIDL"
-
-
-#
-# End of module _GlobalIDL
 #
 __name__ = "Naming_idl"
 
