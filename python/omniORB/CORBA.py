@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.28.2.16  2002/09/21 23:27:11  dgrisby
+# New omniORB.any helper module.
+#
 # Revision 1.28.2.15  2002/06/11 20:21:31  dgrisby
 # Missed out wchar, wstring TypeCodes.
 #
@@ -169,6 +172,10 @@
 # Revision 1.1  1999/06/08 16:21:52  dpg1
 # Initial revision
 #
+
+"""
+Main omniORB CORBA module
+"""
 
 
 import _omnipy

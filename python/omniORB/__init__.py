@@ -30,6 +30,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.26.2.13  2002/09/21 23:27:11  dgrisby
+# New omniORB.any helper module.
+#
 # Revision 1.26.2.12  2002/08/16 19:27:36  dgrisby
 # Documentation update. Minor ORB updates to match docs.
 #
@@ -152,6 +155,11 @@
 # Revision 1.1  1999/07/19 15:53:26  dpg1
 # Initial revision
 #
+
+"""
+omniORB module -- omniORB specific features
+
+"""
 
 import sys, types, string, imp, os, os.path, tempfile, exceptions
 
@@ -450,6 +458,8 @@ class Enum:
     def __init__(self, repoId, items):
         self._NP_RepositoryId = repoId
         self._items = items
+        for i in items:
+            i._parent_id = repoId
 
     def _item(self, n):
         return self._items[n]
@@ -760,6 +770,7 @@ BAD_INV_ORDER_ORBHasShutdown       = OMGminorCode(4)
 BAD_CONTEXT_NoMatchingProperty     = omniORBminorCode(75)
 BAD_CONTEXT_StartingScopeNotFound  = omniORBminorCode(76)
 BAD_PARAM_WrongPythonType          = omniORBminorCode(88)
+BAD_PARAM_PythonValueOutOfRange    = omniORBminorCode(95)
 BAD_PARAM_WrongUnionMemberSelected = omniORBminorCode(107)
 BAD_TYPECODE_InvalidIndirection    = omniORBminorCode(108)
 INTF_REPOS_NotAvailable            = omniORBminorCode(39)

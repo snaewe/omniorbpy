@@ -1,3 +1,14 @@
+Sun Sep 22 00:26:51 BST 2002 dgrisby
+====================================
+
+- New omniORB.any helper module.
+
+python/omniORB/CORBA.py
+python/omniORB/__init__.py
+python/omniORB/any.py        -- new
+python/omniORB/dir.mk
+
+
 Sun Sep 22 00:15:23 BST 2002 dgrisby
 ====================================
 

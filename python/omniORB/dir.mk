@@ -12,7 +12,7 @@ all:: ir_idl.py
 
 
 FILES = __init__.py CORBA.py PortableServer.py PortableServer__POA.py \
-        tcInternal.py URI.py codesets.py ir_idl.py
+        tcInternal.py URI.py codesets.py any.py ir_idl.py
 
 ifdef OPEN_SSL_ROOT
 FILES += sslTP.py
