@@ -33,6 +33,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.28  2000/02/04 12:17:11  dpg1
+// Support for VMS.
+//
 // Revision 1.27  1999/12/15 12:17:20  dpg1
 // Changes to compile with SunPro CC 5.0.
 //
@@ -171,6 +174,69 @@ PyObject* omniPy::pyDummyThreadClass;   // threading module dummy
                                         //  thread class
 PyObject* omniPy::pyEmptyTuple;         // Zero element tuple.
 #endif
+
+
+// Twin type
+extern "C" {
+
+  static void
+  omnipyTwin_dealloc(omnipyTwin* tp)
+  {
+    PyMem_DEL(tp);
+  }
+
+  static int
+  omnipyTwin_cmp(omnipyTwin* t1, omnipyTwin* t2)
+  {
+    // Can't use simple t1->ob_twin - t2->ob_twin in case int is
+    // smaller than a pointer
+    if      (t1->ob_twin == t2->ob_twin) return 0;
+    else if (t1->ob_twin >  t2->ob_twin) return 1;
+    else                                 return -1;
+  }
+
+  static long
+  omnipyTwin_hash(omnipyTwin* tp)
+  {
+    return (long)tp->ob_twin;
+  }
+
+  static PyTypeObject omnipyTwinType = {
+    PyObject_HEAD_INIT(&PyType_Type)
+    0,
+    (char*)"omnipyTwin",
+    sizeof(omnipyTwin),
+    0,
+    (destructor)omnipyTwin_dealloc,   /*tp_dealloc*/
+    0,			              /*tp_print*/
+    0,                                /*tp_getattr*/
+    0,				      /*tp_setattr*/
+    (cmpfunc)omnipyTwin_cmp,          /*tp_compare*/
+    0,                                /*tp_repr*/
+    0,				      /*tp_as_number*/
+    0,                                /*tp_as_sequence*/
+    0,				      /*tp_as_mapping*/
+    (hashfunc)omnipyTwin_hash,	      /*tp_hash*/
+    0,				      /*tp_call*/
+    0,				      /*tp_str*/
+    0,				      /*tp_getattro*/
+    0,				      /*tp_setattro*/
+    0,                                /*tp_as_buffer*/
+    0,				      /*tp_xxx4*/
+    0,                                /*tp_doc*/
+  };
+}
+
+PyObject*
+omniPy::newTwin(void* twin)
+{
+  omnipyTwin* ot = PyMem_NEW(omnipyTwin, 1);
+  ot->ob_type = &omnipyTwinType;
+  ot->ob_size = 0;
+  ot->ob_twin = (void*)twin;
+  _Py_NewReference(ot);
+  return (PyObject*)ot;
+}
 
 
 // Things visible to Python:

@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.15  2000/02/04 12:17:10  dpg1
+// Support for VMS.
+//
 // Revision 1.14  2000/01/20 17:47:09  dpg1
 // Refcounting bug in any handling.
 //
@@ -77,6 +80,15 @@
 //
 
 #include <omnipy.h>
+
+#if defined(__DECCXX)
+// EDG based compaq cxx is having a problem with taking the address of static
+// functions.
+PyObject* omnipyCompaqCxxBug() {
+  // Oddly, modules that invoke the following function don't have a problem.
+  return omniPy::newTwin(0); // never call this.
+}
+#endif
 
 CORBA::ULong
 omniPy::alignedSize(CORBA::ULong msgsize,
