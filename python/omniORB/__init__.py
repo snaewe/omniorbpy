@@ -30,6 +30,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.30.2.7  2005/03/02 13:39:16  dgrisby
+# Another merge from omnipy2_develop.
+#
 # Revision 1.30.2.6  2005/01/25 11:45:48  dgrisby
 # Merge from omnipy2_develop; set RPM version.
 #
@@ -340,25 +343,36 @@ sys.modules."""
     return ret
 
 
-def cdrMarshal(tc, data):
-    """cdrMarshal(TypeCode, data) -> binary string
+def cdrMarshal(tc, data, endian=-1):
+    """cdrMarshal(TypeCode, data [,endian]) -> binary string
 
 Marshal data with the given type into a CDR encapsulation. The data
 can later be converted back into Python objects with cdrUnmarshal().
 The encapsulation is language, platform, and ORB independent.
+
+If the endian boolean is provided, it represents the endianness to
+marshal with: True for little endian; false for big endian. The
+resulting string in this case is the raw marshalled form, not a CDR
+encapsulation. To unmarshal it, the endianness must be known.
 
 Throws CORBA.BAD_PARAM if the data does not match the TypeCode."""
 
     if not isinstance(tc, CORBA.TypeCode):
         raise TypeError("Argument 1 must be a TypeCode")
 
-    return _omnipy.cdrMarshal(tc._d, data)
+    return _omnipy.cdrMarshal(tc._d, data, endian)
 
-def cdrUnmarshal(tc, encap):
-    """cdrUnmarshal(TypeCode, string) -> data
+def cdrUnmarshal(tc, encap, endian=-1):
+    """cdrUnmarshal(TypeCode, string [,endian]) -> data
 
 Unmarshal a CDR stream created with cdrMarshal() or equivalent. The
 encapsulation must adhere to the given TypeCode.
+
+If the endian boolean is provided, it represents the endianness to
+unmarshal with: True for little endian; false for big endian. In this
+case, the string should be the raw marshalled form, not a CDR
+encapsulation. If the endianness does not match that used for
+marshalling, invalid data may be returned, or exceptions raised.
 
 Throws CORBA.MARSHAL if the binary string does not match the
 TypeCode."""
@@ -366,7 +380,8 @@ TypeCode."""
     if not isinstance(tc, CORBA.TypeCode):
         raise TypeError("Argument 1 must be a TypeCode")
 
-    return _omnipy.cdrUnmarshal(tc._d, encap)
+    return _omnipy.cdrUnmarshal(tc._d, encap, endian)
+
 
 WTHREAD_CREATED = 0
 WTHREAD_DELETED = 1

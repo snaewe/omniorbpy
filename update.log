@@ -1,3 +1,14 @@
+Wed Mar  2 13:36:30 GMT 2005 dgrisby
+====================================
+
+- Another merge from omnipy2_develop.
+
+modules/omnipy.cc
+modules/pyThreadCache.cc
+modules/pyThreadCache.h
+python/omniORB/__init__.py
+
+
 Tue Jan 25 11:43:42 GMT 2005 dgrisby
 ====================================
 
