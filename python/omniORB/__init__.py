@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.23  2000/06/28 10:49:07  dpg1
+# Incorrect comment removed.
+#
 # Revision 1.22  2000/06/27 15:09:41  dpg1
 # Expanded comment.
 #
@@ -263,12 +266,6 @@ runtime creates any "WorkerThread"s.
 #   installTransientExceptionHandler()
 #   installCommFailureExceptionHandler()
 #   installSystemExceptionHandler()
-#
-# And with omniORB3:
-#
-#   nameToString()
-#   stringToName()
-#   addrAndNameToURI()
 
 from _omnipy.omni_func import *
 
