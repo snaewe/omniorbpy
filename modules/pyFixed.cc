@@ -29,6 +29,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.2.5  2003/03/02 19:12:56  dgrisby
+// Remove unnecessary #include.
+//
 // Revision 1.1.2.4  2001/09/24 10:48:26  dpg1
 // Meaningful minor codes.
 //
@@ -45,8 +48,6 @@
 #include <omnipy.h>
 #include <pyFixed.h>
 #include <stdio.h>
-
-#include <iostream.h>  // ***
 
 static PyObject*
 fixedValueAsPyLong(const CORBA::Fixed& f)
