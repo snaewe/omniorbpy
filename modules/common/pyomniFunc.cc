@@ -29,6 +29,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.2.4  2000/10/30 14:27:36  dpg1
+// Add omniORB.maxTcpConnectionPerServer
+//
 // Revision 1.1.2.3  2000/09/19 09:24:16  dpg1
 // More paranoid about clearing Python error status
 //
@@ -359,6 +362,37 @@ extern "C" {
     return 0;
   }
 
+  static char maxTcpConnectionPerServer_doc [] =
+  "maxTcpConnectionPerServer(int) -> None\n"
+  "maxTcpConnectionPerServer()    -> int\n"
+  "\n"
+  "The ORB opens more than one TCP connection to a server if there\n"
+  "is more than one concurrent invocation to that server. This variable\n"
+  "decides the maximum number of connections to use per server. This\n"
+  "variable is read only once at ORB_init. If the number of concurrent\n"
+  "invocations exceeds this number, the extra invocations are blocked\n"
+  "until the the outstanding ones return. (The default value is 5.)\n";
+
+  static PyObject* pyomni_maxTcpConnectionPerServer(PyObject* self,
+						    PyObject* args)
+  {
+    if (PyTuple_GET_SIZE(args) == 0) {
+      return PyInt_FromLong(omniORB::maxTcpConnectionPerServer);
+    }
+    else if (PyTuple_GET_SIZE(args) == 1) {
+      PyObject* pymc = PyTuple_GET_ITEM(args, 0);
+
+      if (PyInt_Check(pymc)) {
+	omniORB::maxTcpConnectionPerServer = PyInt_AS_LONG(pymc);
+	Py_INCREF(Py_None);
+	return Py_None;
+      }
+    }
+    PyErr_SetString(PyExc_TypeError,
+		    (char*)"Operation requires a single integer argument");
+    return 0;
+  }
+
   static PyMethodDef pyomni_methods[] = {
     {(char*)"installTransientExceptionHandler",
      pyomni_installTransientExceptionHandler,
@@ -375,6 +409,10 @@ extern "C" {
     {(char*)"traceLevel",
      pyomni_traceLevel,
      METH_VARARGS, traceLevel_doc},
+
+    {(char*)"maxTcpConnectionPerServer",
+     pyomni_maxTcpConnectionPerServer,
+     METH_VARARGS, maxTcpConnectionPerServer_doc},
 
     {NULL,NULL}
   };

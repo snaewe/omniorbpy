@@ -1,3 +1,11 @@
+Mon Oct 30 14:24:17 GMT 2000 dpg1
+=================================
+
+- Add omniORB.maxTcpConnectionPerServer
+
+src/lib/omniORBpy/modules/common/pyomniFunc.cc
+
+
 Mon Oct  9 09:54:53 BST 2000 dpg1
 =================================
 
