@@ -48,7 +48,7 @@ DIR_CPPFLAGS += $(patsubst %,-I%/src/lib/omniORB/orbcore,$(IMPORT_TREES))
 ifdef UnixPlatform
 #CXXDEBUGFLAGS = -g
 
-PYPREFIX  := $(shell python -c 'import sys; print sys.exec_prefix')
+PYPREFIX  := $(shell $(PYTHON) -c 'import sys; print sys.exec_prefix')
 PYVERSION := $(shell $(PYTHON) -c 'import sys; print sys.version[:3]')
 PYINCDIR  := $(PYPREFIX)/include
 PYINCFILE := "<python$(PYVERSION)/Python.h>"
@@ -159,7 +159,7 @@ endif
 
 ifdef Win32Platform
 
-PYPREFIX1 := "$(shell python -c 'import sys,string; sys.stdout.write(string.lower(sys.prefix))')"
+PYPREFIX1 := "$(shell $(PYTHON) -c 'import sys,string; sys.stdout.write(string.lower(sys.prefix))')"
 PYPREFIX  := $(subst program files,progra~1,$(subst \,/,$(PYPREFIX1)))
 PYVERSION := $(shell $(PYTHON) -c 'import sys; sys.stdout.write(sys.version[:3])')
 PYINCDIR  := $(PYPREFIX)/include
@@ -279,7 +279,7 @@ endif
 
 ifdef NextStep
 
-PYPREFIX = $(shell python -c "import sys;print sys.exec_prefix")
+PYPREFIX = $(shell $(PYTHON) -c "import sys;print sys.exec_prefix")
 CXXOPTIONS += -I$(PYPREFIX)/include
 CXXLINKOPTIONS += -nostdlib -r
 SO = .so
