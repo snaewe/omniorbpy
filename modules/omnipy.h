@@ -31,6 +31,9 @@
 #define _omnipy_h_
 
 // $Log$
+// Revision 1.2.4.17  2002/03/18 12:40:38  dpg1
+// Support overriding _non_existent.
+//
 // Revision 1.2.4.16  2002/01/18 15:49:44  dpg1
 // Context support. New system exception construction. Fix None call problem.
 //
@@ -622,6 +625,7 @@ public:
     virtual const char*             _mostDerivedRepoId();
     virtual CORBA::Boolean          _is_a(const char* logical_type_id);
     virtual PortableServer::POA_ptr _default_POA();
+    virtual CORBA::Boolean          _non_existent();
 
     inline PyObject* pyServant() { Py_INCREF(pyservant_); return pyservant_; }
 

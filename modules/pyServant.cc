@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.12  2002/03/18 12:40:38  dpg1
+// Support overriding _non_existent.
+//
 // Revision 1.1.2.11  2002/03/11 15:40:04  dpg1
 // _get_interface support, exception minor codes.
 //
@@ -326,6 +329,35 @@ Py_omniServant::_default_POA()
   }
   CORBA::Object_var obj = omniPy::orb->resolve_initial_references("RootPOA");
   return PortableServer::POA::_narrow(obj);
+}
+
+CORBA::Boolean
+omniPy::
+Py_omniServant::_non_existent()
+{
+  omnipyThreadCache::lock _t;
+  PyObject* result = PyObject_CallMethod(pyservant_,
+					 (char*)"_non_existent", 0);
+  if (!result) {
+    if (omniORB::trace(1)) {
+      {
+	omniORB::logger l;
+	l << "Exception trying to call _non_existent. Raising UNKNOWN.\n";
+      }
+      PyErr_Print();
+    }
+    else {
+      PyErr_Clear();
+    }
+    OMNIORB_THROW(UNKNOWN, UNKNOWN_PythonException, CORBA::COMPLETED_NO);
+  }
+
+  if (!PyInt_Check(result))
+    OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, CORBA::COMPLETED_NO);
+
+  long i = PyInt_AS_LONG(result);
+  Py_DECREF(result);
+  return i ? 1 : 0;
 }
 
 

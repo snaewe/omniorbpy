@@ -1,14 +1,24 @@
+Mon Mar 18 12:39:18 GMT 2002 dpg1
+=================================
+
+- Support overriding _non_existent.
+
+modules/omnipy.h
+modules/pyServant.cc
+python/omniORB/PortableServer.py
+
+
 Mon Mar 11 15:39:49 GMT 2002 dpg1
 =================================
 
 - _get_interface support, exception minor codes.
 
-src/lib/omniORBpy/modules/pyServant.cc
-src/lib/omniORBpy/python/omniORB/CORBA.py
-src/lib/omniORBpy/python/omniORB/PortableServer.py
-src/lib/omniORBpy/python/omniORB/URI.py
-src/lib/omniORBpy/python/omniORB/__init__.py
-src/lib/omniORBpy/python/omniORB/tcInternal.py
+modules/pyServant.cc
+python/omniORB/CORBA.py
+python/omniORB/PortableServer.py
+python/omniORB/URI.py
+python/omniORB/__init__.py
+python/omniORB/tcInternal.py
 
 
 Mon Feb 25 15:32:48 GMT 2002 dpg1
