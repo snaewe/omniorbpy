@@ -1,15 +1,32 @@
+Mon Apr  9 16:19:04 BST 2001 dpg1
+=================================
+
+- Fixed point support.
+
+modules/dir.mk
+modules/omnipy.cc
+modules/omnipy.h
+modules/pyFixed.cc
+modules/pyFixed.h
+modules/pyMarshal.cc
+modules/pyomniFunc.cc
+omniidl_be/python.py
+python/omniORB/CORBA.py
+python/omniORB/__init__.py
+
+
 Tue Mar 13 10:36:16 GMT 2001 dpg1
 =================================
 
 - Fixes from omnipy1_develop
 
-src/lib/omniORBpy/modules/dir.mk
-src/lib/omniORBpy/modules/omnipy.h
-src/lib/omniORBpy/modules/pyORBFunc.cc
-src/lib/omniORBpy/modules/pyObjectRef.cc
-src/lib/omniORBpy/modules/pyPOAFunc.cc
-src/lib/omniORBpy/modules/pyServant.cc
-src/lib/omniORBpy/modules/pyTypeCode.cc
+modules/dir.mk
+modules/omnipy.h
+modules/pyORBFunc.cc
+modules/pyObjectRef.cc
+modules/pyPOAFunc.cc
+modules/pyServant.cc
+modules/pyTypeCode.cc
 
 
 Tue Jan  9 17:23:07 GMT 2001 dpg1
@@ -18,8 +35,8 @@ Tue Jan  9 17:23:07 GMT 2001 dpg1
 - Release the Python interpreter lock when doing potentially blocking
   stream calls.
 
-src/lib/omniORBpy/modules/pyCallDescriptor.cc
-src/lib/omniORBpy/modules/pyObjectRef.cc
+modules/pyCallDescriptor.cc
+modules/pyObjectRef.cc
 
 
 Tue Dec  5 17:46:39 GMT 2000 dpg1

@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.28.2.4  2001/04/09 15:22:17  dpg1
+# Fixed point support.
+#
 # Revision 1.28.2.3  2000/11/22 14:43:58  dpg1
 # Support code set conversion and wchar/wstring.
 #
@@ -701,6 +704,9 @@ def is_nil(obj):
         return 0
     raise BAD_PARAM()
 
+# Fixed point constructor
+fixed = omniORB.fixed
+
 
 #############################################################################
 #                                                                           #
@@ -725,8 +731,8 @@ except NameError:
 #############################################################################
 
 # Note that we do not include the majority of the IfR declarations
-# here, because that would cause lots of bloat. Code which requires it
-# should compile ir.idl and manually import ir_idl.
+# here, because that would cause lots of bloat. Call
+# omniORB.importIRStubs() to import the full IfR declarations.
 
 # typedef string Identifier
 class Identifier:

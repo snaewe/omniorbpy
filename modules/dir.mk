@@ -21,7 +21,8 @@ CXXSRCS = omnipy.cc \
           pyMarshal.cc \
           pyTypeCode.cc \
           pyThreadCache.cc \
-          pyomniFunc.cc
+          pyomniFunc.cc \
+	  pyFixed.cc
 
 OBJS =    omnipy.o \
           pyORBFunc.o \
@@ -34,7 +35,8 @@ OBJS =    omnipy.o \
           pyMarshal.o \
           pyTypeCode.o \
           pyThreadCache.o \
-          pyomniFunc.o
+          pyomniFunc.o \
+	  pyFixed.o
 
 
 DIR_CPPFLAGS += $(patsubst %,-I%/src/lib/omniORB,$(IMPORT_TREES))

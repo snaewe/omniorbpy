@@ -31,6 +31,9 @@
 #define _omnipy_h_
 
 // $Log$
+// Revision 1.2.4.6  2001/04/09 15:22:15  dpg1
+// Fixed point support.
+//
 // Revision 1.2.4.5  2001/03/13 10:38:07  dpg1
 // Fixes from omnipy1_develop
 //
@@ -57,7 +60,7 @@
 
 extern "C" {
   struct omnipyTwin {
-    PyObject_VAR_HEAD
+    PyObject_HEAD
     void* ob_twin;
   };
 }
@@ -182,6 +185,19 @@ public:
   // Throw a C++ system exception equivalent to the given Python exception
   static
   void produceSystemException(PyObject* eobj, PyObject* erepoId);
+
+
+  ////////////////////////////////////////////////////////////////////////////
+  // Fixed point                                                            //
+  ////////////////////////////////////////////////////////////////////////////
+
+  // Create a new omnipyFixedObject.
+  static
+  PyObject* newFixedObject(const CORBA::Fixed& f);
+
+  // Version for CORBA.fixed() function
+  static
+  PyObject* newFixedObject(PyObject* self, PyObject* args);
 
 
   ////////////////////////////////////////////////////////////////////////////

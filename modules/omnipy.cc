@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.4  2001/04/09 15:22:15  dpg1
+// Fixed point support.
+//
 // Revision 1.1.2.3  2000/11/22 17:23:03  dpg1
 // Twin strings pre-allocated.
 //
@@ -135,7 +138,7 @@ extern "C" {
     0,				      /*tp_getattro*/
     0,				      /*tp_setattro*/
     0,                                /*tp_as_buffer*/
-    0,				      /*tp_xxx4*/
+    0,				      /*tp_flags*/
     0,                                /*tp_doc*/
   };
 }
@@ -145,7 +148,6 @@ omniPy::newTwin(void* twin)
 {
   omnipyTwin* ot = PyMem_NEW(omnipyTwin, 1);
   ot->ob_type = &omnipyTwinType;
-  ot->ob_size = 0;
   ot->ob_twin = (void*)twin;
   _Py_NewReference(ot);
   return (PyObject*)ot;

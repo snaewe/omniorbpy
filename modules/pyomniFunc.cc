@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.4  2001/04/09 15:22:16  dpg1
+// Fixed point support.
+//
 // Revision 1.1.2.3  2000/11/22 14:43:58  dpg1
 // Support code set conversion and wchar/wstring.
 //
@@ -422,6 +425,31 @@ extern "C" {
     return 0;
   }
 
+  static char fixed_doc [] =
+  "fixed(digits,scale,value)  -> fixed point object\n"
+  "\n"
+  "Create a new fixed point object, given digits and scale limits\n"
+  "and the value as an int or long.\n"
+  "\n"
+  "e.g. fixed(5, 2, 12345L) -> 123.45\n"
+  "     fixed(5, 5, 123L)   -> 0.00123\n"
+  "\n"
+  "omniORB specific:\n"
+  "\n"
+  "fixed(string)              -> fixed point object\n"
+  "fixed(int)                 -> fixed point object\n"
+  "fixed(long)                -> fixed point object\n"
+  "fixed(digits,scale,string) -> fixed point object\n"
+  "\n"
+  "e.g. fixed(\"123.45\") -> 123.45\n";
+
+  static PyObject*
+  pyomni_fixed(PyObject* self, PyObject* args)
+  {
+    return omniPy::newFixedObject(self, args);
+  }
+
+
   static PyMethodDef pyomni_methods[] = {
     {(char*)"installTransientExceptionHandler",
      pyomni_installTransientExceptionHandler,
@@ -446,6 +474,10 @@ extern "C" {
     {(char*)"nativeCharCodeSet",
      pyomni_nativeCharCodeSet,
      METH_VARARGS, nativeCharCodeSet_doc},
+
+    {(char*)"fixed",
+     pyomni_fixed,
+     METH_VARARGS, fixed_doc},
 
     {NULL,NULL}
   };
