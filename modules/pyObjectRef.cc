@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.11  2001/06/15 10:59:26  dpg1
+// Apply fixes from omnipy1_develop.
+//
 // Revision 1.1.2.10  2001/06/11 13:06:26  dpg1
 // Support for PortableServer::Current.
 //
@@ -454,8 +457,8 @@ omniPy::stringToObject(const char* uri)
     omniPy::InterpreterUnlocker _u;
     objref = omniPy::createObjRef(CORBA::Object::_PD_repoId,
 				  cxxobjref->_getIOR(), 0, 0);
+    CORBA::release(cxxobj);
   }
-  CORBA::release(cxxobj);
   return (CORBA::Object_ptr)objref->_ptrToObjRef(CORBA::Object::_PD_repoId);
 }
 

@@ -1,3 +1,16 @@
+Fri Jun 15 11:47:15 BST 2001 dpg1
+=================================
+
+- Apply fixes from omnipy1_develop.
+
+modules/pyObjectRef.cc
+modules/pyPOAFunc.cc
+modules/pyServant.cc
+omniidl_be/python.py
+python/omniORB/CORBA.py
+python/omniORB/__init__.py
+
+
 Wed Jun 13 12:26:02 BST 2001 dpg1
 =================================
 
