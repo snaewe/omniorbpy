@@ -4,6 +4,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.3  1999/09/20 16:01:54  dpg1
+// *** empty log message ***
+//
 // Revision 1.2  1999/09/20 14:55:04  dpg1
 // GCC 2.95 is more pedantic than egcs.
 //
@@ -13,8 +16,8 @@
 
 
 #include <omnipy.h>
-#include <omniORB2/ropeFactory.h>
-#include <omniORB2/objectManager.h>
+#include <ropeFactory.h>   // Internal omniORB interface
+#include <objectManager.h> // Internal omniORB interface
 
 #include <iostream.h>
 
