@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.28.2.17  2003/03/07 11:56:04  dgrisby
+# Missing TypeCode creation functions.
+#
 # Revision 1.28.2.16  2002/09/21 23:27:11  dgrisby
 # New omniORB.any helper module.
 #
@@ -528,6 +531,12 @@ class ORB:
 
     def create_string_tc(self, bound):
         return tcInternal.createStringTC(bound)
+
+    def create_wstring_tc(self, bound):
+        return tcInternal.createWStringTC(bound)
+
+    def create_fixed_tc(self, digits, scale):
+        return tcInternal.createFixedTC(digits, scale)
 
     def create_sequence_tc(self, bound, element_type):
         return tcInternal.createSequenceTC(bound, element_type)

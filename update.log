@@ -1,3 +1,12 @@
+Fri Mar  7 11:54:03 GMT 2003 dgrisby
+====================================
+
+- Missing TypeCode creation functions.
+
+python/omniORB/CORBA.py
+python/omniORB/tcInternal.py
+
+
 Wed Mar  5 15:13:11 GMT 2003 dgrisby
 ====================================
 

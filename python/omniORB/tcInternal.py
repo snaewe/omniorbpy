@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.10.2.7  2003/03/07 11:56:04  dgrisby
+# Missing TypeCode creation functions.
+#
 # Revision 1.10.2.6  2002/06/11 20:21:31  dgrisby
 # Missed out wchar, wstring TypeCodes.
 #
@@ -240,6 +243,14 @@ def createInterfaceTC(id, name):
 
 def createStringTC(bound):
     d = (tv_string, bound)
+    return createTypeCode(d)
+
+def createWStringTC(bound):
+    d = (tv_wstring, bound)
+    return createTypeCode(d)
+
+def createFixedTC(digits, scale):
+    d = (tv_fixed, digits, scale)
     return createTypeCode(d)
 
 def createSequenceTC(bound, element_type):
