@@ -28,6 +28,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.29.2.15  2003/04/16 13:07:59  dgrisby
+# Option to generate example implementations.
+#
 # Revision 1.29.2.14  2002/11/25 21:31:09  dgrisby
 # Friendly error messages with file errors, remove code to kill POA
 # modules from pre-1.0.
@@ -538,6 +541,72 @@ _tc_@ename@ = omniORB.tcInternal.createTypeCode(_d_@ename@)
 omniORB.registerType(@ename@._NP_RepositoryId, _d_@ename@, _tc_@ename@)"""
 
 
+example_start = """\
+#!/usr/bin/env python
+
+# Python example implementations generated from @filename@
+
+import CORBA, PortableServer
+
+# Import the Python stub modules so type definitions are available.
+"""
+
+example_import_skels = """
+# Import the Python Skeleton modules so skeleton base classes are available.
+"""
+
+example_import = """\
+import @module@"""
+
+example_classdef = """
+
+# Implementation of interface @ccname@
+
+class @ifname@_i (@skname@):
+@inheritance_note@
+    def __init__(self):
+        # Initialise member variables here
+        pass
+"""
+
+example_opdef = """\
+    # @signature@
+    def @opname@(self@args@):
+        raise CORBA.NO_IMPLEMENT(0, CORBA.COMPLETED_NO)
+        # *** Implement me
+        # Must return: @returnspec@
+"""
+
+example_end = """
+if __name__ == "__main__":
+    import sys
+    
+    # Initialise the ORB
+    orb = CORBA.ORB_init(sys.argv)
+    
+    # As an example, we activate an object in the Root POA
+    poa = orb.resolve_initial_references("RootPOA")
+
+    # Create an instance of a servant class
+    servant = @ifname@_i()
+
+    # Activate it in the Root POA
+    poa.activate_object(servant)
+
+    # Get the object reference to the object
+    objref = servant._this()
+    
+    # Print a stringified IOR for it
+    print orb.object_to_string(objref)
+
+    # Activate the Root POA's manager
+    poa._get_the_POAManager().activate()
+
+    # Run the ORB, blocking this thread
+    orb.run()
+"""
+
+
 
 # Global state
 imported_files   = {}
@@ -549,6 +618,7 @@ global_module    = "_GlobalIDL"
 module_package   = ""
 stub_package     = ""
 stub_directory   = ""
+example_impl     = 0
 
 
 def error_exit(message):
@@ -558,6 +628,7 @@ def error_exit(message):
 def run(tree, args):
     global main_idl_file, imported_files, exported_modules, output_inline
     global global_module, module_package, stub_package, stub_directory
+    global example_impl
 
     imported_files.clear()
     exported_modules.clear()
@@ -600,7 +671,10 @@ def run(tree, args):
             global_module = arg[7:]
             if global_module == "":
                 error_exit("You may not have an unnamed global module.")
-                
+
+        elif arg == "example":
+            example_impl = 1
+
         else:
             sys.stderr.write(main.cmdname + ": Warning: Python " \
                              "back-end does not understand argument: " + \
@@ -636,7 +710,7 @@ def run(tree, args):
 
     exports = exported_modules.keys()
     exports.sort()
-    export_list   = map(lambda s: '"' + module_package + s + '"', exports)
+    export_list = map(lambda s: '"' + module_package + s + '"', exports)
     if len(export_list) == 1: export_list.append("")
     export_string = string.join(export_list, ", ")
 
@@ -644,6 +718,21 @@ def run(tree, args):
 
     if create_package:
         updateModules(exports, outpymodule)
+
+    if example_impl:
+        implname = os.path.join(stub_directory, outpybasename + "_example.py")
+        exst = output.Stream(open(implname, "w"), 4)
+        exst.out(example_start, filename=main_idl_file)
+        for mod in exports:
+            exst.out(example_import, module=mod)
+        exst.out(example_import_skels)
+        for mod in exports:
+            exst.out(example_import, module=skeletonModuleName(mod))
+
+        ev = ExampleVisitor(exst)
+        tree.accept(ev)
+
+        exst.out(example_end, ifname=ev.first)
 
 
 class PythonVisitor:
@@ -1652,7 +1741,180 @@ class DocstringVisitor (idlvisitor.AstVisitor):
                     sn[-2] = "_set_" + n.identifier()
                     self.docs.append((sn, self.target_node.scopedName()))
                 self.ok = 1
-                
+
+
+class ExampleVisitor (idlvisitor.AstVisitor, idlvisitor.TypeVisitor):
+    def __init__(self, st):
+        self.st = st
+        self.first = None
+
+    def visitAST(self, node):
+        for n in node.declarations():
+            if not output_inline and not n.mainFile(): continue
+
+            if isinstance(n, idlast.Module) or isinstance(n, idlast.Interface):
+                n.accept(self)
+
+    def visitModule(self, node):
+        for n in node.definitions():
+            if not output_inline and not n.mainFile(): continue
+
+            if isinstance(n, idlast.Module) or isinstance(n, idlast.Interface):
+                n.accept(self)
+
+    def visitInterface(self, node):
+        ifname = mangle(node.identifier())
+        sname  = node.scopedName()
+        ccname = idlutil.ccolonName(sname)
+        fsname = fixupScopedName(sname, prefix="")
+        dname  = dotName(fsname)
+        skname = skeletonModuleName(dname)
+
+        if self.first is None:
+            self.first = ifname
+
+        if len(node.inherits()) == 1:
+            inheritance_note = """
+    # Note: this interface inherits from another interface. You must
+    # either multiply inherit from the servant class implementing the
+    # base interface, or explicitly implement the inherited operations
+    # here.
+    #
+    # Inherited interface:
+    #
+"""
+        elif node.inherits():
+            inheritance_note = """
+    # Note: this interface inherits from other interfaces. You must either
+    # multiply inherit from the servant classes implementing the base
+    # interfaces, or explicitly implement the inherited operations here.
+    #
+    # Inherited interfaces:
+    #
+"""
+        else:
+            inheritance_note = ""
+
+        for inh in node.inherits():
+            iname = idlutil.ccolonName(inh.scopedName())
+            inheritance_note = inheritance_note + "    #   %s\n" % iname
+        
+        self.st.out(example_classdef, ifname=ifname,
+                    ccname=ccname, skname=skname,
+                    inheritance_note = inheritance_note)
+
+        for c in node.callables():
+
+            if isinstance(c, idlast.Attribute):
+
+                c.attrType().accept(self)
+                attrtype = self.__result_type
+
+                for attr in c.identifiers():
+
+                    signature = "attribute %s %s" % (attrtype, attr)
+
+                    if c.readonly():
+                        signature = "readonly " + signature
+
+                    if not c.readonly():
+                        self.st.out(example_opdef,
+                                    signature = signature,
+                                    opname = "_set_" + attr,
+                                    args = ", value",
+                                    returnspec = "None")
+
+                    self.st.out(example_opdef,
+                                signature = signature,
+                                opname = "_get_" + attr,
+                                args = "",
+                                returnspec = "attribute value")
+            else:
+                # Operation
+                innames  = []
+                outnames = []
+                siglist  = []
+
+                c.returnType().accept(self)
+                rettype = self.__result_type
+
+                if c.returnType().kind() != idltype.tk_void:
+                    outnames.append("result")
+
+                for p in c.parameters():
+                    if p.is_in():
+                        innames.append(p.identifier())
+                    if p.is_out():
+                        outnames.append(p.identifier())
+
+                    direction = {0:"in", 1:"out", 2:"inout"}[p.direction()]
+
+                    p.paramType().accept(self)
+                    siglist.append("%s %s %s" % (direction,
+                                                 self.__result_type,
+                                                 p.identifier()))
+
+                signature = "%s %s(%s)" % (rettype, c.identifier(),
+                                           string.join(siglist, ", "))
+
+                if innames:
+                    args = ", " + string.join(innames, ", ")
+                else:
+                    args = ""
+
+                if outnames:
+                    returnspec = string.join(outnames, ", ")
+                else:
+                    returnspec = "None"
+
+                self.st.out(example_opdef,
+                            signature = signature,
+                            opname = c.identifier(),
+                            args = args,
+                            returnspec = returnspec)
+
+
+
+    ttsMap = {
+        idltype.tk_void:       "void",
+        idltype.tk_short:      "short",
+        idltype.tk_long:       "long",
+        idltype.tk_ushort:     "unsigned short",
+        idltype.tk_ulong:      "unsigned long",
+        idltype.tk_float:      "float",
+        idltype.tk_double:     "double",
+        idltype.tk_boolean:    "boolean",
+        idltype.tk_char:       "char",
+        idltype.tk_octet:      "octet",
+        idltype.tk_any:        "any",
+        idltype.tk_TypeCode:   "CORBA::TypeCode",
+        idltype.tk_Principal:  "CORBA::Principal",
+        idltype.tk_longlong:   "long long",
+        idltype.tk_ulonglong:  "unsigned long long",
+        idltype.tk_longdouble: "long double",
+        idltype.tk_wchar:      "wchar"
+        }
+
+    def visitBaseType(self, type):
+        self.__result_type = self.ttsMap[type.kind()]
+
+    def visitStringType(self, type):
+        if type.bound() == 0:
+            self.__result_type = "string"
+        else:
+            self.__result_type = "string<" + str(type.bound()) + ">"
+
+    def visitWStringType(self, type):
+        if type.bound() == 0:
+            self.__result_type = "wstring"
+        else:
+            self.__result_type = "wstring<" + str(type.bound()) + ">"
+
+
+    def visitDeclaredType(self, type):
+        self.__result_type = idlutil.ccolonName(type.decl().scopedName())
+
+
 
 
 
