@@ -1,6 +1,6 @@
 # Version number
 OMNIPY_MAJOR = 0
-OMNIPY_MINOR = 4
+OMNIPY_MINOR = 5
 
 ifeq ($(OMNIORB_VERSION),)
 OMNIORB_VERSION = 2.8.0
@@ -39,7 +39,7 @@ CXXSRCS = $(VERSIONDIR)/omnipy.cc \
           $(VERSIONDIR)/pyPOAManagerFunc.cc \
           $(VERSIONDIR)/pyObjectRef.cc \
           $(VERSIONDIR)/pyCallDescriptor.cc \
-	  $(VERSIONDIR)/pyServant.cc \
+          $(VERSIONDIR)/pyServant.cc \
           common/pyExceptions.cc \
           common/pyMarshal.cc \
           common/pyTypeCode.cc \
@@ -52,7 +52,7 @@ OBJS =    $(VERSIONDIR)/omnipy.o \
           $(VERSIONDIR)/pyPOAManagerFunc.o \
           $(VERSIONDIR)/pyObjectRef.o \
           $(VERSIONDIR)/pyCallDescriptor.o \
-	  $(VERSIONDIR)/pyServant.o \
+          $(VERSIONDIR)/pyServant.o \
           common/pyExceptions.o \
           common/pyMarshal.o \
           common/pyTypeCode.o \
@@ -179,10 +179,10 @@ endif
 
 ifdef Win32Platform
 
-PYPREFIX1 := $(shell python -c 'import sys; sys.stdout.write(sys.prefix)')
-PYPREFIX := $(subst Program Files,progra~1,$(PYPREFIX1))
-PYINCDIR := $(PYPREFIX)/include
-PYLIBDIR := $(PYPREFIX)/libs
+PYPREFIX1 := $(shell python -c 'import sys,string; sys.stdout.write(string.lower(sys.prefix))')
+PYPREFIX  := $(subst program files,progra~1,$(PYPREFIX1))
+PYINCDIR  := $(PYPREFIX)/include
+PYLIBDIR  := $(PYPREFIX)/libs
 
 DIR_CPPFLAGS += -I"$(PYINCDIR)"
 PYLIBPATH = -libpath:"$(PYLIBDIR)"
