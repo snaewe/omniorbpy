@@ -32,6 +32,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.13  2000/06/27 15:13:11  dpg1
+// New copyObjRefArgument() function
+//
 // Revision 1.12  2000/06/16 17:33:18  dpg1
 // When creating an object reference with target type A, when the object
 // claims to be B, but A and B are unrelated, now creates a reference of
@@ -325,6 +328,81 @@ omniPy::createObjRef(const char* mostDerivedRepoId,
     throw;
   }
 }
+
+PyObject*
+omniPy::copyObjRefArgument(PyObject* pytargetRepoId, PyObject* pyobjref,
+			   CORBA::CompletionStatus compstatus)
+{
+  if (pyobjref == Py_None) {
+    // Nil objref
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
+  if (!PyInstance_Check(pyobjref)) {
+    // Not an objref
+    CORBA::BAD_PARAM ex(0,compstatus);
+    return omniPy::handleSystemException(ex);
+  }
+  CORBA::Object_ptr objref = (CORBA::Object_ptr)getTwin(pyobjref, OBJREF_TWIN);
+  if (!objref) {
+    // Not an objref
+    CORBA::BAD_PARAM ex(0,compstatus);
+    return omniPy::handleSystemException(ex);
+  }
+
+  // To copy an object reference, we have to take a number of things
+  // into account. When the C++ object reference was created, it was
+  // initialised with a most-derived repoId and a target repoId. If we
+  // knew that the most-derived interface is compatible with the
+  // target, then the Python objref is of the most derived type. If we
+  // did not know the most-derived interface, or we did know it and
+  // believed it to be incompatible with the target, then the Python
+  // objref is of the target type, and it has a string attribute named
+  // "_NP_RepositoryId" containing the most derived repoId.
+  //
+  // Now, as we are copying this objref, we have a target repoId,
+  // which is possibly different from the objref's original target.
+  // It's also possible that some time after we created the Python
+  // objref, some new stubs were imported, so we now know about the
+  // objref's most derived type when before we didn't.
+  //
+  // So, to copy the reference, we first see if the Python objref has
+  // an attribute named "_NP_RepositoryId". If it does, all bets are
+  // off, and we have to create a new C++ objref from scratch. If it
+  // doesn't have the attribute, we look to see if the objref's class
+  // is a subclass of the target objref class (or the same class). If
+  // so, we can just incref the existing Python objref and return it;
+  // if not, we have to build a new C++ objref.
+
+  if (!PyDict_GetItemString(((PyInstanceObject*)pyobjref)->in_dict,
+			    (char*)"_NP_RepositoryId")) {
+
+    PyObject* targetClass = PyDict_GetItem(pyomniORBobjrefMap,
+					   pytargetRepoId);
+    OMNIORB_ASSERT(targetClass);
+
+    if (PyClass_IsSubclass((PyObject*)((PyInstanceObject*)pyobjref)->in_class,
+			   targetClass)) {
+      Py_INCREF(pyobjref);
+      return pyobjref;
+    }
+  }
+  // Create new C++ and Python objrefs with the right target type
+  omniObject* ooref        = objref->PR_getobj();
+  const char* actualRepoId = ooref->NP_IRRepositoryId();
+  const char* targetRepoId = PyString_AS_STRING(pytargetRepoId);
+
+  if (targetRepoId[0] == '\0') targetRepoId = 0;
+
+  omniObject* newooref     = omniPy::createObjRef(actualRepoId,
+						  targetRepoId,
+						  ooref->iopProfiles(), 0);
+  return createPyCorbaObjRef(targetRepoId,
+			     (CORBA::Object_ptr)newooref->
+			                     _widenFromTheMostDerivedIntf(0));
+}
+
+
 
 
 omniObject*

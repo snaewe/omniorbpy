@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.23  2000/06/27 15:13:11  dpg1
+// New copyObjRefArgument() function
+//
 // Revision 1.22  2000/06/12 15:36:08  dpg1
 // Support for exception handler functions. Under omniORB 3, local
 // operation dispatch modified so exceptions handlers are run.
@@ -277,6 +280,16 @@ public:
 			   const char* targetRepoId,
 			   IOP::TaggedProfileList* profiles,
 			   CORBA::Boolean release);
+
+  // Copy a Python object reference in an argument or return value.
+  // Compares the type of the objref with the target type, and creates
+  // a new objref of the target type if they are not compatible. Sets
+  // Python exception status to BAD_PARAM and returns 0 if the Python
+  // object is not an object reference.
+  static
+  PyObject* copyObjRefArgument(PyObject*               pytargetRepoId,
+			       PyObject*               pyobjref,
+			       CORBA::CompletionStatus compstatus);
 
   // Mirror of omni::stringToObject()
   static

@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.23  2000/06/27 15:13:11  dpg1
+// New copyObjRefArgument() function
+//
 // Revision 1.22  2000/05/11 11:58:24  dpg1
 // Throw system exceptions with OMNIORB_THROW.
 //
@@ -2746,7 +2749,6 @@ omniPy::unmarshalPyObject(NetBufferedStream& stream,
 #endif
 	}
       }
-
       CORBA::Object_ptr obj = omniPy::UnMarshalObjRef(targetRepoId,
 						      stream);
       r_o = createPyCorbaObjRef(targetRepoId, obj);
@@ -3966,17 +3968,20 @@ omniPy::copyArgument(PyObject*               d_o,
     {
       OMNIORB_ASSERT(tup);
 
-      if (a_o == Py_None) {
-	Py_INCREF(Py_None); return Py_None;
-      }
-      else if (PyInstance_Check(a_o)) {
-	CORBA::Object_ptr obj = (CORBA::Object_ptr)getTwin(a_o, OBJREF_TWIN);
-	if (!obj) return setPyBadParam(compstatus);
+      return omniPy::copyObjRefArgument(PyTuple_GET_ITEM(d_o, 1),
+					a_o, compstatus);
 
-	Py_INCREF(a_o); return a_o;
-      }
-      else
-	return setPyBadParam(compstatus);
+//        if (a_o == Py_None) {
+//  	Py_INCREF(Py_None); return Py_None;
+//        }
+//        else if (PyInstance_Check(a_o)) {
+//  	CORBA::Object_ptr obj = (CORBA::Object_ptr)getTwin(a_o, OBJREF_TWIN);
+//  	if (!obj) return setPyBadParam(compstatus);
+
+//  	Py_INCREF(a_o); return a_o;
+//        }
+//        else
+//  	return setPyBadParam(compstatus);
     }
     break;
 
