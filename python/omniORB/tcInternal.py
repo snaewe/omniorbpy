@@ -3,6 +3,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.5  1999/09/20 15:11:45  dpg1
+# Bug in insertIndirections() fixed.
+#
 # Revision 1.4  1999/09/13 14:52:27  dpg1
 # TypeCode equivalence.
 #
@@ -885,4 +888,5 @@ def r_insertIndirections(d, seen, ind):
             r_insertIndirections(d[i+1], seen, ind)
 
     elif k == tv__indirect:
-        ind.append(d[1])
+        if type(d[1][0]) == types.StringType:
+            ind.append(d[1])
