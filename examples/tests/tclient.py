@@ -1404,6 +1404,23 @@ def doTests(orb, poa, io):
     if ok: tpass()
     else:  tfail()
 
+    tstart("Long sequence of struct S1")
+
+    ok = 1
+    s  = [TypeTest.S1(1, 2, 3, 4, 5.6, 7, 8, "a", 10),
+          TypeTest.S1(-10, 0xffff, -1234567, 42L, 1.234, 5.678, 0, "z", 255)]
+    s  = s * 1000
+    r  = io.complex39(s)
+
+    if r[1].b == 0xffff:
+        tresult("+")
+    else:
+        ok = 0
+        tresult("-")
+
+    if ok: tpass()
+    else:  tfail()
+
 
     tstart("Fixed")
 
