@@ -31,7 +31,7 @@ import omniORB, _omnipy
 from omniORB import CORBA, PortableServer
 _0_CORBA = CORBA
 
-_omnipy.checkVersion(0,1, __file__)
+_omnipy.checkVersion(0,2, __file__)
 
 
 #
@@ -278,6 +278,7 @@ class NamingContext (PortableServer.Servant):
 
     _op_d = {"bind": _0_CosNaming.NamingContext._d_bind, "rebind": _0_CosNaming.NamingContext._d_rebind, "bind_context": _0_CosNaming.NamingContext._d_bind_context, "rebind_context": _0_CosNaming.NamingContext._d_rebind_context, "resolve": _0_CosNaming.NamingContext._d_resolve, "unbind": _0_CosNaming.NamingContext._d_unbind, "new_context": _0_CosNaming.NamingContext._d_new_context, "bind_new_context": _0_CosNaming.NamingContext._d_bind_new_context, "destroy": _0_CosNaming.NamingContext._d_destroy, "list": _0_CosNaming.NamingContext._d_list}
 
+NamingContext._omni_skeleton = NamingContext
 _0_POA_CosNaming.NamingContext = NamingContext
 del NamingContext
 __name__ = "CosNaming"
@@ -345,6 +346,7 @@ class BindingIterator (PortableServer.Servant):
 
     _op_d = {"next_one": _0_CosNaming.BindingIterator._d_next_one, "next_n": _0_CosNaming.BindingIterator._d_next_n, "destroy": _0_CosNaming.BindingIterator._d_destroy}
 
+BindingIterator._omni_skeleton = BindingIterator
 _0_POA_CosNaming.BindingIterator = BindingIterator
 del BindingIterator
 __name__ = "CosNaming"
@@ -360,5 +362,6 @@ __name__ = "_GlobalIDL"
 #
 __name__ = "Naming_idl"
 
+_exported_modules = ( "CosNaming", )
 
 # The end.
