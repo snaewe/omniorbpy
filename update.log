@@ -1,3 +1,11 @@
+Thu Oct 18 17:42:26 BST 2001 dpg1
+=================================
+
+- Segfault with invalid policy list in create_POA().
+
+modules/pyPOAFunc.cc
+
+
 Thu Oct 18 16:54:43 BST 2001 dpg1
 =================================
 
