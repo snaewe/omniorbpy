@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.12  2003/12/15 18:14:27  dgrisby
+// Another bug in omniORB.LOCATION_FORWARD handling.
+//
 // Revision 1.1.2.11  2003/09/25 13:17:16  dgrisby
 // Report unexpected user exceptions.
 //
@@ -219,19 +222,22 @@ omniPy::handleLocationForward(PyObject* evalue)
   CORBA::Object_ptr fwd =
     (CORBA::Object_ptr)omniPy::getTwin(pyfwd, OBJREF_TWIN);
 
+  if (fwd)
+    CORBA::Object::_duplicate(fwd);
+
   Py_DECREF(pyfwd);
   Py_DECREF(pyperm);
   Py_DECREF(evalue);
-  if (fwd)
-    throw omniORB::LOCATION_FORWARD(CORBA::Object::_duplicate(fwd), perm);
+  if (fwd) {
+    OMNIORB_ASSERT(CORBA::Object::_PR_is_valid(fwd));
+    throw omniORB::LOCATION_FORWARD(fwd, perm);
+  }
   else {
     omniORB::logs(1, "Invalid object reference inside "
 		  "omniORB.LOCATION_FORWARD exception");
     OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, CORBA::COMPLETED_NO);
   }
 }
-
-
 
 
 
