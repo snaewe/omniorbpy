@@ -31,9 +31,8 @@
 # $Id$
 
 # $Log$
-# Revision 1.18  2000/02/15 17:14:15  dpg1
-# UserException now has a __str__() method to avoid an exception in the
-# exception handler.
+# Revision 1.19  2000/03/03 17:41:28  dpg1
+# Major reorganisation to support omniORB 3.0 as well as 2.8.
 #
 # Revision 1.17  2000/01/31 10:51:42  dpg1
 # Fix to exception throwing.
@@ -144,157 +143,156 @@ class UserException (Exception):
     def __str__(self):
         return ""
 
-
 # All the standard system exceptions...
 
 class UNKNOWN (SystemException):
-    _NP_RepositoryId = "IDL:omg.org/CORBA/UNKNOWN"
+    _NP_RepositoryId = "IDL:omg.org/CORBA/UNKNOWN:1.0"
     def __init__(self, minor=0, completed=COMPLETED_NO):
         SystemException.__init__(self, minor, completed)
 
 class BAD_PARAM (SystemException):
-    _NP_RepositoryId = "IDL:omg.org/CORBA/BAD_PARAM"
+    _NP_RepositoryId = "IDL:omg.org/CORBA/BAD_PARAM:1.0"
     def __init__(self, minor=0, completed=COMPLETED_NO):
         SystemException.__init__(self, minor, completed)
 
 class NO_MEMORY (SystemException):
-    _NP_RepositoryId = "IDL:omg.org/CORBA/NO_MEMORY"
+    _NP_RepositoryId = "IDL:omg.org/CORBA/NO_MEMORY:1.0"
     def __init__(self, minor=0, completed=COMPLETED_NO):
         SystemException.__init__(self, minor, completed)
         return
 
 class IMP_LIMIT (SystemException):
-    _NP_RepositoryId = "IDL:omg.org/CORBA/IMP_LIMIT"
+    _NP_RepositoryId = "IDL:omg.org/CORBA/IMP_LIMIT:1.0"
     def __init__(self, minor=0, completed=COMPLETED_NO):
         SystemException.__init__(self, minor, completed)
 
 class COMM_FAILURE (SystemException):
-    _NP_RepositoryId = "IDL:omg.org/CORBA/COMM_FAILURE"
+    _NP_RepositoryId = "IDL:omg.org/CORBA/COMM_FAILURE:1.0"
     def __init__(self, minor=0, completed=COMPLETED_NO):
         SystemException.__init__(self, minor, completed)
 
 class INV_OBJREF (SystemException):
-    _NP_RepositoryId = "IDL:omg.org/CORBA/INV_OBJREF"
+    _NP_RepositoryId = "IDL:omg.org/CORBA/INV_OBJREF:1.0"
     def __init__(self, minor=0, completed=COMPLETED_NO):
         SystemException.__init__(self, minor, completed)
 
 class OBJECT_NOT_EXIST (SystemException):
-    _NP_RepositoryId = "IDL:omg.org/CORBA/OBJECT_NOT_EXIST"
+    _NP_RepositoryId = "IDL:omg.org/CORBA/OBJECT_NOT_EXIST:1.0"
     def __init__(self, minor=0, completed=COMPLETED_NO):
         SystemException.__init__(self, minor, completed)
 
 class NO_PERMISSION (SystemException):
-    _NP_RepositoryId = "IDL:omg.org/CORBA/NO_PERMISSION"
+    _NP_RepositoryId = "IDL:omg.org/CORBA/NO_PERMISSION:1.0"
     def __init__(self, minor=0, completed=COMPLETED_NO):
         SystemException.__init__(self, minor, completed)
 
 class INTERNAL (SystemException):
-    _NP_RepositoryId = "IDL:omg.org/CORBA/INTERNAL"
+    _NP_RepositoryId = "IDL:omg.org/CORBA/INTERNAL:1.0"
     def __init__(self, minor=0, completed=COMPLETED_NO):
         SystemException.__init__(self, minor, completed)
 
 class MARSHAL (SystemException):
-    _NP_RepositoryId = "IDL:omg.org/CORBA/MARSHAL"
+    _NP_RepositoryId = "IDL:omg.org/CORBA/MARSHAL:1.0"
     def __init__(self, minor=0, completed=COMPLETED_NO):
         SystemException.__init__(self, minor, completed)
 
 class INITIALIZE (SystemException):
-    _NP_RepositoryId = "IDL:omg.org/CORBA/INITIALIZE"
+    _NP_RepositoryId = "IDL:omg.org/CORBA/INITIALIZE:1.0"
     def __init__(self, minor=0, completed=COMPLETED_NO):
         SystemException.__init__(self, minor, completed)
 
 class NO_IMPLEMENT (SystemException):
-    _NP_RepositoryId = "IDL:omg.org/CORBA/NO_IMPLEMENT"
+    _NP_RepositoryId = "IDL:omg.org/CORBA/NO_IMPLEMENT:1.0"
     def __init__(self, minor=0, completed=COMPLETED_NO):
         SystemException.__init__(self, minor, completed)
 
 class BAD_TYPECODE (SystemException):
-    _NP_RepositoryId = "IDL:omg.org/CORBA/BAD_TYPECODE"
+    _NP_RepositoryId = "IDL:omg.org/CORBA/BAD_TYPECODE:1.0"
     def __init__(self, minor=0, completed=COMPLETED_NO):
         SystemException.__init__(self, minor, completed)
 
 class BAD_OPERATION (SystemException):
-    _NP_RepositoryId = "IDL:omg.org/CORBA/BAD_OPERATION"
+    _NP_RepositoryId = "IDL:omg.org/CORBA/BAD_OPERATION:1.0"
     def __init__(self, minor=0, completed=COMPLETED_NO):
         SystemException.__init__(self, minor, completed)
 
 class NO_RESOURCES (SystemException):
-    _NP_RepositoryId = "IDL:omg.org/CORBA/NO_RESOURCES"
+    _NP_RepositoryId = "IDL:omg.org/CORBA/NO_RESOURCES:1.0"
     def __init__(self, minor=0, completed=COMPLETED_NO):
         SystemException.__init__(self, minor, completed)
 
 class NO_RESPONSE (SystemException):
-    _NP_RepositoryId = "IDL:omg.org/CORBA/NO_RESPONSE"
+    _NP_RepositoryId = "IDL:omg.org/CORBA/NO_RESPONSE:1.0"
     def __init__(self, minor=0, completed=COMPLETED_NO):
         SystemException.__init__(self, minor, completed)
 
 class PERSIST_STORE (SystemException):
-    _NP_RepositoryId = "IDL:omg.org/CORBA/PERSIST_STORE"
+    _NP_RepositoryId = "IDL:omg.org/CORBA/PERSIST_STORE:1.0"
     def __init__(self, minor=0, completed=COMPLETED_NO):
         SystemException.__init__(self, minor, completed)
 
 class BAD_INV_ORDER (SystemException):
-    _NP_RepositoryId = "IDL:omg.org/CORBA/BAD_INV_ORDER"
+    _NP_RepositoryId = "IDL:omg.org/CORBA/BAD_INV_ORDER:1.0"
     def __init__(self, minor=0, completed=COMPLETED_NO):
         SystemException.__init__(self, minor, completed)
 
 class TRANSIENT (SystemException):
-    _NP_RepositoryId = "IDL:omg.org/CORBA/TRANSIENT"
+    _NP_RepositoryId = "IDL:omg.org/CORBA/TRANSIENT:1.0"
     def __init__(self, minor=0, completed=COMPLETED_NO):
         SystemException.__init__(self, minor, completed)
 
 class FREE_MEM (SystemException):
-    _NP_RepositoryId = "IDL:omg.org/CORBA/FREE_MEM"
+    _NP_RepositoryId = "IDL:omg.org/CORBA/FREE_MEM:1.0"
     def __init__(self, minor=0, completed=COMPLETED_NO):
         SystemException.__init__(self, minor, completed)
 
 class INV_IDENT (SystemException):
-    _NP_RepositoryId = "IDL:omg.org/CORBA/INV_IDENT"
+    _NP_RepositoryId = "IDL:omg.org/CORBA/INV_IDENT:1.0"
     def __init__(self, minor=0, completed=COMPLETED_NO):
         SystemException.__init__(self, minor, completed)
 
 class INV_FLAG (SystemException):
-    _NP_RepositoryId = "IDL:omg.org/CORBA/INV_FLAG"
+    _NP_RepositoryId = "IDL:omg.org/CORBA/INV_FLAG:1.0"
     def __init__(self, minor=0, completed=COMPLETED_NO):
         SystemException.__init__(self, minor, completed)
 
 class INTF_REPOS (SystemException):
-    _NP_RepositoryId = "IDL:omg.org/CORBA/INTF_REPOS"
+    _NP_RepositoryId = "IDL:omg.org/CORBA/INTF_REPOS:1.0"
     def __init__(self, minor=0, completed=COMPLETED_NO):
         SystemException.__init__(self, minor, completed)
 
 class BAD_CONTEXT (SystemException):
-    _NP_RepositoryId = "IDL:omg.org/CORBA/BAD_CONTEXT"
+    _NP_RepositoryId = "IDL:omg.org/CORBA/BAD_CONTEXT:1.0"
     def __init__(self, minor=0, completed=COMPLETED_NO):
         SystemException.__init__(self, minor, completed)
 
 class OBJ_ADAPTER (SystemException):
-    _NP_RepositoryId = "IDL:omg.org/CORBA/OBJ_ADAPTER"
+    _NP_RepositoryId = "IDL:omg.org/CORBA/OBJ_ADAPTER:1.0"
     def __init__(self, minor=0, completed=COMPLETED_NO):
         SystemException.__init__(self, minor, completed)
 
 class DATA_CONVERSION (SystemException):
-    _NP_RepositoryId = "IDL:omg.org/CORBA/DATA_CONVERSION"
+    _NP_RepositoryId = "IDL:omg.org/CORBA/DATA_CONVERSION:1.0"
     def __init__(self, minor=0, completed=COMPLETED_NO):
         SystemException.__init__(self, minor, completed)
 
 class TRANSACTION_REQUIRED (SystemException):
-    _NP_RepositoryId = "IDL:omg.org/CORBA/TRANSACTION_REQUIRED"
+    _NP_RepositoryId = "IDL:omg.org/CORBA/TRANSACTION_REQUIRED:1.0"
     def __init__(self, minor=0, completed=COMPLETED_NO):
         SystemException.__init__(self, minor, completed)
 
 class TRANSACTION_ROLLEDBACK (SystemException):
-    _NP_RepositoryId = "IDL:omg.org/CORBA/TRANSACTION_ROLLEDBACK"
+    _NP_RepositoryId = "IDL:omg.org/CORBA/TRANSACTION_ROLLEDBACK:1.0"
     def __init__(self, minor=0, completed=COMPLETED_NO):
         SystemException.__init__(self, minor, completed)
 
 class INVALID_TRANSACTION (SystemException):
-    _NP_RepositoryId = "IDL:omg.org/CORBA/INVALID_TRANSACTION"
+    _NP_RepositoryId = "IDL:omg.org/CORBA/INVALID_TRANSACTION:1.0"
     def __init__(self, minor=0, completed=COMPLETED_NO):
         SystemException.__init__(self, minor, completed)
 
 class WRONG_TRANSACTION (SystemException):
-    _NP_RepositoryId = "IDL:omg.org/CORBA/WRONG_TRANSACTION"
+    _NP_RepositoryId = "IDL:omg.org/CORBA/WRONG_TRANSACTION:1.0"
     def __init__(self, minor=0, completed=COMPLETED_NO):
         SystemException.__init__(self, minor, completed)
 
@@ -458,8 +456,10 @@ _d_any = tcInternal.tv_any
 #                                                                           #
 #############################################################################
 
-ORB_ID = "omniORB2"
-BOA_ID = "omniORB2_BOA"
+if _omnipy.coreVersion() == "2.8.0":
+    ORB_ID = "omniORB2"
+else:
+    ORB_ID = "omniORB3"
 
 def ORB_init(argv=[], orb_identifier = ORB_ID):
     omniORB.orb_lock.acquire()
@@ -477,31 +477,19 @@ class ORB:
 
     def __init__(self, argv, orb_identifier):
         _omnipy.ORB_init(self, argv, orb_identifier)
-        self.__argv = argv
-        self.__poa  = None
-
-#    def BOA_init(self, argv=[], boa_identifier = BOA_ID):
-#        return BOA(self, argv, boa_identifier)
+        self._omni_argv = argv # For omniORB 2.8 to initialise its BOA
 
     def string_to_object(self, ior):
-        return _omnipy.stringToObject(self, ior)
+        return _omnipy.orb_func.string_to_object(self, ior)
 
     def object_to_string(self, obj):
-        return _omnipy.objectToString(self, obj)
+        return _omnipy.orb_func.object_to_string(self, obj)
 
     def list_initial_services(self):
-        isl = _omnipy.listInitialServices(self)
-        isl.append("RootPOA")
-        return isl
+        return _omnipy.orb_func.list_initial_services(self)
 
     def resolve_initial_references(self, identifier):
-
-        if identifier == "RootPOA":
-            if self.__poa is None:
-                self.__poa = omniORB.PortableServer.POA(self, self.__argv)
-            return self.__poa
-
-        return _omnipy.resolveInitialReferences(self, identifier)
+        return _omnipy.orb_func.resolve_initial_references(self, identifier)
 
     # TypeCode operations
     def create_struct_tc(self, id, name, members):
@@ -535,8 +523,8 @@ class ORB:
         return tcInternal.createRecursiveTC(id)
 
     def run(self):
-        poa = self.resolve_initial_references("RootPOA")
-        _omnipy.implIsReady(poa, 0, 1)
+#        poa = self.resolve_initial_references("RootPOA")
+#        _omnipy.implIsReady(poa, 0, 1)
         while 1:
             time.sleep(60)
 
@@ -549,32 +537,15 @@ class ORB:
                    "create_array_tc", "create_recursive_tc",
                    "run"]
 
+    class InvalidName (UserException):
+        _NP_RepositoryId = "IDL:omg.org/CORBA/ORB/InvalidName:1.0"
 
-#############################################################################
-#                                                                           #
-# BOA                                                                       #
-#                                                                           #
-#############################################################################
+    _d_InvalidName  = (omniORB.tcInternal.tv_except, InvalidName,
+                       InvalidName._NP_RepositoryId, "InvalidName")
+    _tc_InvalidName = omniORB.tcInternal.createTypeCode(_d_InvalidName)
+    omniORB.registerType(InvalidName._NP_RepositoryId,
+                         _d_InvalidName, _tc_InvalidName)
 
-#  class BOA:
-#      """
-#      omnipy BOA object
-
-#      Soon to be superceded by the POA...
-#      """
-
-#      def __init__(self, orb, argv, boa_identifier):
-#          _omnipy.BOA_init(self, orb, argv, boa_identifier)
-#          print "BOA initialised"
-
-#      def obj_is_ready(self, obj):
-#          _omnipy.objectIsReady(self, obj)
-#          print "Object activated"
-
-#      def impl_is_ready(self, z=0, noblock=0):
-#          _omnipy.implIsReady(self, z, noblock)
-
-#      __methods__ = ["obj_is_ready", "impl_is_ready"]
 
 
 #############################################################################
@@ -595,7 +566,8 @@ class Object:
         pass
 
     def __del__(self):
-        pass
+        if _omnipy is not None:
+            _omnipy.releaseObjref(self)
 
     def __getstate__(self):
         return ORB_init().object_to_string(self)
@@ -638,6 +610,50 @@ class Object:
 
 _d_Object  = (omniORB.tcInternal.tv_objref, Object._NP_RepositoryId, "Object")
 _tc_Object = omniORB.tcInternal.createTypeCode(_d_Object)
+omniORB.registerType(Object._NP_RepositoryId, _d_Object, _tc_Object)
+
+
+#############################################################################
+#                                                                           #
+# Policy                                                                    #
+#                                                                           #
+#############################################################################
+
+class Policy (Object):
+    _NP_ReposotoryId = "IDL:omg.org/CORBA/Policy:1.0"
+
+    def __init__(self):
+        raise RuntimeError("Cannot construct objects of this type.")
+
+    def _get_policy_type(self):
+        return self._policy_type
+
+    def copy(self):
+        return self
+
+    def destroy(self):
+        pass
+
+    def _is_a(self, repoId):
+        return omniORB.static_is_a(self.__class__, repoId)
+
+    def _non_existent(self):
+        return 0
+
+    def _is_equivalent(self, other_object):
+        return self == other_object
+
+    def _hash(self, maximum):
+        return hash(self) % maximum
+
+    def _narrow(self, dest):
+        if self._is_a(dest._NP_RepositoryId):
+            return self
+        else:
+            return None
+
+    __methods__ = ["_get_policy_type", "copy", "destroy"] + Object.__methods__
+
 
 
 
@@ -653,7 +669,6 @@ def is_nil(obj):
     if isinstance(obj, Object):
         return 0
     raise BAD_PARAM()
-
 
 
 #############################################################################

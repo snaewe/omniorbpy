@@ -31,7 +31,7 @@ import omniORB, _omnipy
 from omniORB import CORBA, PortableServer
 _0_CORBA = CORBA
 
-_omnipy.checkVersion(0,2, __file__)
+_omnipy.checkVersion(0,4, __file__)
 
 
 #
@@ -222,34 +222,34 @@ class _objref_NamingContext (CORBA.Object):
         CORBA.Object.__init__(self)
 
     def bind(self, *args):
-        return _omnipy.invokeOp(self, "bind", _0_CosNaming.NamingContext._d_bind, args)
+        return _omnipy.invoke(self, "bind", _0_CosNaming.NamingContext._d_bind, args)
 
     def rebind(self, *args):
-        return _omnipy.invokeOp(self, "rebind", _0_CosNaming.NamingContext._d_rebind, args)
+        return _omnipy.invoke(self, "rebind", _0_CosNaming.NamingContext._d_rebind, args)
 
     def bind_context(self, *args):
-        return _omnipy.invokeOp(self, "bind_context", _0_CosNaming.NamingContext._d_bind_context, args)
+        return _omnipy.invoke(self, "bind_context", _0_CosNaming.NamingContext._d_bind_context, args)
 
     def rebind_context(self, *args):
-        return _omnipy.invokeOp(self, "rebind_context", _0_CosNaming.NamingContext._d_rebind_context, args)
+        return _omnipy.invoke(self, "rebind_context", _0_CosNaming.NamingContext._d_rebind_context, args)
 
     def resolve(self, *args):
-        return _omnipy.invokeOp(self, "resolve", _0_CosNaming.NamingContext._d_resolve, args)
+        return _omnipy.invoke(self, "resolve", _0_CosNaming.NamingContext._d_resolve, args)
 
     def unbind(self, *args):
-        return _omnipy.invokeOp(self, "unbind", _0_CosNaming.NamingContext._d_unbind, args)
+        return _omnipy.invoke(self, "unbind", _0_CosNaming.NamingContext._d_unbind, args)
 
     def new_context(self, *args):
-        return _omnipy.invokeOp(self, "new_context", _0_CosNaming.NamingContext._d_new_context, args)
+        return _omnipy.invoke(self, "new_context", _0_CosNaming.NamingContext._d_new_context, args)
 
     def bind_new_context(self, *args):
-        return _omnipy.invokeOp(self, "bind_new_context", _0_CosNaming.NamingContext._d_bind_new_context, args)
+        return _omnipy.invoke(self, "bind_new_context", _0_CosNaming.NamingContext._d_bind_new_context, args)
 
     def destroy(self, *args):
-        return _omnipy.invokeOp(self, "destroy", _0_CosNaming.NamingContext._d_destroy, args)
+        return _omnipy.invoke(self, "destroy", _0_CosNaming.NamingContext._d_destroy, args)
 
     def list(self, *args):
-        return _omnipy.invokeOp(self, "list", _0_CosNaming.NamingContext._d_list, args)
+        return _omnipy.invoke(self, "list", _0_CosNaming.NamingContext._d_list, args)
 
     __methods__ = ["bind", "rebind", "bind_context", "rebind_context", "resolve", "unbind", "new_context", "bind_new_context", "destroy", "list"] + CORBA.Object.__methods__
 
@@ -266,7 +266,7 @@ class NamingContext (PortableServer.Servant):
         if _omnipy is not None:
             _omnipy.releaseObjref(self)
 
-    _op_d = {"bind": _0_CosNaming.NamingContext._d_bind, "rebind": _0_CosNaming.NamingContext._d_rebind, "bind_context": _0_CosNaming.NamingContext._d_bind_context, "rebind_context": _0_CosNaming.NamingContext._d_rebind_context, "resolve": _0_CosNaming.NamingContext._d_resolve, "unbind": _0_CosNaming.NamingContext._d_unbind, "new_context": _0_CosNaming.NamingContext._d_new_context, "bind_new_context": _0_CosNaming.NamingContext._d_bind_new_context, "destroy": _0_CosNaming.NamingContext._d_destroy, "list": _0_CosNaming.NamingContext._d_list}
+    _omni_op_d = {"bind": _0_CosNaming.NamingContext._d_bind, "rebind": _0_CosNaming.NamingContext._d_rebind, "bind_context": _0_CosNaming.NamingContext._d_bind_context, "rebind_context": _0_CosNaming.NamingContext._d_rebind_context, "resolve": _0_CosNaming.NamingContext._d_resolve, "unbind": _0_CosNaming.NamingContext._d_unbind, "new_context": _0_CosNaming.NamingContext._d_new_context, "bind_new_context": _0_CosNaming.NamingContext._d_bind_new_context, "destroy": _0_CosNaming.NamingContext._d_destroy, "list": _0_CosNaming.NamingContext._d_list}
 
 NamingContext._omni_skeleton = NamingContext
 _0_POA_CosNaming.NamingContext = NamingContext
@@ -305,13 +305,13 @@ class _objref_BindingIterator (CORBA.Object):
         CORBA.Object.__init__(self)
 
     def next_one(self, *args):
-        return _omnipy.invokeOp(self, "next_one", _0_CosNaming.BindingIterator._d_next_one, args)
+        return _omnipy.invoke(self, "next_one", _0_CosNaming.BindingIterator._d_next_one, args)
 
     def next_n(self, *args):
-        return _omnipy.invokeOp(self, "next_n", _0_CosNaming.BindingIterator._d_next_n, args)
+        return _omnipy.invoke(self, "next_n", _0_CosNaming.BindingIterator._d_next_n, args)
 
     def destroy(self, *args):
-        return _omnipy.invokeOp(self, "destroy", _0_CosNaming.BindingIterator._d_destroy, args)
+        return _omnipy.invoke(self, "destroy", _0_CosNaming.BindingIterator._d_destroy, args)
 
     __methods__ = ["next_one", "next_n", "destroy"] + CORBA.Object.__methods__
 
@@ -328,7 +328,7 @@ class BindingIterator (PortableServer.Servant):
         if _omnipy is not None:
             _omnipy.releaseObjref(self)
 
-    _op_d = {"next_one": _0_CosNaming.BindingIterator._d_next_one, "next_n": _0_CosNaming.BindingIterator._d_next_n, "destroy": _0_CosNaming.BindingIterator._d_destroy}
+    _omni_op_d = {"next_one": _0_CosNaming.BindingIterator._d_next_one, "next_n": _0_CosNaming.BindingIterator._d_next_n, "destroy": _0_CosNaming.BindingIterator._d_destroy}
 
 BindingIterator._omni_skeleton = BindingIterator
 _0_POA_CosNaming.BindingIterator = BindingIterator

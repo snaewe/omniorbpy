@@ -1,6 +1,6 @@
 // -*- Mode: C++; -*-
 //                            Package   : omniORBpy
-// pyProxyCallWrapper.cc      Created on: 1999/06/07
+// pyCallDescriptor.cc        Created on: 1999/06/07
 //                            Author    : Duncan Grisby (dpg1)
 //
 //    Copyright (C) 1999 AT&T Laboratories Cambridge
@@ -25,12 +25,15 @@
 //
 //
 // Description:
-//    Implementation of Python proxy call wrapper object
+//    Implementation of Python call descriptor object
 
 
 // $Id$
 
 // $Log$
+// Revision 1.13  2000/03/03 17:41:43  dpg1
+// Major reorganisation to support omniORB 3.0 as well as 2.8.
+//
 // Revision 1.12  1999/12/15 12:17:19  dpg1
 // Changes to compile with SunPro CC 5.0.
 //
@@ -84,7 +87,8 @@ omniPy::Py_OmniProxyCallDesc::alignedSize(CORBA::ULong msgsize)
   for (int i=0; i < in_l_; i++)
     msgsize = omniPy::alignedSize(msgsize,
 				  PyTuple_GET_ITEM(in_d_,i),
-				  PyTuple_GET_ITEM(args_,i));
+				  PyTuple_GET_ITEM(args_,i),
+				  CORBA::COMPLETED_NO);
   return msgsize;
 }
 
@@ -110,7 +114,7 @@ omniPy::Py_OmniProxyCallDesc::unmarshalReturnedValues(GIOP_C& giop_client)
 {
   reacquireInterpreterLock();
 
-  assert(out_l_ >= 0);
+  OMNIORB_ASSERT(out_l_ >= 0);
   // out_l_ == -1 if it's a oneway operation, but we should never
   // reach here if that is the case.
 
@@ -148,7 +152,7 @@ omniPy::Py_OmniProxyCallDesc::userException(GIOP_C&     giop_client,
     // has already been unmarshalled.
 
     PyObject* excclass = PyTuple_GET_ITEM(d_o, 1);
-    assert(PyClass_Check(excclass));
+    OMNIORB_ASSERT(PyClass_Check(excclass));
 
     int       cnt      = (PyTuple_GET_SIZE(d_o) - 4) / 2;
     PyObject* exctuple = PyTuple_New(cnt);
@@ -180,7 +184,8 @@ omniPy::Py_OmniOWProxyCallDesc::alignedSize(CORBA::ULong msgsize)
   for (int i=0; i < in_l_; i++)
     msgsize = omniPy::alignedSize(msgsize,
 				  PyTuple_GET_ITEM(in_d_,i),
-				  PyTuple_GET_ITEM(args_,i));
+				  PyTuple_GET_ITEM(args_,i),
+				  CORBA::COMPLETED_NO);
   return msgsize;
 }
 

@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.17  2000/03/03 17:41:27  dpg1
+# Major reorganisation to support omniORB 3.0 as well as 2.8.
+#
 # Revision 1.16  2000/01/31 10:51:41  dpg1
 # Fix to exception throwing.
 #
@@ -98,6 +101,15 @@ import _omnipy
 
 
 # Public functions
+
+def coreVersion():
+    """coreVersion()
+
+Return a string containing the version number of the omniORB core, of
+the form major.minor.micro. Versions from 3.0.0 up support the full
+POA functionality."""
+    return _omnipy.coreVersion()
+
 
 _omniidl_args = []
 
@@ -188,6 +200,31 @@ sys.modules."""
     finally:
         os.remove(tfn)
     return ret
+
+
+def cdrMarshal(tc, data):
+    """cdrMarshal(TypeCode, data) -> string
+
+Marshal data with the given type into a CDR encapsulation. The data
+can later be converted back into Python objects with cdrUnmarshal().
+The encapsulation is language, platform, and ORB independent."""
+
+    if not isinstance(tc, CORBA.TypeCode):
+        raise TypeError("Argument 1 must be a TypeCode")
+
+    return _omnipy.cdrMarshal(tc._d, data)
+
+def cdrUnmarshal(tc, encap):
+    """cdrUnmarshal(TypeCode, string) -> data
+
+Unmarshal a CDR stream created with cdrMarshal() or equivalent. The
+encapsulation MUST adhere to the given TypeCode."""
+
+    if not isinstance(tc, CORBA.TypeCode):
+        raise TypeError("Argument 1 must be a TypeCode")
+
+    return _omnipy.cdrUnmarshal(tc._d, encap)
+
 
 
 # Private things
@@ -513,38 +550,107 @@ def static_is_a(cls, repoId):
     return 0
 
 
-# System exception mapping:
+# WorkerThread class used to make the threading module happy during
+# operation dispatch.
+# *** Depends on threading module internals ***
+
+_thr_init = threading.Thread.__init__
+_thr_id   = threading._get_ident
+_thr_act  = threading._active
+_thr_acq  = threading._active_limbo_lock.acquire
+_thr_rel  = threading._active_limbo_lock.release
+
+class WorkerThread(threading.Thread):
+
+    def __init__(self):
+        _thr_init(self, name="omniORB")
+        self._Thread__started = 1
+        self.id = _thr_id()
+        _thr_acq()
+        if _thr_act.has_key(self.id):
+            self.add = 0
+        else:
+            self.add = 1
+            _thr_act[self.id] = self
+        _thr_rel()
+
+    def delete(self):
+        if self.add:
+            _thr_acq()
+            del _thr_act[self.id]
+            _thr_rel()
+
+    def _set_daemon(self): return 1
+    def join(self):        assert 0, "cannot join an omniORB WorkerThread"
+    
+
+
+# System exception mapping. omniORB 3.0 ends exception repoIds with
+# :1.0; omniORB 2.8 doesn't. We put a mapping for both here.
+
 sysExceptionMapping = {
-    "IDL:omg.org/CORBA/UNKNOWN":                CORBA.UNKNOWN,
-    "IDL:omg.org/CORBA/BAD_PARAM":              CORBA.BAD_PARAM,
-    "IDL:omg.org/CORBA/NO_MEMORY":              CORBA.NO_MEMORY,
-    "IDL:omg.org/CORBA/IMP_LIMIT":              CORBA.IMP_LIMIT,
-    "IDL:omg.org/CORBA/COMM_FAILURE":           CORBA.COMM_FAILURE,
-    "IDL:omg.org/CORBA/INV_OBJREF":             CORBA.INV_OBJREF,
-    "IDL:omg.org/CORBA/OBJECT_NOT_EXIST":       CORBA.OBJECT_NOT_EXIST,
-    "IDL:omg.org/CORBA/NO_PERMISSION":          CORBA.NO_PERMISSION,
-    "IDL:omg.org/CORBA/INTERNAL":               CORBA.INTERNAL,
-    "IDL:omg.org/CORBA/MARSHAL":                CORBA.MARSHAL,
-    "IDL:omg.org/CORBA/INITIALIZE":             CORBA.INITIALIZE,
-    "IDL:omg.org/CORBA/NO_IMPLEMENT":           CORBA.NO_IMPLEMENT,
-    "IDL:omg.org/CORBA/BAD_TYPECODE":           CORBA.BAD_TYPECODE,
-    "IDL:omg.org/CORBA/BAD_OPERATION":          CORBA.BAD_OPERATION,
-    "IDL:omg.org/CORBA/NO_RESOURCES":           CORBA.NO_RESOURCES,
-    "IDL:omg.org/CORBA/NO_RESPONSE":            CORBA.NO_RESPONSE,
-    "IDL:omg.org/CORBA/PERSIST_STORE":          CORBA.PERSIST_STORE,
-    "IDL:omg.org/CORBA/BAD_INV_ORDER":          CORBA.BAD_INV_ORDER,
-    "IDL:omg.org/CORBA/TRANSIENT":              CORBA.TRANSIENT,
-    "IDL:omg.org/CORBA/FREE_MEM":               CORBA.FREE_MEM,
-    "IDL:omg.org/CORBA/INV_IDENT":              CORBA.INV_IDENT,
-    "IDL:omg.org/CORBA/INV_FLAG":               CORBA.INV_FLAG,
-    "IDL:omg.org/CORBA/INTF_REPOS":             CORBA.INTF_REPOS,
-    "IDL:omg.org/CORBA/BAD_CONTEXT":            CORBA.BAD_CONTEXT,
-    "IDL:omg.org/CORBA/OBJ_ADAPTER":            CORBA.OBJ_ADAPTER,
-    "IDL:omg.org/CORBA/DATA_CONVERSION":        CORBA.DATA_CONVERSION,
-    "IDL:omg.org/CORBA/TRANSACTION_REQUIRED":   CORBA.TRANSACTION_REQUIRED,
-    "IDL:omg.org/CORBA/TRANSACTION_ROLLEDBACK": CORBA.TRANSACTION_ROLLEDBACK,
-    "IDL:omg.org/CORBA/INVALID_TRANSACTION":    CORBA.INVALID_TRANSACTION,
-    "IDL:omg.org/CORBA/WRONG_TRANSACTION":      CORBA.WRONG_TRANSACTION
+    "IDL:omg.org/CORBA/UNKNOWN:1.0":               CORBA.UNKNOWN,
+    "IDL:omg.org/CORBA/BAD_PARAM:1.0":             CORBA.BAD_PARAM,
+    "IDL:omg.org/CORBA/NO_MEMORY:1.0":             CORBA.NO_MEMORY,
+    "IDL:omg.org/CORBA/IMP_LIMIT:1.0":             CORBA.IMP_LIMIT,
+    "IDL:omg.org/CORBA/COMM_FAILURE:1.0":          CORBA.COMM_FAILURE,
+    "IDL:omg.org/CORBA/INV_OBJREF:1.0":            CORBA.INV_OBJREF,
+    "IDL:omg.org/CORBA/OBJECT_NOT_EXIST:1.0":      CORBA.OBJECT_NOT_EXIST,
+    "IDL:omg.org/CORBA/NO_PERMISSION:1.0":         CORBA.NO_PERMISSION,
+    "IDL:omg.org/CORBA/INTERNAL:1.0":              CORBA.INTERNAL,
+    "IDL:omg.org/CORBA/MARSHAL:1.0":               CORBA.MARSHAL,
+    "IDL:omg.org/CORBA/INITIALIZE:1.0":            CORBA.INITIALIZE,
+    "IDL:omg.org/CORBA/NO_IMPLEMENT:1.0":          CORBA.NO_IMPLEMENT,
+    "IDL:omg.org/CORBA/BAD_TYPECODE:1.0":          CORBA.BAD_TYPECODE,
+    "IDL:omg.org/CORBA/BAD_OPERATION:1.0":         CORBA.BAD_OPERATION,
+    "IDL:omg.org/CORBA/NO_RESOURCES:1.0":          CORBA.NO_RESOURCES,
+    "IDL:omg.org/CORBA/NO_RESPONSE:1.0":           CORBA.NO_RESPONSE,
+    "IDL:omg.org/CORBA/PERSIST_STORE:1.0":         CORBA.PERSIST_STORE,
+    "IDL:omg.org/CORBA/BAD_INV_ORDER:1.0":         CORBA.BAD_INV_ORDER,
+    "IDL:omg.org/CORBA/TRANSIENT:1.0":             CORBA.TRANSIENT,
+    "IDL:omg.org/CORBA/FREE_MEM:1.0":              CORBA.FREE_MEM,
+    "IDL:omg.org/CORBA/INV_IDENT:1.0":             CORBA.INV_IDENT,
+    "IDL:omg.org/CORBA/INV_FLAG:1.0":              CORBA.INV_FLAG,
+    "IDL:omg.org/CORBA/INTF_REPOS:1.0":            CORBA.INTF_REPOS,
+    "IDL:omg.org/CORBA/BAD_CONTEXT:1.0":           CORBA.BAD_CONTEXT,
+    "IDL:omg.org/CORBA/OBJ_ADAPTER:1.0":           CORBA.OBJ_ADAPTER,
+    "IDL:omg.org/CORBA/DATA_CONVERSION:1.0":       CORBA.DATA_CONVERSION,
+    "IDL:omg.org/CORBA/TRANSACTION_REQUIRED:1.0":  CORBA.TRANSACTION_REQUIRED,
+    "IDL:omg.org/CORBA/TRANSACTION_ROLLEDBACK:1.0":CORBA.TRANSACTION_ROLLEDBACK,
+    "IDL:omg.org/CORBA/INVALID_TRANSACTION:1.0":   CORBA.INVALID_TRANSACTION,
+    "IDL:omg.org/CORBA/WRONG_TRANSACTION:1.0":     CORBA.WRONG_TRANSACTION,
+
+    # Second time around, with no version number
+    "IDL:omg.org/CORBA/UNKNOWN":                   CORBA.UNKNOWN,
+    "IDL:omg.org/CORBA/BAD_PARAM":                 CORBA.BAD_PARAM,
+    "IDL:omg.org/CORBA/NO_MEMORY":                 CORBA.NO_MEMORY,
+    "IDL:omg.org/CORBA/IMP_LIMIT":                 CORBA.IMP_LIMIT,
+    "IDL:omg.org/CORBA/COMM_FAILURE":              CORBA.COMM_FAILURE,
+    "IDL:omg.org/CORBA/INV_OBJREF":                CORBA.INV_OBJREF,
+    "IDL:omg.org/CORBA/OBJECT_NOT_EXIST":          CORBA.OBJECT_NOT_EXIST,
+    "IDL:omg.org/CORBA/NO_PERMISSION":             CORBA.NO_PERMISSION,
+    "IDL:omg.org/CORBA/INTERNAL":                  CORBA.INTERNAL,
+    "IDL:omg.org/CORBA/MARSHAL":                   CORBA.MARSHAL,
+    "IDL:omg.org/CORBA/INITIALIZE":                CORBA.INITIALIZE,
+    "IDL:omg.org/CORBA/NO_IMPLEMENT":              CORBA.NO_IMPLEMENT,
+    "IDL:omg.org/CORBA/BAD_TYPECODE":              CORBA.BAD_TYPECODE,
+    "IDL:omg.org/CORBA/BAD_OPERATION":             CORBA.BAD_OPERATION,
+    "IDL:omg.org/CORBA/NO_RESOURCES":              CORBA.NO_RESOURCES,
+    "IDL:omg.org/CORBA/NO_RESPONSE":               CORBA.NO_RESPONSE,
+    "IDL:omg.org/CORBA/PERSIST_STORE":             CORBA.PERSIST_STORE,
+    "IDL:omg.org/CORBA/BAD_INV_ORDER":             CORBA.BAD_INV_ORDER,
+    "IDL:omg.org/CORBA/TRANSIENT":                 CORBA.TRANSIENT,
+    "IDL:omg.org/CORBA/FREE_MEM":                  CORBA.FREE_MEM,
+    "IDL:omg.org/CORBA/INV_IDENT":                 CORBA.INV_IDENT,
+    "IDL:omg.org/CORBA/INV_FLAG":                  CORBA.INV_FLAG,
+    "IDL:omg.org/CORBA/INTF_REPOS":                CORBA.INTF_REPOS,
+    "IDL:omg.org/CORBA/BAD_CONTEXT":               CORBA.BAD_CONTEXT,
+    "IDL:omg.org/CORBA/OBJ_ADAPTER":               CORBA.OBJ_ADAPTER,
+    "IDL:omg.org/CORBA/DATA_CONVERSION":           CORBA.DATA_CONVERSION,
+    "IDL:omg.org/CORBA/TRANSACTION_REQUIRED":      CORBA.TRANSACTION_REQUIRED,
+    "IDL:omg.org/CORBA/TRANSACTION_ROLLEDBACK":    CORBA.TRANSACTION_ROLLEDBACK,
+    "IDL:omg.org/CORBA/INVALID_TRANSACTION":       CORBA.INVALID_TRANSACTION,
+    "IDL:omg.org/CORBA/WRONG_TRANSACTION":         CORBA.WRONG_TRANSACTION
     }
 
 # Reserved word mapping:
@@ -582,5 +688,5 @@ keywordMapping = {
 
 # Register this module and the threading module with omnipy:
 import omniORB, omniORB.PortableServer
-_omnipy.registerPyObjects(omniORB, threading)
+_omnipy.registerPyObjects(omniORB)
 del omniORB

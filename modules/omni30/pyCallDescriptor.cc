@@ -1,9 +1,9 @@
 // -*- Mode: C++; -*-
 //                            Package   : omniORBpy
-// pyProxyCallWrapper.cc      Created on: 1999/06/07
+// pyCallDescriptor.cc        Created on: 2000/02/02
 //                            Author    : Duncan Grisby (dpg1)
 //
-//    Copyright (C) 1999 AT&T Laboratories Cambridge
+//    Copyright (C) 2000 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORBpy library
 //
@@ -25,56 +25,21 @@
 //
 //
 // Description:
-//    Implementation of Python proxy call wrapper object
+//    Implementation of Python call descriptor object
 
 
 // $Id$
 
 // $Log$
-// Revision 1.12  1999/12/15 12:17:19  dpg1
-// Changes to compile with SunPro CC 5.0.
-//
-// Revision 1.11  1999/09/29 09:05:03  dpg1
-// Now releases the Python interpreter lock before invoke's call to
-// _is_a().
-//
-// Revision 1.10  1999/09/28 14:23:30  dpg1
-// Fixed some bugs in handling the Python interpreter lock.
-//
-// Revision 1.9  1999/09/24 09:22:02  dpg1
-// Added copyright notices.
-//
-// Revision 1.8  1999/09/20 14:55:37  dpg1
-// GCC 2.95 is more pedantic than egcs.
-//
-// Revision 1.7  1999/07/29 14:20:44  dpg1
-// Oneway support. Exception handling modified.
-//
-// Revision 1.6  1999/07/19 16:49:32  dpg1
-// Recursive marshalling functions moved out of proxy call class into
-// omniPy module so the can be shared with the server-side.
-//
-// Revision 1.5  1999/06/23 12:44:28  dpg1
-// Descriptors extended to contain all TypeCode-required info.
-//
-// Revision 1.4  1999/06/10 10:42:59  dpg1
-// Marshalling changed to reflect new type mapping.
-//
-// Revision 1.3  1999/06/08 16:20:47  dpg1
-// All types except any.
-//
-// Revision 1.2  1999/06/07 14:58:20  dpg1
-// Descriptors unflattened again.
-//
-// Revision 1.1  1999/06/07 10:11:02  dpg1
-// Initial revision
+// Revision 1.13  2000/03/03 17:41:42  dpg1
+// Major reorganisation to support omniORB 3.0 as well as 2.8.
 //
 
 #include <omnipy.h>
 
 
 CORBA::ULong
-omniPy::Py_OmniProxyCallDesc::alignedSize(CORBA::ULong msgsize)
+omniPy::Py_omniCallDescriptor::alignedSize(CORBA::ULong msgsize)
 {
   // alignedSize() is called with the interpreter lock
   // released. Reacquire it so we can touch the descriptor objects
@@ -84,13 +49,14 @@ omniPy::Py_OmniProxyCallDesc::alignedSize(CORBA::ULong msgsize)
   for (int i=0; i < in_l_; i++)
     msgsize = omniPy::alignedSize(msgsize,
 				  PyTuple_GET_ITEM(in_d_,i),
-				  PyTuple_GET_ITEM(args_,i));
+				  PyTuple_GET_ITEM(args_,i),
+				  CORBA::COMPLETED_NO);
   return msgsize;
 }
 
 
 void
-omniPy::Py_OmniProxyCallDesc::marshalArguments(GIOP_C& giop_client)
+omniPy::Py_omniCallDescriptor::marshalArguments(GIOP_C& giop_client)
 {
   // We should always hold the interpreter lock when entering this
   // function. The call to releaseInterpreterLock() will assert that
@@ -106,11 +72,11 @@ omniPy::Py_OmniProxyCallDesc::marshalArguments(GIOP_C& giop_client)
 
 
 void
-omniPy::Py_OmniProxyCallDesc::unmarshalReturnedValues(GIOP_C& giop_client)
+omniPy::Py_omniCallDescriptor::unmarshalReturnedValues(GIOP_C& giop_client)
 {
   reacquireInterpreterLock();
 
-  assert(out_l_ >= 0);
+  OMNIORB_ASSERT(out_l_ >= 0);
   // out_l_ == -1 if it's a oneway operation, but we should never
   // reach here if that is the case.
 
@@ -135,8 +101,8 @@ omniPy::Py_OmniProxyCallDesc::unmarshalReturnedValues(GIOP_C& giop_client)
 
 
 void
-omniPy::Py_OmniProxyCallDesc::userException(GIOP_C&     giop_client,
-					    const char* repoId)
+omniPy::Py_omniCallDescriptor::userException(GIOP_C&     giop_client,
+					     const char* repoId)
 {
   reacquireInterpreterLock();
 
@@ -148,7 +114,7 @@ omniPy::Py_OmniProxyCallDesc::userException(GIOP_C&     giop_client,
     // has already been unmarshalled.
 
     PyObject* excclass = PyTuple_GET_ITEM(d_o, 1);
-    assert(PyClass_Check(excclass));
+    OMNIORB_ASSERT(PyClass_Check(excclass));
 
     int       cnt      = (PyTuple_GET_SIZE(d_o) - 4) / 2;
     PyObject* exctuple = PyTuple_New(cnt);
@@ -162,8 +128,8 @@ omniPy::Py_OmniProxyCallDesc::userException(GIOP_C&     giop_client,
     PyObject* exc_i = PyEval_CallObject(excclass, exctuple);
     Py_DECREF(exctuple);
 
-    PyErr_SetObject(PyTuple_GET_ITEM(d_o, 1), exc_i);
-    throw CORBA::UserException();
+    PyErr_SetObject(excclass, exc_i);
+    throw UserExceptionHandled();
   }
   else {
     giop_client.RequestCompleted(1);
@@ -172,25 +138,21 @@ omniPy::Py_OmniProxyCallDesc::userException(GIOP_C&     giop_client,
 }
 
 
-CORBA::ULong
-omniPy::Py_OmniOWProxyCallDesc::alignedSize(CORBA::ULong msgsize)
-{
-  reacquireInterpreterLock();
-
-  for (int i=0; i < in_l_; i++)
-    msgsize = omniPy::alignedSize(msgsize,
-				  PyTuple_GET_ITEM(in_d_,i),
-				  PyTuple_GET_ITEM(args_,i));
-  return msgsize;
-}
-
-
 void
-omniPy::Py_OmniOWProxyCallDesc::marshalArguments(GIOP_C& giop_client)
+omniPy::Py_localCallBackFunction(omniCallDescriptor* cd, omniServant* svnt)
 {
-  for (int i=0; i < in_l_; i++)
-    omniPy::marshalPyObject(giop_client,
-			    PyTuple_GET_ITEM(in_d_,i),
-			    PyTuple_GET_ITEM(args_,i));
-  releaseInterpreterLock();
+  Py_omniCallDescriptor* pycd = (Py_omniCallDescriptor*)cd;
+  Py_omniServant*        pyos =
+    (Py_omniServant*)svnt->_ptrToInterface("Py_omniServant");
+
+  pycd->reacquireInterpreterLock();
+
+  // *** TODO: Copy args which would otherwise have reference semantics
+
+  pycd->result_ = pyos->local_dispatch(pycd->op(), pycd->args_);
+
+  // invokeOp() expects us to come back from oneways with the
+  // interpreter unlocked
+  if (pycd->is_oneway())
+    pycd->releaseInterpreterLock();
 }

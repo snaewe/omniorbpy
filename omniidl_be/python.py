@@ -28,6 +28,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.22  2000/03/03 17:41:28  dpg1
+# Major reorganisation to support omniORB 3.0 as well as 2.8.
+#
 # Revision 1.21  2000/02/23 10:20:52  dpg1
 # Bug in descriptors for single-item enums.
 #
@@ -132,7 +135,7 @@ import omniORB, _omnipy
 from omniORB import CORBA, PortableServer
 _0_CORBA = CORBA
 
-_omnipy.checkVersion(0,2, __file__)
+_omnipy.checkVersion(0,4, __file__)
 """
 
 file_end = """\
@@ -219,13 +222,13 @@ objref_object_init = """\
 
 objref_attribute_get = """
     def _get_@attr@(self, *args):
-        return _omnipy.invokeOp(self, "_get_@attr@", _0_@modname@.@ifid@._d__get_@attr@, args)"""
+        return _omnipy.invoke(self, "_get_@attr@", _0_@modname@.@ifid@._d__get_@attr@, args)"""
 objref_attribute_set = """
     def _set_@attr@(self, *args):
-        return _omnipy.invokeOp(self, "_set_@attr@", _0_@modname@.@ifid@._d__set_@attr@, args)"""
+        return _omnipy.invoke(self, "_set_@attr@", _0_@modname@.@ifid@._d__set_@attr@, args)"""
 objref_operation = """
     def @opname@(self, *args):
-        return _omnipy.invokeOp(self, "@opname@", _0_@modname@.@ifid@._d_@opname@, args)"""
+        return _omnipy.invoke(self, "@opname@", _0_@modname@.@ifid@._d_@opname@, args)"""
 objref_methods = """
     __methods__ = @methods@"""
 
@@ -245,10 +248,10 @@ class @ifid@ (@inherits@):
             _omnipy.releaseObjref(self)"""
 
 skeleton_methodmap = """
-    _op_d = @methodmap@"""
+    _omni_op_d = @methodmap@"""
 
 skeleton_inheritmap = """\
-    _op_d.update(@inheritclass@._op_d)"""
+    _omni_op_d.update(@inheritclass@._omni_op_d)"""
 
 skeleton_end = """
 @ifid@._omni_skeleton = @ifid@

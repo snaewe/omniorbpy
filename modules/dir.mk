@@ -1,25 +1,63 @@
-
 # Version number
 OMNIPY_MAJOR = 0
-OMNIPY_MINOR = 2
+OMNIPY_MINOR = 4
 
-CXXSRCS = omnipy.cc \
-          pyExceptions.cc \
-          pyObjectRef.cc \
-          pyMarshal.cc \
-          pyTypeCode.cc \
-          pyProxyCallWrapper.cc \
-          pyServant.cc
+ifeq ($(OMNIORB_VERSION),)
+OMNIORB_VERSION = 2.8.0
+endif
 
-OBJS    = omnipy.o \
-          pyExceptions.o \
-          pyObjectRef.o \
-          pyMarshal.o \
-          pyTypeCode.o \
-          pyProxyCallWrapper.o \
-          pyServant.o
+DIR_CPPFLAGS += -DOMNIPY_MAJOR=$(OMNIPY_MAJOR) -DOMNIPY_MINOR=$(OMNIPY_MINOR)
+DIR_CPPFLAGS += -DOMNIORB_VERSION_STRING=\"$(OMNIORB_VERSION)\"
 
-DIR_CPPFLAGS = $(patsubst %,-I%/src/lib/omniORB2/orbcore,$(IMPORT_TREES))
+ifeq ($(OMNIORB_MAJOR_VERSION).$(OMNIORB_MINOR_VERSION), 3.0)
+
+VERSIONDIR = omni30
+DIR_CPPFLAGS += -DOMNIORBPY_FOR_30
+
+else
+
+VERSIONDIR = omni28
+DIR_CPPFLAGS += -DOMNIORBPY_FOR_28
+
+OMNIORB_LIB              = $(OMNIORB2_LIB)
+OMNIORB_LIB_NODYN        = $(OMNIORB2_LIB_NODYN)
+OMNIORB_LIB_NODYN_DEPEND = $(OMNIORB2_LIB_NODYN_DEPEND)
+
+endif
+
+
+SUBDIRS = $(VERSIONDIR) common
+all::
+	@$(MakeSubdirs)
+export::
+	@$(MakeSubdirs)
+
+
+CXXSRCS = $(VERSIONDIR)/omnipy.cc \
+          $(VERSIONDIR)/pyORBFunc.cc \
+          $(VERSIONDIR)/pyPOAFunc.cc \
+          $(VERSIONDIR)/pyPOAManagerFunc.cc \
+          $(VERSIONDIR)/pyObjectRef.cc \
+          $(VERSIONDIR)/pyCallDescriptor.cc \
+	  $(VERSIONDIR)/pyServant.cc \
+          common/pyExceptions.cc \
+          common/pyMarshal.cc \
+          common/pyTypeCode.cc
+
+OBJS =    $(VERSIONDIR)/omnipy.o \
+          $(VERSIONDIR)/pyORBFunc.o \
+          $(VERSIONDIR)/pyPOAFunc.o \
+          $(VERSIONDIR)/pyPOAManagerFunc.o \
+          $(VERSIONDIR)/pyObjectRef.o \
+          $(VERSIONDIR)/pyCallDescriptor.o \
+	  $(VERSIONDIR)/pyServant.o \
+          common/pyExceptions.o \
+          common/pyMarshal.o \
+          common/pyTypeCode.o
+
+
+DIR_CPPFLAGS += $(patsubst %,-I%/src/lib/omniORB2,$(IMPORT_TREES))
+DIR_CPPFLAGS += $(patsubst %,-I%/src/lib/omniORB2/orbcore,$(IMPORT_TREES))
 
 
 #############################################################################
@@ -29,7 +67,7 @@ DIR_CPPFLAGS = $(patsubst %,-I%/src/lib/omniORB2/orbcore,$(IMPORT_TREES))
 ifdef UnixPlatform
 CXXDEBUGFLAGS = -g
 
-PYPREFIX := $(shell python -c 'import sys; print sys.prefix')
+PYPREFIX := $(shell python -c 'import sys; print sys.exec_prefix')
 PYINCDIR := $(PYPREFIX)/include
 DIR_CPPFLAGS += -I$(PYINCDIR)
 endif
@@ -49,8 +87,8 @@ lib     = $(soname).$(OMNIPY_MINOR)
 $(lib): $(OBJS)
 	(set -x; \
 	$(RM) $@; \
-	$(CXXLINK) $(CXXLINKOPTIONS) -shared -o $@ -Wl,-soname,$(soname) $(IMPORT_LIBRARY_FLAGS) $(OMNIORB2_LIB_NODYN_DEPEND)\
-	 $(filter-out $(LibSuffixPattern),$^) $(OMNIORB2_LIB_NODYN)\
+	$(CXXLINK) $(CXXLINKOPTIONS) -shared -o $@ -Wl,-soname,$(soname) $(IMPORT_LIBRARY_FLAGS) $(OMNIORB_LIB_NODYN_DEPEND)\
+	 $(filter-out $(LibSuffixPattern),$^) $(OMNIORB_LIB_NODYN)\
 	)
 
 all:: $(lib)
@@ -93,7 +131,7 @@ $(lib): $(OBJS)
         fi; \
         $(CXX) -G -o $@ -h $(soname) $(IMPORT_LIBRARY_FLAGS) \
          $(patsubst %,-R %,$(IMPORT_LIBRARY_DIRS)) \
-         $(filter-out $(LibSuffixPattern),$^) $(OMNIORB2_LIB_NODYN) \
+         $(filter-out $(LibSuffixPattern),$^) $(OMNIORB_LIB_NODYN) \
          $$CXX_RUNTIME \
 	)
 
@@ -106,8 +144,8 @@ CXXOPTIONS += -fPIC
 $(lib): $(OBJS)
 	(set -x; \
 	$(RM) $@; \
-	$(CXXLINK) $(CXXLINKOPTIONS) -shared -o $@ -Wl-soname,$(soname) $(IMPORT_LIBRARY_FLAGS) $(OMNIORB2_LIB_NODYN_DEPEND)\
-	 $(filter-out $(LibSuffixPattern),$^) $(OMNIORB2_LIB_NODYN)\
+	$(CXXLINK) $(CXXLINKOPTIONS) -shared -o $@ -Wl-soname,$(soname) $(IMPORT_LIBRARY_FLAGS) $(OMNIORB_LIB_NODYN_DEPEND)\
+	 $(filter-out $(LibSuffixPattern),$^) $(OMNIORB_LIB_NODYN)\
 	)
 
 endif
@@ -163,7 +201,7 @@ $(lib): $(OBJS)
          fi; \
 	 set -x; \
 	 $(RM) $@; \
-	 libs="$(OMNIORB2_LIB) python15.lib"; \
+	 libs="$(OMNIORB_LIB) python15.lib"; \
 	 $(CXXLINK) -out:$@ -DLL $(CXXLINKOPTIONS) $(IMPORT_LIBRARY_FLAGS) $(PYLIBPATH) $(OBJS) $$libs; \
 	)
 
@@ -198,7 +236,7 @@ $(lib): $(OBJS) $(PYOBJS)
 	     -bI:$(py_exp) \
 	     -n $(libinit) \
 	     $(IMPORT_LIBRARY_FLAGS) \
-	     -lomnithread2 -lomniORB28 \
+	     $(OMNIORB_LIB_NODYN) \
 	     -bhalt:4 -T512 -H512 \
 	     $(filter-out $(LibSuffixPattern),$^) \
 	     -p 40 \
@@ -235,8 +273,8 @@ $(lib): $(OBJS)
        (set -x; \
        $(RM) $@; \
        $(CXXLINK) $(CXXLINKOPTIONS) -shared -o $@ -Wl,-soname,$(soname) $(IMPOR
-T_LIBRARY_FLAGS) $(OMNIORB2_LIB_NODYN_DEPEND)\
-        $(filter-out $(LibSuffixPattern),$^) $(OMNIORB2_LIB)\
+T_LIBRARY_FLAGS) $(OMNIORB_LIB_NODYN_DEPEND)\
+        $(filter-out $(LibSuffixPattern),$^) $(OMNIORB_LIB)\
        )
 
 all:: $(lib)
@@ -271,7 +309,7 @@ soname  = $(libname).$(OMNIPY_MAJOR)
 lib     = $(soname).$(OMNIPY_MINOR)
 
 $(lib): $(OBJS)
-      $(CXXLINK) $(CXXLINKOPTIONS) $(OBJS) $(OMNIORB2_LIB_NODYN_DEPEND) -o $(lib)
+      $(CXXLINK) $(CXXLINKOPTIONS) $(OBJS) $(OMNIORB_LIB_NODYN_DEPEND) -o $(lib)
 
 all:: $(lib)
 

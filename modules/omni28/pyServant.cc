@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.13  2000/03/03 17:41:42  dpg1
+// Major reorganisation to support omniORB 3.0 as well as 2.8.
+//
 // Revision 1.12  1999/12/15 12:17:19  dpg1
 // Changes to compile with SunPro CC 5.0.
 //
@@ -91,22 +94,21 @@ public:
     PyEval_AcquireLock();
     oldstate_ = PyThreadState_Swap(newstate_);
 
-    // Create a dummy threading.Thread object, so the threading module
-    // is happy. *** This is very dependent on the implementation of
-    // the threading module.
-    dummy_thread_ = PyEval_CallObject(omniPy::pyDummyThreadClass,
-				      omniPy::pyEmptyTuple);
-    assert(dummy_thread_);
+    // Create a threading.Thread object, so the threading module is
+    // happy.
+    worker_thread_ = PyEval_CallObject(omniPy::pyWorkerThreadClass,
+				       omniPy::pyEmptyTuple);
+    OMNIORB_ASSERT(worker_thread_);
   }
 
   ~lockWithNewThreadState() {
-    // Remove the dummy Thread object
-    PyObject* meth = PyObject_GetAttrString(dummy_thread_,
-					    (char*)"_Thread__delete");
-    assert(meth);
-    PyEval_CallObject(meth, omniPy::pyEmptyTuple);
-    Py_DECREF(meth);
-    Py_DECREF(dummy_thread_);
+    // Delete worker thread
+    PyObject* argtuple = PyTuple_New(1);
+    PyTuple_SET_ITEM(argtuple, 0, worker_thread_);
+
+    PyObject* tmp = PyEval_CallObject(omniPy::pyWorkerThreadDel, argtuple);
+    Py_XDECREF(tmp);
+    Py_DECREF(argtuple);
 
     // Return to the previous thread state
     PyThreadState_Swap(oldstate_);
@@ -130,7 +132,7 @@ public:
 private:
   PyThreadState*   newstate_;
   PyThreadState*   oldstate_;
-  PyObject*        dummy_thread_;
+  PyObject*        worker_thread_;
 };
 
 
@@ -139,13 +141,15 @@ Py_Servant::Py_Servant(PyObject* pyservant, PyObject* opdict,
 		       const char* repoId)
   : pyservant_(pyservant), opdict_(opdict)
 {
-  assert(PyInstance_Check(pyservant));
-  assert(PyDict_Check(opdict));
+  OMNIORB_ASSERT(PyInstance_Check(pyservant));
+  OMNIORB_ASSERT(PyDict_Check(opdict));
   Py_INCREF(pyservant_);
   Py_INCREF(opdict_);
 
   pyskeleton_ = PyObject_GetAttrString(pyservant_, (char*)"_omni_skeleton");
-  assert(pyskeleton_ && PyClass_Check(pyskeleton_));
+  OMNIORB_ASSERT(pyskeleton_ && PyClass_Check(pyskeleton_));
+
+  omniPy::setTwin(pyservant, (omniPy::Py_Servant*)this, SERVANT_TWIN);
 
   omniObject::PR_IRRepositoryId(repoId);
   this->PR_setobj(this);
@@ -155,6 +159,7 @@ omniPy::
 Py_Servant::~Py_Servant()
 {
   //  cout << "Py_Servant destructor." << endl;
+  omniPy::remTwin(pyservant_, SERVANT_TWIN);
   Py_DECREF(pyservant_);
   Py_DECREF(opdict_);
   Py_DECREF(pyskeleton_);
@@ -192,7 +197,7 @@ Py_Servant::_widenFromTheMostDerivedIntf(const char* repoId,
     if (!isa)
       PyErr_Print();
       
-    assert(isa && PyInt_Check(isa));
+    OMNIORB_ASSERT(isa && PyInt_Check(isa));
     if (PyInt_AS_LONG(isa))
       return (void*)this;
   }
@@ -216,7 +221,7 @@ Py_Servant::dispatch(GIOP_S&        giop_server,
 
   if (!desc) return 0; // Unknown operation name
 
-  assert(PyTuple_Check(desc));
+  OMNIORB_ASSERT(PyTuple_Check(desc));
 
   PyObject *in_d, *out_d, *exc_d;
   int       in_l,  out_l;
@@ -225,7 +230,7 @@ Py_Servant::dispatch(GIOP_S&        giop_server,
   out_d   = PyTuple_GET_ITEM(desc,1);
   exc_d   = PyTuple_GET_ITEM(desc,2);
 
-  assert(PyTuple_Check(in_d));
+  OMNIORB_ASSERT(PyTuple_Check(in_d));
 
   in_l  = PyTuple_GET_SIZE(in_d);
 
@@ -249,7 +254,7 @@ Py_Servant::dispatch(GIOP_S&        giop_server,
   PyObject* method = PyObject_GetAttrString(pyservant_, (char*)op);
 
   if (!method) {
-    //    cerr << "Couldn't find method called " << op << "!" << endl;
+    PyErr_Clear();
     Py_DECREF(argtuple);
     throw CORBA::NO_IMPLEMENT(0,CORBA::COMPLETED_NO);
   }
@@ -266,13 +271,15 @@ Py_Servant::dispatch(GIOP_S&        giop_server,
       if (out_l == 1) {
 	msgsize = omniPy::alignedSize(msgsize,
 				      PyTuple_GET_ITEM(out_d, 0),
-				      result);
+				      result,
+				      CORBA::COMPLETED_MAYBE);
       }
       else if (out_l > 1) {
 	for (i=0; i < out_l; i++) {
 	  msgsize = omniPy::alignedSize(msgsize,
 					PyTuple_GET_ITEM(out_d,  i),
-					PyTuple_GET_ITEM(result, i));
+					PyTuple_GET_ITEM(result, i),
+					CORBA::COMPLETED_MAYBE);
 	}
       }
       giop_server.InitialiseReply(GIOP::NO_EXCEPTION, msgsize);
@@ -305,27 +312,13 @@ Py_Servant::dispatch(GIOP_S&        giop_server,
   else {
     // An exception of some sort was thrown
     PyObject *etype, *evalue, *etraceback;
-
-    //    cout << "Exception..." << endl;
-
+    PyObject *erepoId = 0;
     PyErr_Fetch(&etype, &evalue, &etraceback);
+    OMNIORB_ASSERT(etype);
 
-    assert(etype);
+    if (evalue && PyInstance_Check(evalue))
+      erepoId = PyObject_GetAttrString(evalue, (char*)"_NP_RepositoryId");
 
-    if (!(evalue && PyInstance_Check(evalue))) {
-      omniORB::log << "omniORBpy: *** Warning: caught an unexpected "
-		   << "exception during up-call.\n"
-		   << "omniORBPy: Traceback follows:\n";
-      omniORB::log.flush();
-      PyErr_Restore(etype, evalue, etraceback);
-      PyErr_Print();
-      throw CORBA::UNKNOWN(0,CORBA::COMPLETED_NO);
-    }
-
-    //    cout << "Exception may be one we know..." << endl;
-
-    PyObject* erepoId = PyObject_GetAttrString(evalue,
-					       (char*)"_NP_RepositoryId");
     if (!erepoId) {
       omniORB::log << "omniORBpy: *** Warning: caught an unexpected "
 		   << "exception during up-call.\n"
@@ -335,20 +328,20 @@ Py_Servant::dispatch(GIOP_S&        giop_server,
       PyErr_Print();
       throw CORBA::UNKNOWN(0,CORBA::COMPLETED_NO);
     }
-
     Py_DECREF(etype);
     Py_XDECREF(etraceback);
 
     // Is it a user exception?
     if (exc_d != Py_None) {
-      assert(PyDict_Check(exc_d));
+      OMNIORB_ASSERT(PyDict_Check(exc_d));
 
       PyObject* edesc = PyDict_GetItem(exc_d, erepoId);
 
       if (edesc) {
 	//	cout << "User exception. marshalling..." << endl;
 	CORBA::ULong msgsize = GIOP_S::ReplyHeaderSize();
-	msgsize = omniPy::alignedSize(msgsize, edesc, evalue);
+	msgsize = omniPy::alignedSize(msgsize, edesc, evalue,
+				      CORBA::COMPLETED_MAYBE);
 	giop_server.InitialiseReply(GIOP::USER_EXCEPTION, msgsize);
 	omniPy::marshalPyObject(giop_server, edesc, evalue);
 	giop_server.ReplyCompleted();
@@ -359,6 +352,57 @@ Py_Servant::dispatch(GIOP_S&        giop_server,
     }
     omniPy::produceSystemException(evalue, erepoId);
   }
-  assert(0); // Never reach here.
+  OMNIORB_ASSERT(0); // Never reach here.
   return 0;
+}
+
+
+extern void omniPy_objectIsReady(omniObject* obj);
+
+omniPy::Py_Servant*
+omniPy::getServantForPyObject(PyObject* pyservant)
+{
+  if (!PyInstance_Check(pyservant))
+    return 0;
+
+  Py_Servant* pyos;
+
+  // Is there a Py_Servant already?
+  pyos = (omniPy::Py_Servant*)omniPy::getTwin(pyservant, SERVANT_TWIN);
+  if (pyos) {
+    return pyos;
+  }
+
+  // Is it an instance of the right class?
+  PyClassObject* pysc = ((PyInstanceObject*)pyservant)->in_class;
+
+  if (!PyClass_IsSubclass((PyObject*)pysc, omniPy::pyServantClass))
+    return 0;
+
+  PyObject* opdict = PyObject_GetAttrString(pyservant, (char*)"_omni_op_d");
+  if (!(opdict && PyDict_Check(opdict)))
+    return 0;
+
+  PyObject* pyrepoId = PyObject_GetAttrString(pyservant,
+					      (char*)"_NP_RepositoryId");
+  if (!(pyrepoId && PyString_Check(pyrepoId))) {
+    Py_DECREF(opdict);
+    return 0;
+  }
+
+  pyos = new omniPy::Py_Servant(pyservant, opdict,
+				PyString_AS_STRING(pyrepoId));
+  Py_DECREF(pyrepoId);
+  Py_DECREF(opdict);
+
+  omniPy_objectIsReady(pyos);
+
+  CORBA::Object_ptr objref = (CORBA::Object_ptr)pyos;
+
+  PyObject* pyobjref = omniPy::createPyCorbaObjRef(0, objref);
+
+  PyObject_SetAttrString(pyservant, (char*)"_omni_objref", pyobjref);
+  Py_DECREF(pyobjref);
+
+  return pyos;
 }

@@ -32,6 +32,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.10  2000/03/03 17:41:43  dpg1
+// Major reorganisation to support omniORB 3.0 as well as 2.8.
+//
 // Revision 1.9  1999/12/15 12:17:19  dpg1
 // Changes to compile with SunPro CC 5.0.
 //
@@ -71,57 +74,6 @@
 #if defined(HAS_Cplusplus_Namespace)
 using omniORB::operator==;
 #endif
-
-
-PyObject*
-omniPy::createPyCorbaObjRef(const char*             targetRepoId,
-			    const CORBA::Object_ptr objref)
-{
-  if (CORBA::is_nil(objref)) {
-    Py_INCREF(Py_None);
-    return Py_None;
-  }
-  omniObject*    oobj = objref->PR_getobj();
-
-  const char*    actualRepoId = oobj->NP_IRRepositoryId();
-  PyObject*      objrefClass;
-  CORBA::Boolean fullTypeUnknown = 0;
-
-  // Try to find objref class for most derived type:
-  objrefClass = PyDict_GetItemString(pyomniORBobjrefMap, (char*)actualRepoId);
-
-  if (!objrefClass && targetRepoId) {
-    // No objref class for the most derived type -- try to find one for
-    // the target type:
-    objrefClass     = PyDict_GetItemString(pyomniORBobjrefMap,
-					   (char*)targetRepoId);
-    fullTypeUnknown = 1;
-  }
-  if (!objrefClass) {
-    // No target type, or stub code bug:
-    objrefClass     = PyObject_GetAttrString(pyCORBAmodule, (char*)"Object");
-    fullTypeUnknown = 1;
-  }
-
-  assert(objrefClass); // Couldn't even find CORBA.Object!
-
-  PyObject* pyobjref = PyEval_CallObject(objrefClass, omniPy::pyEmptyTuple);
-
-  assert(PyInstance_Check(pyobjref));
-
-  if (fullTypeUnknown) {
-    PyObject* idstr = PyString_FromString(actualRepoId);
-    PyDict_SetItemString(((PyInstanceObject*)pyobjref)->in_dict,
-			 (char*)"_NP_RepositoryId", idstr);
-  }
-
-  omniPy::setTwin(pyobjref, (CORBA::Object_ptr)objref, OBJREF_TWIN);
-
-  //  cout << "Returning objref..." << endl;
-
-  return pyobjref;
-}
-
 
 
 class PyProxyObject : public virtual omniObject,
@@ -167,6 +119,57 @@ PyProxyObject::_widenFromTheMostDerivedIntf(const char* repoId,
   else
     return 0;
 }
+
+
+PyObject*
+omniPy::createPyCorbaObjRef(const char*             targetRepoId,
+			    const CORBA::Object_ptr objref)
+{
+  if (CORBA::is_nil(objref)) {
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
+  omniObject*    oobj = objref->PR_getobj();
+
+  const char*    actualRepoId = oobj->NP_IRRepositoryId();
+  PyObject*      objrefClass;
+  CORBA::Boolean fullTypeUnknown = 0;
+
+  // Try to find objref class for most derived type:
+  objrefClass = PyDict_GetItemString(pyomniORBobjrefMap, (char*)actualRepoId);
+
+  if (!objrefClass && targetRepoId) {
+    // No objref class for the most derived type -- try to find one for
+    // the target type:
+    objrefClass     = PyDict_GetItemString(pyomniORBobjrefMap,
+					   (char*)targetRepoId);
+    fullTypeUnknown = 1;
+  }
+  if (!objrefClass) {
+    // No target type, or stub code bug:
+    objrefClass     = PyObject_GetAttrString(pyCORBAmodule, (char*)"Object");
+    fullTypeUnknown = 1;
+  }
+
+  OMNIORB_ASSERT(objrefClass); // Couldn't even find CORBA.Object!
+
+  PyObject* pyobjref = PyEval_CallObject(objrefClass, omniPy::pyEmptyTuple);
+
+  OMNIORB_ASSERT(pyobjref && PyInstance_Check(pyobjref));
+
+  if (fullTypeUnknown) {
+    PyObject* idstr = PyString_FromString(actualRepoId);
+    PyDict_SetItemString(((PyInstanceObject*)pyobjref)->in_dict,
+			 (char*)"_NP_RepositoryId", idstr);
+  }
+
+  omniPy::setTwin(pyobjref, (CORBA::Object_ptr)objref, OBJREF_TWIN);
+
+  //  cout << "Returning objref..." << endl;
+
+  return pyobjref;
+}
+
 
 
 

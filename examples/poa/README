@@ -1,0 +1,14 @@
+This directory contains examples of using ServantActivators and
+ServantLocators. Both example programs implement the Echo server, with
+on-demand object activation.
+
+If you run either program with a -l command line argument, it will
+make a number of local calls to the object, showing that the activator
+or locator runs in the local, as well as the remote, case.
+
+These examples only work if you are using omniORB 3.0. omniORB 2.8
+does not support these POA-only facilities.
+
+Before the programs will run, you must compile the IDL with
+
+  omniidl -bpython echo.idl

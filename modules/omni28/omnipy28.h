@@ -1,6 +1,6 @@
 // -*- Mode: C++; -*-
 //                            Package   : omniORBpy
-// omnipy.h                   Created on: 1999/06/07
+// omnipy28.h                 Created on: 1999/06/07
 //                            Author    : Duncan Grisby (dpg1)
 //
 //    Copyright (C) 1999 AT&T Laboratories Cambridge
@@ -25,12 +25,15 @@
 //
 //
 // Description:
-//    Master header file for omnipy internals
+//    Master header file for omnipy internals, omniORB 2.8 version
 
 
 // $Id$
 
 // $Log$
+// Revision 1.18  2000/03/03 17:41:43  dpg1
+// Major reorganisation to support omniORB 3.0 as well as 2.8.
+//
 // Revision 1.17  2000/02/04 12:17:11  dpg1
 // Support for VMS.
 //
@@ -89,8 +92,8 @@
 // Initial revision
 //
 
-#ifndef _omnipy_h_
-#define _omnipy_h_
+#ifndef _omnipy28_h_
+#define _omnipy28_h_
 
 #if defined(__WIN32__) || defined(__VMS)
 #include <Python.h>
@@ -100,6 +103,12 @@
 
 #include <omniORB2/CORBA.h>
 #include <omniORB2/proxyCall.h>
+
+#ifndef OMNIORB_ASSERT
+#include <assert.h>
+#define OMNIORB_ASSERT(x) assert(x)
+#endif
+
 
 ////////////////////////////////////////////////////////////////////////////
 // Data structure to manage C++ twins of Python objects                   //
@@ -112,371 +121,424 @@ extern "C" {
   };
 }
 
-_CORBA_MODULE omniPy
-_CORBA_MODULE_BEG
-
-_CORBA_MODULE_FN
-PyObject* newTwin(void* twin);
-
-_CORBA_MODULE_FN
-inline void
-setTwin(PyObject* obj, void* twin, char* name)
-{
-  PyObject* ot = newTwin(twin);
-
-  PyDict_SetItemString(((PyInstanceObject*)obj)->in_dict,
-		       name, ot);
-  Py_DECREF(ot);
-}
-
-_CORBA_MODULE_FN
-inline void*
-getTwin(PyObject* obj, char* name)
-{
-  PyObject* ot = PyDict_GetItemString(((PyInstanceObject*)obj)->in_dict,
-				      name);
-  if (ot)
-    return ((omnipyTwin*)ot)->ob_twin;
-  else
-    return 0;
-}
-
-_CORBA_MODULE_FN
-inline void
-remTwin(PyObject* obj, char* name)
-{
-  PyDict_DelItemString(((PyInstanceObject*)obj)->in_dict, name);
-}
-
-#define ORB_TWIN    (char*)"__twin_orb"
-#define BOA_TWIN    (char*)"__twin_boa"
-#define OBJREF_TWIN (char*)"__twin_obj"
+// Twin attribute names
+#define ORB_TWIN        (char*)"__omni_orb"           // ORB_ptr
+#define OBJREF_TWIN     (char*)"__omni_obj"           // Object_ptr
+#define SERVANT_TWIN    (char*)"__omni_svt"           // Py_Servant
+#define BOA_TWIN        (char*)"__omni_boa"           // BOA_ptr
 
 
+// Useful macro
+#define RAISE_PY_BAD_PARAM_IF(x) \
+  if (x) { \
+    CORBA::BAD_PARAM _ex; \
+    return omniPy::handleSystemException(_ex); \
+  }
 
-////////////////////////////////////////////////////////////////////////////
-// The global Python interpreter state                                    //
-////////////////////////////////////////////////////////////////////////////
-
-_CORBA_MODULE_VAR PyInterpreterState* pyInterpreter;
-_CORBA_MODULE_VAR omni_mutex*         pyInterpreterLock;
-
-////////////////////////////////////////////////////////////////////////////
-// Global pointers to Python objects                                      //
-////////////////////////////////////////////////////////////////////////////
-
-_CORBA_MODULE_VAR PyObject* pyCORBAmodule;	// The CORBA module
-_CORBA_MODULE_VAR PyObject* pyCORBAsysExcMap;	//  The system exception map
-_CORBA_MODULE_VAR PyObject* pyCORBAAnyClass;    //  Any class
-_CORBA_MODULE_VAR PyObject* pyomniORBmodule;	// The omniORB module
-_CORBA_MODULE_VAR PyObject* pyomniORBobjrefMap;	//  The objref class map
-_CORBA_MODULE_VAR PyObject* pyomniORBtypeMap;   //  Type map
-_CORBA_MODULE_VAR PyObject* pyomniORBwordMap;   //  Reserved word map
-_CORBA_MODULE_VAR PyObject* pyCreateTypeCode;	// Function to create a
-						//  TypeCode object
-_CORBA_MODULE_VAR PyObject* pyDummyThreadClass; // threading module dummy
-                                                //  thread class
-_CORBA_MODULE_VAR PyObject* pyEmptyTuple;       // Zero element tuple
-
-
-////////////////////////////////////////////////////////////////////////////
-// Utility functions                                                      //
-////////////////////////////////////////////////////////////////////////////
-
-// Set the Python execution state to handle a system exception:
-_CORBA_MODULE_FN
-void handleSystemException(const CORBA::SystemException& ex);
-
-// Throw a system exception equivalent to the given Python exception
-_CORBA_MODULE_FN
-void produceSystemException(PyObject* eobj, PyObject* erepoId);
-
-
-////////////////////////////////////////////////////////////////////////////
-// Object reference functions                                             //
-////////////////////////////////////////////////////////////////////////////
-
-// Create the Python object relating to a CORBA object reference:
-_CORBA_MODULE_FN
-PyObject* createPyCorbaObjRef(const char* targetRepoId,
-			      const CORBA::Object_ptr obj);
-
-_CORBA_MODULE_FN
-omniObject* createObjRef(const char* mostDerivedRepoId,
-			 const char* targetRepoId,
-			 IOP::TaggedProfileList* profiles,
-			 CORBA::Boolean release);
-
-_CORBA_MODULE_FN
-omniObject* stringToObject(const char* str);
-
-_CORBA_MODULE_FN
-CORBA::Object_ptr UnMarshalObjRef(const char* repoId, NetBufferedStream& s);
-
-_CORBA_MODULE_FN
-CORBA::Object_ptr UnMarshalObjRef(const char* repoId, MemBufferedStream& s);
-
-
-
-////////////////////////////////////////////////////////////////////////////
-// Recursive marshalling functions                                        //
-////////////////////////////////////////////////////////////////////////////
-
-// Calculate aligned size of the given argument object a_o, which has
-// the type specified by d_o. Assumes that argument types are correct,
-// unless checking is necessary.
-_CORBA_MODULE_FN
-CORBA::ULong alignedSize(CORBA::ULong msgsize,
-			 PyObject* d_o,
-			 PyObject* a_o);
-
-// Check the type and marshal the given argument object a_o, which
-// has the type specified by d_o.
-_CORBA_MODULE_FN
-void marshalPyObject(NetBufferedStream& stream,
-		     PyObject*          d_o,
-		     PyObject*          a_o);
-
-_CORBA_MODULE_FN
-void marshalPyObject(MemBufferedStream& stream,
-		     PyObject*          d_o,
-		     PyObject*          a_o);
-
-// Unmarshal a PyObject, which has the type specified by d_o.
-_CORBA_MODULE_FN
-PyObject* unmarshalPyObject(NetBufferedStream& stream,
-			    PyObject*          d_o);
-
-_CORBA_MODULE_FN
-PyObject* unmarshalPyObject(MemBufferedStream& stream,
-			    PyObject*          d_o);
-
-
-////////////////////////////////////////////////////////////////////////////
-// TypeCode and Any support functions                                     //
-////////////////////////////////////////////////////////////////////////////
-
-// Marshalled size of a TypeCode given as a descriptor:
-_CORBA_MODULE_FN
-CORBA::ULong alignedSizeTypeCode(CORBA::ULong msgsize, PyObject* d_o);
-
-
-// Marshal a type descriptor as a TypeCode:
-_CORBA_MODULE_FN
-void marshalTypeCode(NetBufferedStream& stream, PyObject* d_o);
-
-_CORBA_MODULE_FN
-void marshalTypeCode(MemBufferedStream& stream, PyObject* d_o);
-
-
-// Unmarshal a TypeCode, returning a descriptor:
-_CORBA_MODULE_FN
-PyObject* unmarshalTypeCode(NetBufferedStream& stream);
-
-_CORBA_MODULE_FN
-PyObject* unmarshalTypeCode(MemBufferedStream& stream);
-
-
-
-////////////////////////////////////////////////////////////////////////////
-// Proxy call descriptor object                                           //
-////////////////////////////////////////////////////////////////////////////
-
-class Py_OmniProxyCallDesc : public OmniProxyCallDesc {
+class omniPy {
 public:
 
-  Py_OmniProxyCallDesc(const char* op, size_t len, CORBA::Boolean has_exc,
-		       PyObject* in_d, PyObject* out_d, PyObject* exc_d,
-		       PyObject* args)
-    : OmniProxyCallDesc(op, len, has_exc),
-      in_d_(in_d),
-      out_d_(out_d),
-      exc_d_(exc_d),
-      args_(args)
+  ////////////////////////////////////////////////////////////////////////////
+  // The global Python interpreter state                                    //
+  ////////////////////////////////////////////////////////////////////////////
+
+  static PyInterpreterState* pyInterpreter;
+  static omni_mutex*         pyInterpreterLock;
+
+  ////////////////////////////////////////////////////////////////////////////
+  // Global pointers to Python objects                                      //
+  ////////////////////////////////////////////////////////////////////////////
+
+  static PyObject* pyCORBAmodule;      // The CORBA module
+  static PyObject* pyCORBAsysExcMap;   //  The system exception map
+  static PyObject* pyCORBAAnyClass;    //  Any class
+  static PyObject* pyomniORBmodule;    // The omniORB module
+  static PyObject* pyomniORBobjrefMap; //  The objref class map
+  static PyObject* pyomniORBtypeMap;   //  Type map
+  static PyObject* pyomniORBwordMap;   //  Reserved word map
+  static PyObject* pyPortableServerModule; // Portable server module
+  static PyObject* pyServantClass;     // Servant class
+  static PyObject* pyCreateTypeCode;   // Function to create a TypeCode object
+  static PyObject* pyWorkerThreadClass;// Worker thread class
+  static PyObject* pyWorkerThreadDel;  // Method to delete worker thread
+  static PyObject* pyEmptyTuple;       // Zero element tuple
+
+  ////////////////////////////////////////////////////////////////////////////
+  // Pointer to the ORB                                                     //
+  ////////////////////////////////////////////////////////////////////////////
+
+  static CORBA::ORB_ptr orb;
+
+  ////////////////////////////////////////////////////////////////////////////
+  // Twin object handling                                                   //
+  ////////////////////////////////////////////////////////////////////////////
+
+  static PyObject* newTwin(void* twin);
+
+  static
+  inline void
+  setTwin(PyObject* obj, void* twin, char* name)
   {
-    assert(PyTuple_Check(in_d));
-    assert(PyTuple_Check(out_d));
-    tstate_ = 0;
-    in_l_   = PyTuple_GET_SIZE(in_d_);
-    out_l_  = PyTuple_GET_SIZE(out_d_);
-    //    cout << "Py_OmniProxyCallDesc created: " << op << " " << len << endl;
+    PyObject* ot = newTwin(twin);
+
+    PyDict_SetItemString(((PyInstanceObject*)obj)->in_dict,
+			 name, ot);
+    Py_DECREF(ot);
   }
 
-  virtual ~Py_OmniProxyCallDesc() {
-    assert(!tstate_);
-  }
-
-  inline void releaseInterpreterLock() {
-    assert(!tstate_);
-    tstate_ = PyEval_SaveThread();
-  }
-
-  inline void reacquireInterpreterLock() {
-    assert(tstate_);
-    PyEval_RestoreThread(tstate_);
-    tstate_ = 0;
-  }
-
-  virtual CORBA::ULong alignedSize(CORBA::ULong msgsize);
-
-  virtual void marshalArguments(GIOP_C& giop_client);
-
-  virtual void unmarshalReturnedValues(GIOP_C& giop_client);
-
-  virtual void userException(GIOP_C& giop_client, const char* repoId);
-
-  inline void systemException(const CORBA::SystemException& ex) {
-    if (tstate_) {
-      PyEval_RestoreThread(tstate_);
-      tstate_ = 0;
-    }
-    handleSystemException(ex);
-  }
-
-  inline PyObject* result() { return result_; }
-
-private:
-  PyObject*      in_d_;
-  int            in_l_;
-  PyObject*      out_d_;
-  int            out_l_;
-  PyObject*      exc_d_;
-  PyObject*      args_;
-  PyObject*      result_;
-  PyThreadState* tstate_;
-
-  Py_OmniProxyCallDesc(const Py_OmniProxyCallDesc&);
-  Py_OmniProxyCallDesc& operator=(const Py_OmniProxyCallDesc&);
-};
-
-
-// Version for oneway:
-
-class Py_OmniOWProxyCallDesc : public OmniOWProxyCallDesc {
-public:
-
-  Py_OmniOWProxyCallDesc(const char* op, size_t len,
-		       PyObject* in_d, PyObject* args)
-    : OmniOWProxyCallDesc(op, len),
-      in_d_(in_d),
-      args_(args)
+  static
+  inline void*
+  getTwin(PyObject* obj, char* name)
   {
-    tstate_ = 0;
-    assert(PyTuple_Check(in_d));
-    in_l_   = PyTuple_GET_SIZE(in_d_);
-    //    cout << "Py_OmniProxyCallDesc created: " << op << " " << len << endl;
-  }
-
-  virtual ~Py_OmniOWProxyCallDesc() {
-    assert(!tstate_);
-  }
-
-  inline void releaseInterpreterLock() {
-    tstate_ = PyEval_SaveThread();
-  }
-
-  inline void reacquireInterpreterLock() {
-    assert(tstate_);
-    PyEval_RestoreThread(tstate_);
-    tstate_ = 0;
-  }
-
-  virtual CORBA::ULong alignedSize(CORBA::ULong msgsize);
-
-  virtual void marshalArguments(GIOP_C& giop_client);
-
-  inline void systemException(const CORBA::SystemException& ex) {
-    if (tstate_) {
-      PyEval_RestoreThread(tstate_);
-      tstate_ = 0;
-    }
-    handleSystemException(ex);
-  }
-
-private:
-  PyObject*      in_d_;
-  int            in_l_;
-  PyObject*      args_;
-  PyThreadState* tstate_;
-
-  Py_OmniOWProxyCallDesc(const Py_OmniOWProxyCallDesc&);
-  Py_OmniOWProxyCallDesc& operator=(const Py_OmniOWProxyCallDesc&);
-};
-
-
-
-////////////////////////////////////////////////////////////////////////////
-// Servant object                                                         //
-////////////////////////////////////////////////////////////////////////////
-
-class Py_Servant : public virtual omniObject, public virtual CORBA::Object {
-
-public:
-
-  Py_Servant(PyObject* pyservant, PyObject* opdict, const char* repoId);
-
-  virtual ~Py_Servant();
-
-  omniORB::objectKey _key();
-
-  virtual CORBA::Boolean dispatch(GIOP_S&        giop_server,
-				  const char*    op,
-				  CORBA::Boolean response);
-
-  inline PyObject* local_dispatch(const char* op, PyObject* args) {
-    PyObject* method = PyObject_GetAttrString(pyservant_, (char*)op);
-    if (method) {
-      PyObject* ret = PyEval_CallObject(method, args);
-      Py_DECREF(method);
-      return ret;
-    }
-    else {
-      PyObject* err =
-	PyString_FromString("Local servant has no operation named ");
-
-      PyString_ConcatAndDel(&err, PyString_FromString(op));
-      PyErr_SetObject(PyExc_AttributeError, err);
-      Py_DECREF(err);
+    PyObject* ot = PyDict_GetItemString(((PyInstanceObject*)obj)->in_dict,
+					name);
+    if (ot)
+      return ((omnipyTwin*)ot)->ob_twin;
+    else
       return 0;
+  }
+
+  static
+  inline void
+  remTwin(PyObject* obj, char* name)
+  {
+    PyDict_DelItemString(((PyInstanceObject*)obj)->in_dict, name);
+  }
+
+  ////////////////////////////////////////////////////////////////////////////
+  // Module initialisation functions                                        //
+  ////////////////////////////////////////////////////////////////////////////
+
+  static void initORBFunc       (PyObject* d);
+  static void initPOAFunc       (PyObject* d);
+  static void initPOAManagerFunc(PyObject* d);
+
+
+  ////////////////////////////////////////////////////////////////////////////
+  // Utility functions                                                      //
+  ////////////////////////////////////////////////////////////////////////////
+
+  // Set the Python execution state to handle a system exception.
+  // Returns a NULL PyObject so you can say
+  //   return handleSystemException(ex).
+  static
+  PyObject* handleSystemException(const CORBA::SystemException& ex);
+
+  // Throw a C++ system exception equivalent to the given Python exception
+  static
+  void produceSystemException(PyObject* eobj, PyObject* erepoId);
+
+
+  ////////////////////////////////////////////////////////////////////////////
+  // Python object creation functions                                       //
+  ////////////////////////////////////////////////////////////////////////////
+
+  static
+  PyObject* fakePyRootPOAObject(PyObject* pyorb, const CORBA::ORB_ptr orb);
+
+  ////////////////////////////////////////////////////////////////////////////
+  // Object reference functions                                             //
+  ////////////////////////////////////////////////////////////////////////////
+
+  // Create the Python object relating to a CORBA object reference:
+  static
+  PyObject* createPyCorbaObjRef(const char* targetRepoId,
+				const CORBA::Object_ptr obj);
+
+  // Functions which mirror omni::createObjRef(). These versions don't
+  // look for C++ proxy factories, and spot local Python servants.
+  static
+  omniObject* createObjRef(const char* mostDerivedRepoId,
+			   const char* targetRepoId,
+			   IOP::TaggedProfileList* profiles,
+			   CORBA::Boolean release);
+
+  // Mirror of omni::stringToObject()
+  static
+  omniObject* stringToObject(const char* str);
+
+  // Mirrors of CORBA::UnMarshalObjRef()
+  static
+  CORBA::Object_ptr UnMarshalObjRef(const char* repoId, NetBufferedStream& s);
+
+  static
+  CORBA::Object_ptr UnMarshalObjRef(const char* repoId, MemBufferedStream& s);
+
+
+  ////////////////////////////////////////////////////////////////////////////
+  // Recursive marshalling functions                                        //
+  ////////////////////////////////////////////////////////////////////////////
+
+  // Calculate aligned size of the given argument object a_o, which
+  // has the type specified by d_o. Checks all argument types, and
+  // throws BAD_PARAM if they are wrong. If BAD_PARAM is thrown, its
+  // completion status is set to the given value.
+  static
+  CORBA::ULong alignedSize(CORBA::ULong            msgsize,
+			   PyObject*               d_o,
+			   PyObject*               a_o,
+			   CORBA::CompletionStatus compstatus);
+
+  // Check the type and marshal the given argument object a_o, which
+  // has the type specified by d_o. These functions MUST NOT be called
+  // without having first called alignedSize with the same arguments,
+  // since they perform no argument type checking.
+  static
+  void marshalPyObject(NetBufferedStream& stream,
+		       PyObject*          d_o,
+		       PyObject*          a_o);
+
+  static
+  void marshalPyObject(MemBufferedStream& stream,
+		       PyObject*          d_o,
+		       PyObject*          a_o);
+
+  // Unmarshal a PyObject, which has the type specified by d_o.
+  static
+  PyObject* unmarshalPyObject(NetBufferedStream& stream,
+			      PyObject*          d_o);
+
+  static
+  PyObject* unmarshalPyObject(MemBufferedStream& stream,
+			      PyObject*          d_o);
+
+
+  ////////////////////////////////////////////////////////////////////////////
+  // TypeCode and Any support functions                                     //
+  ////////////////////////////////////////////////////////////////////////////
+
+  // Marshalled size of a TypeCode given as a descriptor:
+  static
+  CORBA::ULong alignedSizeTypeCode(CORBA::ULong msgsize, PyObject* d_o);
+
+
+  // Marshal a type descriptor as a TypeCode:
+  static
+  void marshalTypeCode(NetBufferedStream& stream, PyObject* d_o);
+
+  static
+  void marshalTypeCode(MemBufferedStream& stream, PyObject* d_o);
+
+
+  // Unmarshal a TypeCode, returning a descriptor:
+  static
+  PyObject* unmarshalTypeCode(NetBufferedStream& stream);
+
+  static
+  PyObject* unmarshalTypeCode(MemBufferedStream& stream);
+
+
+  ////////////////////////////////////////////////////////////////////////////
+  // Proxy call descriptor object                                           //
+  ////////////////////////////////////////////////////////////////////////////
+
+  class Py_OmniProxyCallDesc : public OmniProxyCallDesc {
+  public:
+
+    Py_OmniProxyCallDesc(const char* op, size_t len, CORBA::Boolean has_exc,
+			 PyObject* in_d, PyObject* out_d, PyObject* exc_d,
+			 PyObject* args)
+      : OmniProxyCallDesc(op, len, has_exc),
+	in_d_(in_d),
+	out_d_(out_d),
+	exc_d_(exc_d),
+	args_(args)
+    {
+      assert(PyTuple_Check(in_d));
+      assert(PyTuple_Check(out_d));
+      tstate_ = 0;
+      in_l_   = PyTuple_GET_SIZE(in_d_);
+      out_l_  = PyTuple_GET_SIZE(out_d_);
     }
-  }
 
-  inline PyObject* pyServant() {
-    Py_INCREF(pyservant_);
-    return pyservant_;
-  }
+    virtual ~Py_OmniProxyCallDesc() {
+      assert(!tstate_);
+    }
 
-private:
-  PyObject* pyservant_;		// Python servant object
-  PyObject* opdict_;		// Operation descriptor dictionary
-  PyObject* pyskeleton_;	// Skeleton class object
+    inline void releaseInterpreterLock() {
+      assert(!tstate_);
+      tstate_ = PyEval_SaveThread();
+    }
 
-  Py_Servant(const Py_Servant&);
-  Py_Servant& operator=(const Py_Servant&);
+    inline void reacquireInterpreterLock() {
+      assert(tstate_);
+      PyEval_RestoreThread(tstate_);
+      tstate_ = 0;
+    }
 
-protected:
-  virtual void* _widenFromTheMostDerivedIntf(const char* repoId,
-					     CORBA::Boolean is_cxx_type_id);
+    virtual CORBA::ULong alignedSize(CORBA::ULong msgsize);
+
+    virtual void marshalArguments(GIOP_C& giop_client);
+
+    virtual void unmarshalReturnedValues(GIOP_C& giop_client);
+
+    virtual void userException(GIOP_C& giop_client, const char* repoId);
+
+    inline void systemException(const CORBA::SystemException& ex) {
+      if (tstate_) {
+	PyEval_RestoreThread(tstate_);
+	tstate_ = 0;
+      }
+      handleSystemException(ex);
+    }
+
+    inline PyObject* result() { return result_; }
+
+  private:
+    PyObject*      in_d_;
+    int            in_l_;
+    PyObject*      out_d_;
+    int            out_l_;
+    PyObject*      exc_d_;
+    PyObject*      args_;
+    PyObject*      result_;
+    PyThreadState* tstate_;
+
+    Py_OmniProxyCallDesc(const Py_OmniProxyCallDesc&);
+    Py_OmniProxyCallDesc& operator=(const Py_OmniProxyCallDesc&);
+  };
+
+
+  // Version for oneway:
+
+  class Py_OmniOWProxyCallDesc : public OmniOWProxyCallDesc {
+  public:
+
+    Py_OmniOWProxyCallDesc(const char* op, size_t len,
+			   PyObject* in_d, PyObject* args)
+      : OmniOWProxyCallDesc(op, len),
+	in_d_(in_d),
+	args_(args)
+    {
+      tstate_ = 0;
+      assert(PyTuple_Check(in_d));
+      in_l_   = PyTuple_GET_SIZE(in_d_);
+    }
+
+    virtual ~Py_OmniOWProxyCallDesc() {
+      assert(!tstate_);
+    }
+
+    inline void releaseInterpreterLock() {
+      tstate_ = PyEval_SaveThread();
+    }
+
+    inline void reacquireInterpreterLock() {
+      assert(tstate_);
+      PyEval_RestoreThread(tstate_);
+      tstate_ = 0;
+    }
+
+    virtual CORBA::ULong alignedSize(CORBA::ULong msgsize);
+
+    virtual void marshalArguments(GIOP_C& giop_client);
+
+    inline void systemException(const CORBA::SystemException& ex) {
+      if (tstate_) {
+	PyEval_RestoreThread(tstate_);
+	tstate_ = 0;
+      }
+      handleSystemException(ex);
+    }
+
+  private:
+    PyObject*      in_d_;
+    int            in_l_;
+    PyObject*      args_;
+    PyThreadState* tstate_;
+
+    Py_OmniOWProxyCallDesc(const Py_OmniOWProxyCallDesc&);
+    Py_OmniOWProxyCallDesc& operator=(const Py_OmniOWProxyCallDesc&);
+  };
+
+
+
+  ////////////////////////////////////////////////////////////////////////////
+  // Servant object                                                         //
+  ////////////////////////////////////////////////////////////////////////////
+
+  class Py_Servant : public virtual omniObject, public virtual CORBA::Object {
+
+  public:
+
+    Py_Servant(PyObject* pyservant, PyObject* opdict, const char* repoId);
+
+    virtual ~Py_Servant();
+
+    omniORB::objectKey _key();
+
+    virtual CORBA::Boolean dispatch(GIOP_S&        giop_server,
+				    const char*    op,
+				    CORBA::Boolean response);
+
+    inline PyObject* local_dispatch(const char* op, PyObject* args) {
+      PyObject* method = PyObject_GetAttrString(pyservant_, (char*)op);
+      if (method) {
+	PyObject* ret = PyEval_CallObject(method, args);
+	Py_DECREF(method);
+	return ret;
+      }
+      else {
+	PyObject* err =
+	  PyString_FromString("Local servant has no operation named ");
+
+	PyString_ConcatAndDel(&err, PyString_FromString(op));
+	PyErr_SetObject(PyExc_AttributeError, err);
+	Py_DECREF(err);
+	return 0;
+      }
+    }
+
+    inline PyObject* pyServant() {
+      Py_INCREF(pyservant_);
+      return pyservant_;
+    }
+
+  private:
+    PyObject* pyservant_;		// Python servant object
+    PyObject* opdict_;		// Operation descriptor dictionary
+    PyObject* pyskeleton_;	// Skeleton class object
+
+    Py_Servant(const Py_Servant&);
+    Py_Servant& operator=(const Py_Servant&);
+
+  protected:
+    virtual void* _widenFromTheMostDerivedIntf(const char* repoId,
+					       CORBA::Boolean is_cxx_type_id);
+  };
+
+  // Function to find or create a Py_Servant object for a Python
+  // servant object. If the Python object is not an instance of a
+  // class derived from PortableServer.Servant, returns 0.
+  static Py_Servant* getServantForPyObject(PyObject* pyservant);
+
+
+  ////////////////////////////////////////////////////////////////////////////
+  // InterpreterUnlocker releases the Python interpreter lock               //
+  ////////////////////////////////////////////////////////////////////////////
+
+  class InterpreterUnlocker {
+  public:
+    InterpreterUnlocker() {
+      tstate_ = PyEval_SaveThread();
+    }
+    ~InterpreterUnlocker() {
+      PyEval_RestoreThread(tstate_);
+    }
+  private:
+    PyThreadState* tstate_;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  // UserExceptionHandled is thrown when we've handled a user exception     //
+  ////////////////////////////////////////////////////////////////////////////
+
+  class UserExceptionHandled {
+  public:
+    UserExceptionHandled() { }
+    ~UserExceptionHandled() { }
+  };
+
 };
 
-
-////////////////////////////////////////////////////////////////////////////
-// InterpreterUnlocker releases the Python interpreter lock               //
-////////////////////////////////////////////////////////////////////////////
-
-class InterpreterUnlocker {
-public:
-  InterpreterUnlocker() {
-    tstate_ = PyEval_SaveThread();
-  }
-  ~InterpreterUnlocker() {
-    PyEval_RestoreThread(tstate_);
-  }
-private:
-  PyThreadState* tstate_;
-};
-
-
-_CORBA_MODULE_END
-
-#endif // _omnipy_h_
+#endif // _omnipy28_h_
