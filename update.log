@@ -1,3 +1,11 @@
+Mon Nov 10 16:47:17 GMT 2003 dgrisby
+====================================
+
+- Last checking broke hashability.
+
+python/omniORB/__init__.py
+
+
 Mon Nov 10 16:31:11 GMT 2003 dgrisby
 ====================================
 
