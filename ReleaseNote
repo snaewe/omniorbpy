@@ -1,10 +1,10 @@
-Release Notes for omniORBpy 1.0  (14 July 2000)
+Release Notes for omniORBpy 1.1  (18 August 2000)
 ===============================
 
-This is omniORBpy 1.0, a robust high-performance CORBA ORB for Python.
+This is omniORBpy 1.1, a robust high-performance CORBA ORB for Python.
 
 The bindings adhere to the standard IDL to Python mapping which you
-may find at http://www.omg.org/cgi-bin/doc?ptc/00-04-08.
+may find at http://cgi.omg.org/cgi-bin/doc?ptc/00-04-08.
 
 
 ----------------------------------------------------------------------
@@ -12,7 +12,7 @@ may find at http://www.omg.org/cgi-bin/doc?ptc/00-04-08.
 
 The mapping for server-side skeletons has changed since pre-release 2.
 Server-side code written for omniORBpy before pre-release 3 MUST be
-updated to work with omniORBpy 1.0.
+updated to work with omniORBpy 1.0 and above.
 
 This unfortunate state of affairs is due to an internal contradiction
 in drafts of the Python mapping. See below for full details.
@@ -25,7 +25,7 @@ omniORB 3.0 or omniORB 2.8. If you use omniORB 3.0, the full POA
 functionality is available; with omniORB 2.8 many POA functions are
 not supported.
 
-omniORBpy is currently available for Linux, Solaris, and Windows NT.
+omniORBpy is currently available for many Unix platforms and Windows.
 It has been ported to a number of other operating systems by outside
 contributors.
 
@@ -37,6 +37,22 @@ It is a good idea to subscribe to the omniORB mailing list. See
 Please report any bugs you find to the mailing list, or directly to
 Duncan Grisby,
                                          dgrisby@uk.research.att.com
+
+
+Summary of changes from omniORBpy 1.0
+-------------------------------------
+
+- Bug fixes. For details, see:
+
+    http://www.uk.research.att.com/omniORB/omniORBpy/bugfixes.html
+
+- Long long support
+
+    Available with omniORB 3.0.1 and above, provided your C++ compiler
+    supports 64-bit types.
+
+- New omniORB.LOCATION_FORWARD exception
+
 
 
 Summary of changes from pre-release 3
@@ -137,8 +153,7 @@ The following features are currently missing from omniORBpy.
 1. There is no support for DII and DSI. Since you can write IDL and
    Python code on-the-fly, this is not a significant limitation.
 
-2. The long long, unsigned long long, long double, wchar, and wstring
-   types are not yet supported.
+2. The long double, wchar, and wstring types are not yet supported.
 
 3. When using omniORB 2.8, the majority of POA functions are not
    supported, since the Python POA is actually implemented with the
