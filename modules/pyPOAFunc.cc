@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.6  2001/09/24 10:48:27  dpg1
+// Meaningful minor codes.
+//
 // Revision 1.1.2.5  2001/06/15 10:59:26  dpg1
 // Apply fixes from omnipy1_develop.
 //
@@ -173,7 +176,7 @@ CORBA::Policy_ptr createPolicyObject(PortableServer::POA_ptr poa,
   if (policy) return policy;
 
   PyErr_Clear();
-  OMNIORB_THROW(BAD_PARAM, 0, CORBA::COMPLETED_NO);
+  OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, CORBA::COMPLETED_NO);
   return 0; // For MSVC
 }
   
@@ -191,7 +194,8 @@ extern "C" {
 			  &pyPOA, &name, &pyPM, &pypolicies))
       return 0;
 
-    RAISE_PY_BAD_PARAM_IF(!PySequence_Check(pypolicies));
+    RAISE_PY_BAD_PARAM_IF(!PySequence_Check(pypolicies),
+			  BAD_PARAM_WrongPythonType);
 
     PortableServer::POA_ptr poa =
       (PortableServer::POA_ptr)omniPy::getTwin(pyPOA, POA_TWIN);
@@ -412,7 +416,7 @@ extern "C" {
 
     CORBA::Object_ptr actobj = (CORBA::Object_ptr)omniPy::getTwin(pyact,
 								  OBJREF_TWIN);
-    RAISE_PY_BAD_PARAM_IF(!actobj);
+    RAISE_PY_BAD_PARAM_IF(!actobj, BAD_PARAM_WrongPythonType);
 
     try {
       omniPy::InterpreterUnlocker _u;
@@ -420,7 +424,8 @@ extern "C" {
 	PortableServer::AdapterActivator::_narrow(actobj);
 
       if (CORBA::is_nil(act))
-	OMNIORB_THROW(BAD_PARAM, 0, CORBA::COMPLETED_NO);
+	OMNIORB_THROW(INV_OBJREF, INV_OBJREF_InterfaceMisMatch,
+		      CORBA::COMPLETED_NO);
 
       poa->the_activator(act);
     }
@@ -481,7 +486,7 @@ extern "C" {
 
     CORBA::Object_ptr mgrobj = (CORBA::Object_ptr)omniPy::getTwin(pymgr,
 								  OBJREF_TWIN);
-    RAISE_PY_BAD_PARAM_IF(!mgrobj);
+    RAISE_PY_BAD_PARAM_IF(!mgrobj, BAD_PARAM_WrongPythonType);
 
     try {
       omniPy::InterpreterUnlocker _u;
@@ -489,7 +494,8 @@ extern "C" {
 	PortableServer::ServantManager::_narrow(mgrobj);
 
       if (CORBA::is_nil(mgr))
-	OMNIORB_THROW(BAD_PARAM, 0, CORBA::COMPLETED_NO);
+	OMNIORB_THROW(INV_OBJREF, INV_OBJREF_InterfaceMisMatch,
+		      CORBA::COMPLETED_NO);
 
       poa->set_servant_manager(mgr);
     }
@@ -533,7 +539,8 @@ extern "C" {
 	  omniPy::InterpreterUnlocker _u;
 	  servant->_remove_ref();
 	}
-	OMNIORB_THROW(OBJ_ADAPTER, 0, CORBA::COMPLETED_NO);
+	OMNIORB_THROW(OBJ_ADAPTER,
+		      OBJ_ADAPTER_IncompatibleServant, CORBA::COMPLETED_NO);
       }
     }
     catch (PortableServer::POA::NoServant& ex) {
@@ -558,7 +565,7 @@ extern "C" {
     OMNIORB_ASSERT(poa);
 
     omniPy::Py_omniServant* pyos = omniPy::getServantForPyObject(pyServant);
-    RAISE_PY_BAD_PARAM_IF(!pyos);
+    RAISE_PY_BAD_PARAM_IF(!pyos, BAD_PARAM_WrongPythonType);
     PYOSReleaseHelper _r(pyos);
 
     try {
@@ -587,7 +594,7 @@ extern "C" {
     OMNIORB_ASSERT(poa);
 
     omniPy::Py_omniServant* pyos = omniPy::getServantForPyObject(pyServant);
-    RAISE_PY_BAD_PARAM_IF(!pyos);
+    RAISE_PY_BAD_PARAM_IF(!pyos, BAD_PARAM_WrongPythonType);
     PYOSReleaseHelper _r(pyos);
 
     try {
@@ -625,7 +632,7 @@ extern "C" {
     OMNIORB_ASSERT(poa);
 
     omniPy::Py_omniServant* pyos = omniPy::getServantForPyObject(pyServant);
-    RAISE_PY_BAD_PARAM_IF(!pyos);
+    RAISE_PY_BAD_PARAM_IF(!pyos, BAD_PARAM_WrongPythonType);
     PYOSReleaseHelper _r(pyos);
 
     try {
@@ -757,7 +764,7 @@ extern "C" {
     OMNIORB_ASSERT(poa);
 
     omniPy::Py_omniServant* pyos = omniPy::getServantForPyObject(pyServant);
-    RAISE_PY_BAD_PARAM_IF(!pyos);
+    RAISE_PY_BAD_PARAM_IF(!pyos, BAD_PARAM_WrongPythonType);
     PYOSReleaseHelper _r(pyos);
 
     try {
@@ -790,7 +797,7 @@ extern "C" {
     OMNIORB_ASSERT(poa);
 
     omniPy::Py_omniServant* pyos = omniPy::getServantForPyObject(pyServant);
-    RAISE_PY_BAD_PARAM_IF(!pyos);
+    RAISE_PY_BAD_PARAM_IF(!pyos, BAD_PARAM_WrongPythonType);
     PYOSReleaseHelper _r(pyos);
 
     try {
@@ -825,12 +832,13 @@ extern "C" {
       (PortableServer::POA_ptr)omniPy::getTwin(pyPOA, POA_TWIN);
     OMNIORB_ASSERT(poa);
 
-    RAISE_PY_BAD_PARAM_IF(!PyInstance_Check(pyobjref));
+    RAISE_PY_BAD_PARAM_IF(!PyInstance_Check(pyobjref),
+			  BAD_PARAM_WrongPythonType);
 
     CORBA::Object_ptr objref =
       (CORBA::Object_ptr)omniPy::getTwin(pyobjref, OBJREF_TWIN);
 
-    RAISE_PY_BAD_PARAM_IF(!objref);
+    RAISE_PY_BAD_PARAM_IF(!objref, BAD_PARAM_WrongPythonType);
 
     try {
       PortableServer::Servant servant;
@@ -853,7 +861,8 @@ extern "C" {
 	  omniPy::InterpreterUnlocker _u;
 	  servant->_remove_ref();
 	}
-	OMNIORB_THROW(OBJ_ADAPTER, 0, CORBA::COMPLETED_NO);
+	OMNIORB_THROW(OBJ_ADAPTER,
+		      OBJ_ADAPTER_IncompatibleServant, CORBA::COMPLETED_NO);
       }
     }
     catch (PortableServer::POA::ObjectNotActive& ex) {
@@ -880,12 +889,13 @@ extern "C" {
       (PortableServer::POA_ptr)omniPy::getTwin(pyPOA, POA_TWIN);
     OMNIORB_ASSERT(poa);
 
-    RAISE_PY_BAD_PARAM_IF(!PyInstance_Check(pyobjref));
+    RAISE_PY_BAD_PARAM_IF(!PyInstance_Check(pyobjref),
+			  BAD_PARAM_WrongPythonType);
 
     CORBA::Object_ptr objref =
       (CORBA::Object_ptr)omniPy::getTwin(pyobjref, OBJREF_TWIN);
 
-    RAISE_PY_BAD_PARAM_IF(!objref);
+    RAISE_PY_BAD_PARAM_IF(!objref, BAD_PARAM_WrongPythonType);
 
     try {
       PortableServer::ObjectId_var oid;
@@ -940,7 +950,8 @@ extern "C" {
 	  omniPy::InterpreterUnlocker _u;
 	  servant->_remove_ref();
 	}
-	OMNIORB_THROW(OBJ_ADAPTER, 0, CORBA::COMPLETED_NO);
+	OMNIORB_THROW(OBJ_ADAPTER,
+		      OBJ_ADAPTER_IncompatibleServant, CORBA::COMPLETED_NO);
       }
     }
     catch (PortableServer::POA::ObjectNotActive& ex) {
@@ -1021,7 +1032,7 @@ extern "C" {
     if (!PyArg_ParseTuple(args, (char*)"O", &pyservant)) return 0;
 
     omniPy::Py_omniServant* pyos = omniPy::getServantForPyObject(pyservant);
-    RAISE_PY_BAD_PARAM_IF(!pyos);
+    RAISE_PY_BAD_PARAM_IF(!pyos, BAD_PARAM_WrongPythonType);
     PYOSReleaseHelper _r(pyos);
 
     try {

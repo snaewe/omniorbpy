@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.14  2001/09/24 10:48:27  dpg1
+// Meaningful minor codes.
+//
 // Revision 1.1.2.13  2001/09/20 14:51:25  dpg1
 // Allow ORB reinitialisation after destroy(). Clean up use of omni namespace.
 //
@@ -403,12 +406,12 @@ omniPy::copyObjRefArgument(PyObject* pytargetRepoId, PyObject* pyobjref,
   }
   if (!PyInstance_Check(pyobjref)) {
     // Not an objref
-    OMNIORB_THROW(BAD_PARAM, 0, compstatus);
+    OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
   }
   CORBA::Object_ptr objref = (CORBA::Object_ptr)getTwin(pyobjref, OBJREF_TWIN);
   if (!objref) {
     // Not an objref
-    OMNIORB_THROW(BAD_PARAM, 0, compstatus);
+    OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
   }
 
   // To copy an object reference, we have to take a number of things
@@ -528,7 +531,8 @@ omniPy::UnMarshalObjRef(const char* repoId, cdrStream& s)
     omniIOR* ior = new omniIOR(id._retn(),profiles._retn());
     omniObjRef* objref = omniPy::createObjRef(repoId,ior,0);
 
-    if (!objref) OMNIORB_THROW(MARSHAL,0, CORBA::COMPLETED_MAYBE);
+    if (!objref) OMNIORB_THROW(MARSHAL, MARSHAL_InvalidIOR,
+			       (CORBA::CompletionStatus)s.completion());
     return 
       (CORBA::Object_ptr)objref->_ptrToObjRef(CORBA::Object::_PD_repoId);
   }

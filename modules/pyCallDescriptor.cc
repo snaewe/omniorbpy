@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.9  2001/09/24 10:48:25  dpg1
+// Meaningful minor codes.
+//
 // Revision 1.1.2.8  2001/09/20 14:51:24  dpg1
 // Allow ORB reinitialisation after destroy(). Clean up use of omni namespace.
 //
@@ -140,7 +143,9 @@ omniPy::Py_omniCallDescriptor::unmarshalReturnedValues(cdrStream& stream)
 					  PyTuple_GET_ITEM(out_d_, 0));
     else {
       result_ = PyTuple_New(out_l_);
-      if (!result_) OMNIORB_THROW(NO_MEMORY,0,CORBA::COMPLETED_MAYBE);
+      if (!result_)
+	OMNIORB_THROW(NO_MEMORY, 0,
+		      (CORBA::CompletionStatus)stream.completion());
 
       for (int i=0; i < out_l_; i++) {
 	PyTuple_SET_ITEM(result_, i,
@@ -181,7 +186,8 @@ omniPy::Py_omniCallDescriptor::userException(cdrStream& stream,
   else {
     releaseInterpreterLock();
     if (iop_client) iop_client->RequestCompleted(1);
-    OMNIORB_THROW(MARSHAL, 0, CORBA::COMPLETED_MAYBE);
+    OMNIORB_THROW(UNKNOWN, UNKNOWN_UserException,
+		  (CORBA::CompletionStatus)stream.completion());
   }
 }
 
@@ -235,7 +241,9 @@ omniPy::Py_omniCallDescriptor::setAndValidateReturnedValues(PyObject* result)
 
   if (out_l_ == -1 || out_l_ == 0) {
     if (result_ != Py_None)
-      OMNIORB_THROW(BAD_PARAM, 0, CORBA::COMPLETED_MAYBE);
+      OMNIORB_THROW(BAD_PARAM,
+		    BAD_PARAM_WrongPythonType,
+		    CORBA::COMPLETED_MAYBE);
   }
 
   if (out_l_ == 1) {

@@ -29,6 +29,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.2.11  2001/09/24 10:48:28  dpg1
+// Meaningful minor codes.
+//
 // Revision 1.1.2.10  2001/09/20 14:51:25  dpg1
 // Allow ORB reinitialisation after destroy(). Clean up use of omni namespace.
 //
@@ -541,7 +544,9 @@ r_marshalTypeCode(cdrStream&           stream,
 	if (PyString_Check(t_o)) {
 	  // Indirection to a repoId -- find the corresponding descriptor
 	  t_o = PyDict_GetItem(omniPy::pyomniORBtypeMap, t_o);
-	  if (!t_o) OMNIORB_THROW(BAD_TYPECODE, 0, CORBA::COMPLETED_NO);
+	  if (!t_o)
+	    OMNIORB_THROW(BAD_PARAM, BAD_PARAM_IncompletePythonType,
+			  (CORBA::CompletionStatus)stream.completion());
 
 	  Py_INCREF(t_o);
 	  PyList_SetItem(l, 0, t_o);
@@ -561,7 +566,8 @@ r_marshalTypeCode(cdrStream&           stream,
       break;
 
     default:
-      OMNIORB_THROW(BAD_TYPECODE, 0, CORBA::COMPLETED_NO);
+      OMNIORB_THROW(BAD_TYPECODE, BAD_TYPECODE_UnknownKind,
+		    (CORBA::CompletionStatus)stream.completion());
     }
   }
 }
@@ -574,7 +580,8 @@ unmarshalRawPyString(cdrStream& stream)
   CORBA::ULong len; len <<= stream;
 
   if (!stream.checkInputOverrun(1, len))
-    OMNIORB_THROW(MARSHAL, 0, CORBA::COMPLETED_NO);
+    OMNIORB_THROW(MARSHAL, MARSHAL_PassEndOfMessage,
+		  (CORBA::CompletionStatus)stream.completion());
 
   PyObject* pystring = PyString_FromStringAndSize(0, len - 1);
 
@@ -588,7 +595,8 @@ skipString(cdrStream& stream)
   CORBA::ULong len; len <<= stream;
 
   if (!stream.checkInputOverrun(1, len))
-    OMNIORB_THROW(MARSHAL, 0, CORBA::COMPLETED_NO);
+    OMNIORB_THROW(MARSHAL, MARSHAL_PassEndOfMessage,
+		  (CORBA::CompletionStatus)stream.completion());
 
   stream.skipInput(len);
 }
@@ -1103,7 +1111,8 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
       position  = tc_offset + 4 + offset;
 
       if (!odm.lookup(t_o, position))
-	OMNIORB_THROW(BAD_TYPECODE, 0, CORBA::COMPLETED_NO);
+	OMNIORB_THROW(MARSHAL, MARSHAL_InvalidIndirection,
+		      (CORBA::CompletionStatus)stream.completion());
 
       d_o = PyTuple_New(2); odm.add(d_o, tc_offset);
       PyTuple_SET_ITEM(d_o, 0, PyInt_FromLong(tk));
@@ -1115,7 +1124,8 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
     break;
 
   default:
-    OMNIORB_THROW(BAD_TYPECODE, 0, CORBA::COMPLETED_NO);
+    OMNIORB_THROW(BAD_TYPECODE, BAD_TYPECODE_UnknownKind,
+		  (CORBA::CompletionStatus)stream.completion());
   }
   return d_o;
 }

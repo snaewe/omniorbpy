@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.2  2001/09/24 10:48:27  dpg1
+// Meaningful minor codes.
+//
 // Revision 1.1.2.1  2001/06/11 13:06:26  dpg1
 // Support for PortableServer::Current.
 //
@@ -172,7 +175,8 @@ extern "C" {
 	omniPy::InterpreterUnlocker _u;
 	servant->_remove_ref();
       }
-      CORBA::OBJ_ADAPTER ex(0, CORBA::COMPLETED_NO);
+      CORBA::OBJ_ADAPTER ex(OBJ_ADAPTER_IncompatibleServant,
+			    CORBA::COMPLETED_NO);
       return omniPy::handleSystemException(ex);
     }
   }

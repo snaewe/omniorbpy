@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.7  2001/09/24 10:48:28  dpg1
+// Meaningful minor codes.
+//
 // Revision 1.1.2.6  2001/08/21 12:48:27  dpg1
 // Meaningful exception minor code strings.
 //
@@ -222,14 +225,16 @@ extern "C" {
     if (!PyArg_ParseTuple(args, (char*)"OO|O", &pycookie, &pyfn, &pyobjref))
       return 0;
 
-    RAISE_PY_BAD_PARAM_IF(!PyCallable_Check(pyfn));
-    RAISE_PY_BAD_PARAM_IF(pyobjref && !PyInstance_Check(pyobjref));
+
+    RAISE_PY_BAD_PARAM_IF(!PyCallable_Check(pyfn), BAD_PARAM_WrongPythonType);
+    RAISE_PY_BAD_PARAM_IF(pyobjref && !PyInstance_Check(pyobjref),
+			  BAD_PARAM_WrongPythonType);
 
     if (pyobjref) {
       CORBA::Object_ptr objref =
 	(CORBA::Object_ptr)omniPy::getTwin(pyobjref, OBJREF_TWIN);
 
-      RAISE_PY_BAD_PARAM_IF(!objref);
+      RAISE_PY_BAD_PARAM_IF(!objref, BAD_PARAM_WrongPythonType);
 
       PyObject* tuple = Py_BuildValue((char*)"OO", pyfn, pycookie);
       PyObject_SetAttrString(pyobjref, (char*)"__omni_transient", tuple);
@@ -269,14 +274,15 @@ extern "C" {
     if (!PyArg_ParseTuple(args, (char*)"OO|O", &pycookie, &pyfn, &pyobjref))
       return 0;
 
-    RAISE_PY_BAD_PARAM_IF(!PyCallable_Check(pyfn));
-    RAISE_PY_BAD_PARAM_IF(pyobjref && !PyInstance_Check(pyobjref));
+    RAISE_PY_BAD_PARAM_IF(!PyCallable_Check(pyfn), BAD_PARAM_WrongPythonType);
+    RAISE_PY_BAD_PARAM_IF(pyobjref && !PyInstance_Check(pyobjref),
+			  BAD_PARAM_WrongPythonType);
 
     if (pyobjref) {
       CORBA::Object_ptr objref =
 	(CORBA::Object_ptr)omniPy::getTwin(pyobjref, OBJREF_TWIN);
 
-      RAISE_PY_BAD_PARAM_IF(!objref);
+      RAISE_PY_BAD_PARAM_IF(!objref, BAD_PARAM_WrongPythonType);
 
       PyObject* tuple = Py_BuildValue((char*)"OO", pyfn, pycookie);
       PyObject_SetAttrString(pyobjref, (char*)"__omni_commfailure", tuple);
@@ -317,14 +323,15 @@ extern "C" {
     if (!PyArg_ParseTuple(args, (char*)"OO|O", &pycookie, &pyfn, &pyobjref))
       return 0;
 
-    RAISE_PY_BAD_PARAM_IF(!PyCallable_Check(pyfn));
-    RAISE_PY_BAD_PARAM_IF(pyobjref && !PyInstance_Check(pyobjref));
+    RAISE_PY_BAD_PARAM_IF(!PyCallable_Check(pyfn), BAD_PARAM_WrongPythonType);
+    RAISE_PY_BAD_PARAM_IF(pyobjref && !PyInstance_Check(pyobjref),
+			  BAD_PARAM_WrongPythonType);
 
     if (pyobjref) {
       CORBA::Object_ptr objref =
 	(CORBA::Object_ptr)omniPy::getTwin(pyobjref, OBJREF_TWIN);
 
-      RAISE_PY_BAD_PARAM_IF(!objref);
+      RAISE_PY_BAD_PARAM_IF(!objref, BAD_PARAM_WrongPythonType);
 
       PyObject* tuple = Py_BuildValue((char*)"OO", pyfn, pycookie);
       PyObject_SetAttrString(pyobjref, (char*)"__omni_systemex", tuple);

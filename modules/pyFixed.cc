@@ -29,6 +29,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.2.4  2001/09/24 10:48:26  dpg1
+// Meaningful minor codes.
+//
 // Revision 1.1.2.3  2001/05/14 12:47:21  dpg1
 // Fix memory leaks.
 //
@@ -109,10 +112,14 @@ omniPy::newFixedObject(PyObject* self, PyObject* args)
 	long scale  = PyInt_AsLong(pys);
 
 	if (digits < 0 || digits > 31)
-	  OMNIORB_THROW(BAD_PARAM, 0, CORBA::COMPLETED_NO);
+	  OMNIORB_THROW(DATA_CONVERSION,
+			DATA_CONVERSION_RangeError,
+			CORBA::COMPLETED_NO);
 
 	if (scale < 0 || scale > digits)
-	  OMNIORB_THROW(BAD_PARAM, 0, CORBA::COMPLETED_NO);
+	  OMNIORB_THROW(DATA_CONVERSION,
+			DATA_CONVERSION_RangeError,
+			CORBA::COMPLETED_NO);
 
 	// The standard interface to fixed creation provides an int or
 	// long representing the required value of the fixed times
@@ -382,7 +389,9 @@ extern "C" {
       CORBA::LongLong ll = *((omnipyFixedObject*)v)->ob_fixed;
       if (ll > _CORBA_LONGLONG_CONST(2147483647) ||
 	  ll < _CORBA_LONGLONG_CONST(-2147483648))
-	OMNIORB_THROW(DATA_CONVERSION, 0, CORBA::COMPLETED_NO);
+	OMNIORB_THROW(DATA_CONVERSION,
+		      DATA_CONVERSION_RangeError,
+		      CORBA::COMPLETED_NO);
 
       return PyInt_FromLong((long)ll);
 #else
