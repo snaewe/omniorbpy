@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.28.2.12  2002/03/11 15:40:05  dpg1
+# _get_interface support, exception minor codes.
+#
 # Revision 1.28.2.11  2002/01/18 15:49:45  dpg1
 # Context support. New system exception construction. Fix None call problem.
 #
@@ -370,7 +373,7 @@ def id(obj):
     try:
         return obj._NP_RepositoryId
     except AttributeError:
-        raise BAD_PARAM()
+        raise BAD_PARAM(omniORB.BAD_PARAM_WrongPythonType, COMPLETED_NO)
 
 
 #############################################################################
@@ -551,7 +554,6 @@ class ORB:
 #                                                                           #
 #############################################################################
 
-
 class Object:
     """ CORBA::Object base class """
 
@@ -577,14 +579,20 @@ class Object:
     def _get_interface(self):
         import omniORB
         if omniORB.orb is None:
-            raise BAD_INV_ORDER(0, COMPLETED_NO)
+            raise BAD_INV_ORDER(omniORB.BAD_INV_ORDER_ORBHasShutdown,
+                                COMPLETED_NO)
 
-        import omniORB.ir_idl # Make sure IR stubs are loaded
+        omniORB.importIRStubs()
+
+        try:
+            return _omnipy.invoke(self, "_interface", _d_Object_interface, ())
+        except Exception:
+            pass
 
         ir = omniORB.orb.resolve_initial_references("InterfaceRepository")
         ir = ir._narrow(Repository)
         if ir is None:
-            raise INTF_REPOS(0, COMPLETED_NO)
+            raise INTF_REPOS(INTF_REPOS_NotAvailable, COMPLETED_NO)
         interf = ir.lookup_id(self._NP_RepositoryId)
         return interf._narrow(InterfaceDef)
     
@@ -611,7 +619,7 @@ class Object:
         return _omnipy.narrow(self, dest._NP_RepositoryId)
 
     __methods__ = ["_is_a", "_non_existent", "_is_equivalent",
-                   "_hash", "_narrow"]
+                   "_get_interface", "_hash", "_narrow"]
 
 _d_Object  = (omniORB.tcInternal.tv_objref, Object._NP_RepositoryId, "Object")
 TC_Object  = _tc_Object = omniORB.tcInternal.createTypeCode(_d_Object)
@@ -689,39 +697,42 @@ class Context (Object):
     def set_one_value(self, name, val):
         if type(name) is not types.StringType or \
            type(val) is not types.StringType:
-            raise BAD_PARAM(0, COMPLETED_NO)
+            raise BAD_PARAM(omniORB.BAD_PARAM_WrongPythonType, COMPLETED_NO)
         
         self.__values[name] = val
 
     def set_values(self, values):
         if type(values) is not types.DictType:
-            raise BAD_PARAM(0, COMPLETED_NO)
+            raise BAD_PARAM(omniORB.BAD_PARAM_WrongPythonType, COMPLETED_NO)
         
         for k,v in values.items():
             if type(k) is not types.StringType or \
                type(v) is not types.StringType:
-                raise BAD_PARAM(0, COMPLETED_NO)
+                raise BAD_PARAM(omniORB.BAD_PARAM_WrongPythonType,
+                                COMPLETED_NO)
 
         self.__values.update(values)
 
     def get_values(self, pattern, start_scope=None):
         if type(pattern) is not types.StringType:
-            raise BAD_PARAM(0, COMPLETED_NO)
+            raise BAD_PARAM(omniORB.BAD_PARAM_WrongPythonType, COMPLETED_NO)
         
         ctxt = self
         if start_scope:
             while ctxt and ctxt.__name != start_scope:
                 ctxt = ctxt.__parent
             if ctxt is None:
-                raise BAD_CONTEXT(0, COMPLETED_NO)
+                raise BAD_CONTEXT(omniORB.BAD_CONTEXT_StartingScopeNotFound,
+                                  COMPLETED_NO)
 
         r = ctxt._get_values([pattern])
-        if r == {}: raise BAD_CONTEXT(0, COMPLETED_NO)
+        if r == {}: raise BAD_CONTEXT(omniORB.BAD_CONTEXT_NoMatchingProperty,
+                                      COMPLETED_NO)
         return r
 
     def delete_values(self, pattern):
         if type(pattern) is not types.StringType or pattern == "":
-            raise BAD_PARAM(0, COMPLETED_NO)
+            raise BAD_PARAM(omniORB.BAD_PARAM_WrongPythonType, COMPLETED_NO)
 
         found = 0
 
@@ -742,7 +753,8 @@ class Context (Object):
             pass
         
         if not found:
-            raise BAD_CONTEXT(0, COMPLETED_NO)
+            raise BAD_CONTEXT(omniORB.BAD_CONTEXT_NoMatchingProperty,
+                              COMPLETED_NO)
 
     def create_child(self, ctx_name):
         return Context(ctx_name, self)
@@ -811,7 +823,7 @@ def is_nil(obj):
         return 1
     if isinstance(obj, Object):
         return 0
-    raise BAD_PARAM()
+    raise BAD_PARAM(omniORB.BAD_PARAM_WrongPythonType, COMPLETED_NO)
 
 # Fixed point constructor
 fixed = omniORB.fixed
@@ -828,9 +840,9 @@ try:
     word = ord
 except NameError:
     def wstr(c):
-        raise NO_IMPLEMENT(0, COMPLETED_NO)
+        raise NO_IMPLEMENT(omniORB.NO_IMPLEMENT_Unsupported, COMPLETED_NO)
     def word(c):
-        raise NO_IMPLEMENT(0, COMPLETED_NO)
+        raise NO_IMPLEMENT(omniORB.NO_IMPLEMENT_Unsupported, COMPLETED_NO)
 
 
 #############################################################################

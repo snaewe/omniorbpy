@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.10.2.4  2002/03/11 15:40:05  dpg1
+# _get_interface support, exception minor codes.
+#
 # Revision 1.10.2.3  2001/05/14 14:49:39  dpg1
 # Fix get_compact_typecode() and equivalent()
 #
@@ -323,7 +326,8 @@ def createTypeCode(d, parent=None):
         if type(d[1][0]) == types.StringType:
             nd = omniORB.findType(d[1][0])
             if nd is None:
-                raise CORBA.BAD_TYPECODE()
+                raise CORBA.BAD_TYPECODE(omniORB.BAD_TYPECODE_InvalidIndirection,
+                                         CORBA.COMPLETED_NO)
             d[1][0] = nd
         return createTypeCode(d[1][0], parent)
 
@@ -342,7 +346,8 @@ class TypeCode_base (CORBA.TypeCode):
             if self._d == tc._d: return CORBA.TRUE
             else:                return CORBA.FALSE
         except AttributeError:
-            raise CORBA.BAD_PARAM()
+            raise CORBA.BAD_PARAM(omniORB.BAD_PARAM_WrongPythonType,
+                                  CORBA.COMPLETED_NO)
 
     def equivalent(self, tc):
         return self.equal(tc)
@@ -837,7 +842,7 @@ def equivalentDescriptors(a, b, seen=None, a_ids=None, b_ids=None):
         return 0
 
     except AttributeError:
-        raise CORBA.BAD_PARAM()
+        raise CORBA.BAD_PARAM(BAD_PARAM_WrongPythonType, CORBA.COMPLETED_NO)
 
 
 # Functions to compact descriptors:
@@ -854,7 +859,8 @@ def getCompactDescriptor(d):
             else:
                 i[0] = seen[id(i[0])]
         except KeyError:
-            raise CORBA.BAD_TYPECODE()
+            raise CORBA.BAD_TYPECODE(BAD_TYPECODE_InvalidIndirection,
+                                     CORBA.COMPLETED_NO)
 
     return r
 

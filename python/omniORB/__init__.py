@@ -30,6 +30,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.26.2.10  2002/03/11 15:40:05  dpg1
+# _get_interface support, exception minor codes.
+#
 # Revision 1.26.2.9  2002/02/25 15:34:26  dpg1
 # Get list of keywords from keyword module.
 #
@@ -309,6 +312,8 @@ def importIRStubs():
 
 Make stubs for the Interface Repository appear in the CORBA module"""
     import omniORB.ir_idl
+    CORBA._d_Object_interface = ((),(CORBA._d_InterfaceDef,),None)
+
 
 
 # Import omniORB API functions. This provides:
@@ -479,7 +484,8 @@ class Union:
                 return self._v
             else:
                 if mem == self._def_m or self._m_to_d.has_key(mem):
-                    raise CORBA.BAD_PARAM()
+                    raise CORBA.BAD_PARAM(BAD_PARAM_WrongUnionMemberSelected,
+                                          CORBA.COMPLETED_NO)
                 else:
                     raise AttributeError(mem)
         except KeyError:
@@ -487,7 +493,8 @@ class Union:
                 return self._v
             else:
                 if self._m_to_d.has_key(mem):
-                    raise CORBA.BAD_PARAM()
+                    raise CORBA.BAD_PARAM(BAD_PARAM_WrongUnionMemberSelected,
+                                          CORBA.COMPLETED_NO)
                 else:
                     raise AttributeError(mem)
 
@@ -738,6 +745,23 @@ try:
 except ImportError:
     pass
 
+# Exception minor codes. See include/omniORB4/minorCode.h
+
+def omniORBminorCode(c):
+    return 0x41540000 | c
+
+def OMGminorCode(c):
+    return 0x4f4d0000 | c
+
+BAD_INV_ORDER_ORBHasShutdown       = OMGminorCode(4)
+BAD_CONTEXT_NoMatchingProperty     = omniORBminorCode(75)
+BAD_CONTEXT_StartingScopeNotFound  = omniORBminorCode(76)
+BAD_PARAM_WrongPythonType          = omniORBminorCode(88)
+BAD_PARAM_WrongUnionMemberSelected = omniORBminorCode(107)
+BAD_TYPECODE_InvalidIndirection    = omniORBminorCode(108)
+INTF_REPOS_NotAvailable            = omniORBminorCode(39)
+NO_IMPLEMENT_Unsupported           = omniORBminorCode(36)
+
 
 # More public things, which depend on the CORBA module
 
@@ -754,7 +778,8 @@ is set to 1, a permanent location forward is requested."""
 
     def __init__(self, objref, perm=0):
         if not isinstance(objref, CORBA.Object):
-            raise CORBA.BAD_PARAM(0,CORBA.COMPLETED_NO)
+            raise CORBA.BAD_PARAM(BAD_PARAM_WrongPythonType,
+                                  CORBA.COMPLETED_NO)
 
         self._forward = objref
         self._perm    = perm
@@ -770,6 +795,6 @@ _omnipy.registerPyObjects(omniORB)
 
 # Import the Interface Repository stubs if necessary
 if os.environ.has_key("OMNIORBPY_IMPORT_IR_STUBS"):
-    import omniORB.ir_idl
+    importIRStubs()
 
 del omniORB

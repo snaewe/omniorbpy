@@ -30,6 +30,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.1.4.1  2002/03/11 15:40:05  dpg1
+# _get_interface support, exception minor codes.
+#
 # Revision 1.1  2000/06/27 16:15:46  dpg1
 # New omniORB.URI module
 #
@@ -58,7 +61,7 @@ Convert a stringified name to a CosNaming.Name"""
     global __regex
 
     if type(sname) is not types.StringType:
-        raise CORBA.BAD_PARAM()
+        raise CORBA.BAD_PARAM(omniORB.BAD_PARAM_WrongPythonType, COMPLETED_NO)
 
     if sname == "":
         raise CosNaming.NamingContext.InvalidName()
@@ -119,7 +122,7 @@ Convert the CosNaming.Name into its stringified form."""
 
     if type(name) is not types.ListType and \
        type(name) is not types.TupleType:
-        raise CORBA.BAD_PARAM()
+        raise CORBA.BAD_PARAM(omniORB.BAD_PARAM_WrongPythonType, COMPLETED_NO)
 
     if len(name) == 0:
         raise CosNaming.NamingContext.InvalidName()
@@ -134,7 +137,7 @@ Convert the CosNaming.Name into its stringified form."""
                 parts.append(__regex.sub(r"\\\1", nc.id) + "." + \
                              __regex.sub(r"\\\1", nc.kind))
     except AttributeError:
-        raise CORBA.BAD_PARAM()
+        raise CORBA.BAD_PARAM(omniORB.BAD_PARAM_WrongPythonType, COMPLETED_NO)
 
     return string.join(parts, "/")
 
@@ -152,7 +155,7 @@ Create a valid corbaname URI from an address string and a stringified name"""
 
     if type(addr) is not types.StringType or \
        type(sname) is not types.StringType:
-        raise CORBA.BAD_PARAM()
+        raise CORBA.BAD_PARAM(omniORB.BAD_PARAM_WrongPythonType, COMPLETED_NO)
 
     if addr == "":
         raise CosNaming.NamingContextExt.InvalidAddress()

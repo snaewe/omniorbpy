@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.11  2002/03/11 15:40:04  dpg1
+// _get_interface support, exception minor codes.
+//
 // Revision 1.1.2.10  2002/01/18 15:49:44  dpg1
 // Context support. New system exception construction. Fix None call problem.
 //
@@ -463,7 +466,25 @@ Py_omniServant::_dispatch(omniCallHandle& handle)
   const char* op   = handle.operation_name();
   PyObject*   desc = PyDict_GetItemString(opdict_, (char*)op);
 
-  if (!desc) return 0; // Unknown operation name
+  if (!desc) {
+    if (omni::strMatch(op, "_interface")) {
+      // Special case: _interface call maps to _get_interface
+      //
+      // If the IR stubs have been loaded, the descriptor for the
+      // _interface call will be in the CORBA module. If they have not
+      // been loaded, there will be no descriptor, and we fall back to
+      // the ORB core version of _interface.
+
+      desc = PyObject_GetAttrString(omniPy::pyCORBAmodule,
+				    (char*)"_d_Object_interface");
+      if (desc)
+	Py_DECREF(desc);
+      else
+	PyErr_Clear();
+    }
+    if (!desc)
+      return 0; // Unknown operation name
+  }
 
   OMNIORB_ASSERT(PyTuple_Check(desc));
 
@@ -505,6 +526,10 @@ Py_omniServant::remote_dispatch(Py_omniCallDescriptor* pycd)
   const char* op     = pycd->op();
   PyObject*   method = PyObject_GetAttrString(pyservant_, (char*)op);
 
+  if (!method && omni::strMatch(op, "_interface")) {
+    PyErr_Clear();
+    method = PyObject_GetAttrString(pyservant_, (char*)"_get_interface");
+  }
   if (!method) {
     if (omniORB::trace(1)) {
       omniORB::logger l;
@@ -585,6 +610,10 @@ Py_omniServant::local_dispatch(Py_omniCallDescriptor* pycd)
   const char* op     = pycd->op();
   PyObject*   method = PyObject_GetAttrString(pyservant_, (char*)op);
 
+  if (!method && omni::strMatch(op, "_interface")) {
+    PyErr_Clear();
+    method = PyObject_GetAttrString(pyservant_, (char*)"_get_interface");
+  }
   if (!method) {
     if (omniORB::trace(1)) {
       omniORB::logger l;

@@ -1,3 +1,16 @@
+Mon Mar 11 15:39:49 GMT 2002 dpg1
+=================================
+
+- _get_interface support, exception minor codes.
+
+src/lib/omniORBpy/modules/pyServant.cc
+src/lib/omniORBpy/python/omniORB/CORBA.py
+src/lib/omniORBpy/python/omniORB/PortableServer.py
+src/lib/omniORBpy/python/omniORB/URI.py
+src/lib/omniORBpy/python/omniORB/__init__.py
+src/lib/omniORBpy/python/omniORB/tcInternal.py
+
+
 Mon Feb 25 15:32:48 GMT 2002 dpg1
 =================================
 
