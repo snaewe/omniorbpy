@@ -24,8 +24,7 @@
 #   
 #   Client to AT&T Labs Cambridge weather service
 
-weatherIOR = "IOR:0003003c0000001449444c3a77656174686572496e666f3a312e300000000001000000000000003400010000000000187777772e756b2e72657365617263682e6174742e636f6d00669800000000000c3519450765f2b96f00000001"
-
+weatherIOR    = None
 CORBAInterval = 1
 
 import Tkinter
@@ -54,7 +53,11 @@ class CORBAThread(threading.Thread):
             if arg == "-v":
                 self.verbose = 1
             else:
-                weatherIOR = argv[1]
+                weatherIOR = arg
+
+        if weatherIOR is None:
+            print "You must specify an IOR for the weather server."
+            sys.exit(1)
 
         self.wio = self.orb.string_to_object(weatherIOR)
 

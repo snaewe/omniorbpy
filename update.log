@@ -1,3 +1,13 @@
+Wed Mar 12 17:37:09 GMT 2003 dgrisby
+====================================
+
+- Update readmes, weather client.
+
+examples/random/README
+examples/weather/README
+examples/weather/weather.py
+
+
 Wed Mar 12 11:10:47 GMT 2003 dgrisby
 ====================================
 

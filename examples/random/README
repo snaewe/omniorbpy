@@ -1,10 +1,6 @@
 This little example provides an omniORBpy client to the random number
 server running on random.org.
 
-This example requires omniORB and omniORBpy from
-
-  http://www.uk.research.att.com/omniORB/
-
 To run the example, you must first compile the Python stubs from
 random.idl, with
 
