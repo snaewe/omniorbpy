@@ -1,0 +1,18 @@
+<?xml version="1.0" standalone="yes"?>
+<?xml-stylesheet type="text/xsl" href="bugfixes.xsl"?>
+
+<!-- The following bugs have been fixed since the omniORBpy 1.0     -->
+<!-- release. This file is transformed into html with bugfixes.xsl. -->
+
+<!-- Editors: make sure the content you add is well-formed XML.     -->
+
+<buglist>
+
+<bug id="1" date="Tue Jul 18 16:19:27 BST 2000" user="dpg1">
+
+  <summary>IDL compiler bug -- inheritance from typedef</summary>
+  <reported>Renzo Tomaselli</reported>
+  <link href="http://www.uk.research.att.com/omniORB/archives/2000-07/0116.html"/>
+</bug>
+
+</buglist>

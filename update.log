@@ -1,3 +1,13 @@
+Tue Jul 18 15:58:27 BST 2000 dpg1
+=================================
+
+- Bug with inheritance from typedef
+
+bugfixes.xml           -- new
+bugfixes.xsl           -- new
+omniidl_be/python.py
+
+
 Fri Jul 14 13:57:50 BST 2000 dpg1
 =================================
 
