@@ -28,6 +28,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.13  1999/11/30 10:41:20  dpg1
+# Back-ends can now have their own usage string.
+#
 # Revision 1.12  1999/11/25 11:49:31  dpg1
 # Minor version number bumped since server-side _is_a() required an
 # incompatible change.
@@ -79,6 +82,8 @@ stub_module      = ""
 module_directory = ""
 
 cpp_args = ["-D__OMNIIDL_PYTHON__"]
+usage_string = """\
+  -Wbstdout       Send generated stubs to stdout rather than a file"""
 
 #""" Uncomment this line to get syntax highlighting on the output strings
 
