@@ -30,6 +30,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.26.2.3  2001/04/10 16:35:33  dpg1
+# Minor bugs in Any coercion.
+#
 # Revision 1.26.2.2  2001/04/09 15:22:17  dpg1
 # Fixed point support.
 #
@@ -568,7 +571,7 @@ def coerceAny(v, fd, td):
 
     try:
         if fd == td:
-            return a._v
+            return v
 
         elif fd[0] == tcInternal.tv_objref:
             return _omnipy.narrow(v, td[1])
@@ -583,7 +586,7 @@ def coerceAny(v, fd, td):
             return apply(td[1], l)
 
         elif fd[0] == tcInternal.tv_union:
-            return td[1](v._d, coerceAny(v._v, fd[6][v._d], tf[6][v._d]))
+            return td[1](v._d, coerceAny(v._v, fd[6][v._d], td[6][v._d]))
 
         elif fd[0] == tcInternal.tv_enum:
             return td[3][v._v]
