@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.23  2000/04/27 11:05:26  dpg1
+# Add perform_work(), work_pending(), shutdown(), and destroy() operations.
+#
 # Revision 1.22  2000/03/29 10:15:47  dpg1
 # Exceptions now more closely follow the interface of
 # exceptions.Exception.
@@ -126,6 +129,8 @@ FALSE = 0
 
 class Exception (exceptions.Exception):
     pass
+
+OMGVMCID = 0x4f4d0000
 
 # Completion status:
 
@@ -453,6 +458,24 @@ class ORB:
     def resolve_initial_references(self, identifier):
         return _omnipy.orb_func.resolve_initial_references(self, identifier)
 
+    def work_pending(self):
+        return 0
+
+    def perform_work(self):
+        return
+
+    def run(self):
+        # *** This is broken. It should finish when shutdown() is called.
+        while 1:
+            time.sleep(60)
+
+    def shutdown(self, wait_for_completion):
+        _omnipy.orb_func.shutdown(self, wait_for_completion)
+
+    def destroy(self):
+        _omnipy.orb_func.destroy(self)
+
+
     # TypeCode operations
     def create_struct_tc(self, id, name, members):
         return tcInternal.createStructTC(id, name, members)
@@ -484,20 +507,16 @@ class ORB:
     def create_recursive_tc(self, id):
         return tcInternal.createRecursiveTC(id)
 
-    def run(self):
-#        poa = self.resolve_initial_references("RootPOA")
-#        _omnipy.implIsReady(poa, 0, 1)
-        while 1:
-            time.sleep(60)
 
     __methods__ = ["string_to_object", "object_to_string",
                    "list_initial_services", "resolve_initial_references",
+                   "work_pending", "perform_work", "run",
+                   "shutdown", "destroy",
                    "create_struct_tc", "create_union_tc",
                    "create_enum_tc", "create_alias_tc",
                    "create_exception_tc", "create_interface_tc",
                    "create_string_tc", "create_sequence_tc",
-                   "create_array_tc", "create_recursive_tc",
-                   "run"]
+                   "create_array_tc", "create_recursive_tc"]
 
     class InvalidName (UserException):
         _NP_RepositoryId = "IDL:omg.org/CORBA/ORB/InvalidName:1.0"
