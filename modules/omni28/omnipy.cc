@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.18  1999/10/01 11:07:21  dpg1
+// Error reporting if up-call raises an unexpected exception.
+//
 // Revision 1.17  1999/09/29 15:46:51  dpg1
 // lockWithNewThreadState now creates a dummy threading.Thread object so
 // threading doesn't get upset that it's not there. Very dependent on the
@@ -137,11 +140,12 @@ extern "C" {
       return NULL;
 
     if (maj != OMNIPY_MAJOR) {
-      omniORB::log << "***\n*** WARNING! omnipy module version "
+      omniORB::log << "omniORBpy: ***\n"
+		   << "omniORBpy: *** WARNING! omnipy module version "
 		   << OMNIPY_MAJOR << "." << OMNIPY_MINOR
 		   << ", stubs in " << mod << " are version "
-		   << maj << "." << min
-		   << "\n***\n";
+		   << maj << "." << min << "\n"
+		   << "omniORBpy: ***\n";
       omniORB::log.flush();
     }
     Py_INCREF(Py_None);
