@@ -7,9 +7,8 @@ The bindings adhere to the proposed IDL to Python mapping which you
 may find at ftp://ftp.omg.org/pub/docs/orbos/99-08-02.pdf. There are a
 number of errors in the mapping document, which are outlined below.
 
-omniORBpy is currently available for Linux and Solaris, and should be
-reasonably easy to port to any other Unix. Windows NT support will be
-available soon.
+omniORBpy is currently available for Linux, Solaris, and Windows NT.
+It should be reasonably easy to port to any other Unix.
 
 The package is believed to be reasonably stable, but there are
 probably still some latent bugs.
@@ -23,7 +22,7 @@ Building
 
 You must install the omniORBpy source in the $TOP/src/lib directory of
 a working omniORB 2.8 tree. Then, in the $TOP/src/lib/omniORBpy
-directory, simple do a gnumake export.
+directory, simply do a gnumake export.
 
 
 Using omniORBpy
@@ -37,15 +36,17 @@ variable, like:
 where $TOP is the root of your omniORB tree and $FARCH is the platform
 name you selected in config.mk.
 
-You should also have $TOP/bin/scripts in your PATH, so you can run the
-IDL compiler, omniidlpy.
+On Unix platforms, you should also have $TOP/bin/scripts in your PATH,
+so you can run the IDL compiler, omniidl. On NT, omniidl is an
+executable which lives in $TOP/bin/x86_nt_4.0, so you should place
+that on your path.
 
 omniORBpy requires Python version 1.5.2. Be careful not to use
 /usr/bin/python on RedHat 5.2 machines, since that is Python 1.5.1.
 
 If you have been using Fnorb, make sure you remove any of its stub
-files before using omniidlpy in a particular directory. If you don't,
-omniidlpy will refuse to modify the stub files.
+files before using omniidl in a particular directory. If you don't,
+omniidl will refuse to modify the stub files.
 
 
 A brief tutorial
