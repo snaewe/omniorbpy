@@ -1,3 +1,28 @@
+Mon Jun  5 19:07:01 BST 2000 dpg1
+=================================
+
+- omniidl updates:
+
+  - support for __omni_pragma
+  - comments can be attached to subsequent declarations (with -K)
+  - better idea of most recent decl in operation declarations
+
+omniidl/cxx/idl.ll
+omniidl/cxx/idl.yy
+omniidl/cxx/idlast.cc
+omniidl/cxx/idlast.h
+omniidl/cxx/idlconfig.cc
+omniidl/cxx/idlconfig.h
+omniidl/cxx/idlpython.cc
+omniidl/cxx/lex.yy.cc
+omniidl/cxx/y.tab.cc
+omniidl/python/omniidl/main.py
+
+  - minor makefile fixes propogated from omniORB 3
+
+omniidl/cxx/dir.mk
+
+
 Fri Jun  2 15:24:13 BST 2000 dpg1
 =================================
 
