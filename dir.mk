@@ -1,8 +1,8 @@
-SUBDIRS = modules python omniidl_be
-
 ifeq ($(OMNIORB_VERSION),)
-SUBDIRS += omniidl
+SUBDIRS = omniidl
 endif
+
+SUBDIRS += modules omniidl_be python
 
 all::
 	@$(MakeSubdirs)
