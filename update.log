@@ -1,3 +1,11 @@
+Thu Jul 29 12:36:06 BST 2004 dgrisby
+====================================
+
+- Bump omniORB core version number.
+
+mk/beforeauto.mk.in
+
+
 Wed Jul 28 14:35:21 BST 2004 dgrisby
 ====================================
 
