@@ -200,7 +200,7 @@ PYLIBDIR  := $(PYPREFIX)/libs
 PYLIB     := python$(subst .,,$(PYVERSION)).lib
 
 DIR_CPPFLAGS += -I$(PYINCDIR) -I$(PYINCDIR)/python$(PYVERSION) \
-                -DPYTHON_INCLUDE="<Python.h>" -DPYTHON_THREAD_INC="<pythread.h>
+                -DPYTHON_INCLUDE="<Python.h>" -DPYTHON_THREAD_INC="<pythread.h>"
 
 PYLIBPATH = $(patsubst %,-libpath:%,$(PYLIBDIR))
 
