@@ -40,7 +40,25 @@ OBJS =    omnipy.o \
 	  pyContext.o
 
 
-DIR_CPPFLAGS += $(patsubst %,-I%/src/lib/omniORB/include,$(IMPORT_TREES))
+DIR_CPPFLAGS += $(patsubst %,-I%/include,$(OMNIORB_ROOT))
+DIR_CPPFLAGS += $(patsubst %,-I%/include/omniORB4/internal,$(OMNIORB_ROOT))
+DIR_CPPFLAGS += $(patsubst %,-I%/include/omniORB4/internal,$(IMPORT_TREES))
+
+
+all:: pydistdate.hh
+
+pydistdate.hh: ../update.log
+	$(PYTHON) $(BASE_OMNI_TREE)/bin/scripts/distdate.py OMNIORBPY <$^ >pydistdate.hh
+
+export:: pydistdate.hh
+	@(file=$^; dir="$(EXPORT_TREE)/$(INCDIR)/omniORB4"; \
+	 $(ExportFileToDir))
+
+ifdef INSTALLTARGET
+install:: pydistdate.hh
+	@(file=$^; dir="$(INSTALLINCDIR)/omniORB4"; \
+	 $(ExportFileToDir))
+endif
 
 
 #############################################################################
@@ -59,6 +77,46 @@ DIR_CPPFLAGS += -I$(PYINCDIR) -DPYTHON_INCLUDE=$(PYINCFILE) -DPYTHON_THREAD_INC=
 DIR_CPPFLAGS += $(CORBA_CPPFLAGS)
 
 endif
+
+ifeq ($(platform),autoconf)
+
+namespec := _omnipymodule _ $(OMNIPY_MAJOR) $(OMNIPY_MINOR)
+
+SharedLibraryFullNameTemplate = $$1$$2.$(SHAREDLIB_SUFFIX).$$3.$$4
+SharedLibrarySoNameTemplate   = $$1$$2.$(SHAREDLIB_SUFFIX).$$3
+SharedLibraryLibNameTemplate  = $$1$$2.$(SHAREDLIB_SUFFIX)
+
+ifdef PythonLibraryPlatformLinkFlagsTemplate
+SharedLibraryPlatformLinkFlagsTemplate = $(PythonLibraryPlatformLinkFlagsTemplate)
+endif
+
+shlib := $(shell $(SharedLibraryFullName) $(namespec))
+
+DIR_CPPFLAGS += $(SHAREDLIB_CPPFLAGS)
+
+$(shlib): $(OBJS)
+	@(namespec="$(namespec)"; $(MakeCXXSharedLibrary))
+
+all:: $(shlib)
+
+export:: $(shlib)
+	@(namespec="$(namespec)"; $(ExportSharedLibrary))
+
+ifdef INSTALLTARGET
+install:: $(shlib)
+	@(dir="$(INSTALLPYEXECDIR)"; namespec="$(namespec)"; \
+          $(ExportSharedLibraryToDir))
+endif
+
+clean::
+	$(RM) *.o
+	(dir=.; $(CleanSharedLibrary))
+
+veryclean::
+	$(RM) *.o
+	(dir=.; $(CleanSharedLibrary))
+
+else
 
 #############################################################################
 #   Make rules for Linux                                                    #
@@ -433,4 +491,6 @@ export:: $(lib)
          )
 
 endif
+endif
+
 endif

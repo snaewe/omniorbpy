@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.18  2002/02/18 18:48:13  dpg1
+// Autoconf support.
+//
 // Revision 1.1.2.17  2002/01/18 15:49:44  dpg1
 // Context support. New system exception construction. Fix None call problem.
 //
@@ -88,7 +91,7 @@
 #define DLL_EXPORT
 #endif
 
-#include <omniORB4/pydistdate.hh>
+#include "pydistdate.hh"
 #include <omnipy.h>
 #include <pyThreadCache.h>
 #include <initialiser.h>
