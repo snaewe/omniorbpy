@@ -2824,92 +2824,6 @@ echo "${ECHO_T}$am_cv_python_platform" >&6
   pkgpyexecdir=\${pyexecdir}/$PACKAGE
 
 
-# Extract the first word of "omkdepend", so it can be a program name with args.
-set dummy omkdepend; ac_word=$2
-echo "$as_me:$LINENO: checking for $ac_word" >&5
-echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
-if test "${ac_cv_path_OMKDEPEND+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  case $OMKDEPEND in
-  [\\/]* | ?:[\\/]*)
-  ac_cv_path_OMKDEPEND="$OMKDEPEND" # Let the user override the test with a path.
-  ;;
-  *)
-  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH:$OMNIORB_ROOT/bin:/usr/local/bin:/usr/bin
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-  for ac_exec_ext in '' $ac_executable_extensions; do
-  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_path_OMKDEPEND="$as_dir/$ac_word$ac_exec_ext"
-    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-done
-
-  test -z "$ac_cv_path_OMKDEPEND" && ac_cv_path_OMKDEPEND="omkdepend"
-  ;;
-esac
-fi
-OMKDEPEND=$ac_cv_path_OMKDEPEND
-
-if test -n "$OMKDEPEND"; then
-  echo "$as_me:$LINENO: result: $OMKDEPEND" >&5
-echo "${ECHO_T}$OMKDEPEND" >&6
-else
-  echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
-fi
-
-for ac_prog in omkdirhier mkdirhier
-do
-  # Extract the first word of "$ac_prog", so it can be a program name with args.
-set dummy $ac_prog; ac_word=$2
-echo "$as_me:$LINENO: checking for $ac_word" >&5
-echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
-if test "${ac_cv_path_MKDIRHIER+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  case $MKDIRHIER in
-  [\\/]* | ?:[\\/]*)
-  ac_cv_path_MKDIRHIER="$MKDIRHIER" # Let the user override the test with a path.
-  ;;
-  *)
-  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in ./bin/scripts:$PATH:$OMNIORB_ROOT/bin:/usr/local/bin:/usr/bin
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-  for ac_exec_ext in '' $ac_executable_extensions; do
-  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_path_MKDIRHIER="$as_dir/$ac_word$ac_exec_ext"
-    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-done
-
-  ;;
-esac
-fi
-MKDIRHIER=$ac_cv_path_MKDIRHIER
-
-if test -n "$MKDIRHIER"; then
-  echo "$as_me:$LINENO: result: $MKDIRHIER" >&5
-echo "${ECHO_T}$MKDIRHIER" >&6
-else
-  echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
-fi
-
-  test -n "$MKDIRHIER" && break
-done
-test -n "$MKDIRHIER" || MKDIRHIER="omkdirhier"
-
-
 ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -3005,6 +2919,102 @@ if test "$open_ssl_root" = "no"; then
 fi
 OPEN_SSL_ROOT=$open_ssl_root
 
+
+
+
+
+abssrcdir=`cd $srcdir; pwd`
+searchpath=$abssrcdir/bin/scripts:$OMNIORB_ROOT/bin:/usr/local/bin:/usr/bin:$PATH
+
+for ac_prog in omkdepend
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
+if test "${ac_cv_path_OMKDEPEND+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  case $OMKDEPEND in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_OMKDEPEND="$OMKDEPEND" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $searchpath
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_OMKDEPEND="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+
+  ;;
+esac
+fi
+OMKDEPEND=$ac_cv_path_OMKDEPEND
+
+if test -n "$OMKDEPEND"; then
+  echo "$as_me:$LINENO: result: $OMKDEPEND" >&5
+echo "${ECHO_T}$OMKDEPEND" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
+  test -n "$OMKDEPEND" && break
+done
+test -n "$OMKDEPEND" || OMKDEPEND="omkdepend"
+
+for ac_prog in omkdirhier mkdirhier
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
+if test "${ac_cv_path_MKDIRHIER+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  case $MKDIRHIER in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_MKDIRHIER="$MKDIRHIER" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $searchpath
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_MKDIRHIER="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+
+  ;;
+esac
+fi
+MKDIRHIER=$ac_cv_path_MKDIRHIER
+
+if test -n "$MKDIRHIER"; then
+  echo "$as_me:$LINENO: result: $MKDIRHIER" >&5
+echo "${ECHO_T}$MKDIRHIER" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
+  test -n "$MKDIRHIER" && break
+done
+test -n "$MKDIRHIER" || MKDIRHIER="omkdirhier"
 
 
 
@@ -3723,10 +3733,10 @@ s,@pythondir@,$pythondir,;t t
 s,@pkgpythondir@,$pkgpythondir,;t t
 s,@pyexecdir@,$pyexecdir,;t t
 s,@pkgpyexecdir@,$pkgpyexecdir,;t t
-s,@OMKDEPEND@,$OMKDEPEND,;t t
-s,@MKDIRHIER@,$MKDIRHIER,;t t
 s,@OMNIORB_ROOT@,$OMNIORB_ROOT,;t t
 s,@OPEN_SSL_ROOT@,$OPEN_SSL_ROOT,;t t
+s,@OMKDEPEND@,$OMKDEPEND,;t t
+s,@MKDIRHIER@,$MKDIRHIER,;t t
 s,@COMPILER_NAME@,$COMPILER_NAME,;t t
 s,@PLATFORM_NAME@,$PLATFORM_NAME,;t t
 s,@OSVERSION@,$OSVERSION,;t t

@@ -1,3 +1,22 @@
+Fri Mar 14 15:22:03 GMT 2003 dgrisby
+====================================
+
+- I lied. That wasn't really the 2.1 release.
+- Use Python 1.5.2 sequence length function.
+
+modules/pyObjectRef.cc
+
+- Remove const char* -> char* warnings.
+
+modules/pyContext.cc
+modules/pyFixed.cc
+
+- Properly find omkdepend.
+
+configure
+configure.ac
+
+
 Fri Mar 14 11:27:17 GMT 2003 dgrisby
 ====================================
 

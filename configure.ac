@@ -19,11 +19,6 @@ AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 
 AM_PATH_PYTHON
-AC_PATH_PROG(OMKDEPEND, omkdepend, omkdepend,
-             $PATH:$OMNIORB_ROOT/bin:/usr/local/bin:/usr/bin)
-AC_PATH_PROGS(MKDIRHIER, omkdirhier mkdirhier, omkdirhier,
-             ./bin/scripts:$PATH:$OMNIORB_ROOT/bin:/usr/local/bin:/usr/bin)
-
 AC_LANG(C++)
 
 
@@ -31,6 +26,15 @@ dnl ** Libraries
 
 OMNI_OMNIORB_ROOT
 OMNI_OPENSSL_ROOT
+
+
+dnl ** More programs
+
+abssrcdir=`cd $srcdir; pwd`
+searchpath=$abssrcdir/bin/scripts:$OMNIORB_ROOT/bin:/usr/local/bin:/usr/bin:$PATH
+
+AC_PATH_PROGS(OMKDEPEND, omkdepend, omkdepend,$searchpath)
+AC_PATH_PROGS(MKDIRHIER, omkdirhier mkdirhier, omkdirhier, $searchpath)
 
 
 dnl ** Compiler name
