@@ -1301,6 +1301,29 @@ def doTests(orb, poa, io):
     else:  tfail()
 
 
+    tstart("Fixed")
+
+    ok = 1
+    f = TypeTest.F1(123456789)
+    r = io.complex40(f)
+    if r == f:
+        tresult("+")
+    else:
+        ok = 0
+        tresult("-")
+        
+    try:
+        f  = CORBA.fixed("123456")
+        r  = io.complex40(f)
+        ok = 0
+        tresult("-")
+    except CORBA.DATA_CONVERSION:
+        tresult("+")
+
+    if ok: tpass()
+    else:  tfail()
+
+
     tstart("Exceptions")
 
     ok = 1
@@ -1416,6 +1439,7 @@ def doTests(orb, poa, io):
     io.tc1(TypeTest._tc_X1);  tresult("+")
     io.tc1(TypeTest._tc_X2);  tresult("+")
     io.tc1(TypeTest._tc_I);   tresult("+")
+    io.tc1(TypeTest._tc_F1);  tresult("+")
 
     if ok: tpass()
     else:  tfail()
@@ -1520,7 +1544,6 @@ if __name__ == "__main__":
 
     if "-r" in sys.argv:
         print "\nRepeating tests..."
-        global output
         output = 0
         while 1:
             doTests(orb, poa, io)

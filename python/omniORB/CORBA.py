@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.28.2.5  2001/04/10 11:11:14  dpg1
+# TypeCode support and tests for Fixed point.
+#
 # Revision 1.28.2.4  2001/04/09 15:22:17  dpg1
 # Fixed point support.
 #
@@ -379,9 +382,10 @@ class TypeCode:
     def length(self):                   return self._t.length()
     def content_type(self):             return self._t.content_type()
 
-    # Things for types we don't support:
     def fixed_digits(self):             return self._t.fixed_digits()
     def fixed_scale(self):              return self._t.fixed_scale()
+
+    # Things for types we don't support:
     def member_visibility(self, index): return self._t.member_visibility(index)
     def type_modifier(self):            return self._t.type_modifier()
     def concrete_base_type(self):       return self._t.concrete_base_type()

@@ -84,6 +84,7 @@ class I_i (TypeTest__POA.I):
     def complex37(self, a): return a
     def complex38(self, a): return a
     def complex39(self, a): return a
+    def complex40(self, a): return a
 
     def except1(self):
         raise TypeTest.X1()

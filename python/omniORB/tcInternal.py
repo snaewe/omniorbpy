@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.10.2.2  2001/04/10 11:11:15  dpg1
+# TypeCode support and tests for Fixed point.
+#
 # Revision 1.10.2.1  2000/11/01 15:29:01  dpg1
 # Support for forward-declared structs and unions
 # RepoIds in indirections are now resolved at the time of use
@@ -268,7 +271,11 @@ def createTypeCode(d, parent=None):
     elif k == tv_longlong:  return TypeCode_empty(d)
     elif k == tv_ulonglong: return TypeCode_empty(d)
     elif k == tv_longdouble:return TypeCode_empty(d)
+    elif k == tv_wchar:     return TypeCode_empty(d)
+
     elif k == tv_string:    return TypeCode_string(d)
+    elif k == tv_wstring:   return TypeCode_wstring(d)
+    elif k == tv_fixed:     return TypeCode_fixed(d)
 
     elif k == tv_objref:
         tc = omniORB.findTypeCode(d[1])
@@ -356,9 +363,10 @@ class TypeCode_base (CORBA.TypeCode):
     def length(self):                   raise CORBA.TypeCode.BadKind()
     def content_type(self):             raise CORBA.TypeCode.BadKind()
 
-    # Things for types we don't support:
     def fixed_digits(self):             raise CORBA.TypeCode.BadKind()
     def fixed_scale(self):              raise CORBA.TypeCode.BadKind()
+
+    # Things for types we don't support:
     def member_visibility(self, index): raise CORBA.TypeCode.BadKind()
     def type_modifier(self):            raise CORBA.TypeCode.BadKind()
     def concrete_base_type(self):       raise CORBA.TypeCode.BadKind()
@@ -403,6 +411,33 @@ class TypeCode_string (TypeCode_base):
 
     def length(self):
         return self._d[1]
+
+# wstring:
+class TypeCode_wstring (TypeCode_base):
+    def __init__(self, desc):
+        if type(desc) is not types.TupleType or \
+           desc[0] != tv_wstring:
+            raise CORBA.INTERNAL()
+        self._d = desc
+        self._k = CORBA.tk_wstring
+
+    def length(self):
+        return self._d[1]
+
+# fixed:
+class TypeCode_fixed (TypeCode_base):
+    def __init__(self, desc):
+        if type(desc) is not types.TupleType or \
+           desc[0] != tv_fixed:
+            raise CORBA.INTERNAL()
+        self._d = desc
+        self._k = CORBA.tk_fixed
+
+    def fixed_digits(self):
+        return self._d[1]
+
+    def fixed_scale(self):
+        return self._d[2]
 
 
 # objref:

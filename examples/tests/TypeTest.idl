@@ -71,6 +71,9 @@ module TypeTest {
   typedef octet          A9[5];
   typedef string         A10[5];
 
+  struct S2;
+  typedef sequence <S2> S2s;
+
   struct S2 {
     S1     a;
     U1     b;
@@ -95,6 +98,8 @@ module TypeTest {
     long   a;
     string b;
   };
+
+  typedef fixed<10,5> F1;
 
   interface I {
 
@@ -168,6 +173,9 @@ module TypeTest {
     S2         complex37(in S2         a);
     S3         complex38(in S3         a);
     Q10        complex39(in Q10        a);
+
+    // Fixed
+    F1         complex40(in F1         a);
 
     // Exceptions
     void except1()          raises (X1);

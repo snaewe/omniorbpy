@@ -1,3 +1,16 @@
+Tue Apr 10 12:09:22 BST 2001 dpg1
+=================================
+
+- TypeCode support and tests for Fixed point.
+
+examples/tests/TypeTest.idl
+examples/tests/tclient.py
+examples/tests/tserver.py
+modules/pyTypeCode.cc
+python/omniORB/CORBA.py
+python/omniORB/tcInternal.py
+
+
 Mon Apr  9 17:25:49 BST 2001 dpg1
 =================================
 

@@ -29,6 +29,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.2.8  2001/04/10 11:11:14  dpg1
+// TypeCode support and tests for Fixed point.
+//
 // Revision 1.1.2.7  2001/04/09 15:52:07  dpg1
 // Bring up-to-date with omnipy1_develop.
 //
@@ -217,6 +220,7 @@ r_marshalTypeCode(cdrStream&           stream,
     case CORBA::tk_longlong:
     case CORBA::tk_ulonglong:
 #endif
+    case CORBA::tk_wchar:
       // Nothing more to be sent
       break;
 
@@ -226,6 +230,27 @@ r_marshalTypeCode(cdrStream&           stream,
 	t_o = PyTuple_GET_ITEM(d_o, 1); OMNIORB_ASSERT(PyInt_Check(t_o));
 	CORBA::ULong len = PyInt_AS_LONG(t_o);
 	len >>= stream;
+      }
+      break;
+
+    case CORBA::tk_wstring:
+      {
+	// Send max length
+	t_o = PyTuple_GET_ITEM(d_o, 1); OMNIORB_ASSERT(PyInt_Check(t_o));
+	CORBA::ULong len = PyInt_AS_LONG(t_o);
+	len >>= stream;
+      }
+      break;
+
+    case CORBA::tk_fixed:
+      {
+	// Send digits followed by scale
+	t_o = PyTuple_GET_ITEM(d_o, 1); OMNIORB_ASSERT(PyInt_Check(t_o));
+	CORBA::UShort digits = PyInt_AS_LONG(t_o);
+	t_o = PyTuple_GET_ITEM(d_o, 2); OMNIORB_ASSERT(PyInt_Check(t_o));
+	CORBA::Short scale = PyInt_AS_LONG(t_o);
+	digits >>= stream;
+	scale  >>= stream;
       }
       break;
 
@@ -593,6 +618,7 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
   case CORBA::tk_longlong:
   case CORBA::tk_ulonglong:
 #endif
+  case CORBA::tk_wchar:
     {
       d_o = PyInt_FromLong(tk); odm.add(d_o, tc_offset);
     }
@@ -606,6 +632,30 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
       CORBA::ULong len; len <<= stream;
 
       PyTuple_SET_ITEM(d_o, 1, PyInt_FromLong(len));
+    }
+    break;
+
+  case CORBA::tk_wstring:
+    {
+      d_o = PyTuple_New(2); odm.add(d_o, tc_offset);
+      PyTuple_SET_ITEM(d_o, 0, PyInt_FromLong(tk));
+
+      CORBA::ULong len; len <<= stream;
+
+      PyTuple_SET_ITEM(d_o, 1, PyInt_FromLong(len));
+    }
+    break;
+
+  case CORBA::tk_fixed:
+    {
+      d_o = PyTuple_New(3); odm.add(d_o, tc_offset);
+      PyTuple_SET_ITEM(d_o, 0, PyInt_FromLong(tk));
+
+      CORBA::UShort digits; digits <<= stream;
+      CORBA::Short  scale;  scale  <<= stream;
+
+      PyTuple_SET_ITEM(d_o, 1, PyInt_FromLong(digits));
+      PyTuple_SET_ITEM(d_o, 2, PyInt_FromLong(scale));
     }
     break;
 
