@@ -30,8 +30,12 @@
 
 # $Id$
 # $Log$
-# Revision 1.28  2001/06/18 09:40:01  dpg1
-# 1.4 release.
+# Revision 1.29  2001/06/21 14:11:20  dpg1
+# This really is the 1.4 release.
+#
+# Revision 1.24.2.5  2001/06/21 09:36:37  dpg1
+# New "inline" argument to importIDL(). objref classes no longer
+# needlessly call base class constructors.
 #
 # Revision 1.24.2.4  2001/06/12 10:56:02  dpg1
 # Scoping bug in stub code.
@@ -171,13 +175,17 @@ e.g. omniidlArguments(["-I/my/include", "-DMY_DEFINE"])"""
 
 # Import an IDL file by forking the IDL compiler and processing the
 # output
-def importIDL(idlname, args=None):
-    """importIDL(filename [, args ]) -> tuple
+def importIDL(idlname, args=None, inline=1):
+    """importIDL(filename [, args ] [, inline ]) -> tuple
 
 Run the IDL compiler on the specified IDL file, and import the
 resulting stubs. If args is present, it must contain a list of strings
 used as arguments to omniidl. If args is not present, uses the default
 set with omniidlArguments().
+
+Normally imports the definitions for #included files as well as the
+main file. Set inline to 0 to only import definitions for the main
+file.
 
 Returns a tuple of Python module names corresponding to the IDL module
 names declared in the file. The modules can be accessed through
@@ -187,10 +195,14 @@ sys.modules."""
         raise ImportError("File " + idlname + " does not exist")
 
     if args is None: args = _omniidl_args
+    if inline:
+        inline_str = "-Wbinline "
+    else:
+        inline_str = ""
 
     argstr  = string.join(args, " ")
     modname = string.replace(os.path.basename(idlname), ".", "_")
-    pipe    = os.popen("omniidl -q -bpython -Wbstdout,inline " + \
+    pipe    = os.popen("omniidl -q -bpython -Wbstdout " + inline_str + \
                        argstr + " " + idlname)
     try:
         tempname  = tempfile.mktemp()
@@ -217,13 +229,17 @@ sys.modules."""
         del sys.modules[modname]
         raise ImportError("Invalid output from omniidl")
 
-def importIDLString(str, args=None):
-    """importIDLString(string [, args ]) -> tuple
+def importIDLString(str, args=None, inline=1):
+    """importIDLString(string [, args ] [, inline ]) -> tuple
 
 Run the IDL compiler on the given string, and import the resulting
 stubs. If args is present, it must contain a list of strings used as
 arguments to omniidl. If args is not present, uses the default set
 with omniidlArguments().
+
+Normally imports the definitions for #included files as well as the
+main file. Set inline to 0 to only import definitions for the main
+file.
 
 Returns a tuple of Python module names corresponding to the IDL module
 names declared in the file. The modules can be accessed through
@@ -234,7 +250,7 @@ sys.modules."""
     tf.write(str)
     tf.close()
     try:
-        ret = importIDL(tfn, args)
+        ret = importIDL(tfn, args, inline)
     finally:
         os.remove(tfn)
     return ret

@@ -8,6 +8,18 @@
 
 <buglist version="1.3">
 
+<bug id="7" date="Thu Jun 21 10:26:24 BST 2001" user="dpg1">
+  <summary>Problems with omniORB.importIDL()</summary>
+  <reported>Joshua Reynolds</reported>
+  <link
+  href="http://www.uk.research.att.com/omniORB/archives/2001-06/0155.html"/>
+  <text>
+  Calling base class constructors in objref classes is unnecessary;
+  removing the calls prevents the problem. importIDL() now has an
+  "inline" flag, so unnecessary re-definitions can be avoided too.
+  </text>
+</bug>
+
 <bug id="6" date="Tue Jun 12 11:19:56 BST 2001" user="dpg1">
 
   <summary>Invalid generated code with complex IDL scoping</summary>
