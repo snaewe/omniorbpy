@@ -28,6 +28,10 @@
 
 // $Id$
 // $Log$
+// Revision 1.23.2.1  2000/08/14 16:09:17  dpg1
+// Error message now says "Could not open..." rather than "Could not
+// find..." when Python imports fail.
+//
 // Revision 1.23  2000/06/20 13:55:58  dpg1
 // omniidl now keeps the C++ tree until after the back-ends have run.
 // This means that back-ends can be C++ extension modules.
@@ -1369,7 +1373,7 @@ main(int argc, char** argv)
 "except ImportError:\n"
 "    sys.stderr.write('\\n\\n')\n"
 "    sys.stderr.write('omniidl: ERROR!\\n\\n')\n"
-"    sys.stderr.write('omniidl: Could not find Python files for IDL compiler\\n')\n"
+"    sys.stderr.write('omniidl: Could not open Python files for IDL compiler\\n')\n"
 "    sys.stderr.write('omniidl: Please put them in directory ' + \\\n"
 "                     (pylibdir or binarchdir) + '\\n')\n"
 "    sys.stderr.write('omniidl: (or set the PYTHONPATH environment variable)\\n')\n"
