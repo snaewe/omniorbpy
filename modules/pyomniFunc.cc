@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.12  2003/09/01 09:53:39  dgrisby
+// Avoid deadlock in dummy thread deletion.
+//
 // Revision 1.1.2.11  2002/11/27 00:18:25  dgrisby
 // Per thread / per objref timeouts.
 //
@@ -215,6 +218,7 @@ extern "C" {
   static void removeDummyOmniThread(void* vself) {
     if ((omni_thread*)vself == omni_thread::self()) {
       omniORB::logs(10, "Remove dummy omni thread.");
+      omniPy::InterpreterUnlocker _u;
       omni_thread::release_dummy();
     }
     else
