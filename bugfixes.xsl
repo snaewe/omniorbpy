@@ -10,7 +10,7 @@
   <html>
   <head>
   <title>omniORBpy bugs</title>
-  <link REL="stylesheet" HREF="../styles.css" TYPE="text/css"/>
+  <link REL="stylesheet" HREF="../../styles.css" TYPE="text/css"/>
   </head>
   <body background="../images/sidebarbg.gif">
 
