@@ -29,6 +29,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.2.2  2003/03/14 15:29:22  dgrisby
+// Remove const char* -> char* warnings.
+//
 // Revision 1.1.2.1  2002/01/18 15:49:44  dpg1
 // Context support. New system exception construction. Fix None call problem.
 //
@@ -83,7 +86,8 @@ omniPy::validateContext(PyObject* c_o, CORBA::CompletionStatus compstatus)
 void
 omniPy::marshalContext(cdrStream& stream, PyObject* p_o, PyObject* c_o)
 {
-  PyObject* values = PyObject_CallMethod(c_o, "_get_values", "O", p_o);
+  PyObject* values = PyObject_CallMethod(c_o, (char*)"_get_values",
+					 (char*)"O", p_o);
   if (values) {
     PyObject* items = PyDict_Items(values);
     CORBA::ULong count = PyList_GET_SIZE(items);
@@ -157,7 +161,8 @@ omniPy::unmarshalContext(cdrStream& stream)
 PyObject*
 omniPy::filterContext(PyObject* p_o, PyObject* c_o)
 {
-  PyObject* values = PyObject_CallMethod(c_o, "_get_values", "O", p_o);
+  PyObject* values = PyObject_CallMethod(c_o, (char*)"_get_values",
+					 (char*)"O", p_o);
 
   if (values) {
     PyObject* r = PyObject_CallFunction(omniPy::pyCORBAContextClass,

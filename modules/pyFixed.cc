@@ -29,6 +29,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.2.6  2003/03/14 15:29:22  dgrisby
+// Remove const char* -> char* warnings.
+//
 // Revision 1.1.2.5  2003/03/02 19:12:56  dgrisby
 // Remove unnecessary #include.
 //
@@ -229,11 +232,11 @@ extern "C" {
   }
 
   static PyMethodDef fixed_methods[] = {
-    {"value",     (PyCFunction)fixed_value},
-    {"precision", (PyCFunction)fixed_precision},
-    {"decimals",  (PyCFunction)fixed_decimals},
-    {"round",     (PyCFunction)fixed_round,    METH_VARARGS},
-    {"truncate",  (PyCFunction)fixed_truncate, METH_VARARGS},
+    {(char*)"value",     (PyCFunction)fixed_value},
+    {(char*)"precision", (PyCFunction)fixed_precision},
+    {(char*)"decimals",  (PyCFunction)fixed_decimals},
+    {(char*)"round",     (PyCFunction)fixed_round,    METH_VARARGS},
+    {(char*)"truncate",  (PyCFunction)fixed_truncate, METH_VARARGS},
     {0,0}
   };
 
