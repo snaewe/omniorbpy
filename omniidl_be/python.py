@@ -28,6 +28,10 @@
 
 # $Id$
 # $Log$
+# Revision 1.8  1999/11/11 15:55:29  dpg1
+# Python back-end interface now supports valuetype declarations.
+# Back-ends still don't support them, though.
+#
 # Revision 1.7  1999/11/10 16:08:22  dpg1
 # Some types weren't registered properly.
 #
@@ -1101,6 +1105,11 @@ class PythonVisitor:
                         ename   = ename,
                         repoId  = node.repoId(),
                         eitems  = eitems)
+
+    def visitNative(self, node):
+        if self.handleImported(node): return
+
+        print "Warning: ignoring declaration of native", node.identifier()
 
 
 def operationToDescriptors(op):
