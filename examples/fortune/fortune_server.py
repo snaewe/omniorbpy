@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import sys, os
-from omniORB import CORBA, PortableServer
+import CORBA, PortableServer
 import Fortune, Fortune__POA
 
 FORTUNE_PATH = "/usr/games/fortune"
@@ -15,14 +15,16 @@ class CookieServer_i (Fortune__POA.CookieServer):
             raise Fortune.Failure("popen of fortune failed")
         return cookie
 
-orb = CORBA.ORB_init(sys.argv + ["-ORBendpoint", "giop:tcp::14285"])
+# By default, listen on port 2809, the default corbaloc port, so
+# clients can access the object with corbaloc::host.name/fortune
+if "-ORBendPoint" not in sys.argv:
+    sys.argv.extend(["-ORBendPoint", "giop:tcp::2809"])
+
+orb = CORBA.ORB_init(sys.argv)
 poa = orb.resolve_initial_references("omniINSPOA")
 
 servant = CookieServer_i()
 poa.activate_object_with_id("fortune", servant)
-
-obj = servant._this()
-print orb.object_to_string(obj)
 
 poa._get_the_POAManager().activate()
 orb.run()
