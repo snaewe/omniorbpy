@@ -1,3 +1,14 @@
+Wed Sep  6 12:13:30 BST 2000 dpg1
+=================================
+
+- Minor changes to support Python versions above 1.5.2
+
+external_merge/README.Python -- new 
+modules/dir.mk
+modules/omni28/omnipy28.h
+modules/omni30/omnipy30.h
+
+
 Fri Sep  1 15:07:45 BST 2000 dpg1
 =================================
 

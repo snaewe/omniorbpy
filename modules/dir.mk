@@ -81,9 +81,11 @@ DIR_CPPFLAGS += $(patsubst %,-I%/src/lib/omniORB2/orbcore,$(IMPORT_TREES))
 ifdef UnixPlatform
 #CXXDEBUGFLAGS = -g
 
-PYPREFIX := $(shell python -c 'import sys; print sys.exec_prefix')
-PYINCDIR := $(PYPREFIX)/include
-DIR_CPPFLAGS += -I$(PYINCDIR)
+PYPREFIX  := $(shell python -c 'import sys; print sys.exec_prefix')
+PYVERSION := $(shell $(PYTHON) -c 'import sys; print sys.version[:3]')
+PYINCDIR  := $(PYPREFIX)/include
+PYINCFILE := "<python$(PYVERSION)/Python.h>"
+DIR_CPPFLAGS += -I$(PYINCDIR) -DPYTHON_INCLUDE=$(PYINCFILE)
 endif
 
 #############################################################################
@@ -190,10 +192,12 @@ ifdef Win32Platform
 
 PYPREFIX1 := $(shell python -c 'import sys,string; sys.stdout.write(string.lower(sys.prefix))')
 PYPREFIX  := $(subst program files,progra~1,$(PYPREFIX1))
+PYVERSION := $(shell $(PYTHON) -c 'import sys; print sys.version[:3]')
 PYINCDIR  := $(PYPREFIX)/include
 PYLIBDIR  := $(PYPREFIX)/libs
 
-DIR_CPPFLAGS += -I"$(PYINCDIR)"
+DIR_CPPFLAGS += -I$(PYINCDIR) -I$(PYINCDIR)/python$(PYVERSION) \
+                -DPYTHON_INCLUDE="<Python.h>"
 PYLIBPATH = -libpath:"$(PYLIBDIR)"
 
 implib = _omnipy.lib

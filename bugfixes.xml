@@ -8,6 +8,16 @@
 
 <buglist>
 
+<bug id="5" date="Wed Sep  6 12:13:30 BST 2000" user="dpg1">
+
+  <summary>Support for Python 1.6 and 2.0b1</summary>
+  <text>
+  omniORBpy was hard-coded to require Python 1.5.2, just in case later
+  versions were incompatible. 1.6 and 2.0b1 are compatible, so they
+  are now supported.
+  </text>
+</bug>
+
 <bug id="4" date="Fri Sep  1 15:07:45 BST 2000" user="dpg1">
 
   <summary>Memory leak when returning invalid data</summary>

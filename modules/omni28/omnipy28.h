@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.23.2.1  2000/09/06 11:20:49  dpg1
+// Support for Python 1.6 and 2.0b1.
+//
 // Revision 1.23  2000/06/27 15:13:11  dpg1
 // New copyObjRefArgument() function
 //
@@ -113,10 +116,10 @@
 #ifndef _omnipy28_h_
 #define _omnipy28_h_
 
-#if defined(__WIN32__) || defined(__VMS)
+#if defined(__VMS)
 #include <Python.h>
 #else
-#include <python1.5/Python.h>
+#include PYTHON_INCLUDE
 #endif
 
 #include <omniORB2/CORBA.h>
