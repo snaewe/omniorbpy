@@ -3,6 +3,10 @@
 # $Id$
 
 # $Log$
+# Revision 1.4  1999/09/13 15:13:09  dpg1
+# Module handling.
+# Any coercion (*** not fully tested).
+#
 # Revision 1.3  1999/08/03 09:03:46  dpg1
 # Unions with no default member fixed.
 #
@@ -13,7 +17,7 @@
 # Initial revision
 #
 
-import threading
+import sys, threading, types, imp
 
 import _omnipy
 
@@ -37,7 +41,6 @@ def registerObjref(repoId, objref):
     map_lock.release()
 
 def registerType(repoId, desc, tc):
-#    print "type:", repoId, desc
     map_lock.acquire()
     typeMapping[repoId]     = desc
     typeCodeMapping[repoId] = tc
@@ -62,6 +65,23 @@ def findTypeCode(repoId):
     except KeyError:
         map_lock.release()
         return None
+
+# Function to return a Python module for the required IDL module name
+
+def openModule(mname, fname=None):
+    if sys.modules.has_key(mname):
+        mod = sys.modules[mname]
+    else:
+        mod = imp.new_module(mname)
+        mod.__doc__ = "omniORB IDL module " + mname + "\n\n" + \
+                      "Generated from:\n\n"
+        sys.modules[mname] = mod
+
+    if fname is not None:
+        mod.__doc__ = mod.__doc__ + "  " + fname + "\n"
+
+    return mod
+
 
 
 # Classes to support IDL type mapping
@@ -226,6 +246,80 @@ def createUnknownUserException(repoId, members):
     UnknownUserException._NP_RepositoryId = repoId
     UnknownUserException._members         = members
     return UnknownUserException
+
+
+# Function to coerce an Any value with a partially-specified
+# descriptor to a value with an equivalent, fully-specified
+# descriptor.
+
+def coerceAny(v, fd, td):
+    if fd == td:
+        return v
+
+    if not tcInternal.equivalentDescriptors(fd, td):
+        return None
+
+    if type(fd) is not types.TupleType or \
+       type(td) is not types.TupleType:
+        return None
+
+    while fd[0] == tcInternal.tv_alias:
+        fd = fd[3]
+
+    while td[0] == tcInternal.tv_alias:
+        td = td[3]
+
+    try:
+        if fd == td:
+            return a._v
+
+        elif fd[0] == tcInternal.tv_objref:
+            return _omnipy.narrow(v, td[1])
+
+        elif fd[0] == tcInternal.tv_struct:
+            l = list(v._values)
+
+            # Coerce each member
+            for i in range(len(l)):
+                l[i] = coerceAny(l[i], fd[i*2 + 5], td[i*2 + 5])
+            
+            return apply(td[1], l)
+
+        elif fd[0] == tcInternal.tv_union:
+            return td[1](v._d, coerceAny(v._v, fd[6][v._d], tf[6][v._d]))
+
+        elif fd[0] == tcInternal.tv_enum:
+            return td[3][v._v]
+
+        elif fd[0] == tcInternal.tv_sequence:
+            l = v[:]
+            for i in range(len(l)):
+                l[i] = coerceAny(v[i], fd[1], td[1])
+            return l
+
+        elif fd[0] == tcInternal.tv_array:
+            l = v[:]
+            for i in range(len(l)):
+                l[i] = coerceAny(v[i], fd[1], td[1])
+            return l
+
+        elif fd[0] == tcInternal.tv_except:
+            l = list(v._values)
+
+            # Coerce each member
+            for i in range(len(l)):
+                l[i] = coerceAny(l[i], fd[i*2 + 5], td[i*2 + 5])
+            
+            return apply(td[1], l)
+
+        elif fd[0] == tcInternal.tv__indirect:
+            return coerceAny(v, fd[1][0], td[1][0])
+
+    except:
+        return None
+
+    return None
+
 
 
 # System exception mapping:
