@@ -27,10 +27,12 @@
 # Description:
 #    TypeCode internal implementation
 
-
 # $Id$
 
 # $Log$
+# Revision 1.9.2.2  2001/05/11 16:27:23  dpg1
+# TypeCode.get_compact_typecode() was broken.
+#
 # Revision 1.9.2.1  2000/08/07 09:19:24  dpg1
 # Long long support
 #
@@ -436,7 +438,7 @@ class TypeCode_struct (TypeCode_base):
         return equivalentDescriptors(self._d, tc._d)
 
     def get_compact_typecode(self):
-        return TypeCode_struct(getCompactDescriptor(self._d))
+        return TypeCode_struct(getCompactDescriptor(self._d), None)
 
     def id(self):                 return self._d[2]
     def name(self):               return self._d[3]
@@ -472,7 +474,7 @@ class TypeCode_union (TypeCode_base):
         return equivalentDescriptors(self._d, tc._d)
 
     def get_compact_typecode(self):
-        return TypeCode_union(getCompactDescriptor(self._d))
+        return TypeCode_union(getCompactDescriptor(self._d), None)
 
     def id(self):                  return self._d[2]
     def name(self):                return self._d[3]
@@ -541,7 +543,7 @@ class TypeCode_sequence (TypeCode_base):
         return equivalentDescriptors(self._d, tc._d)
 
     def get_compact_typecode(self):
-        return TypeCode_sequence(getCompactDescriptor(self._d))
+        return TypeCode_sequence(getCompactDescriptor(self._d), None)
 
     def length(self):       return self._d[2]
     def content_type(self):
@@ -568,7 +570,7 @@ class TypeCode_array (TypeCode_base):
         return equivalentDescriptors(self._d, tc._d)
 
     def get_compact_typecode(self):
-        return TypeCode_sequence(getCompactDescriptor(self._d))
+        return TypeCode_sequence(getCompactDescriptor(self._d), None)
 
     def length(self):       return self._d[2]
     def content_type(self): return createTypeCode(self._d[1])
@@ -591,7 +593,7 @@ class TypeCode_alias (TypeCode_base):
         return equivalentDescriptors(self._d, tc._d)
 
     def get_compact_typecode(self):
-        return TypeCode_alias(getCompactDescriptor(self._d))
+        return TypeCode_alias(getCompactDescriptor(self._d), None)
 
     def id(self):           return self._d[1]
     def name(self):         return self._d[2]
@@ -615,7 +617,7 @@ class TypeCode_except (TypeCode_base):
         return equivalentDescriptors(self._d, tc._d)
 
     def get_compact_typecode(self):
-        return TypeCode_except(getCompactDescriptor(self._d))
+        return TypeCode_except(getCompactDescriptor(self._d), None)
 
     def id(self):                 return self._d[2]
     def name(self):               return self._d[3]
@@ -801,7 +803,6 @@ def r_getCompactDescriptor(d, seen, ind):
     
     elif k == tv_struct:
         c = list(d)
-        c[2] = ""
         c[3] = ""
         for i in range(4, len(c), 2):
             c[i]   = ""
@@ -811,7 +812,6 @@ def r_getCompactDescriptor(d, seen, ind):
     
     elif k == tv_union:
         c = list(d)
-        c[2] = ""
         c[3] = ""
         c[4] = r_getCompactDescriptor(d[4], seen, ind)
 
@@ -830,7 +830,7 @@ def r_getCompactDescriptor(d, seen, ind):
         m = []
         for e in d[3]:
             m.append(omniORB.AnonymousEnumItem(e._v))
-        r = (k, "", "", tuple(m))
+        r = (k, d[1], "", tuple(m))
 
     elif k == tv_sequence:
         r = (k, r_getCompactDescriptor(d[1], seen, ind), d[2])
@@ -839,7 +839,7 @@ def r_getCompactDescriptor(d, seen, ind):
         r = (k, r_getCompactDescriptor(d[1], seen, ind), d[2])
 
     elif k == tv_alias:
-        r = (k, "", "", r_getCompactDescriptor(d[3], seen, ind))
+        r = (k, d[1], "", r_getCompactDescriptor(d[3], seen, ind))
 
     elif k == tv_except:
         c = list(d)

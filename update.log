@@ -1,3 +1,11 @@
+Fri May 11 17:22:00 BST 2001 dpg1
+=================================
+
+- TypeCode.get_compact_typecode() was broken.
+
+python/omniORB/tcInternal.py
+
+
 Thu May  3 15:30:03 BST 2001 dpg1
 =================================
 
