@@ -1,3 +1,25 @@
+Wed Nov 22 14:40:58 GMT 2000 dpg1
+=================================
+
+- Remove dead omniORB 2.8 code.
+
+src/lib/omniORBpy/modules/dir.mk
+src/lib/omniORBpy/modules/pyExceptions.cc
+
+- Fix segfault in string_to_object and resolve_initial_references with
+  nil objref.
+
+src/lib/omniORBpy/modules/pyORBFunc.cc
+src/lib/omniORBpy/modules/pyObjectRef.cc
+
+- Support code set conversion and wchar/wstring.
+
+src/lib/omniORBpy/modules/pyMarshal.cc
+src/lib/omniORBpy/modules/pyomniFunc.cc
+src/lib/omniORBpy/omniidl_be/python.py
+src/lib/omniORBpy/python/omniORB/CORBA.py
+
+
 Mon Nov  6 17:05:39 GMT 2000 dpg1
 =================================
 
