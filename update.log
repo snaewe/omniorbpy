@@ -1,3 +1,11 @@
+Fri Jul  6 15:34:33 BST 2001 dpg1
+=================================
+
+- Expose omniORB.MaxMessageSize function.
+
+modules/common/pyomniFunc.cc
+
+
 Thu Jun 21 15:07:36 BST 2001 dpg1
 =================================
 

@@ -29,6 +29,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.2.5  2001/07/06 14:36:28  dpg1
+// Expose omniORB.MaxMessageSize function.
+//
 // Revision 1.1.2.4  2000/10/30 14:27:36  dpg1
 // Add omniORB.maxTcpConnectionPerServer
 //
@@ -393,6 +396,32 @@ extern "C" {
     return 0;
   }
 
+  static char MaxMessageSize_doc [] =
+  "MaxMessageSize(int) -> None\n"
+  "MaxMessageSize()    -> int\n"
+  "\n"
+  "Set or get the ORB-wide limit on the sizr of a GIOP message.\n";
+
+  static PyObject* pyomni_MaxMessageSize(PyObject* self,
+					 PyObject* args)
+  {
+    if (PyTuple_GET_SIZE(args) == 0) {
+      return PyInt_FromLong(omniORB::MaxMessageSize());
+    }
+    else if (PyTuple_GET_SIZE(args) == 1) {
+      PyObject* pymc = PyTuple_GET_ITEM(args, 0);
+
+      if (PyInt_Check(pymc)) {
+	omniORB::MaxMessageSize(PyInt_AS_LONG(pymc));
+	Py_INCREF(Py_None);
+	return Py_None;
+      }
+    }
+    PyErr_SetString(PyExc_TypeError,
+		    (char*)"Operation requires a single integer argument");
+    return 0;
+  }
+
   static PyMethodDef pyomni_methods[] = {
     {(char*)"installTransientExceptionHandler",
      pyomni_installTransientExceptionHandler,
@@ -413,6 +442,10 @@ extern "C" {
     {(char*)"maxTcpConnectionPerServer",
      pyomni_maxTcpConnectionPerServer,
      METH_VARARGS, maxTcpConnectionPerServer_doc},
+
+    {(char*)"MaxMessageSize",
+     pyomni_MaxMessageSize,
+     METH_VARARGS, MaxMessageSize_doc},
 
     {NULL,NULL}
   };
