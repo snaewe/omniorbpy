@@ -31,6 +31,10 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.3  2000/12/04 18:57:23  dpg1
+// Fix deadlock when trying to lock omniORB internal lock while holding
+// the Python interpreter lock.
+//
 // Revision 1.1.2.2  2000/11/22 14:42:56  dpg1
 // Fix segfault in string_to_object and resolve_initial_references with
 // nil objref.
@@ -442,8 +446,11 @@ omniPy::copyObjRefArgument(PyObject* pytargetRepoId, PyObject* pyobjref,
 
   if (targetRepoId[0] == '\0') targetRepoId = CORBA::Object::_PD_repoId;
 
-  omniObjRef* newooref     = omniPy::createObjRef(targetRepoId,
-						  ooref->_getIOR(), 0, 0);
+  omniObjRef* newooref;
+  {
+    omniPy::InterpreterUnlocker _u;
+    newooref = omniPy::createObjRef(targetRepoId, ooref->_getIOR(), 0, 0);
+  }
   return createPyCorbaObjRef(targetRepoId,
 			     (CORBA::Object_ptr)newooref->
 			             _ptrToObjRef(CORBA::Object::_PD_repoId));
@@ -461,8 +468,12 @@ omniPy::stringToObject(const char* uri)
     return cxxobj;
   }
   omniObjRef* cxxobjref = cxxobj->_PR_getobj();
-  omniObjRef* objref    = omniPy::createObjRef(CORBA::Object::_PD_repoId,
-					       cxxobjref->_getIOR(), 0, 0);
+  omniObjRef* objref;
+  {
+    omniPy::InterpreterUnlocker _u;
+    objref = omniPy::createObjRef(CORBA::Object::_PD_repoId,
+				  cxxobjref->_getIOR(), 0, 0);
+  }
   CORBA::release(cxxobj);
   return (CORBA::Object_ptr)objref->_ptrToObjRef(CORBA::Object::_PD_repoId);
 }
@@ -471,8 +482,9 @@ omniPy::stringToObject(const char* uri)
 CORBA::Object_ptr
 omniPy::UnMarshalObjRef(const char* repoId, cdrStream& s)
 {
-  CORBA::String_var          id;
-  IOP::TaggedProfileList_var profiles;
+  omniPy::InterpreterUnlocker _u;
+  CORBA::String_var           id;
+  IOP::TaggedProfileList_var  profiles;
 
   id = IOP::IOR::unmarshaltype_id(s);
 

@@ -30,6 +30,10 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.3  2000/12/04 18:57:23  dpg1
+// Fix deadlock when trying to lock omniORB internal lock while holding
+// the Python interpreter lock.
+//
 // Revision 1.1.2.2  2000/11/22 14:42:56  dpg1
 // Fix segfault in string_to_object and resolve_initial_references with
 // nil objref.
@@ -99,8 +103,11 @@ extern "C" {
     }
     RAISE_PY_BAD_PARAM_IF(!objref);
 
-    CORBA::String_var str = orb->object_to_string(objref);
-
+    CORBA::String_var str;
+    {
+      omniPy::InterpreterUnlocker _u;
+      str = orb->object_to_string(objref);
+    }
     return PyString_FromString((char*)str);
   }
 
@@ -115,8 +122,11 @@ extern "C" {
     CORBA::ORB_ptr orb = (CORBA::ORB_ptr)omniPy::getTwin(pyorb, ORB_TWIN);
     OMNIORB_ASSERT(orb);
 
-    CORBA::ORB::ObjectIdList_var ids = orb->list_initial_services();
-
+    CORBA::ORB::ObjectIdList_var ids;
+    {
+      omniPy::InterpreterUnlocker _u;
+      ids = orb->list_initial_services();
+    }
     PyObject* pyids = PyList_New(ids->length());
 
     for (CORBA::ULong i=0; i<ids->length(); i++) {
@@ -140,7 +150,17 @@ extern "C" {
     CORBA::Object_ptr objref;
 
     try {
+      omniPy::InterpreterUnlocker _u;
       objref = orb->resolve_initial_references(id);
+
+      if (!(CORBA::is_nil(objref) || objref->_NP_is_pseudo())) {
+	omniObjRef* cxxref = objref->_PR_getobj();
+	omniObjRef* pyref  = omniPy::createObjRef(CORBA::Object::_PD_repoId,
+						  cxxref->_getIOR(), 0, 0);
+	CORBA::release(objref);
+	objref =
+	  (CORBA::Object_ptr)pyref->_ptrToObjRef(CORBA::Object::_PD_repoId);
+      }
     }
     catch (CORBA::ORB::InvalidName& ex) {
       PyObject* excc = PyObject_GetAttrString(pyorb, (char*)"InvalidName");
@@ -151,14 +171,6 @@ extern "C" {
     }
     OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
 
-    if (!(CORBA::is_nil(objref) || objref->_NP_is_pseudo())) {
-      omniObjRef* cxxref = objref->_PR_getobj();
-      omniObjRef* pyref  = omniPy::createObjRef(CORBA::Object::_PD_repoId,
-						cxxref->_getIOR(), 0, 0);
-      CORBA::release(objref);
-      objref =
-	(CORBA::Object_ptr)pyref->_ptrToObjRef(CORBA::Object::_PD_repoId);
-    }
     return omniPy::createPyCorbaObjRef(0, objref);
   }
 
