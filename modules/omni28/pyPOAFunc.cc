@@ -29,6 +29,10 @@
 
 // $Id$
 // $Log$
+// Revision 1.4  2000/03/10 12:13:54  dpg1
+// servant_to_id() and servant_to_reference() correctly throw
+// ServantNotActive if necessary.
+//
 // Revision 1.3  2000/03/07 16:52:17  dpg1
 // Support for compilers which do not allow exceptions to be caught by
 // base class. (Like MSVC 5, surprise surprise.)
@@ -233,16 +237,16 @@ extern "C" {
   static PyObject* pyPOA_activate_object(PyObject* self, PyObject* args)
   {
     PyObject* pyPOA;
-    PyObject* pyServant;
+    PyObject* pyservant;
 
-    if (!PyArg_ParseTuple(args, (char*)"OO", &pyPOA, &pyServant)) return 0;
+    if (!PyArg_ParseTuple(args, (char*)"OO", &pyPOA, &pyservant)) return 0;
 
     CORBA::BOA_ptr boa = (CORBA::BOA_ptr)omniPy::getTwin(pyPOA, BOA_TWIN);
     OMNIORB_ASSERT(boa);
 
     omniPy::Py_Servant* pyos;
     try {
-      pyos = omniPy::getServantForPyObject(pyServant);
+      pyos = omniPy::getServantForPyObject(pyservant);
       RAISE_PY_BAD_PARAM_IF(!pyos);
     }
     OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
@@ -315,19 +319,18 @@ extern "C" {
   static PyObject* pyPOA_servant_to_id(PyObject* self, PyObject* args)
   {
     PyObject* pyPOA;
-    PyObject* pyServant;
+    PyObject* pyservant;
 
-    if (!PyArg_ParseTuple(args, (char*)"OO", &pyPOA, &pyServant)) return 0;
+    if (!PyArg_ParseTuple(args, (char*)"OO", &pyPOA, &pyservant)) return 0;
 
     CORBA::BOA_ptr boa = (CORBA::BOA_ptr)omniPy::getTwin(pyPOA, BOA_TWIN);
     OMNIORB_ASSERT(boa);
 
     omniPy::Py_Servant* pyos;
-    try {
-      pyos = omniPy::getServantForPyObject(pyServant);
-      RAISE_PY_BAD_PARAM_IF(!pyos);
-    }
-    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
+    pyos = (omniPy::Py_Servant*)omniPy::getTwin(pyservant, SERVANT_TWIN);
+
+    if (!pyos)
+      return raisePOAException(pyPOA, "ServantNotActive");
 
     omniObject* oobj = pyos->PR_getobj();
 
@@ -354,16 +357,11 @@ extern "C" {
     CORBA::BOA_ptr boa = (CORBA::BOA_ptr)omniPy::getTwin(pyPOA, BOA_TWIN);
     OMNIORB_ASSERT(boa);
 
-    omniPy::Py_Servant* pyos;
-    try {
-      pyos = omniPy::getServantForPyObject(pyservant);
-      RAISE_PY_BAD_PARAM_IF(!pyos);
-    }
-    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
-
     PyObject* pyobjref = PyObject_GetAttrString(pyservant,
 						(char*)"_omni_objref");
-    OMNIORB_ASSERT(pyobjref);
+    if (!pyobjref)
+      return raisePOAException(pyPOA, "ServantNotActive");
+
     return pyobjref;
   }
 
