@@ -1,7 +1,7 @@
-Release Notes for omniORBpy 1.4  (18 June 2001)
+Release Notes for omniORBpy 1.5  (30 May 2002)
 ===============================
 
-This is omniORBpy 1.4, a robust high-performance CORBA ORB for Python.
+This is omniORBpy 1.5, a robust high-performance CORBA ORB for Python.
 
 The bindings adhere to the standard IDL to Python mapping which you
 may find at http://cgi.omg.org/cgi-bin/doc?formal/01-02-66
@@ -18,26 +18,32 @@ contributors.
 
 It is a good idea to subscribe to the omniORB mailing list. See
 
-    http://www.uk.research.att.com/omniORB/intouch.html
-
+    http://omniorb.sourceforge.net/list.html
 
 Please report any bugs you find to the mailing list.
+
+
+Summary of changes from omniORBpy 1.4
+-------------------------------------
+
+- Bug fixes. For details, see:
+
+    http://omniorb.sourceforge.net/bugs.html
+
+- Expose the omniORB.MaxMessageSize function.
+
 
 
 Summary of changes from omniORBpy 1.3
 -------------------------------------
 
-- Bug fixes. For details, see:
-
-    http://www.uk.research.att.com/omniORB/omniORBpy/bugfixes.html
+- Bug fixes.
 
 
 Summary of changes from omniORBpy 1.2
 -------------------------------------
 
-- Bug fixes. For details, see:
-
-    http://www.uk.research.att.com/omniORB/omniORBpy/bugfixes.html
+- Bug fixes.
 
 - Expose the omniORB.maxTcpConnectonPerServer setting to Python.
 
@@ -45,9 +51,7 @@ Summary of changes from omniORBpy 1.2
 Summary of changes from omniORBpy 1.1
 -------------------------------------
 
-- Bug fixes. For details, see:
-
-    http://www.uk.research.att.com/omniORB/omniORBpy/bugfixes.html
+- Bug fixes.
 
 - Support for Python versions beyond 1.5.2.
 
@@ -55,9 +59,7 @@ Summary of changes from omniORBpy 1.1
 Summary of changes from omniORBpy 1.0
 -------------------------------------
 
-- Bug fixes. For details, see:
-
-    http://www.uk.research.att.com/omniORB/omniORBpy/bugfixes.html
+- Bug fixes.
 
 - Long long support
 

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+<?xml-stylesheet type="text/xml" href="buglayout.xml"?>
+
+<!-- The following bugs have been fixed since the omniORBpy 1.5     -->
+<!-- release.                                                       -->
+
+<!-- Editors: make sure the content you add is well-formed XML.     -->
+
+<buglist version="1.5">
+
+<nobugs/>
+
+</buglist>
