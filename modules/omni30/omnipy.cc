@@ -33,6 +33,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.27  1999/12/15 12:17:20  dpg1
+// Changes to compile with SunPro CC 5.0.
+//
 // Revision 1.26  1999/12/14 15:28:40  dpg1
 // Catch ORB::InvalidName exception in resolve_initial_references().
 //
@@ -184,7 +187,7 @@ extern "C" {
     int   maj, min;
     char* mod;
 
-    if (!PyArg_ParseTuple(args, "iis", &maj, &min, &mod))
+    if (!PyArg_ParseTuple(args, (char*)"iis", &maj, &min, &mod))
       return NULL;
 
     if (maj != OMNIPY_MAJOR || (maj == 0 && min != OMNIPY_MINOR)) {
@@ -212,42 +215,45 @@ extern "C" {
     PyThreadState* tstate = PyThreadState_Get();
     omniPy::pyInterpreter = tstate->interp;
 
-    if (!PyArg_ParseTuple(args, "OO", &omniPy::pyomniORBmodule, &pythreading))
+    if (!PyArg_ParseTuple(args, (char*)"OO",
+			  &omniPy::pyomniORBmodule, &pythreading))
       return NULL;
 
     assert(PyModule_Check(omniPy::pyomniORBmodule));
     assert(PyModule_Check(pythreading));
 
     omniPy::pyCORBAmodule =
-      PyObject_GetAttrString(omniPy::pyomniORBmodule, "CORBA");
+      PyObject_GetAttrString(omniPy::pyomniORBmodule, (char*)"CORBA");
 
     assert(omniPy::pyCORBAmodule && PyModule_Check(omniPy::pyCORBAmodule));
 
     omniPy::pyCORBAsysExcMap =
-      PyObject_GetAttrString(omniPy::pyomniORBmodule, "sysExceptionMapping");
+      PyObject_GetAttrString(omniPy::pyomniORBmodule,
+			     (char*)"sysExceptionMapping");
 
     temp =
-      PyObject_GetAttrString(omniPy::pyCORBAmodule, "Object");
+      PyObject_GetAttrString(omniPy::pyCORBAmodule, (char*)"Object");
 
     omniPy::pyCORBAAnyClass =
-      PyObject_GetAttrString(omniPy::pyCORBAmodule, "Any");
+      PyObject_GetAttrString(omniPy::pyCORBAmodule, (char*)"Any");
 
     omniPy::pyomniORBobjrefMap =
-      PyObject_GetAttrString(omniPy::pyomniORBmodule, "objrefMapping");
+      PyObject_GetAttrString(omniPy::pyomniORBmodule, (char*)"objrefMapping");
 
     omniPy::pyomniORBtypeMap =
-      PyObject_GetAttrString(omniPy::pyomniORBmodule, "typeMapping");
+      PyObject_GetAttrString(omniPy::pyomniORBmodule, (char*)"typeMapping");
 
     omniPy::pyomniORBwordMap =
-      PyObject_GetAttrString(omniPy::pyomniORBmodule, "keywordMapping");
+      PyObject_GetAttrString(omniPy::pyomniORBmodule, (char*)"keywordMapping");
 
     temp =
-      PyObject_GetAttrString(omniPy::pyomniORBmodule, "tcInternal");
+      PyObject_GetAttrString(omniPy::pyomniORBmodule, (char*)"tcInternal");
 
-    omniPy::pyCreateTypeCode = PyObject_GetAttrString(temp, "createTypeCode");
+    omniPy::pyCreateTypeCode = PyObject_GetAttrString(temp,
+						      (char*)"createTypeCode");
 
     omniPy::pyDummyThreadClass = PyObject_GetAttrString(pythreading,
-							"_DummyThread");
+							(char*)"_DummyThread");
     omniPy::pyEmptyTuple = PyTuple_New(0);
 
     assert(omniPy::pyCORBAsysExcMap);
@@ -286,7 +292,7 @@ extern "C" {
     int       argc;
     char**    argv;
 
-    if (!PyArg_ParseTuple(args, "OOs", &pyorb, &pyargv, &orbid))
+    if (!PyArg_ParseTuple(args, (char*)"OOs", &pyorb, &pyargv, &orbid))
       return NULL;
 
     if (!PyList_Check(pyargv)) {
@@ -353,7 +359,7 @@ extern "C" {
     int       argc;
     char**    argv;
 
-    if (!PyArg_ParseTuple(args, "OOOs", &pyboa, &pyorb, &pyargv, &boaid))
+    if (!PyArg_ParseTuple(args,(char*)"OOOs", &pyboa, &pyorb, &pyargv, &boaid))
       return NULL;
 
     if (!PyList_Check(pyargv)) {
@@ -415,7 +421,7 @@ extern "C" {
     PyObject* pyorb;
     char* s;
 
-    if (!PyArg_ParseTuple(args, "Os", &pyorb, &s))
+    if (!PyArg_ParseTuple(args, (char*)"Os", &pyorb, &s))
       return NULL;
 
     CORBA::ORB_ptr orb = (CORBA::ORB_ptr)omniPy::getTwin(pyorb, ORB_TWIN);
@@ -450,7 +456,7 @@ extern "C" {
     PyObject* pyorb;
     PyObject* pyobjref;
 
-    if (!PyArg_ParseTuple(args, "OO", &pyorb, &pyobjref))
+    if (!PyArg_ParseTuple(args, (char*)"OO", &pyorb, &pyobjref))
       return NULL;
 
     CORBA::ORB_ptr orb = (CORBA::ORB_ptr)omniPy::getTwin(pyorb, ORB_TWIN);
@@ -465,7 +471,7 @@ extern "C" {
     else {
       if (!PyInstance_Check(pyobjref)) {
 	PyErr_SetString(PyExc_TypeError,
-			"Argument must be an object reference.");
+			(char*)"Argument must be an object reference.");
 	return NULL;
       }	
       objref = (CORBA::Object_ptr)omniPy::getTwin(pyobjref, OBJREF_TWIN);
@@ -483,7 +489,7 @@ extern "C" {
   {
     PyObject* pyorb;
 
-    if (!PyArg_ParseTuple(args, "O", &pyorb))
+    if (!PyArg_ParseTuple(args, (char*)"O", &pyorb))
       return NULL;
 
     CORBA::ORB_ptr orb = (CORBA::ORB_ptr)omniPy::getTwin(pyorb, ORB_TWIN);
@@ -505,7 +511,7 @@ extern "C" {
     PyObject* pyorb;
     char*     id;
 
-    if (!PyArg_ParseTuple(args, "Os", &pyorb, &id))
+    if (!PyArg_ParseTuple(args, (char*)"Os", &pyorb, &id))
       return NULL;
 
     CORBA::ORB_ptr orb = (CORBA::ORB_ptr)omniPy::getTwin(pyorb, ORB_TWIN);
@@ -541,15 +547,16 @@ extern "C" {
     PyObject* pyboa;
     PyObject* pyservant;
 
-    if (!PyArg_ParseTuple(args, "OO", &pyboa, &pyservant))
+    if (!PyArg_ParseTuple(args, (char*)"OO", &pyboa, &pyservant))
       return NULL;
 
     assert(pyservant && PyInstance_Check(pyservant));
 
-    PyObject* opdict = PyObject_GetAttrString(pyservant, "_op_d");
+    PyObject* opdict = PyObject_GetAttrString(pyservant, (char*)"_op_d");
     assert(opdict && PyDict_Check(opdict));
 
-    PyObject* repoId = PyObject_GetAttrString(pyservant, "_NP_RepositoryId");
+    PyObject* repoId = PyObject_GetAttrString(pyservant,
+					      (char*)"_NP_RepositoryId");
     assert(repoId && PyString_Check(repoId));
 
     omniPy::Py_Servant* cxxservant;
@@ -564,7 +571,7 @@ extern "C" {
 
     PyObject* pyobjref = omniPy::createPyCorbaObjRef(0, objref);
 
-    PyObject_SetAttrString(pyservant, "_objref", pyobjref);
+    PyObject_SetAttrString(pyservant, (char*)"_objref", pyobjref);
     Py_DECREF(pyobjref);
 
     Py_INCREF(Py_None);
@@ -577,7 +584,7 @@ extern "C" {
     PyObject* pyboa;
     int z, noblock;
 
-    if (!PyArg_ParseTuple(args, "Oii", &pyboa, &z, &noblock))
+    if (!PyArg_ParseTuple(args, (char*)"Oii", &pyboa, &z, &noblock))
       return NULL;
 
     assert(pyboa && PyInstance_Check(pyboa));
@@ -606,7 +613,7 @@ extern "C" {
   {
     PyObject* pyobjref;
 
-    if (!PyArg_ParseTuple(args, "O", &pyobjref))
+    if (!PyArg_ParseTuple(args, (char*)"O", &pyobjref))
       return NULL;
 
     assert(pyobjref && PyInstance_Check(pyobjref));
@@ -634,7 +641,7 @@ extern "C" {
   {
     PyObject* pyobjref;
 
-    if (!PyArg_ParseTuple(args, "O", &pyobjref))
+    if (!PyArg_ParseTuple(args, (char*)"O", &pyobjref))
       return NULL;
 
     assert(pyobjref && PyInstance_Check(pyobjref));
@@ -773,7 +780,7 @@ extern "C" {
   {
     PyObject* pyobjref;
 
-    if (!PyArg_ParseTuple(args, "O", &pyobjref))
+    if (!PyArg_ParseTuple(args, (char*)"O", &pyobjref))
       return NULL;
 
     CORBA::Object_ptr cxxobjref =
@@ -794,7 +801,7 @@ extern "C" {
     PyObject* pyobjref;
     char*     repoId;
 
-    if (!PyArg_ParseTuple(args, "Os", &pyobjref, &repoId))
+    if (!PyArg_ParseTuple(args, (char*)"Os", &pyobjref, &repoId))
       return NULL;
 
     CORBA::Object_ptr cxxobjref =
@@ -816,7 +823,7 @@ extern "C" {
   {
     PyObject* pyobjref;
 
-    if (!PyArg_ParseTuple(args, "O", &pyobjref))
+    if (!PyArg_ParseTuple(args, (char*)"O", &pyobjref))
       return NULL;
 
     CORBA::Object_ptr cxxobjref =
@@ -839,7 +846,7 @@ extern "C" {
     PyObject* pyobjref1;
     PyObject* pyobjref2;
 
-    if (!PyArg_ParseTuple(args, "OO", &pyobjref1, &pyobjref2))
+    if (!PyArg_ParseTuple(args, (char*)"OO", &pyobjref1, &pyobjref2))
       return NULL;
 
     CORBA::Object_ptr cxxobjref1, cxxobjref2;
@@ -864,7 +871,7 @@ extern "C" {
     PyObject*    pyobjref;
     CORBA::ULong max;
 
-    if (!PyArg_ParseTuple(args, "Oi", &pyobjref, &max))
+    if (!PyArg_ParseTuple(args, (char*)"Oi", &pyobjref, &max))
       return NULL;
 
     CORBA::Object_ptr cxxobjref =
@@ -882,7 +889,7 @@ extern "C" {
     PyObject* pysource;
     char*     repoId;
 
-    if (!PyArg_ParseTuple(args, "Os", &pysource, &repoId))
+    if (!PyArg_ParseTuple(args, (char*)"Os", &pysource, &repoId))
       return NULL;
 
     CORBA::Object_ptr cxxsource =
@@ -921,35 +928,37 @@ extern "C" {
   static PyMethodDef omnipy_methods[] = {
 
     // omnipy specific things:
-    {"checkVersion",             omnipy_checkVersion,            METH_VARARGS},
-    {"registerPyObjects",        omnipy_registerPyObjects,       METH_VARARGS},
+    {(char*)"checkVersion",      omnipy_checkVersion,            METH_VARARGS},
+    {(char*)"registerPyObjects", omnipy_registerPyObjects,       METH_VARARGS},
 
     // Wrappers for functions in CORBA::
-    {"ORB_init",                 omnipy_ORB_init,                METH_VARARGS},
+    {(char*)"ORB_init",          omnipy_ORB_init,                METH_VARARGS},
 
     // Wrappers for functions in CORBA::ORB::
-    {"BOA_init",                 omnipy_BOA_init,                METH_VARARGS},
-    {"stringToObject",           omnipy_stringToObject,          METH_VARARGS},
-    {"objectToString",           omnipy_objectToString,          METH_VARARGS},
-    {"listInitialServices",      omnipy_listInitialServices,     METH_VARARGS},
-    {"resolveInitialReferences", omnipy_resolveInitialReferences,METH_VARARGS},
+    {(char*)"BOA_init",          omnipy_BOA_init,                METH_VARARGS},
+    {(char*)"stringToObject",    omnipy_stringToObject,          METH_VARARGS},
+    {(char*)"objectToString",    omnipy_objectToString,          METH_VARARGS},
+    {(char*)"listInitialServices",
+                                 omnipy_listInitialServices,     METH_VARARGS},
+    {(char*)"resolveInitialReferences",
+                                 omnipy_resolveInitialReferences,METH_VARARGS},
 
     // Wrappers for functions in CORBA::BOA::
-    {"objectIsReady",            omnipy_objectIsReady,           METH_VARARGS},
-    {"implIsReady",              omnipy_implIsReady,             METH_VARARGS},
+    {(char*)"objectIsReady",     omnipy_objectIsReady,           METH_VARARGS},
+    {(char*)"implIsReady",       omnipy_implIsReady,             METH_VARARGS},
 
     // Wrappers for POA functions
-    {"referenceToServant",       omnipy_referenceToServant,      METH_VARARGS},
-    {"referenceToId",            omnipy_referenceToId,           METH_VARARGS},
+    {(char*)"referenceToServant",omnipy_referenceToServant,      METH_VARARGS},
+    {(char*)"referenceToId",     omnipy_referenceToId,           METH_VARARGS},
 
     // Functions for CORBA objects:
-    {"invokeOp",                 omnipy_invokeOp,                METH_VARARGS},
-    {"releaseObjref",            omnipy_releaseObjref,           METH_VARARGS},
-    {"isA",                      omnipy_isA,                     METH_VARARGS},
-    {"nonExistent",              omnipy_nonExistent,             METH_VARARGS},
-    {"isEquivalent",             omnipy_isEquivalent,            METH_VARARGS},
-    {"hash",                     omnipy_hash,                    METH_VARARGS},
-    {"narrow",                   omnipy_narrow,                  METH_VARARGS},
+    {(char*)"invokeOp",          omnipy_invokeOp,                METH_VARARGS},
+    {(char*)"releaseObjref",     omnipy_releaseObjref,           METH_VARARGS},
+    {(char*)"isA",               omnipy_isA,                     METH_VARARGS},
+    {(char*)"nonExistent",       omnipy_nonExistent,             METH_VARARGS},
+    {(char*)"isEquivalent",      omnipy_isEquivalent,            METH_VARARGS},
+    {(char*)"hash",              omnipy_hash,                    METH_VARARGS},
+    {(char*)"narrow",            omnipy_narrow,                  METH_VARARGS},
     {NULL,NULL}
   };
 
@@ -960,11 +969,9 @@ extern "C" {
 
     omniPy::pyInterpreterLock = new omni_mutex;
 
-    PyObject *m  = Py_InitModule("_omnipy", omnipy_methods);
+    PyObject *m  = Py_InitModule((char*)"_omnipy", omnipy_methods);
     PyObject *d = PyModule_GetDict(m);
-    PyDict_SetItemString(d, "omnipyTwinType",
+    PyDict_SetItemString(d, (char*)"omnipyTwinType",
 			 (PyObject*)&omnipyTwinType);
-
-    //    cout << "_omnipy initialised." << endl;
   }
 }

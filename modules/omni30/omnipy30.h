@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.16  1999/12/15 12:17:20  dpg1
+// Changes to compile with SunPro CC 5.0.
+//
 // Revision 1.15  1999/12/02 17:35:57  dpg1
 // _narrow, _is_a, _is_equivalent weren't unlocking the interpreter.
 //
@@ -131,7 +134,7 @@ extern "C" {
   static PyTypeObject omnipyTwinType = {
     PyObject_HEAD_INIT(&PyType_Type)
       0,
-      "omnipyTwin",
+      (char*)"omnipyTwin",
       sizeof(omnipyTwin),
       0,
       (destructor)omnipyTwin_dealloc,   /*tp_dealloc*/
@@ -201,9 +204,9 @@ remTwin(PyObject* obj, char* name)
   PyDict_DelItemString(((PyInstanceObject*)obj)->in_dict, name);
 }
 
-#define ORB_TWIN    "__twin_orb"
-#define BOA_TWIN    "__twin_boa"
-#define OBJREF_TWIN "__twin_obj"
+#define ORB_TWIN    (char*)"__twin_orb"
+#define BOA_TWIN    (char*)"__twin_boa"
+#define OBJREF_TWIN (char*)"__twin_obj"
 
 
 

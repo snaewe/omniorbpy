@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.7  1999/12/15 12:17:18  dpg1
+// Changes to compile with SunPro CC 5.0.
+//
 // Revision 1.6  1999/12/15 11:04:05  dpg1
 // Small bug in alignedSize() for enum.
 //
@@ -51,8 +54,6 @@
 //
 
 #include <omnipy.h>
-
-#include <iostream.h>
 
 
 // Objects to map descriptors to typecode offsets and vice-versa:
@@ -378,7 +379,8 @@ r_alignedSizeTypeCode(CORBA::ULong msgsize, PyObject* d_o,
 
 	for (int i=0; i<cnt; i++) {
 	  mem = PyTuple_GET_ITEM(mems, i); assert(PyInstance_Check(mem));
-	  t_o = PyObject_GetAttrString(mem, "_n"); assert(PyString_Check(t_o));
+	  t_o = PyObject_GetAttrString(mem, (char*)"_n");
+	  assert(PyString_Check(t_o));
 	  msgsize = omni::align_to(msgsize, omni::ALIGN_4) + 4 +
 	    PyString_GET_SIZE(t_o) + 1;
 	}
@@ -723,7 +725,8 @@ r_marshalTypeCode(NetBufferedStream&   stream,
 	  mem = PyTuple_GET_ITEM(mems, i); assert(PyInstance_Check(mem));
 
 	  // Member name
-	  t_o = PyDict_GetItemString(((PyInstanceObject*)mem)->in_dict, "_n");
+	  t_o = PyDict_GetItemString(((PyInstanceObject*)mem)->in_dict,
+				     (char*)"_n");
 	  MARSHAL_PYSTRING(encap, t_o);
 	}
       	// Send encapsulation
@@ -1109,7 +1112,8 @@ r_marshalTypeCode(MemBufferedStream&   stream,
 	  mem = PyTuple_GET_ITEM(mems, i); assert(PyInstance_Check(mem));
 
 	  // Member name
-	  t_o = PyDict_GetItemString(((PyInstanceObject*)mem)->in_dict, "_n");
+	  t_o = PyDict_GetItemString(((PyInstanceObject*)mem)->in_dict,
+				     (char*)"_n");
 	  MARSHAL_PYSTRING(encap, t_o);
 	}
       	// Send encapsulation
@@ -1398,10 +1402,10 @@ r_unmarshalTypeCode(NetBufferedStream& stream, OffsetDescriptorMap& odm)
 	// *** Could be made faster by finding the createUnknownStruct
 	// function only once, and manually building the argument typle
 	t_o = PyObject_GetAttrString(omniPy::pyomniORBmodule,
-				     "createUnknownStruct");
+				     (char*)"createUnknownStruct");
 	assert(t_o && PyFunction_Check(t_o));
 
-	t_o = PyObject_CallFunction(t_o, "OO", repoId, mems);
+	t_o = PyObject_CallFunction(t_o, (char*)"OO", repoId, mems);
 	assert(t_o && PyClass_Check(t_o));
 
 	Py_DECREF(mems);
@@ -1501,10 +1505,10 @@ r_unmarshalTypeCode(NetBufferedStream& stream, OffsetDescriptorMap& odm)
 
 	// Create class object
 	t_o = PyObject_GetAttrString(omniPy::pyomniORBmodule,
-				     "createUnknownUnion");
+				     (char*)"createUnknownUnion");
 	assert(t_o && PyFunction_Check(t_o));
 
-	t_o = PyObject_CallFunction(t_o, "OiO", repoId, def_used, mems);
+	t_o = PyObject_CallFunction(t_o, (char*)"OiO", repoId, def_used, mems);
 	assert(t_o && PyClass_Check(t_o));
 
 	PyTuple_SET_ITEM(d_o, 1, t_o);
@@ -1546,9 +1550,9 @@ r_unmarshalTypeCode(NetBufferedStream& stream, OffsetDescriptorMap& odm)
 	PyTuple_SET_ITEM(d_o, 3, mems);
 
 	PyObject* eclass = PyObject_GetAttrString(omniPy::pyomniORBmodule,
-						  "EnumItem");
+						  (char*)"EnumItem");
 	PyObject* aclass = PyObject_GetAttrString(omniPy::pyomniORBmodule,
-						  "AnonymousEnumItem");
+						  (char*)"AnonymousEnumItem");
 	assert(eclass && PyClass_Check(eclass));
 	assert(aclass && PyClass_Check(aclass));
 
@@ -1557,9 +1561,9 @@ r_unmarshalTypeCode(NetBufferedStream& stream, OffsetDescriptorMap& odm)
 	  UNMARSHAL_PYSTRING(encap, t_o);
 
 	  if (PyString_GET_SIZE(t_o) > 0)
-	    t_o = PyObject_CallFunction(eclass, "Oi", t_o, i);
+	    t_o = PyObject_CallFunction(eclass, (char*)"Oi", t_o, i);
 	  else
-	    t_o = PyObject_CallFunction(aclass, "i", i);
+	    t_o = PyObject_CallFunction(aclass, (char*)"i", i);
 
 	  assert(t_o && PyInstance_Check(t_o));
 
@@ -1699,10 +1703,10 @@ r_unmarshalTypeCode(NetBufferedStream& stream, OffsetDescriptorMap& odm)
 	// *** Could be made faster by finding the createUnknownStruct
 	// function only once, and manually building the argument typle
 	t_o = PyObject_GetAttrString(omniPy::pyomniORBmodule,
-				     "createUnknownUserException");
+				     (char*)"createUnknownUserException");
 	assert(t_o && PyFunction_Check(t_o));
 
-	t_o = PyObject_CallFunction(t_o, "OO", repoId, mems);
+	t_o = PyObject_CallFunction(t_o, (char*)"OO", repoId, mems);
 	assert(t_o && PyClass_Check(t_o));
 
 	Py_DECREF(mems);
@@ -1864,10 +1868,10 @@ r_unmarshalTypeCode(MemBufferedStream& stream, OffsetDescriptorMap& odm)
 	// *** Could be made faster by finding the createUnknownStruct
 	// function only once, and manually building the argument typle
 	t_o = PyObject_GetAttrString(omniPy::pyomniORBmodule,
-				     "createUnknownStruct");
+				     (char*)"createUnknownStruct");
 	assert(t_o && PyFunction_Check(t_o));
 
-	t_o = PyObject_CallFunction(t_o, "OO", repoId, mems);
+	t_o = PyObject_CallFunction(t_o, (char*)"OO", repoId, mems);
 	assert(t_o && PyClass_Check(t_o));
 
 	Py_DECREF(mems);
@@ -1967,10 +1971,10 @@ r_unmarshalTypeCode(MemBufferedStream& stream, OffsetDescriptorMap& odm)
 
 	// Create class object
 	t_o = PyObject_GetAttrString(omniPy::pyomniORBmodule,
-				     "createUnknownUnion");
+				     (char*)"createUnknownUnion");
 	assert(t_o && PyFunction_Check(t_o));
 
-	t_o = PyObject_CallFunction(t_o, "OiO", repoId, def_used, mems);
+	t_o = PyObject_CallFunction(t_o, (char*)"OiO", repoId, def_used, mems);
 	assert(t_o && PyClass_Check(t_o));
 
 	PyTuple_SET_ITEM(d_o, 1, t_o);
@@ -2012,9 +2016,9 @@ r_unmarshalTypeCode(MemBufferedStream& stream, OffsetDescriptorMap& odm)
 	PyTuple_SET_ITEM(d_o, 3, mems);
 
 	PyObject* eclass = PyObject_GetAttrString(omniPy::pyomniORBmodule,
-						  "EnumItem");
+						  (char*)"EnumItem");
 	PyObject* aclass = PyObject_GetAttrString(omniPy::pyomniORBmodule,
-						  "AnonymousEnumItem");
+						  (char*)"AnonymousEnumItem");
 	assert(eclass && PyClass_Check(eclass));
 	assert(aclass && PyClass_Check(aclass));
 
@@ -2023,9 +2027,9 @@ r_unmarshalTypeCode(MemBufferedStream& stream, OffsetDescriptorMap& odm)
 	  UNMARSHAL_PYSTRING(encap, t_o);
 
 	  if (PyString_GET_SIZE(t_o) > 0)
-	    t_o = PyObject_CallFunction(eclass, "Oi", t_o, i);
+	    t_o = PyObject_CallFunction(eclass, (char*)"Oi", t_o, i);
 	  else
-	    t_o = PyObject_CallFunction(aclass, "i", i);
+	    t_o = PyObject_CallFunction(aclass, (char*)"i", i);
 
 	  assert(t_o && PyInstance_Check(t_o));
 
@@ -2165,10 +2169,10 @@ r_unmarshalTypeCode(MemBufferedStream& stream, OffsetDescriptorMap& odm)
 	// *** Could be made faster by finding the createUnknownStruct
 	// function only once, and manually building the argument typle
 	t_o = PyObject_GetAttrString(omniPy::pyomniORBmodule,
-				     "createUnknownUserException");
+				     (char*)"createUnknownUserException");
 	assert(t_o && PyFunction_Check(t_o));
 
-	t_o = PyObject_CallFunction(t_o, "OO", repoId, mems);
+	t_o = PyObject_CallFunction(t_o, (char*)"OO", repoId, mems);
 	assert(t_o && PyClass_Check(t_o));
 
 	Py_DECREF(mems);
@@ -2205,8 +2209,6 @@ r_unmarshalTypeCode(MemBufferedStream& stream, OffsetDescriptorMap& odm)
   //  cout << "r_unmarshalTypeCode ended." << endl;
   return d_o;
 }
-
-
 
 
 CORBA::ULong

@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.4  1999/12/15 12:17:20  dpg1
+// Changes to compile with SunPro CC 5.0.
+//
 // Revision 1.3  1999/09/24 09:22:03  dpg1
 // Added copyright notices.
 //
@@ -43,8 +46,6 @@
 
 #include <omnipy.h>
 
-#include <iostream.h>
-
 
 void
 omniPy::handleSystemException(const CORBA::SystemException& ex)
@@ -52,7 +53,7 @@ omniPy::handleSystemException(const CORBA::SystemException& ex)
   PyObject* excc = PyDict_GetItemString(pyCORBAsysExcMap,
 					(char*)ex.NP_RepositoryId());
 
-  PyObject* exca = Py_BuildValue("(ii)", ex.minor(), ex.completed());
+  PyObject* exca = Py_BuildValue((char*)"(ii)", ex.minor(), ex.completed());
   PyObject* exci = PyEval_CallObject(excc, exca);
   Py_DECREF(exca);
   PyErr_SetObject(excc, exci);
@@ -68,12 +69,14 @@ omniPy::produceSystemException(PyObject* eobj, PyObject* erepoId)
 
   PyObject *a, *b;
 
-  a     = PyObject_GetAttrString(eobj, "minor"); assert(a && PyInt_Check(a));
+  a     = PyObject_GetAttrString(eobj, (char*)"minor");
+  assert(a && PyInt_Check(a));
   minor = PyInt_AS_LONG(a);
   Py_DECREF(a);
 
-  a      = PyObject_GetAttrString(eobj, "completed"); assert(a);
-  b      = PyObject_GetAttrString(a,    "_v"); assert(b && PyInt_Check(b));
+  a      = PyObject_GetAttrString(eobj, (char*)"completed"); assert(a);
+  b      = PyObject_GetAttrString(a,    (char*)"_v");
+  assert(b && PyInt_Check(b));
   status = (CORBA::CompletionStatus)PyInt_AS_LONG(b);
   Py_DECREF(a); Py_DECREF(b);
 

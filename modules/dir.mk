@@ -81,9 +81,14 @@ lib     = $(soname).$(OMNIPY_MINOR)
 $(lib): $(OBJS)
 	(set -x; \
 	$(RM) $@; \
+	if (CC -V 2>&1 | grep '5\.[0-9]'); \
+	  then CXX_RUNTIME=-lCrun; \
+	  else CXX_RUNTIME=-lC; \
+        fi; \
         $(CXX) -G -o $@ -h $(soname) $(IMPORT_LIBRARY_FLAGS) \
          $(patsubst %,-R %,$(IMPORT_LIBRARY_DIRS)) \
-         $(filter-out $(LibSuffixPattern),$^) -lomnithread -lpthread -lposix4 -mt -lsocket -lnsl -lomniORB2 -ltcpwrapGK -lC \
+         $(filter-out $(LibSuffixPattern),$^) $(OMNIORB2_LIB_NODYN) \
+         $$CXX_RUNTIME \
 	)
 
 all:: $(lib)

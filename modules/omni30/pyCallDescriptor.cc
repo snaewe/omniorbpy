@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.12  1999/12/15 12:17:19  dpg1
+// Changes to compile with SunPro CC 5.0.
+//
 // Revision 1.11  1999/09/29 09:05:03  dpg1
 // Now releases the Python interpreter lock before invoke's call to
 // _is_a().
@@ -67,7 +70,6 @@
 // Initial revision
 //
 
-#include <iostream.h>
 #include <omnipy.h>
 
 
