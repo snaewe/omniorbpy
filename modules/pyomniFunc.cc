@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.8  2002/02/25 15:33:50  dpg1
+// Expose omniORB logger to Python.
+//
 // Revision 1.1.2.7  2001/09/24 10:48:28  dpg1
 // Meaningful minor codes.
 //
@@ -374,6 +377,28 @@ extern "C" {
     return 0;
   }
 
+
+  static char log_doc [] =
+  "log(level, string)\n"
+  "\n"
+  "Output to the omniORB log, if the traceLevel is >= level.\n";
+
+  static PyObject* pyomni_log(PyObject* self, PyObject* args)
+  {
+    int level;
+    char* str;
+    if (!PyArg_ParseTuple(args, (char*)"is", &level, &str))
+      return 0;
+
+    {
+      omniPy::InterpreterUnlocker _u;
+      omniORB::logs(level, str);
+    }
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
+
+
   static char nativeCharCodeSet_doc [] =
   "nativeCharCodeSet(string) -> None\n"
   "nativeCharCodeSet()       -> string\n"
@@ -490,6 +515,7 @@ extern "C" {
     }
   }
 
+
   static PyMethodDef pyomni_methods[] = {
     {(char*)"installTransientExceptionHandler",
      pyomni_installTransientExceptionHandler,
@@ -506,6 +532,10 @@ extern "C" {
     {(char*)"traceLevel",
      pyomni_traceLevel,
      METH_VARARGS, traceLevel_doc},
+
+    {(char*)"log",
+     pyomni_log,
+     METH_VARARGS, log_doc},
 
     {(char*)"nativeCharCodeSet",
      pyomni_nativeCharCodeSet,
