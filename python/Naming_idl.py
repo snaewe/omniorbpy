@@ -35,7 +35,7 @@ _omnipy.checkVersion(0,4, __file__)
 
 
 #
-# Start of module CosNaming
+# Start of module "CosNaming"
 #
 __name__ = "CosNaming"
 _0_CosNaming     = omniORB.openModule("CosNaming",     "Naming.idl")
@@ -83,7 +83,7 @@ del Name
 # enum BindingType
 _0_CosNaming.nobject = omniORB.EnumItem("nobject", 0)
 _0_CosNaming.ncontext = omniORB.EnumItem("ncontext", 1)
-_0_CosNaming.BindingType = omniORB.Enum("IDL:omg.org/CosNaming/BindingType:1.0", (_0_CosNaming.nobject, _0_CosNaming.ncontext))
+_0_CosNaming.BindingType = omniORB.Enum("IDL:omg.org/CosNaming/BindingType:1.0", (_0_CosNaming.nobject, _0_CosNaming.ncontext,))
 
 _0_CosNaming._d_BindingType  = (omniORB.tcInternal.tv_enum, _0_CosNaming.BindingType._NP_RepositoryId, "BindingType", _0_CosNaming.BindingType._items)
 _0_CosNaming._tc_BindingType = omniORB.tcInternal.createTypeCode(_0_CosNaming._d_BindingType)
@@ -118,9 +118,6 @@ del BindingList
 # interface BindingIterator;
 _0_CosNaming._d_BindingIterator = (omniORB.tcInternal.tv_objref, "IDL:omg.org/CosNaming/BindingIterator:1.0", "BindingIterator")
 
-# interface NamingContext;
-_0_CosNaming._d_NamingContext = (omniORB.tcInternal.tv_objref, "IDL:omg.org/CosNaming/NamingContext:1.0", "NamingContext")
-
 # interface NamingContext
 _0_CosNaming._d_NamingContext = (omniORB.tcInternal.tv_objref, "IDL:omg.org/CosNaming/NamingContext:1.0", "NamingContext")
 class NamingContext :
@@ -136,7 +133,7 @@ class NamingContext :
     missing_node = omniORB.EnumItem("missing_node", 0)
     not_context = omniORB.EnumItem("not_context", 1)
     not_object = omniORB.EnumItem("not_object", 2)
-    NotFoundReason = omniORB.Enum("IDL:omg.org/CosNaming/NamingContext/NotFoundReason:1.0", (missing_node, not_context, not_object))
+    NotFoundReason = omniORB.Enum("IDL:omg.org/CosNaming/NamingContext/NotFoundReason:1.0", (missing_node, not_context, not_object,))
     
     _d_NotFoundReason  = (omniORB.tcInternal.tv_enum, NotFoundReason._NP_RepositoryId, "NotFoundReason", NotFoundReason._items)
     _tc_NotFoundReason = omniORB.tcInternal.createTypeCode(_d_NotFoundReason)
@@ -147,6 +144,7 @@ class NamingContext :
         _NP_RepositoryId = "IDL:omg.org/CosNaming/NamingContext/NotFound:1.0"
     
         def __init__(self, why, rest_of_name):
+            CORBA.UserException.__init__(self, why, rest_of_name)
             self.why = why
             self.rest_of_name = rest_of_name
     
@@ -159,6 +157,7 @@ class NamingContext :
         _NP_RepositoryId = "IDL:omg.org/CosNaming/NamingContext/CannotProceed:1.0"
     
         def __init__(self, cxt, rest_of_name):
+            CORBA.UserException.__init__(self, cxt, rest_of_name)
             self.cxt = cxt
             self.rest_of_name = rest_of_name
     
@@ -335,8 +334,115 @@ _0_POA_CosNaming.BindingIterator = BindingIterator
 del BindingIterator
 __name__ = "CosNaming"
 
+# interface NamingContextExt
+_0_CosNaming._d_NamingContextExt = (omniORB.tcInternal.tv_objref, "IDL:omg.org/CosNaming/NamingContextExt:1.0", "NamingContextExt")
+class NamingContextExt (_0_CosNaming.NamingContext):
+    _NP_RepositoryId = _0_CosNaming._d_NamingContextExt[1]
+
+    def __init__(self):
+        raise RuntimeError("Cannot construct objects of this type.")
+
+    _nil = CORBA.Object._nil
+
+    
+    # typedef ... StringName
+    class StringName:
+        _NP_RepositoryId = "IDL:omg.org/CosNaming/NamingContextExt/StringName:1.0"
+        def __init__(self):
+            raise RuntimeError("Cannot construct objects of this type.")
+    _d_StringName  = (omniORB.tcInternal.tv_string,0)
+    _ad_StringName = (omniORB.tcInternal.tv_alias, StringName._NP_RepositoryId, "StringName", (omniORB.tcInternal.tv_string,0))
+    _tc_StringName = omniORB.tcInternal.createTypeCode(_ad_StringName)
+    omniORB.registerType(StringName._NP_RepositoryId, _ad_StringName, _tc_StringName)
+    
+    # typedef ... Address
+    class Address:
+        _NP_RepositoryId = "IDL:omg.org/CosNaming/NamingContextExt/Address:1.0"
+        def __init__(self):
+            raise RuntimeError("Cannot construct objects of this type.")
+    _d_Address  = (omniORB.tcInternal.tv_string,0)
+    _ad_Address = (omniORB.tcInternal.tv_alias, Address._NP_RepositoryId, "Address", (omniORB.tcInternal.tv_string,0))
+    _tc_Address = omniORB.tcInternal.createTypeCode(_ad_Address)
+    omniORB.registerType(Address._NP_RepositoryId, _ad_Address, _tc_Address)
+    
+    # typedef ... URLString
+    class URLString:
+        _NP_RepositoryId = "IDL:omg.org/CosNaming/NamingContextExt/URLString:1.0"
+        def __init__(self):
+            raise RuntimeError("Cannot construct objects of this type.")
+    _d_URLString  = (omniORB.tcInternal.tv_string,0)
+    _ad_URLString = (omniORB.tcInternal.tv_alias, URLString._NP_RepositoryId, "URLString", (omniORB.tcInternal.tv_string,0))
+    _tc_URLString = omniORB.tcInternal.createTypeCode(_ad_URLString)
+    omniORB.registerType(URLString._NP_RepositoryId, _ad_URLString, _tc_URLString)
+    
+    # exception InvalidAddress
+    class InvalidAddress (CORBA.UserException):
+        _NP_RepositoryId = "IDL:omg.org/CosNaming/NamingContextExt/InvalidAddress:1.0"
+    
+    
+    _d_InvalidAddress  = (omniORB.tcInternal.tv_except, InvalidAddress, InvalidAddress._NP_RepositoryId, "InvalidAddress")
+    _tc_InvalidAddress = omniORB.tcInternal.createTypeCode(_d_InvalidAddress)
+    omniORB.registerType(InvalidAddress._NP_RepositoryId, _d_InvalidAddress, _tc_InvalidAddress)
+
+
+_0_CosNaming.NamingContextExt = NamingContextExt
+_0_CosNaming._tc_NamingContextExt = omniORB.tcInternal.createTypeCode(_0_CosNaming._d_NamingContextExt)
+omniORB.registerType(NamingContextExt._NP_RepositoryId, _0_CosNaming._d_NamingContextExt, _0_CosNaming._tc_NamingContextExt)
+
+# NamingContextExt operations and attributes
+NamingContextExt._d_to_string = ((_0_CosNaming._d_Name, ), (_0_CosNaming.NamingContextExt._d_StringName, ), {_0_CosNaming.NamingContext.InvalidName._NP_RepositoryId: _0_CosNaming.NamingContext._d_InvalidName})
+NamingContextExt._d_to_name = ((_0_CosNaming.NamingContextExt._d_StringName, ), (_0_CosNaming._d_Name, ), {_0_CosNaming.NamingContext.InvalidName._NP_RepositoryId: _0_CosNaming.NamingContext._d_InvalidName})
+NamingContextExt._d_to_url = ((_0_CosNaming.NamingContextExt._d_Address, _0_CosNaming.NamingContextExt._d_StringName), (_0_CosNaming.NamingContextExt._d_URLString, ), {_0_CosNaming.NamingContextExt.InvalidAddress._NP_RepositoryId: _0_CosNaming.NamingContextExt._d_InvalidAddress, _0_CosNaming.NamingContext.InvalidName._NP_RepositoryId: _0_CosNaming.NamingContext._d_InvalidName})
+NamingContextExt._d_resolve_str = ((_0_CosNaming.NamingContextExt._d_StringName, ), (_0_CORBA._d_Object, ), {_0_CosNaming.NamingContext.NotFound._NP_RepositoryId: _0_CosNaming.NamingContext._d_NotFound, _0_CosNaming.NamingContext.CannotProceed._NP_RepositoryId: _0_CosNaming.NamingContext._d_CannotProceed, _0_CosNaming.NamingContext.InvalidName._NP_RepositoryId: _0_CosNaming.NamingContext._d_InvalidName, _0_CosNaming.NamingContext.AlreadyBound._NP_RepositoryId: _0_CosNaming.NamingContext._d_AlreadyBound})
+
+# NamingContextExt object reference
+class _objref_NamingContextExt (_0_CosNaming._objref_NamingContext):
+    _NP_RepositoryId = NamingContextExt._NP_RepositoryId
+
+    def __del__(self):
+        if _omnipy is not None:
+            _omnipy.releaseObjref(self)
+
+    def __init__(self):
+        _0_CosNaming._objref_NamingContext.__init__(self)
+
+    def to_string(self, *args):
+        return _omnipy.invoke(self, "to_string", _0_CosNaming.NamingContextExt._d_to_string, args)
+
+    def to_name(self, *args):
+        return _omnipy.invoke(self, "to_name", _0_CosNaming.NamingContextExt._d_to_name, args)
+
+    def to_url(self, *args):
+        return _omnipy.invoke(self, "to_url", _0_CosNaming.NamingContextExt._d_to_url, args)
+
+    def resolve_str(self, *args):
+        return _omnipy.invoke(self, "resolve_str", _0_CosNaming.NamingContextExt._d_resolve_str, args)
+
+    __methods__ = ["to_string", "to_name", "to_url", "resolve_str"] + _0_CosNaming._objref_NamingContext.__methods__
+
+omniORB.registerObjref(NamingContextExt._NP_RepositoryId, _objref_NamingContextExt)
+_0_CosNaming._objref_NamingContextExt = _objref_NamingContextExt
+del NamingContextExt, _objref_NamingContextExt
+
+# NamingContextExt skeleton
+__name__ = "POA_CosNaming"
+class NamingContextExt (_0_POA_CosNaming.NamingContext):
+    _NP_RepositoryId = _0_CosNaming.NamingContextExt._NP_RepositoryId
+
+    def __del__(self):
+        if _omnipy is not None:
+            _omnipy.releaseObjref(self)
+
+    _omni_op_d = {"to_string": _0_CosNaming.NamingContextExt._d_to_string, "to_name": _0_CosNaming.NamingContextExt._d_to_name, "to_url": _0_CosNaming.NamingContextExt._d_to_url, "resolve_str": _0_CosNaming.NamingContextExt._d_resolve_str}
+    _omni_op_d.update(_0_POA_CosNaming.NamingContext._omni_op_d)
+
+NamingContextExt._omni_skeleton = NamingContextExt
+_0_POA_CosNaming.NamingContextExt = NamingContextExt
+del NamingContextExt
+__name__ = "CosNaming"
+
 #
-# End of module CosNaming
+# End of module "CosNaming"
 #
 __name__ = "Naming_idl"
 
