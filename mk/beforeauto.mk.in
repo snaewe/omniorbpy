@@ -43,7 +43,7 @@ endif
 # Directories for installation
 #
 
-prefix        	 := @prefix@
+prefix        	 := $(DESTDIR)@prefix@
 exec_prefix   	 := @exec_prefix@
 INSTALLTARGET 	 := 1
 INSTALLINCDIR 	 := @includedir@
@@ -275,7 +275,7 @@ endef
 # files.
 
 vpath %.idl $(IMPORT_TREES:%=%/idl) \
-            $(OMNIORB_ROOT)/idl/omniORB $(DATADIR)/idl/omniORB
+            $(OMNIORB_ROOT)/share/idl/omniORB $(DATADIR)/idl/omniORB
 
 IMPORT_IDLFLAGS += -I. $(patsubst %,-I%,$(VPATH)) \
 		       $(patsubst %,-I%/idl,$(IMPORT_TREES))
