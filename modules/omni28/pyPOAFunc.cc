@@ -29,11 +29,17 @@
 
 // $Id$
 // $Log$
+// Revision 1.2  2000/03/06 18:45:53  dpg1
+// Support for deactivate_object().
+//
 // Revision 1.1  2000/03/03 17:41:42  dpg1
 // Major reorganisation to support omniORB 3.0 as well as 2.8.
 //
 
 #include <omnipy.h>
+
+#include <ropeFactory.h>   // Internal omniORB interface
+#include <objectManager.h> // Internal omniORB interface
 
 
 #define RAISE_PY_NO_IMPLEMENT \
@@ -41,7 +47,7 @@
 
 
 PyObject*
-omniPy::fakePyRootPOAObject(PyObject* pyorb, const CORBA::ORB_ptr orb)
+omniPy::fakePyRootPOAObject(PyObject* pyorb, const CORBA::ORB_ptr cxxorb)
 {
   // Return existing POA object if there is one
   PyObject* pypoa = PyObject_GetAttrString(pyorb, (char*)"_omni_fpoa");
@@ -85,7 +91,7 @@ omniPy::fakePyRootPOAObject(PyObject* pyorb, const CORBA::ORB_ptr orb)
 
   int orig_argc = argc;
 
-  CORBA::BOA_ptr boa = orb->BOA_init(argc, argv, "omniORB2_BOA");
+  CORBA::BOA_ptr boa = cxxorb->BOA_init(argc, argv, "omniORB2_BOA");
 
   // This is extremely horrid -- modify the Python list in place to
   // reflect the changed argv. This leaks PyStringObjects, but they
@@ -232,9 +238,14 @@ extern "C" {
     CORBA::BOA_ptr boa = (CORBA::BOA_ptr)omniPy::getTwin(pyPOA, BOA_TWIN);
     OMNIORB_ASSERT(boa);
 
-    omniPy::Py_Servant* pyos = omniPy::getServantForPyObject(pyServant);
-    RAISE_PY_BAD_PARAM_IF(!pyos);
-
+    omniPy::Py_Servant* pyos;
+    try {
+      pyos = omniPy::getServantForPyObject(pyServant);
+      RAISE_PY_BAD_PARAM_IF(!pyos);
+    }
+    catch (CORBA::SystemException& ex) {
+      return omniPy::handleSystemException(ex);
+    }
     omniObject* oobj = pyos->PR_getobj();
 
     CORBA::Octet* key;
@@ -258,7 +269,35 @@ extern "C" {
 
   static PyObject* pyPOA_deactivate_object(PyObject* self, PyObject* args)
   {
-    RAISE_PY_NO_IMPLEMENT;
+    PyObject* pyPOA;
+    char*     oidstr;
+    int       oidlen;
+
+    if (!PyArg_ParseTuple(args, (char*)"Os#", &pyPOA, &oidstr, &oidlen))
+      return 0;
+
+    CORBA::BOA_ptr boa = (CORBA::BOA_ptr)omniPy::getTwin(pyPOA, BOA_TWIN);
+    OMNIORB_ASSERT(boa);
+
+    if (oidlen != sizeof(omniObjectKey))
+      return raisePOAException(pyPOA, "ObjectNotActive");
+
+    omniObject* oobj = omni::locatePyObject(omniObjectManager::root(1),
+					    *((omniObjectKey*)oidstr));
+    if (!oobj)
+      return raisePOAException(pyPOA, "ObjectNotActive");
+
+    OMNIORB_ASSERT(!oobj->is_proxy()); // It came from the local object table!
+
+    omniPy::Py_Servant* serv = (omniPy::Py_Servant*)
+      oobj->_widenFromTheMostDerivedIntf("Py_Servant", 1);
+
+    RAISE_PY_BAD_PARAM_IF(!serv);
+
+    CORBA::release(serv);
+    boa->dispose(serv);
+    Py_INCREF(Py_None);
+    return Py_None;
   }
 
   static PyObject* pyPOA_create_reference(PyObject* self, PyObject* args)
@@ -282,9 +321,14 @@ extern "C" {
     CORBA::BOA_ptr boa = (CORBA::BOA_ptr)omniPy::getTwin(pyPOA, BOA_TWIN);
     OMNIORB_ASSERT(boa);
 
-    omniPy::Py_Servant* pyos = omniPy::getServantForPyObject(pyServant);
-    RAISE_PY_BAD_PARAM_IF(!pyos);
-
+    omniPy::Py_Servant* pyos;
+    try {
+      pyos = omniPy::getServantForPyObject(pyServant);
+      RAISE_PY_BAD_PARAM_IF(!pyos);
+    }
+    catch (CORBA::SystemException& ex) {
+      return omniPy::handleSystemException(ex);
+    }
     omniObject* oobj = pyos->PR_getobj();
 
     CORBA::Octet* key;
@@ -310,9 +354,14 @@ extern "C" {
     CORBA::BOA_ptr boa = (CORBA::BOA_ptr)omniPy::getTwin(pyPOA, BOA_TWIN);
     OMNIORB_ASSERT(boa);
 
-    omniPy::Py_Servant* pyos = omniPy::getServantForPyObject(pyservant);
-    RAISE_PY_BAD_PARAM_IF(!pyos);
-
+    omniPy::Py_Servant* pyos;
+    try {
+      pyos = omniPy::getServantForPyObject(pyservant);
+      RAISE_PY_BAD_PARAM_IF(!pyos);
+    }
+    catch (CORBA::SystemException& ex) {
+      return omniPy::handleSystemException(ex);
+    }
     PyObject* pyobjref = PyObject_GetAttrString(pyservant,
 						(char*)"_omni_objref");
     OMNIORB_ASSERT(pyobjref);
@@ -329,17 +378,12 @@ extern "C" {
     CORBA::BOA_ptr boa = (CORBA::BOA_ptr)omniPy::getTwin(pyPOA, BOA_TWIN);
     OMNIORB_ASSERT(boa);
 
-    if (!PyInstance_Check(pyobjref)) {
-      CORBA::BAD_PARAM ex;
-      return omniPy::handleSystemException(ex);
-    }
+    RAISE_PY_BAD_PARAM_IF(!PyInstance_Check(pyobjref));
+
     CORBA::Object_ptr objref =
       (CORBA::Object_ptr)omniPy::getTwin(pyobjref, OBJREF_TWIN);
 
-    if (!objref) {
-      CORBA::BAD_PARAM ex;
-      return omniPy::handleSystemException(ex);
-    }
+    RAISE_PY_BAD_PARAM_IF(!objref);
 
     omniObject* oobj = objref->PR_getobj();
 
@@ -350,7 +394,7 @@ extern "C" {
       omniPy::Py_Servant* local = (omniPy::Py_Servant*)
 	oobj->_widenFromTheMostDerivedIntf("Py_Servant", 1);
 
-      OMNIORB_ASSERT(local);
+      RAISE_PY_BAD_PARAM_IF(!local);
       return local->pyServant();
     }
   }
@@ -365,17 +409,12 @@ extern "C" {
     CORBA::BOA_ptr boa = (CORBA::BOA_ptr)omniPy::getTwin(pyPOA, BOA_TWIN);
     OMNIORB_ASSERT(boa);
 
-    if (!PyInstance_Check(pyobjref)) {
-      CORBA::BAD_PARAM ex;
-      return omniPy::handleSystemException(ex);
-    }
+    RAISE_PY_BAD_PARAM_IF(!PyInstance_Check(pyobjref));
+
     CORBA::Object_ptr objref =
       (CORBA::Object_ptr)omniPy::getTwin(pyobjref, OBJREF_TWIN);
 
-    if (!objref) {
-      CORBA::BAD_PARAM ex;
-      return omniPy::handleSystemException(ex);
-    }
+    RAISE_PY_BAD_PARAM_IF(!objref);
 
     omniObject* oobj = objref->PR_getobj();
 
@@ -399,12 +438,67 @@ extern "C" {
 
   static PyObject* pyPOA_id_to_servant(PyObject* self, PyObject* args)
   {
-    RAISE_PY_NO_IMPLEMENT;
+    PyObject* pyPOA;
+    char*     oidstr;
+    int       oidlen;
+
+    if (!PyArg_ParseTuple(args, (char*)"Os#", &pyPOA, &oidstr, &oidlen))
+      return 0;
+
+    CORBA::BOA_ptr boa = (CORBA::BOA_ptr)omniPy::getTwin(pyPOA, BOA_TWIN);
+    OMNIORB_ASSERT(boa);
+
+    if (oidlen != sizeof(omniObjectKey))
+      return raisePOAException(pyPOA, "ObjectNotActive");
+
+    omniObject* oobj = omni::locatePyObject(omniObjectManager::root(1),
+					    *((omniObjectKey*)oidstr));
+    if (!oobj)
+      return raisePOAException(pyPOA, "ObjectNotActive");
+
+    OMNIORB_ASSERT(!oobj->is_proxy()); // It came from the local object table!
+
+    omniPy::Py_Servant* serv = (omniPy::Py_Servant*)
+      oobj->_widenFromTheMostDerivedIntf("Py_Servant", 1);
+
+    RAISE_PY_BAD_PARAM_IF(!serv);
+    return serv->pyServant();
   }
 
   static PyObject* pyPOA_id_to_reference(PyObject* self, PyObject* args)
   {
-    RAISE_PY_NO_IMPLEMENT;
+    PyObject* pyPOA;
+    char*     oidstr;
+    int       oidlen;
+
+    if (!PyArg_ParseTuple(args, (char*)"Os#", &pyPOA, &oidstr, &oidlen))
+      return 0;
+
+    CORBA::BOA_ptr boa = (CORBA::BOA_ptr)omniPy::getTwin(pyPOA, BOA_TWIN);
+    OMNIORB_ASSERT(boa);
+
+    if (oidlen != sizeof(omniObjectKey))
+      return raisePOAException(pyPOA, "ObjectNotActive");
+
+    omniObject* oobj = omni::locatePyObject(omniObjectManager::root(1),
+					    *((omniObjectKey*)oidstr));
+    if (!oobj)
+      return raisePOAException(pyPOA, "ObjectNotActive");
+
+    OMNIORB_ASSERT(!oobj->is_proxy()); // It came from the local object table!
+
+    omniPy::Py_Servant* serv = (omniPy::Py_Servant*)
+      oobj->_widenFromTheMostDerivedIntf("Py_Servant", 1);
+
+    RAISE_PY_BAD_PARAM_IF(!serv);
+
+    PyObject* pyservant = serv->pyServant();
+    PyObject* pyobjref  = PyObject_GetAttrString(pyservant,
+						 (char*)"_omni_objref");
+    OMNIORB_ASSERT(pyobjref);
+    Py_DECREF(pyservant);
+
+    return pyobjref;
   }
 
   static PyObject* pyPOA_releaseRef(PyObject* self, PyObject* args)
@@ -429,9 +523,14 @@ extern "C" {
     PyObject* pyservant;
     if (!PyArg_ParseTuple(args, (char*)"O", &pyservant)) return 0;
 
-    omniPy::Py_Servant* pyos = omniPy::getServantForPyObject(pyservant);
-    RAISE_PY_BAD_PARAM_IF(!pyos);
-
+    omniPy::Py_Servant* pyos;
+    try {
+      pyos = omniPy::getServantForPyObject(pyservant);
+      RAISE_PY_BAD_PARAM_IF(!pyos);
+    }
+    catch (CORBA::SystemException& ex) {
+      return omniPy::handleSystemException(ex);
+    }
     PyObject* pyobjref = PyObject_GetAttrString(pyservant,
 						(char*)"_omni_objref");
     OMNIORB_ASSERT(pyobjref);
