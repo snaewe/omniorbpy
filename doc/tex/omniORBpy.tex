@@ -1021,7 +1021,7 @@ except CosNaming.NamingContext.NotFound, ex:
 # Narrow the object to an Example::Echo
 eo = obj._narrow(Example.Echo)
 
-if (eo is None):
+if eo is None:
     print "Object reference is not an Example::Echo"
     sys.exit(1)
 
