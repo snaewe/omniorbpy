@@ -28,6 +28,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.29.2.13  2002/07/04 13:14:52  dgrisby
+# Bug with string escapes in Windows filenames.
+#
 # Revision 1.29.2.12  2002/05/27 01:02:37  dgrisby
 # Fix bug with scope lookup in generated code. Fix TypeCode clean-up bug.
 #
@@ -225,8 +228,8 @@ module_start = """
 # Start of module "@sname@"
 #
 __name__ = "@package@@sname@"
-_0_@sname@ = omniORB.openModule("@package@@sname@", "@filename@")
-_0_@s_sname@ = omniORB.openModule("@package@@s_sname@", "@filename@")
+_0_@sname@ = omniORB.openModule("@package@@sname@", r"@filename@")
+_0_@s_sname@ = omniORB.openModule("@package@@s_sname@", r"@filename@")
 """
 
 module_end = """
