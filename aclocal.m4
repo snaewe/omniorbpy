@@ -122,7 +122,7 @@ AC_DEFUN([OMNI_CXX_NEED_FQ_BASE_CTOR],
 [AC_CACHE_CHECK(whether base constructors have to be fully-qualified,
 omni_cv_cxx_need_fq_base_ctor,
 [AC_LANG_PUSH(C++)
- AC_TRY_RUN([
+ AC_TRY_COMPILE([
 class A {
 public:
   class B {
@@ -134,15 +134,12 @@ class C : public A::B {
 public:
   C() : B(5) {}
 };
-int main() {
-  return 0;
-}
 ],
- omni_cv_cxx_need_fq_base_ctor=no, omni_cv_cxx_need_fq_base_ctor=yes,
- omni_cv_cxx_need_fq_base_ctor=no)
+[C c;],
+ omni_cv_cxx_need_fq_base_ctor=no, omni_cv_cxx_need_fq_base_ctor=yes)
  AC_LANG_POP(C++)
 ])
-if test "$omni_cv_cxx_need_fq_base_ctor=" = yes; then
+if test "$omni_cv_cxx_need_fq_base_ctor" = yes; then
   AC_DEFINE(OMNI_REQUIRES_FQ_BASE_CTOR,,
             [define if base constructors have to be fully qualified])
 fi
@@ -155,8 +152,8 @@ omni_cv_cxx_long_is_int,
  AC_TRY_COMPILE([
 int f(int  x){return 1;}
 int f(long x){return 1;}
-],[long l = 5; return f(b);],
- omni_cv_cxx_long_is_int=yes, omni_cv_cxx_long_is_int=no)
+],[long l = 5; return f(l);],
+ omni_cv_cxx_long_is_int=no, omni_cv_cxx_long_is_int=yes)
  AC_LANG_POP(C++)
 ])
 if test "$omni_cv_cxx_long_is_int" = yes; then
@@ -240,11 +237,11 @@ AC_DEFUN([OMNI_SOCKNAME_ARG],
  omni_cv_sockname_size_t=no
  AC_LANG_PUSH(C++)
  AC_TRY_COMPILE([
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
-#include <sys/types.h>
 ],[
   socklen_t l;
   getsockname(0, 0, &l);
@@ -252,11 +249,11 @@ AC_DEFUN([OMNI_SOCKNAME_ARG],
  omni_cv_sockname_size_t=socklen_t)
  if test "$omni_cv_sockname_size_t" = no; then
  AC_TRY_COMPILE([
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
-#include <sys/types.h>
 ],[
   size_t l;
   getsockname(0, 0, &l);
