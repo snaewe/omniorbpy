@@ -28,6 +28,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.27.2.6  2001/04/23 13:53:08  dpg1
+# Cosmetic output change.
+#
 # Revision 1.27.2.5  2001/03/19 12:01:24  dpg1
 # Invalid stub code generated for typedef to struct/union inside an
 # interface.
@@ -208,7 +211,7 @@ import_idl_file = """\
 import @ifilename@"""
 
 open_imported_module_name = """\
-_0_@imodname@     = omniORB.openModule("@package@@imodname@")
+_0_@imodname@ = omniORB.openModule("@package@@imodname@")
 _0_@s_imodname@ = omniORB.openModule("@package@@s_imodname@")"""
 
 forward_interface = """\
