@@ -3,6 +3,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.4  1999/09/13 09:55:02  dpg1
+# Initial references support. __methods__ added.
+#
 # Revision 1.3  1999/07/29 14:16:56  dpg1
 # Server side, TypeCode creation interface.
 #
@@ -260,16 +263,16 @@ tk_value_box          = omniORB.EnumItem("CORBA.tk_value_box",          30)
 tk_native             = omniORB.EnumItem("CORBA.tk_native",             31)
 tk_abstract_interface = omniORB.EnumItem("CORBA.tk_abstract_interface", 32)
 
-TCKind        = omniORB.Enum("IDL:omg.org/CORBA/TCKind:1.0",
-                             (tk_null, tk_void, tk_short, tk_long, tk_ushort,
-                              tk_ulong, tk_float, tk_double, tk_boolean,
-                              tk_char, tk_octet, tk_any, tk_TypeCode,
-                              tk_Principal, tk_objref, tk_struct, tk_union,
-                              tk_enum, tk_string, tk_sequence, tk_array,
-                              tk_alias, tk_except, tk_longlong, tk_ulonglong,
-                              tk_longdouble, tk_wchar, tk_wstring, tk_fixed,
-                              tk_value, tk_value_box, tk_native,
-                              tk_abstract_interface))
+TCKind = omniORB.Enum("IDL:omg.org/CORBA/TCKind:1.0",
+                      (tk_null, tk_void, tk_short, tk_long, tk_ushort,
+                       tk_ulong, tk_float, tk_double, tk_boolean,
+                       tk_char, tk_octet, tk_any, tk_TypeCode,
+                       tk_Principal, tk_objref, tk_struct, tk_union,
+                       tk_enum, tk_string, tk_sequence, tk_array,
+                       tk_alias, tk_except, tk_longlong, tk_ulonglong,
+                       tk_longdouble, tk_wchar, tk_wstring, tk_fixed,
+                       tk_value, tk_value_box, tk_native,
+                       tk_abstract_interface))
 
 class TypeCode:
     class Bounds (UserException):
@@ -313,6 +316,11 @@ class TypeCode:
     def member_visibility(self, index): raise TypeCode.BadKind
     def type_modifier(self):            raise TypeCode.BadKind
     def concrete_base_type(self):       raise TypeCode.BadKind
+
+    __methods__ = ["equal", "equivalent", "get_compact_typecode",
+                   "kind", "id", "name", "member_count", "member_type",
+                   "member_label", "discriminator_type", "default_index",
+                   "length", "content_type"]
 
 import tcInternal
 
@@ -362,6 +370,8 @@ class Any:
             return self._v
         raise NotImplementedError("Any coercion not yet supported.")
 
+    __methods__ = ["typecode", "value"]
+
 _d_any = tcInternal.tv_any
 
 
@@ -401,6 +411,12 @@ class ORB:
     def object_to_string(self, obj):
         return _omnipy.objectToString(self, obj)
 
+    def list_initial_services(self):
+        return _omnipy.listInitialServices(self)
+
+    def resolve_initial_references(self, identifier):
+        return _omnipy.resolveInitialReferences(self, identifier)
+
     # TypeCode operations
     def create_struct_tc(self, id, name, members):
         return tcInternal.createStructTC(id, name, members)
@@ -432,6 +448,13 @@ class ORB:
     def create_recursive_tc(self, id):
         return tcInternal.createRecursiveTC(id)
 
+    __methods__ = ["BOA_init", "string_to_object", "object_to_string",
+                   "list_initial_services", "resolve_initial_references",
+                   "create_struct_tc", "create_union_tc",
+                   "create_enum_tc", "create_alias_tc",
+                   "create_exception_tc", "create_interface_tc",
+                   "create_string_tc", "create_sequence_tc",
+                   "create_array_tc", "create_recursive_tc"]
 
 
 #############################################################################
@@ -458,6 +481,7 @@ class BOA:
     def impl_is_ready(self, z=0, noblock=0):
         _omnipy.implIsReady(self, z, noblock)
 
+    __methods__ = ["obj_is_ready", "impl_is_ready"]
 
 
 #############################################################################
@@ -507,6 +531,9 @@ class Object:
     def _narrow(self, dest):
         return _omnipy.narrow(self, dest._NP_RepositoryId)
 
+    __methods__ = ["_is_a", "_non_existent", "_is_equivalent",
+                   "_hash", "_narrow"]
+
 _d_Object  = (omniORB.tcInternal.tv_objref, None, "Object")
 _tc_Object = omniORB.tcInternal.createTypeCode(_d_Object)
 
@@ -536,6 +563,7 @@ class _nil_Object (Object):
     def _narrow(self, dest):
         return self
 
+    __methods__ = Object.__methods__
 
 Object._nil = _nil_Object()
 
