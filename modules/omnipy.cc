@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.28  2005/03/02 11:32:45  dgrisby
+// New optional endian parameter to cdrMarshal / cdrUnmarshal.
+//
 // Revision 1.1.2.27  2004/03/24 22:13:05  dgrisby
 // Support reinitialising when the Python interpreter isn't finalized.
 //
@@ -525,19 +528,52 @@ extern "C" {
   omnipy_cdrMarshal(PyObject* self, PyObject* args)
   {
     PyObject *desc, *data;
+    int endian = -1;
 
-    if (!PyArg_ParseTuple(args, (char*)"OO", &desc, &data)) return 0;
+    if (!PyArg_ParseTuple(args, (char*)"OO|i", &desc, &data, &endian))
+      return 0;
+
+    if (endian > 1 || endian < -1) {
+      PyErr_SetString(PyExc_ValueError,
+		      "argument 3: endian must be 0 or 1");
+      return 0;
+    }
 
     try {
-      cdrEncapsulationStream stream;
-
       omniPy::validateType(desc, data, CORBA::COMPLETED_NO);
-      omniPy::marshalPyObject(stream, desc, data);
 
-      return PyString_FromStringAndSize((char*)stream.bufPtr(),
-					stream.bufSize());
+      if (endian == -1) {
+	// Marshal into an encapsulation
+	cdrEncapsulationStream stream;
+	omniPy::marshalPyObject(stream, desc, data);
+
+	return PyString_FromStringAndSize((char*)stream.bufPtr(),
+					  stream.bufSize());
+      }
+      else {
+	// Marshal into a raw buffer
+	cdrMemoryStream stream;
+	if (endian != omni::myByteOrder)
+	  stream.setByteSwapFlag(endian);
+
+	omniPy::marshalPyObject(stream, desc, data);
+
+	return PyString_FromStringAndSize((char*)stream.bufPtr(),
+					  stream.bufSize());
+      }
     }
     OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
+  }
+
+  static inline PyObject* do_cdrUnmarshal(cdrStream& stream, PyObject* desc)
+  {
+    PyObject* r = omniPy::unmarshalPyObject(stream, desc);
+    if (stream.checkInputOverrun(1, 1)) {
+      // More data in stream -- must have used the wrong TypeCode
+      Py_DECREF(r);
+      OMNIORB_THROW(MARSHAL, MARSHAL_MessageTooLong, CORBA::COMPLETED_NO);
+    }
+    return r;
   }
 
   static PyObject*
@@ -546,18 +582,46 @@ extern "C" {
     PyObject* desc;
     char*     encap;
     size_t    size;
+    int       endian = -1;
     
-    if (!PyArg_ParseTuple(args, (char*)"Os#", &desc, &encap, &size)) return 0;
+    if (!PyArg_ParseTuple(args, (char*)"Os#|i",
+			  &desc, &encap, &size, &endian))
+      return 0;
+
+    if (endian > 1 || endian < -1) {
+      PyErr_SetString(PyExc_ValueError,
+		      "argument 3: endian must be 0 or 1");
+      return 0;
+    }
 
     try {
-      cdrEncapsulationStream stream((CORBA::Octet*)encap, size);
-      PyObject* r = omniPy::unmarshalPyObject(stream, desc);
-      if (stream.checkInputOverrun(1, 1)) {
-	// More data in stream -- must have used the wrong TypeCode
-	Py_DECREF(r);
-	OMNIORB_THROW(MARSHAL, MARSHAL_MessageTooLong, CORBA::COMPLETED_NO);
+      if (endian == -1) {
+	// Encapsulation
+	cdrEncapsulationStream stream((CORBA::Octet*)encap, size);
+	return do_cdrUnmarshal(stream, desc);
       }
-      return r;
+      else {
+	// Simple buffer. Is it aligned ok?
+	if ((omni::ptr_arith_t)encap ==
+	    omni::align_to((omni::ptr_arith_t)encap, omni::ALIGN_8)) {
+
+	  cdrMemoryStream stream((CORBA::Octet*)encap, size);
+	  if (endian != omni::myByteOrder)
+	    stream.setByteSwapFlag(endian);
+
+	  return do_cdrUnmarshal(stream, desc);
+	}
+	else {
+	  // Unfortunately, this is a common case, due to the way
+	  // Python string objects are laid out.
+	  cdrMemoryStream stream;
+	  if (endian != omni::myByteOrder)
+	    stream.setByteSwapFlag(endian);
+
+	  stream.put_octet_array((CORBA::Octet*)encap, size);
+	  return do_cdrUnmarshal(stream, desc);
+	}
+      }
     }
     OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
   }
