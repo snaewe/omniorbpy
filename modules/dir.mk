@@ -72,11 +72,15 @@ endif
 
 ifdef SunOS
 
-CXXOPTIONS += -Kpic -I/usr/local/include
-
 libname = _omnipymodule.so
 soname  = $(libname).$(OMNIPY_MAJOR)
 lib     = $(soname).$(OMNIPY_MINOR)
+
+DIR_CPPFLAGS += -I/usr/local/include
+
+ifeq ($(notdir $(CXX)),CC)
+
+CXXOPTIONS += -Kpic
 
 $(lib): $(OBJS)
 	(set -x; \
@@ -90,6 +94,21 @@ $(lib): $(OBJS)
          $(filter-out $(LibSuffixPattern),$^) $(OMNIORB2_LIB_NODYN) \
          $$CXX_RUNTIME \
 	)
+
+endif
+
+ifeq ($(notdir $(CXX)),g++)
+
+CXXOPTIONS += -fPIC
+
+$(lib): $(OBJS)
+	(set -x; \
+	$(RM) $@; \
+	$(CXXLINK) $(CXXLINKOPTIONS) -shared -o $@ -Wl-soname,$(soname) $(IMPORT_LIBRARY_FLAGS) $(OMNIORB2_LIB_NODYN_DEPEND)\
+	 $(filter-out $(LibSuffixPattern),$^) $(OMNIORB2_LIB_NODYN)\
+	)
+
+endif
 
 all:: $(lib)
 
@@ -105,6 +124,7 @@ export:: $(lib)
           $(RM) $(libname); \
           ln -s $(soname) $(libname); \
          )
+
 endif
 
 
