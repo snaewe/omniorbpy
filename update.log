@@ -1,10 +1,19 @@
+Fri Sep  1 15:07:45 BST 2000 dpg1
+=================================
+
+- Memory leak when returning invalid data (bug 4)
+
+modules/omni28/pyServant.cc
+modules/omni30/pyServant.cc
+
+
 Wed Aug 30 19:10:01 BST 2000 dpg1
 =================================
 
 - Register operation declarations so they can be found with
   findDecl().
 
-src/tool/omniidl/cxx/idlpython.cc
+omniidl/cxx/idlpython.cc
 
 
 Tue Aug 29 16:17:38 BST 2000 dpg1

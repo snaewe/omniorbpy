@@ -8,6 +8,15 @@
 
 <buglist>
 
+<bug id="4" date="Fri Sep  1 15:07:45 BST 2000" user="dpg1">
+
+  <summary>Memory leak when returning invalid data</summary>
+  <text>
+  If the data returned from a CORBA call was invalid, causing a
+  BAD_PARAM (or other) exception, the invalid data would be leaked.
+  </text>
+</bug>
+
 <bug id="3" date="Wed Aug 23 10:15:43 BST 2000" user="dpg1">
 
   <summary>Interface Repository stubs not available with "import
