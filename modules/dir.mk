@@ -187,6 +187,8 @@ lib = $(patsubst %.lib,%.pyd,$(implib))
 
 all:: $(lib)
 
+ifeq ($(OMNIORB_VERSION),2.8.0)
+
 $(lib): $(OBJS)
 	(if egrep '^ *static *omni_mutex *objectTableLock' $(TOP)/include/omniORB2/omniInternal.h; then \
            echo -e '\n\n\n\a'; \
@@ -204,6 +206,16 @@ $(lib): $(OBJS)
 	 libs="$(OMNIORB_LIB) python15.lib"; \
 	 $(CXXLINK) -out:$@ -DLL $(CXXLINKOPTIONS) $(IMPORT_LIBRARY_FLAGS) $(PYLIBPATH) $(OBJS) $$libs; \
 	)
+
+else
+
+$(lib): $(OBJS)
+	(set -x; \
+	 $(RM) $@; \
+	 libs="$(OMNIORB_LIB) python15.lib"; \
+	 $(CXXLINK) -out:$@ -DLL $(CXXLINKOPTIONS) $(IMPORT_LIBRARY_FLAGS) $(PYLIBPATH) $(OBJS) $$libs; \
+	)
+endif
 
 export:: $(lib)
 	@$(ExportLibrary)

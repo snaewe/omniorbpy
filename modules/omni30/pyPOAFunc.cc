@@ -29,6 +29,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.2  2000/03/06 18:48:28  dpg1
+// Support for our favourite compiler, MSVC.
+//
 // Revision 1.1  2000/03/03 17:41:42  dpg1
 // Major reorganisation to support omniORB 3.0 as well as 2.8.
 //
@@ -73,14 +76,14 @@ CORBA::Policy_ptr createPolicyObject(PortableServer::POA_ptr poa,
 {
   CORBA::Policy_ptr policy = 0;
 
-  PyObject* pyptype  = PyObject_GetAttrString(pypolicy, "_policy_type");
-  PyObject* pyvalue  = PyObject_GetAttrString(pypolicy, "_value");
+  PyObject* pyptype  = PyObject_GetAttrString(pypolicy, (char*)"_policy_type");
+  PyObject* pyvalue  = PyObject_GetAttrString(pypolicy, (char*)"_value");
   PyObject* pyivalue = 0;
 
   if (pyptype && PyInt_Check(pyptype) &&
       pyvalue && PyInstance_Check(pyvalue)) {
 
-    pyivalue = PyObject_GetAttrString(pyvalue, "_v");
+    pyivalue = PyObject_GetAttrString(pyvalue, (char*)"_v");
 
     if (pyivalue && PyInt_Check(pyivalue)) {
       CORBA::ULong ivalue = PyInt_AS_LONG(pyivalue);
@@ -147,6 +150,7 @@ CORBA::Policy_ptr createPolicyObject(PortableServer::POA_ptr poa,
 
   PyErr_Clear();
   throw CORBA::BAD_PARAM();
+  return 0; // For MSVC
 }
   
 
@@ -205,7 +209,7 @@ extern "C" {
       PyObject* excc = PyObject_GetAttrString(pyPOA,
 					      (char*)"InvalidPolicy");
       OMNIORB_ASSERT(excc);
-      PyObject* exci = PyObject_CallFunction(excc, "i", ex.index);
+      PyObject* exci = PyObject_CallFunction(excc, (char*)"i", ex.index);
       PyErr_SetObject(excc, exci);
       return 0;
     }
