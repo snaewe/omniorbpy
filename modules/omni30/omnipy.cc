@@ -31,6 +31,10 @@
 // $Id$
 
 // $Log$
+// Revision 1.20  1999/10/15 17:07:23  dpg1
+// Narrow now properly returns nil if the object is not of the right
+// type.
+//
 // Revision 1.19  1999/10/15 16:25:46  dpg1
 // Fixed refcounting bug with Python servants.
 //
@@ -831,16 +835,20 @@ extern "C" {
     CORBA::Object_ptr cxxsource =
       (CORBA::Object_ptr)omniPy::getTwin(pysource, OBJREF_TWIN);
 
-    omniObject* oosource = cxxsource->PR_getobj();
-
-    omniObject* oodest   = omniPy::createObjRef(oosource->NP_IRRepositoryId(),
+    if (cxxsource->_is_a(repoId)) {
+      omniObject* oosource = cxxsource->PR_getobj();
+      omniObject* oodest = omniPy::createObjRef(oosource->NP_IRRepositoryId(),
 						repoId,
 						oosource->iopProfiles(), 0);
+      CORBA::Object_ptr cxxdest =
+	(CORBA::Object_ptr)(oodest->_widenFromTheMostDerivedIntf(0));
 
-    CORBA::Object_ptr cxxdest =
-      (CORBA::Object_ptr)(oodest->_widenFromTheMostDerivedIntf(0));
-
-    return omniPy::createPyCorbaObjRef(repoId, cxxdest);
+      return omniPy::createPyCorbaObjRef(repoId, cxxdest);
+    }
+    else {
+      Py_INCREF(Py_None);
+      return Py_None;
+    }
   }
 
 
