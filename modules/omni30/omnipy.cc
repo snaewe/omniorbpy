@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.22  1999/11/09 17:27:34  dpg1
+// narrow() now properly handles CORBA system exceptions.
+//
 // Revision 1.21  1999/11/08 11:43:35  dpg1
 // Changes for NT support.
 //
@@ -856,7 +859,15 @@ extern "C" {
     CORBA::Object_ptr cxxsource =
       (CORBA::Object_ptr)omniPy::getTwin(pysource, OBJREF_TWIN);
 
-    if (cxxsource->_is_a(repoId)) {
+    CORBA::Boolean isa;
+    try {
+      isa = cxxsource->_is_a(repoId);
+    }
+    catch (const CORBA::SystemException& ex) {
+      omniPy::handleSystemException(ex);
+      return 0;
+    }
+    if (isa) {
       omniObject* oosource = cxxsource->PR_getobj();
       omniObject* oodest = omniPy::createObjRef(oosource->NP_IRRepositoryId(),
 						repoId,
