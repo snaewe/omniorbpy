@@ -31,6 +31,9 @@
 #define _omnipy_h_
 
 // $Log$
+// Revision 1.2.4.23  2004/04/30 16:39:35  dgrisby
+// Log CORBA exceptions with Python tracebacks. Thanks Luke Deller.
+//
 // Revision 1.2.4.22  2003/12/15 12:10:52  dgrisby
 // Bug with omniORB.LOCATION_FORWARD handling.
 //
@@ -260,7 +263,8 @@ public:
 
   // Throw a C++ system exception equivalent to the given Python exception
   static
-  void produceSystemException(PyObject* eobj, PyObject* erepoId);
+  void produceSystemException(PyObject* eobj, PyObject* erepoId,
+			      PyObject* etype, PyObject* etraceback);
 
   // Handle the current Python exception. An exception must have
   // occurred. Deals with system exceptions and

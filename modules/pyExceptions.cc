@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.14  2004/04/30 16:39:35  dgrisby
+// Log CORBA exceptions with Python tracebacks. Thanks Luke Deller.
+//
 // Revision 1.1.2.13  2004/02/16 13:56:41  dgrisby
 // Cope with long int in exception minor code.
 //
@@ -111,7 +114,8 @@ omniPy::createPySystemException(const CORBA::SystemException& ex)
 
 
 void
-omniPy::produceSystemException(PyObject* eobj, PyObject* erepoId)
+omniPy::produceSystemException(PyObject* eobj, PyObject* erepoId,
+			       PyObject* etype, PyObject* etraceback)
 {
   CORBA::ULong            minor  = 0;
   CORBA::CompletionStatus status = CORBA::COMPLETED_MAYBE;
@@ -143,11 +147,22 @@ omniPy::produceSystemException(PyObject* eobj, PyObject* erepoId)
 
   char* repoId = PyString_AS_STRING(erepoId);
 
-  Py_DECREF(eobj);
-
 #define THROW_SYSTEM_EXCEPTION_IF_MATCH(ex) \
-  if (!strcmp(repoId, "IDL:omg.org/CORBA/" #ex ":1.0")) { \
-    Py_DECREF(erepoId); OMNIORB_THROW(ex, minor, status); \
+  if (omni::strMatch(repoId, "IDL:omg.org/CORBA/" #ex ":1.0")) { \
+    if (omniORB::trace(10)) { \
+      { \
+        omniORB::logger l; \
+        l << "Caught a CORBA system exception during up-call: " \
+          << PyString_AS_STRING(erepoId) << "\n"; \
+      } \
+      PyErr_Restore(etype, eobj, etraceback); \
+      PyErr_Print(); \
+    } \
+    else { \
+      Py_XDECREF(eobj); Py_DECREF(etype); Py_XDECREF(etraceback); \
+    } \
+    Py_DECREF(erepoId); \
+    OMNIORB_THROW(ex, minor, status); \
   }
 
   OMNIORB_FOR_EACH_SYS_EXCEPTION(THROW_SYSTEM_EXCEPTION_IF_MATCH)
@@ -155,9 +170,16 @@ omniPy::produceSystemException(PyObject* eobj, PyObject* erepoId)
 #undef THROW_SYSTEM_EXCEPTION_IF_MATCH
 
   if (omniORB::trace(1)) {
-    omniORB::logger l;
-    l << "Caught an unexpected CORBA exception during up-call: "
-      << PyString_AS_STRING(erepoId) << "\n";
+    {
+      omniORB::logger l;
+      l << "Caught an unexpected CORBA exception during up-call: "
+        << PyString_AS_STRING(erepoId) << "\n";
+    }
+    PyErr_Restore(etype, eobj, etraceback);
+    PyErr_Print();
+  }
+  else {
+    Py_XDECREF(eobj); Py_DECREF(etype); Py_XDECREF(etraceback);
   }
   Py_DECREF(erepoId);
   if (m && c && v)
@@ -194,18 +216,15 @@ omniPy::handlePythonException()
 		  CORBA::COMPLETED_MAYBE);
   }
 
-  Py_DECREF(etype);
-  Py_XDECREF(etraceback);
-
   // Is it a LOCATION_FORWARD?
   if (omni::strMatch(PyString_AS_STRING(erepoId),
 		     "omniORB.LOCATION_FORWARD")) {
-    Py_DECREF(erepoId);
+    Py_DECREF(erepoId); Py_DECREF(etype); Py_XDECREF(etraceback);
     omniPy::handleLocationForward(evalue);
   }
 
   // System exception
-  omniPy::produceSystemException(evalue, erepoId);
+  omniPy::produceSystemException(evalue, erepoId, etype, etraceback);
 }
 
 

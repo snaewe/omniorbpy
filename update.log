@@ -1,3 +1,13 @@
+Fri Apr 30 17:38:04 BST 2004 dgrisby
+====================================
+
+- Log CORBA exceptions with Python tracebacks. Thanks Luke Deller.
+
+modules/omnipy.h
+modules/pyExceptions.cc
+modules/pyServant.cc
+
+
 Tue Apr 20 16:54:08 BST 2004 dgrisby
 ====================================
 
