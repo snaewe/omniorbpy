@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.31  2000/03/06 18:45:34  dpg1
+// Additions to compile on Solaris.
+//
 // Revision 1.30  2000/03/03 17:55:54  dpg1
 // Big swathe of obsolete code removed.
 //
@@ -270,7 +273,7 @@ extern "C" {
     static char* cv = OMNIORB_VERSION_STRING;
 
     if (!PyArg_ParseTuple(args, (char*)"")) return 0;
-    return Py_BuildValue("s", cv);
+    return Py_BuildValue((char*)"s", cv);
   }
 
   static PyObject*
@@ -493,7 +496,7 @@ extern "C" {
     size_t op_len;
 
     /*
-    if (!PyArg_ParseTuple(args, "Os#(OOO)O", &pyobjref, &op, &op_len,
+    if (!PyArg_ParseTuple(args, (char*)"Os#(OOO)O", &pyobjref, &op, &op_len,
 			  &in_d, &out_d, &exc_d, &op_args))
       return 0;
     */
