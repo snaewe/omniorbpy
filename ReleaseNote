@@ -8,7 +8,7 @@ may find at http://www.omg.org/cgi-bin/doc?ptc/00-01-12. There are a
 number of errors in the mapping document, which are outlined below.
 
 omniORBpy makes use of the C++ omniORB library. It can use either
-omniORB 2.8 or omniORB 3.0. If you use omniORB 3.0, the full POA
+omniORB 3.0 or omniORB 2.8. If you use omniORB 3.0, the full POA
 functionality is available; with omniORB 2.8 many POA functions are
 not supported.
 
@@ -29,9 +29,14 @@ You must install the omniORBpy source in the $TOP/src/lib directory of
 a working omniORB 2.8 or 3.0 tree. Then, in the $TOP/src/lib/omniORBpy
 directory, simply do a gnumake export.
 
-On Windows NT only, one of the omniORB 2.8 header files
-(omniInternal.h) has to be updated. You must get the latest version of
-the omni2_8_develop branch from CVS or the ftp snapshots.
+If you used omniORBpy pre-release 1, you should the old omniORBpy
+source tree before installing the new one, just to make sure
+everything starts fresh.
+
+On Windows NT only, if you are using omniORB 2.8, one of the omniORB
+header files (omniInternal.h) has to be updated. You must get the
+latest version of the omni2_8_develop branch from CVS or the ftp
+snapshots.
 
 
 Using omniORBpy
@@ -45,10 +50,8 @@ variable, like:
 where $TOP is the root of your omniORB tree and $FARCH is the platform
 name you selected in config.mk.
 
-On Unix platforms, you should also have $TOP/bin/scripts in your PATH,
-so you can run the IDL compiler, omniidl. On NT, omniidl is an
-executable which lives in $TOP/bin/x86_nt_4.0, so you should place
-that on your path.
+You should also have $TOP/bin/$FARCH in your PATH, so you can run the
+IDL compiler, omniidl.
 
 omniORBpy requires Python version 1.5.2. Be careful not to use
 /usr/bin/python on RedHat 5.2 machines, since that is Python 1.5.1.
