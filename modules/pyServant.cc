@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.18  2005/01/13 16:54:35  dgrisby
+// Fix possible deadlock in user exception deletion.
+//
 // Revision 1.1.2.17  2004/04/30 16:39:35  dgrisby
 // Log CORBA exceptions with Python tracebacks. Thanks Luke Deller.
 //
@@ -486,9 +489,13 @@ Py_omniServant::_dispatch(omniCallHandle& handle)
   }
   catch (omniPy::PyUserException& ex) {
     if (handle.iop_s()) {
-      {
+      try {
 	omniPy::InterpreterUnlocker _u;
 	handle.iop_s()->SendException(&ex);
+      }
+      catch (...) {
+	ex.decrefPyException();
+	throw;
       }
       ex.decrefPyException();
     }
@@ -533,6 +540,7 @@ Py_omniServant::remote_dispatch(Py_omniCallDescriptor* pycd)
     PyObject *etype, *evalue, *etraceback;
     PyObject *erepoId = 0;
     PyErr_Fetch(&etype, &evalue, &etraceback);
+    PyErr_NormalizeException(&etype, &evalue, &etraceback);
     OMNIORB_ASSERT(etype);
 
     if (evalue && PyInstance_Check(evalue))
@@ -693,6 +701,7 @@ Py_omniServant::local_dispatch(Py_omniCallDescriptor* pycd)
     PyObject *etype, *evalue, *etraceback;
     PyObject *erepoId = 0;
     PyErr_Fetch(&etype, &evalue, &etraceback);
+    PyErr_NormalizeException(&etype, &evalue, &etraceback);
     OMNIORB_ASSERT(etype);
 
     if (evalue && PyInstance_Check(evalue))
@@ -792,6 +801,7 @@ Py_ServantActivator::incarnate(const PortableServer::ObjectId& oid,
     PyObject *etype, *evalue, *etraceback;
     PyObject *erepoId = 0;
     PyErr_Fetch(&etype, &evalue, &etraceback);
+    PyErr_NormalizeException(&etype, &evalue, &etraceback);
     OMNIORB_ASSERT(etype);
 
     if (evalue && PyInstance_Check(evalue))
@@ -991,6 +1001,7 @@ Py_ServantLocator::preinvoke(const PortableServer::ObjectId& oid,
     PyObject *etype, *evalue, *etraceback;
     PyObject *erepoId = 0;
     PyErr_Fetch(&etype, &evalue, &etraceback);
+    PyErr_NormalizeException(&etype, &evalue, &etraceback);
     OMNIORB_ASSERT(etype);
 
     if (evalue && PyInstance_Check(evalue))
