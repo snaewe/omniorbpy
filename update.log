@@ -1,3 +1,38 @@
+Fri Jan 18 15:44:02 GMT 2002 dpg1
+=================================
+
+- Context support. New system exception construction. Fix None call problem.
+
+src/lib/omniORBpy/examples/tests/TypeTest.idl
+src/lib/omniORBpy/examples/tests/tclient.py
+src/lib/omniORBpy/examples/tests/tserver.py
+src/lib/omniORBpy/modules/dir.mk
+src/lib/omniORBpy/modules/omnipy.cc
+src/lib/omniORBpy/modules/omnipy.h
+src/lib/omniORBpy/modules/pyCallDescriptor.cc
+src/lib/omniORBpy/modules/pyContext.cc      -- new
+src/lib/omniORBpy/modules/pyServant.cc
+src/lib/omniORBpy/omniidl_be/python.py
+src/lib/omniORBpy/python/omniORB/CORBA.py
+src/lib/omniORBpy/python/omniORB/PortableServer.py
+src/lib/omniORBpy/python/omniORB/PortableServer__POA.py
+src/lib/omniORBpy/python/omniORB/__init__.py
+
+- New examples.
+
+src/lib/omniORBpy/examples/embed/dir.mk
+src/lib/omniORBpy/examples/embed/echo.idl
+src/lib/omniORBpy/examples/embed/embed.cc
+src/lib/omniORBpy/examples/embed/embed.py
+src/lib/omniORBpy/examples/poa/README
+src/lib/omniORBpy/examples/poa/mainthread.py
+src/lib/omniORBpy/examples/poa/singlethread.py
+src/lib/omniORBpy/examples/tictactoe/README
+src/lib/omniORBpy/examples/tictactoe/gameClient.py
+src/lib/omniORBpy/examples/tictactoe/gameServer.py
+src/lib/omniORBpy/examples/tictactoe/tictactoe.idl
+
+
 Mon Dec 10 18:01:14 GMT 2001 dpg1
 =================================
 
