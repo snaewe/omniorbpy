@@ -8,4 +8,20 @@
 
 <buglist>
 
+<bug id="1" date="Tue Aug 22 12:44:57 BST 2000" user="dpg1">
+
+  <summary>omniidl back-end generates useless classes for typedef to
+  struct/union</summary>
+
+  <reported>Jimmy Wilson</reported>
+  <link href="http://www.uk.research.att.com/omniORB/archives/2000-08/0172.html"/>
+  <text>
+  The Python mapping specification is totally silent on the issue of
+  typedefs. The only thing it says is that <em>something</em> must be
+  generated for all declared types, to be passed to
+  <code>CORBA.id()</code>. It does make sense to allow typedef names
+  to be used to contruct structs and unions, though.
+  </text>
+</bug>
+
 </buglist>

@@ -1,3 +1,12 @@
+Tue Aug 22 12:44:57 BST 2000 dpg1
+=================================
+
+- Generate inherited classes for typedefs to struct and unions
+- Cope better with nasty symbols in IDL file names
+
+omniidl_be/python.py
+
+
 Mon Aug 21 11:08:38 BST 2000 dpg1
 =================================
 
