@@ -1,3 +1,11 @@
+Mon Apr  5 10:17:47 BST 2004 dgrisby
+====================================
+
+- Bidirectional servers didn't work.
+
+modules/pyObjectRef.cc
+
+
 Wed Mar 24 22:22:11 GMT 2004 dgrisby
 ====================================
 

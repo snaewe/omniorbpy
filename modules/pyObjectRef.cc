@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.21  2004/04/05 09:06:42  dgrisby
+// Bidirectional servers didn't work.
+//
 // Revision 1.1.2.20  2004/03/02 15:33:57  dgrisby
 // Support persistent server id.
 //
@@ -105,6 +108,10 @@
 #include <inProcessIdentity.h>
 #include <objectAdapter.h>
 #include <omniORB4/omniURI.h>
+#include <giopStrand.h>
+#include <giopStream.h>
+#include <omniCurrent.h>
+#include <poaimpl.h>
 
 OMNI_USING_NAMESPACE(omni)
 
@@ -620,6 +627,22 @@ omniPy::UnMarshalObjRef(const char* repoId, cdrStream& s)
     // this has been accepted as a valid behaviour in GIOP 1.1/IIOP 1.1.
     // 
     omniIOR* ior = new omniIOR(id._retn(),profiles._retn());
+
+    giopStream* gs = giopStream::downcast(&s);
+    if (gs) {
+      giopStrand& g = (giopStrand&)*gs;
+      if (g.biDir && !g.isClient()) {
+	// Check the POA policy to see if the servant's POA is willing
+	// to use bidirectional on its callback objects.
+	omniCurrent* current = omniCurrent::get();
+	omniCallDescriptor* desc = ((current)? current->callDescriptor() :0);
+
+	if (desc && desc->poa() && desc->poa()->acceptBiDirectional()) {
+	  const char* sendfrom = g.connection->peeraddress();
+	  omniIOR::add_TAG_OMNIORB_BIDIR(sendfrom,*ior);
+	}
+      }
+    }
     omniObjRef* objref = omniPy::createObjRef(repoId,ior,0);
 
     if (!objref) OMNIORB_THROW(MARSHAL, MARSHAL_InvalidIOR,
