@@ -176,35 +176,12 @@ lib = $(patsubst %.lib,%.pyd,$(implib))
 
 all:: $(lib)
 
-ifeq ($(OMNIORB_VERSION),2.8.0)
-
-$(lib): $(OBJS)
-	(if egrep '^ *static *omni_mutex *objectTableLock' $(TOP)/include/omniORB2/omniInternal.h; then \
-           echo -e '\n\n\n\a'; \
-	   echo '*** ERROR !!! ***'; \
-	   echo; \
-	   echo 'Your $$TOP\include\omniORB2\omniInternal.h file needs to be patched.'; \
-	   echo; \
-           echo 'Please check-out the latest omni2_8_develop branch from CVS.'; \
-           echo 'See http://www.uk.research.att.com/omniORB/cvs.html for details.'; \
-           echo; \
-           exit 1; \
-         fi; \
-	 set -x; \
-	 $(RM) $@; \
-	 libs="$(OMNIORB_LIB) $(PYLIB)"; \
-	 $(CXXLINK) -out:$@ -DLL $(CXXLINKOPTIONS) $(IMPORT_LIBRARY_FLAGS) $(PYLIBPATH) $(OBJS) $$libs; \
-	)
-
-else
-
 $(lib): $(OBJS)
 	(set -x; \
 	 $(RM) $@; \
 	 libs="$(OMNIORB_LIB) $(PYLIB)"; \
 	 $(CXXLINK) -out:$@ -DLL $(CXXLINKOPTIONS) $(IMPORT_LIBRARY_FLAGS) $(PYLIBPATH) $(OBJS) $$libs; \
 	)
-endif
 
 export:: $(lib)
 	@$(ExportLibrary)
