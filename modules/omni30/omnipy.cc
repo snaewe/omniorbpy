@@ -33,6 +33,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.26  1999/12/14 15:28:40  dpg1
+// Catch ORB::InvalidName exception in resolve_initial_references().
+//
 // Revision 1.25  1999/12/02 17:35:57  dpg1
 // _narrow, _is_a, _is_equivalent weren't unlocking the interpreter.
 //
@@ -515,6 +518,12 @@ extern "C" {
     }
     catch (const CORBA::SystemException& ex) {
       omniPy::handleSystemException(ex);
+      return 0;
+    }
+    catch (CORBA::ORB::InvalidName& ex) {
+      // *** Should propogate this back to Python land
+      CORBA::BAD_PARAM bp;
+      omniPy::handleSystemException(bp);
       return 0;
     }
     return omniPy::createPyCorbaObjRef(0, objref);
