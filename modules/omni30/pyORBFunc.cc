@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.5  2000/04/28 15:31:05  dpg1
+// Accidentally broke resolve_initial_references() for pseudo objects.
+//
 // Revision 1.4  2000/04/27 11:04:00  dpg1
 // Support for ORB core Interoperable Naming Service changes.
 // Add shutdown() and destroy() operations.
@@ -144,10 +147,10 @@ extern "C" {
     CORBA::ORB_ptr orb = (CORBA::ORB_ptr)omniPy::getTwin(pyorb, ORB_TWIN);
     OMNIORB_ASSERT(orb);
 
-    CORBA::Object_ptr cxxobj;
+    CORBA::Object_ptr objref;
 
     try {
-      cxxobj = orb->resolve_initial_references(id);
+      objref = orb->resolve_initial_references(id);
     }
     catch (CORBA::ORB::InvalidName& ex) {
       PyObject* excc = PyObject_GetAttrString(pyorb, (char*)"InvalidName");
@@ -158,17 +161,17 @@ extern "C" {
     }
     OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
 
-    omniObjRef* cxxref = cxxobj->_PR_getobj();
-    omniObjRef* pyref  = omniPy::createObjRef(cxxref->_mostDerivedRepoId(),
-					      CORBA::Object::_PD_repoId,
-					      cxxref->_iopProfiles(),
-					      0, 0);
-    CORBA::release(cxxobj);
-
-    CORBA::Object_ptr result =
-      (CORBA::Object_ptr)pyref->_ptrToObjRef(CORBA::Object::_PD_repoId);
-
-    return omniPy::createPyCorbaObjRef(0, result);
+    if (!objref->_NP_is_pseudo()) {
+      omniObjRef* cxxref = objref->_PR_getobj();
+      omniObjRef* pyref  = omniPy::createObjRef(cxxref->_mostDerivedRepoId(),
+						CORBA::Object::_PD_repoId,
+						cxxref->_iopProfiles(),
+						0, 0);
+      CORBA::release(objref);
+      objref =
+	(CORBA::Object_ptr)pyref->_ptrToObjRef(CORBA::Object::_PD_repoId);
+    }
+    return omniPy::createPyCorbaObjRef(0, objref);
   }
 
   static PyObject*
