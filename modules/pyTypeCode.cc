@@ -29,6 +29,10 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.2.5  2000/12/05 17:48:36  dpg1
+// Strings in TypeCodes need to be marshalled as raw strings. Fix
+// incorrect offset in recursive indirections.
+//
 // Revision 1.1.2.4  2000/12/04 18:58:02  dpg1
 // Fix bug with TypeCode indirections.
 //
@@ -144,15 +148,17 @@ private:
 
 
 
-// Macro to marshal a PyString into a cdrStream
-#define MARSHAL_PYSTRING(_stream, _pystring) { \
-  CORBA::ULong _slen = PyString_GET_SIZE(_pystring) + 1; \
-  _slen >>= _stream; \
-  if (_slen > 0) { \
-    char* _str = PyString_AS_STRING(_pystring); \
-    _stream.put_octet_array((const CORBA::Octet*)((const char*)_str), _slen); \
-  } \
+static inline
+void marshalRawPyString(cdrStream& stream, PyObject* pystring)
+{
+  CORBA::ULong slen = PyString_GET_SIZE(pystring) + 1;
+  slen >>= stream;
+  if (slen > 0) {
+    char* str = PyString_AS_STRING(pystring);
+    stream.put_octet_array((const CORBA::Octet*)((const char*)str), slen);
+  }
 }
+
 
 static void
 r_marshalTypeCode(cdrStream&           stream,
@@ -184,10 +190,11 @@ r_marshalTypeCode(cdrStream&           stream,
     }
 
     // Marshal the kind
-    if (tk != 0xffffffff) tk >>= stream;
-
-    // Offset of this TypeCode (within the current encapsulation if any):
-    tc_offset = stream.currentOutputPtr() - 4;
+    if (tk != 0xffffffff) {
+      tk >>= stream;
+      // Offset of this TypeCode (within the current encapsulation if any):
+      tc_offset = stream.currentOutputPtr() - 4;
+    }
 
     switch (tk) {
     case CORBA::tk_null:
@@ -230,10 +237,10 @@ r_marshalTypeCode(cdrStream&           stream,
 
 	// RepoId and name
 	t_o = PyTuple_GET_ITEM(d_o, 1); OMNIORB_ASSERT(PyString_Check(t_o));
-	MARSHAL_PYSTRING(encap, t_o);
+	marshalRawPyString(encap, t_o);
 
 	t_o = PyTuple_GET_ITEM(d_o, 2); OMNIORB_ASSERT(PyString_Check(t_o));
-	MARSHAL_PYSTRING(encap, t_o);
+	marshalRawPyString(encap, t_o);
 
 	// Send encapsulation
 	::operator>>=((CORBA::ULong)encap.bufSize(), stream);
@@ -249,11 +256,11 @@ r_marshalTypeCode(cdrStream&           stream,
 	DescriptorOffsetMap edom(dom, tc_offset + 8);
 
 	// RepoId and name
-	t_o    = PyTuple_GET_ITEM(d_o, 2); OMNIORB_ASSERT(PyString_Check(t_o));
-	MARSHAL_PYSTRING(encap, t_o);
+	t_o = PyTuple_GET_ITEM(d_o, 2); OMNIORB_ASSERT(PyString_Check(t_o));
+	marshalRawPyString(encap, t_o);
 
-	t_o    = PyTuple_GET_ITEM(d_o, 3); OMNIORB_ASSERT(PyString_Check(t_o));
-	MARSHAL_PYSTRING(encap, t_o);
+	t_o = PyTuple_GET_ITEM(d_o, 3); OMNIORB_ASSERT(PyString_Check(t_o));
+	marshalRawPyString(encap, t_o);
 
 	// Count
 	CORBA::ULong cnt = (PyTuple_GET_SIZE(d_o) - 4) / 2;
@@ -292,11 +299,11 @@ r_marshalTypeCode(cdrStream&           stream,
 	DescriptorOffsetMap edom(dom, tc_offset + 8);
 
 	// RepoId and name
-	t_o    = PyTuple_GET_ITEM(d_o, 2); OMNIORB_ASSERT(PyString_Check(t_o));
-	MARSHAL_PYSTRING(encap, t_o);
+	t_o = PyTuple_GET_ITEM(d_o, 2); OMNIORB_ASSERT(PyString_Check(t_o));
+	marshalRawPyString(encap, t_o);
 
-	t_o    = PyTuple_GET_ITEM(d_o, 3); OMNIORB_ASSERT(PyString_Check(t_o));
-	MARSHAL_PYSTRING(encap, t_o);
+	t_o = PyTuple_GET_ITEM(d_o, 3); OMNIORB_ASSERT(PyString_Check(t_o));
+	marshalRawPyString(encap, t_o);
 
 	// Discriminant type
 	PyObject* discriminant = PyTuple_GET_ITEM(d_o, 4);
@@ -353,11 +360,11 @@ r_marshalTypeCode(cdrStream&           stream,
 	cdrEncapsulationStream encap;
 
 	// RepoId and name
-	t_o    = PyTuple_GET_ITEM(d_o, 1); OMNIORB_ASSERT(PyString_Check(t_o));
-	MARSHAL_PYSTRING(encap, t_o);
+	t_o = PyTuple_GET_ITEM(d_o, 1); OMNIORB_ASSERT(PyString_Check(t_o));
+	marshalRawPyString(encap, t_o);
 
-	t_o    = PyTuple_GET_ITEM(d_o, 2); OMNIORB_ASSERT(PyString_Check(t_o));
-	MARSHAL_PYSTRING(encap, t_o);
+	t_o = PyTuple_GET_ITEM(d_o, 2); OMNIORB_ASSERT(PyString_Check(t_o));
+	marshalRawPyString(encap, t_o);
 
 	PyObject* mems;
 	PyObject* mem;
@@ -374,7 +381,7 @@ r_marshalTypeCode(cdrStream&           stream,
 	  // Member name
 	  t_o = PyDict_GetItemString(((PyInstanceObject*)mem)->in_dict,
 				     (char*)"_n");
-	  MARSHAL_PYSTRING(encap, t_o);
+	  marshalRawPyString(encap, t_o);
 	}
       	// Send encapsulation
 	::operator>>=((CORBA::ULong)encap.bufSize(), stream);
@@ -432,11 +439,11 @@ r_marshalTypeCode(cdrStream&           stream,
 	DescriptorOffsetMap edom(dom, tc_offset + 8);
 
 	// RepoId and name
-	t_o    = PyTuple_GET_ITEM(d_o, 1); OMNIORB_ASSERT(PyString_Check(t_o));
-	MARSHAL_PYSTRING(encap, t_o);
+	t_o = PyTuple_GET_ITEM(d_o, 1); OMNIORB_ASSERT(PyString_Check(t_o));
+	marshalRawPyString(encap, t_o);
 
-	t_o    = PyTuple_GET_ITEM(d_o, 2); OMNIORB_ASSERT(PyString_Check(t_o));
-	MARSHAL_PYSTRING(encap, t_o);
+	t_o = PyTuple_GET_ITEM(d_o, 2); OMNIORB_ASSERT(PyString_Check(t_o));
+	marshalRawPyString(encap, t_o);
 
 	// TypeCode
 	r_marshalTypeCode(encap, PyTuple_GET_ITEM(d_o, 3), edom);
@@ -455,11 +462,11 @@ r_marshalTypeCode(cdrStream&           stream,
 	DescriptorOffsetMap edom(dom, tc_offset + 8);
 
 	// RepoId and name
-	t_o    = PyTuple_GET_ITEM(d_o, 2); OMNIORB_ASSERT(PyString_Check(t_o));
-	MARSHAL_PYSTRING(encap, t_o);
+	t_o = PyTuple_GET_ITEM(d_o, 2); OMNIORB_ASSERT(PyString_Check(t_o));
+	marshalRawPyString(encap, t_o);
 
-	t_o    = PyTuple_GET_ITEM(d_o, 3); OMNIORB_ASSERT(PyString_Check(t_o));
-	MARSHAL_PYSTRING(encap, t_o);
+	t_o = PyTuple_GET_ITEM(d_o, 3); OMNIORB_ASSERT(PyString_Check(t_o));
+	marshalRawPyString(encap, t_o);
 
 	// Count
 	CORBA::ULong cnt = (PyTuple_GET_SIZE(d_o) - 4) / 2;
@@ -510,7 +517,7 @@ r_marshalTypeCode(cdrStream&           stream,
 
 	if (dom.lookup(t_o, position)) {
 	  tk     >>= stream;
-	  offset   = position - (tc_offset + 4);
+	  offset   = position - stream.currentOutputPtr();
 	  offset >>= stream;
 	}
 	else {
@@ -527,12 +534,31 @@ r_marshalTypeCode(cdrStream&           stream,
 
 
 
-// Macro to unmarshal a PyString from a cdrStream
-#define UNMARSHAL_PYSTRING(_stream, _pystring) { \
-  CORBA::ULong _len; _len <<= stream; \
-  _pystring = PyString_FromStringAndSize(0, _len - 1); \
-  _stream.get_octet_array((_CORBA_Octet*)PyString_AS_STRING(_pystring), _len);\
+static inline PyObject*
+unmarshalRawPyString(cdrStream& stream)
+{
+  CORBA::ULong len; len <<= stream;
+
+  if (!stream.checkInputOverrun(1, len))
+    OMNIORB_THROW(MARSHAL, 0, CORBA::COMPLETED_NO);
+
+  PyObject* pystring = PyString_FromStringAndSize(0, len - 1);
+
+  stream.get_octet_array((_CORBA_Octet*)PyString_AS_STRING(pystring), len);
+  return pystring;
 }
+
+static inline void
+skipString(cdrStream& stream)
+{
+  CORBA::ULong len; len <<= stream;
+
+  if (!stream.checkInputOverrun(1, len))
+    OMNIORB_THROW(MARSHAL, 0, CORBA::COMPLETED_NO);
+
+  stream.skipInput(len);
+}
+
 
 PyObject*
 r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
@@ -590,8 +616,8 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
       PyTuple_SET_ITEM(d_o, 0, PyInt_FromLong(tk));
 
       // RepoId and name
-      UNMARSHAL_PYSTRING(encap, t_o); PyTuple_SET_ITEM(d_o, 1, t_o);
-      UNMARSHAL_PYSTRING(encap, t_o); PyTuple_SET_ITEM(d_o, 2, t_o);
+      t_o = unmarshalRawPyString(encap); PyTuple_SET_ITEM(d_o, 1, t_o);
+      t_o = unmarshalRawPyString(encap); PyTuple_SET_ITEM(d_o, 2, t_o);
     }
     break;
 
@@ -600,7 +626,7 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
       CORBA::ULong size; size <<= stream;
       cdrEncapsulationStream encap(stream, size);
 
-      PyObject* repoId; UNMARSHAL_PYSTRING(encap, repoId);
+      PyObject* repoId = unmarshalRawPyString(encap);
 
       d_o = PyDict_GetItem(omniPy::pyomniORBtypeMap, repoId);
 
@@ -613,16 +639,15 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
 	// equivalence, but we don't bother. We still have to recurse
 	// into the TypeCode in case there are later indirections into
 	// it.
-
 	odm.add(d_o, tc_offset);
 	OffsetDescriptorMap eodm(odm, tc_offset + 8);
 
-	UNMARSHAL_PYSTRING(encap, t_o); Py_DECREF(t_o); // Name
+	skipString(encap); // Name
 	CORBA::ULong cnt; cnt <<= encap;
 
 	for (CORBA::ULong i=0; i < cnt; i++) {
 	  // Member name and type
-	  UNMARSHAL_PYSTRING(encap, t_o); Py_DECREF(t_o);
+	  skipString(encap);
 	  t_o = r_unmarshalTypeCode(encap, eodm); Py_DECREF(t_o);
 	}
       }
@@ -630,7 +655,7 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
 	// Don't know this structure
 	OffsetDescriptorMap eodm(odm, tc_offset + 8);
 
-	PyObject* name; UNMARSHAL_PYSTRING(encap, name);
+	PyObject* name = unmarshalRawPyString(encap);
 
 	CORBA::ULong cnt; cnt <<= encap;
 
@@ -647,7 +672,7 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
 
 	for (i=0, j=4; i < cnt; i++) {
 	  // member name
-	  UNMARSHAL_PYSTRING(encap, t_o);
+	  t_o = unmarshalRawPyString(encap);
 
 	  if ((word = PyDict_GetItem(omniPy::pyomniORBwordMap, t_o))) {
 	    Py_DECREF(t_o);
@@ -684,7 +709,7 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
       CORBA::ULong size; size <<= stream;
       cdrEncapsulationStream encap(stream, size);
 
-      PyObject* repoId; UNMARSHAL_PYSTRING(encap, repoId);
+      PyObject* repoId = unmarshalRawPyString(encap);
 
       d_o = PyDict_GetItem(omniPy::pyomniORBtypeMap, repoId);
 
@@ -701,7 +726,7 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
 	odm.add(d_o, tc_offset);
 	OffsetDescriptorMap eodm(odm, tc_offset + 8);
 
-	UNMARSHAL_PYSTRING(encap, t_o); Py_DECREF(t_o); // Name
+	skipString(encap); // Name
 	PyObject* discriminant = r_unmarshalTypeCode(encap, eodm);
 
 	CORBA::Long  def_used; def_used <<= encap;
@@ -712,7 +737,7 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
 	  t_o = omniPy::unmarshalPyObject(encap, discriminant); Py_DECREF(t_o);
 
 	  // Member name
-	  UNMARSHAL_PYSTRING(encap, t_o); Py_DECREF(t_o);
+	  skipString(encap);
 
 	  // Member type
 	  t_o = r_unmarshalTypeCode(encap, eodm); Py_DECREF(t_o);
@@ -728,7 +753,7 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
 	PyTuple_SET_ITEM(d_o, 2, repoId);
 
 	// name
-	UNMARSHAL_PYSTRING(encap, t_o);
+	t_o = unmarshalRawPyString(encap);
 	PyTuple_SET_ITEM(d_o, 3, t_o);
 
 	// discriminant type
@@ -764,7 +789,7 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
 	  PyTuple_SET_ITEM(mem, 0, label);
 
 	  // Member name
-	  UNMARSHAL_PYSTRING(encap, t_o);
+	  t_o = unmarshalRawPyString(encap);
 
 	  if ((word = PyDict_GetItem(omniPy::pyomniORBwordMap, t_o))) {
 	    Py_DECREF(t_o);
@@ -807,7 +832,7 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
       CORBA::ULong size; size <<= stream;
       cdrEncapsulationStream encap(stream, size);
 
-      PyObject* repoId; UNMARSHAL_PYSTRING(encap, repoId);
+      PyObject* repoId = unmarshalRawPyString(encap);
 
       d_o = PyDict_GetItem(omniPy::pyomniORBtypeMap, repoId);
 
@@ -823,7 +848,7 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
 	PyTuple_SET_ITEM(d_o, 1, repoId);
 
 	// name
-	UNMARSHAL_PYSTRING(encap, t_o);
+	t_o = unmarshalRawPyString(encap);
 	PyTuple_SET_ITEM(d_o, 2, t_o);
 
 	// count
@@ -840,7 +865,7 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
 
 	// members
 	for (CORBA::ULong i=0; i<cnt; i++) {
-	  UNMARSHAL_PYSTRING(encap, t_o);
+	  t_o = unmarshalRawPyString(encap);
 
 	  if (PyString_GET_SIZE(t_o) > 0)
 	    t_o = PyObject_CallFunction(eclass, (char*)"Oi", t_o, i);
@@ -900,7 +925,7 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
       CORBA::ULong size; size <<= stream;
       cdrEncapsulationStream encap(stream, size);
 
-      PyObject* repoId; UNMARSHAL_PYSTRING(encap, repoId);
+      PyObject* repoId = unmarshalRawPyString(encap);
 
       d_o = PyDict_GetItem(omniPy::pyomniORBtypeMap, repoId);
 
@@ -911,7 +936,7 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
 
 	odm.add(d_o, tc_offset);
 	OffsetDescriptorMap eodm(odm, tc_offset + 8);
-	UNMARSHAL_PYSTRING(encap, t_o); Py_DECREF(t_o); // name
+	skipString(encap); // name
 	t_o = r_unmarshalTypeCode(encap, eodm); Py_DECREF(t_o);
       }
       else {
@@ -922,7 +947,7 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
 	PyTuple_SET_ITEM(d_o, 1, repoId);
 	
 	// name
-	UNMARSHAL_PYSTRING(encap, t_o); PyTuple_SET_ITEM(d_o, 2, t_o);
+	t_o = unmarshalRawPyString(encap); PyTuple_SET_ITEM(d_o, 2, t_o);
 
 	// TypeCode
 	t_o = r_unmarshalTypeCode(encap, eodm);
@@ -936,7 +961,7 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
       CORBA::ULong size; size <<= stream;
       cdrEncapsulationStream encap(stream, size);
 
-      PyObject* repoId; UNMARSHAL_PYSTRING(encap, repoId);
+      PyObject* repoId = unmarshalRawPyString(encap);
 
       d_o = PyDict_GetItem(omniPy::pyomniORBtypeMap, repoId);
 
@@ -948,12 +973,12 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
 	odm.add(d_o, tc_offset);
 	OffsetDescriptorMap eodm(odm, tc_offset + 8);
 
-	UNMARSHAL_PYSTRING(encap, t_o); Py_DECREF(t_o); // name
+	skipString(encap); // name
 	CORBA::ULong cnt; cnt <<= encap;
 
 	for (CORBA::ULong i=0; i < cnt; i++) {
 	  // Member name and type
-	  UNMARSHAL_PYSTRING(encap, t_o); Py_DECREF(t_o);
+	  skipString(encap);
 	  t_o = r_unmarshalTypeCode(encap, eodm); Py_DECREF(t_o);
 	}
       }
@@ -961,7 +986,7 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
 	// Don't know this exception
 	OffsetDescriptorMap eodm(odm, tc_offset + 8);
 
-	PyObject* name; UNMARSHAL_PYSTRING(encap, name);
+	PyObject* name = unmarshalRawPyString(encap);
 
 	CORBA::ULong cnt; cnt <<= encap;
 
@@ -978,7 +1003,7 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
 
 	for (i=0, j=4; i < cnt; i++) {
 	  // member name
-	  UNMARSHAL_PYSTRING(encap, t_o);
+	  t_o = unmarshalRawPyString(encap);
 
 	  if ((word = PyDict_GetItem(omniPy::pyomniORBwordMap, t_o))) {
 	    Py_DECREF(t_o);
