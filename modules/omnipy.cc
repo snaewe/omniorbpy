@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.12  2001/08/15 10:37:13  dpg1
+// Track ORB core object table changes.
+//
 // Revision 1.1.2.11  2001/06/22 10:29:26  dpg1
 // Add distribution date to logging.
 //
@@ -687,7 +690,7 @@ OMNIORB_FOR_EACH_SYS_EXCEPTION(DO_CALL_DESC_SYSTEM_EXCEPTON)
 	omniObjRef* oosource = cxxsource->_PR_getobj();
 	omniObjRef* oodest   = omniPy::createObjRef(repoId,
 						    oosource->_getIOR(),
-						    0, 0, 0, 1);
+						    0, 0, 1);
 	cxxdest =
 	  (CORBA::Object_ptr)(oodest->_ptrToObjRef(CORBA::Object::_PD_repoId));
       }

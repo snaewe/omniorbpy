@@ -1,3 +1,20 @@
+Wed Aug 15 11:32:53 BST 2001 dpg1
+=================================
+
+- Tweak examples.
+
+src/lib/omniORBpy/examples/echo/echo_clt.py
+src/lib/omniORBpy/examples/poa/servantactivator.py
+src/lib/omniORBpy/examples/poa/servantlocator.py
+
+- Track ORB core object table changes.
+
+src/lib/omniORBpy/modules/omnipy.cc
+src/lib/omniORBpy/modules/omnipy.h
+src/lib/omniORBpy/modules/pyCallDescriptor.cc
+src/lib/omniORBpy/modules/pyObjectRef.cc
+
+
 Wed Aug  1 11:10:52 BST 2001 dpg1
 =================================
 

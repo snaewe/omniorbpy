@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.7  2001/08/15 10:37:14  dpg1
+// Track ORB core object table changes.
+//
 // Revision 1.1.2.6  2001/06/29 15:11:12  dpg1
 // Fix for clients using GIOP 1.0.
 //
@@ -147,7 +150,8 @@ omniPy::Py_omniCallDescriptor::unmarshalReturnedValues(cdrStream& stream)
 
 
 void
-omniPy::Py_omniCallDescriptor::userException(_OMNI_NS(IOP_C)& iop_client,
+omniPy::Py_omniCallDescriptor::userException(cdrStream& stream,
+					     _OMNI_NS(IOP_C)* iop_client,
 					     const char* repoId)
 {
   reacquireInterpreterLock();
@@ -159,21 +163,19 @@ omniPy::Py_omniCallDescriptor::userException(_OMNI_NS(IOP_C)& iop_client,
     try {
       PyUserException ex(d_o);
       
-      cdrStream& stream = iop_client.getStream();
-
       ex <<= stream;
       ex._raise();
     }
     catch (...) {
       releaseInterpreterLock();
-      iop_client.RequestCompleted();
+      if (iop_client) iop_client->RequestCompleted();
       throw;
     }
     OMNIORB_ASSERT(0); // Never reach here
   }
   else {
     releaseInterpreterLock();
-    iop_client.RequestCompleted(1);
+    if (iop_client) iop_client->RequestCompleted(1);
     OMNIORB_THROW(MARSHAL, 0, CORBA::COMPLETED_MAYBE);
   }
 }
