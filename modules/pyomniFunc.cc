@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.6  2001/08/21 12:48:27  dpg1
+// Meaningful exception minor code strings.
+//
 // Revision 1.1.2.5  2001/08/21 10:52:42  dpg1
 // Update to new ORB core APIs.
 //
@@ -429,6 +432,57 @@ extern "C" {
   }
 
 
+  static char minorCodeToString_doc [] =
+  "minorCodeToString(CORBA.SystemException) -> string\n"
+  "\n"
+  "Return a name indicating the meaning of a system exception's minor\n"
+  "code. If there is no entry for the minor code, return None.\n";
+
+  static PyObject* pyomni_minorCodeToString(PyObject* self, PyObject* args)
+  {
+    PyObject* pyexc;
+    PyObject* pyrepoId = 0;
+    PyObject* pyminor = 0;
+
+    if (!PyArg_ParseTuple(args, (char*)"O", &pyexc))
+      return 0;
+
+    if (PyInstance_Check(pyexc)) {
+      pyrepoId = PyObject_GetAttrString(pyexc, (char*)"_NP_RepositoryId");
+      pyminor  = PyObject_GetAttrString(pyexc, (char*)"minor");
+    }
+    if (!(pyrepoId && PyString_Check(pyrepoId) &&
+	  pyminor  && (PyInt_Check(pyminor) || PyLong_Check(pyminor)))) {
+      Py_INCREF(Py_None);
+      return Py_None;
+    }
+    const char* repoId = PyString_AS_STRING(pyrepoId);
+
+    CORBA::ULong minor;
+    if (PyInt_Check(pyminor))
+      minor = PyInt_AS_LONG(pyminor);
+    else
+      minor = PyLong_AsUnsignedLong(pyminor);
+
+    const char* str = 0;
+
+    if (0) {
+    }
+#define ToStringIfMatch(name) \
+    else if (!strcmp(repoId, "IDL:omg.org/CORBA/" #name ":1.0")) \
+      str = minorCode2String(name##_LookupTable, minor);
+
+    OMNIORB_FOR_EACH_SYS_EXCEPTION(ToStringIfMatch)
+#undef ToStringIfMatch
+
+    if (str)
+      return PyString_FromString(str);
+    else {
+      Py_INCREF(Py_None);
+      return Py_None;
+    }
+  }
+
   static PyMethodDef pyomni_methods[] = {
     {(char*)"installTransientExceptionHandler",
      pyomni_installTransientExceptionHandler,
@@ -453,6 +507,10 @@ extern "C" {
     {(char*)"fixed",
      pyomni_fixed,
      METH_VARARGS, fixed_doc},
+
+    {(char*)"minorCodeToString",
+     pyomni_minorCodeToString,
+     METH_VARARGS, minorCodeToString_doc},
 
     {NULL,NULL}
   };

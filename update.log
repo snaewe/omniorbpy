@@ -1,3 +1,12 @@
+Tue Aug 21 13:31:10 BST 2001 dpg1
+=================================
+
+- Meaningful exception minor code strings.
+
+modules/pyomniFunc.cc
+python/omniORB/CORBA.py
+
+
 Tue Aug 21 11:50:55 BST 2001 dpg1
 =================================
 
