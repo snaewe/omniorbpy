@@ -31,6 +31,10 @@
 # $Id$
 
 # $Log$
+# Revision 1.18  2000/02/15 17:14:15  dpg1
+# UserException now has a __str__() method to avoid an exception in the
+# exception handler.
+#
 # Revision 1.17  2000/01/31 10:51:42  dpg1
 # Fix to exception throwing.
 #
@@ -137,7 +141,8 @@ class SystemException (Exception):
                ", Completed: " + str(self.completed) + "."
 
 class UserException (Exception):
-    pass
+    def __str__(self):
+        return ""
 
 
 # All the standard system exceptions...
