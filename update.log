@@ -1,3 +1,15 @@
+Tue Jun 15 17:29:20 BST 2004 dgrisby
+====================================
+
+- Same for thread deletion.
+
+modules/pyThreadCache.cc
+
+- Bump RPM revision.
+
+contrib/RPMs/omniORBpy.spec
+
+
 Tue Jun 15 15:49:19 BST 2004 dgrisby
 ====================================
 
