@@ -1,3 +1,11 @@
+Fri Oct  5 15:27:13 BST 2001 dpg1
+=================================
+
+- Fix hard-coded Python path in AIX make rules.
+
+modules/dir.mk
+
+
 Fri Jul  6 15:34:33 BST 2001 dpg1
 =================================
 
