@@ -1,3 +1,15 @@
+Mon Feb 16 13:55:02 GMT 2004 dgrisby
+====================================
+
+- Operation names clashing with keywords were broken.
+
+omniidl_be/python.py
+
+- Cope with long int in exception minor code.
+
+modules/pyExceptions.cc
+
+
 Mon Feb 16 09:56:57 GMT 2004 dgrisby
 ====================================
 

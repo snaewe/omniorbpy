@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.13  2004/02/16 13:56:41  dgrisby
+// Cope with long int in exception minor code.
+//
 // Revision 1.1.2.12  2003/12/15 18:14:27  dgrisby
 // Another bug in omniORB.LOCATION_FORWARD handling.
 //
@@ -116,9 +119,14 @@ omniPy::produceSystemException(PyObject* eobj, PyObject* erepoId)
   PyObject *m = 0, *c = 0, *v = 0;
 
   m = PyObject_GetAttrString(eobj, (char*)"minor");
-  if (m && PyInt_Check(m)) {
-    minor = PyInt_AS_LONG(m);
 
+  if (m) {
+    if (PyInt_Check(m)) {
+      minor = PyInt_AS_LONG(m);
+    }
+    else if (PyLong_Check(m)) {
+      minor = PyLong_AsUnsignedLong(m);
+    }
     c = PyObject_GetAttrString(eobj, (char*)"completed");
 
     if (c) {
