@@ -28,6 +28,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.29.2.12  2002/05/27 01:02:37  dgrisby
+# Fix bug with scope lookup in generated code. Fix TypeCode clean-up bug.
+#
 # Revision 1.29.2.11  2002/01/18 17:41:17  dpg1
 # Support for "docstrings" in IDL.
 #
@@ -244,13 +247,15 @@ _0_@s_imodname@ = omniORB.openModule("@package@@s_imodname@")"""
 forward_interface = """\
 
 # interface @ifid@;
-_0_@modname@._d_@ifid@ = (omniORB.tcInternal.tv_objref, "@repoId@", "@ifid@")"""
+_0_@modname@._d_@ifid@ = (omniORB.tcInternal.tv_objref, "@repoId@", "@ifid@")
+omniORB.typeMapping["@repoId@"] = _0_@modname@._d_@ifid@"""
 
 
 interface_class = """\
 
 # interface @ifid@
 _0_@modname@._d_@ifid@ = (omniORB.tcInternal.tv_objref, "@repoId@", "@ifid@")
+omniORB.typeMapping["@repoId@"] = _0_@modname@._d_@ifid@
 _0_@modname@.@ifid@ = omniORB.newEmptyClass()
 class @ifid@ @inherits@:
     _NP_RepositoryId = _0_@modname@._d_@ifid@[1]
@@ -370,20 +375,24 @@ omniORB.registerType(@tdname@._NP_RepositoryId, _ad_@tdname@, _tc_@tdname@)"""
 
 forward_struct_descr_at_module_scope = """
 # Forward struct @sname@
-_0_@modname@._d_@sname@ = (omniORB.tcInternal.tv__indirect, ["@repoId@"])"""
+_0_@modname@._d_@sname@ = (omniORB.tcInternal.tv__indirect, ["@repoId@"])
+omniORB.typeMapping["@repoId@"] = _0_@modname@._d_@sname@"""
 
 forward_struct_descr = """
 # Forward struct @sname@
-_d_@sname@ = (omniORB.tcInternal.tv__indirect, ["@repoId@"])"""
+_d_@sname@ = (omniORB.tcInternal.tv__indirect, ["@repoId@"])
+omniORB.typeMapping["@repoId@"] = _d_@sname@"""
 
 recursive_struct_descr_at_module_scope = """
 # Recursive struct @sname@
-_0_@modname@._d_@sname@ = (omniORB.tcInternal.tv__indirect, ["@repoId@"])"""
+_0_@modname@._d_@sname@ = (omniORB.tcInternal.tv__indirect, ["@repoId@"])
+omniORB.typeMapping["@repoId@"] = _0_@modname@._d_@sname@"""
 
 recursive_struct_descr = """
 # Recursive struct @sname@
 _d_@sname@ = (omniORB.tcInternal.tv__indirect, ["@repoId@"])
-_0_@scope@._d_@sname@ = _d_@sname@"""
+_0_@scope@._d_@sname@ = _d_@sname@
+omniORB.typeMapping["@repoId@"] = _d_@sname@"""
 
 struct_class = """
 # struct @sname@
@@ -450,14 +459,26 @@ _d_@sname@  = (omniORB.tcInternal.tv_except, @sname@, @sname@._NP_RepositoryId, 
 _tc_@sname@ = omniORB.tcInternal.createTypeCode(_d_@sname@)
 omniORB.registerType(@sname@._NP_RepositoryId, _d_@sname@, _tc_@sname@)"""
 
+forward_union_descr_at_module_scope = """
+# Forward union @uname@
+_0_@modname@._d_@uname@ = (omniORB.tcInternal.tv__indirect, ["@repoId@"])
+omniORB.typeMapping["@repoId@"] = _0_@modname@._d_@uname@"""
+
+forward_union_descr = """
+# Forward union @uname@
+_d_@uname@ = (omniORB.tcInternal.tv__indirect, ["@repoId@"])
+omniORB.typeMapping["@repoId@"] = _d_@uname@"""
+
 recursive_union_descr_at_module_scope = """
 # Recursive union @uname@
-_0_@modname@._d_@uname@ = (omniORB.tcInternal.tv__indirect, ["@repoId@"])"""
+_0_@modname@._d_@uname@ = (omniORB.tcInternal.tv__indirect, ["@repoId@"])
+omniORB.typeMapping["@repoId@"] = _0_@modname@._d_@uname@"""
 
 recursive_union_descr = """
 # Recursive union @uname@
 _d_@uname@ = (omniORB.tcInternal.tv__indirect, ["@repoId@"])
-_0_@scope@._d_@uname@ = _d_@uname@"""
+_0_@scope@._d_@uname@ = _d_@uname@
+omniORB.typeMapping["@repoId@"] = _d_@uname@"""
 
 union_class = """
 # union @uname@
@@ -1166,7 +1187,7 @@ class PythonVisitor:
 
     #
     # Forward struct
-
+    #
     def visitStructForward(self, node):
         if self.handleImported(node): return
 
@@ -1404,6 +1425,25 @@ class PythonVisitor:
                         scope   = dotName(fscopedName[:-1]))
             
             self.st.out(union_register, uname = uname)
+
+    #
+    # Forward union
+    #
+    def visitUnionForward(self, node):
+        if self.handleImported(node): return
+
+        uname = mangle(node.identifier())
+
+        if self.at_module_scope:
+            self.st.out(forward_union_descr_at_module_scope,
+                        uname   = uname,
+                        repoId  = node.repoId(),
+                        modname = self.modname)
+        else:
+            self.st.out(forward_union_descr,
+                        uname   = uname,
+                        repoId  = node.repoId(),
+                        modname = self.modname)
 
     #
     # Enum
@@ -1727,15 +1767,12 @@ def typeToDescriptor(tspec, from_scope=[], is_typedef=0):
     elif tspec.kind() == idltype.tk_alias:
         sn = fixupScopedName(tspec.scopedName())
         if is_typedef:
-            ret = dotName(sn[:-1] + ["_ad_" + sn[-1]], from_scope)
+            return 'omniORB.typeCodeMapping["%s"]._d' % tspec.decl().repoId()
         else:
-            ret = dotName(sn[:-1] + ["_d_" + sn[-1]], from_scope)
-        return ret
+            return 'omniORB.typeMapping["%s"]' % tspec.decl().repoId()
 
     else:
-        sn  = fixupScopedName(tspec.scopedName())
-        ret = dotName(sn[:-1] + ["_d_" + sn[-1]], from_scope)
-        return ret
+        ret = 'omniORB.typeMapping["%s"]' % tspec.decl().repoId()
 
     tspec.python_desc = ret
     return ret

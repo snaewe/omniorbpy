@@ -1,3 +1,14 @@
+Mon May 27 01:57:57 BST 2002 dgrisby
+====================================
+
+- Fix bug with scope lookup in generated code. Fix TypeCode clean-up bug.
+
+omniidl_be/python.py
+python/omniORB/CORBA.py
+python/omniORB/__init__.py
+python/omniORB/tcInternal.py
+
+
 Sun May 26 22:03:19 BST 2002 dgrisby
 ====================================
 

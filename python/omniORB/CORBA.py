@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.28.2.14  2002/05/27 01:02:37  dgrisby
+# Fix bug with scope lookup in generated code. Fix TypeCode clean-up bug.
+#
 # Revision 1.28.2.13  2002/05/26 00:56:57  dgrisby
 # Minor bug in ORB __del__.
 #
@@ -630,6 +633,10 @@ _d_Object  = (omniORB.tcInternal.tv_objref, Object._NP_RepositoryId, "Object")
 TC_Object  = _tc_Object = omniORB.tcInternal.createTypeCode(_d_Object)
 omniORB.registerType(Object._NP_RepositoryId, _d_Object, _tc_Object)
 omniORB.registerObjref(Object._NP_RepositoryId, Object)
+other_id = "IDL:omg.org/CORBA/Object:1.0"
+omniORB.registerType(other_id, _d_Object, _tc_Object)
+omniORB.registerObjref(other_id, Object)
+del other_id
 
 
 #############################################################################

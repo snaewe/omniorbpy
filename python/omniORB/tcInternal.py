@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.10.2.5  2002/05/27 01:02:37  dgrisby
+# Fix bug with scope lookup in generated code. Fix TypeCode clean-up bug.
+#
 # Revision 1.10.2.4  2002/03/11 15:40:05  dpg1
 # _get_interface support, exception minor codes.
 #
@@ -983,4 +986,4 @@ def removeIndirections(desc):
             removeIndirections(desc[i])
 
     elif k == tv__indirect:
-        del(desc[1][0])
+        desc[1][0] = None
