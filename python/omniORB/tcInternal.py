@@ -27,12 +27,17 @@
 # Description:
 #    TypeCode internal implementation
 
-
 # $Id$
-
 # $Log$
-# Revision 1.11  2001/02/21 14:21:43  dpg1
-# Merge from omnipy1_develop for 1.3 release.
+# Revision 1.12  2001/06/18 09:40:01  dpg1
+# 1.4 release.
+#
+# Revision 1.9.2.3  2001/05/14 14:21:15  dpg1
+# TypeCode.equivalent() was broken in a similar manner to
+# get_compact_typecode()
+#
+# Revision 1.9.2.2  2001/05/11 16:27:23  dpg1
+# TypeCode.get_compact_typecode() was broken.
 #
 # Revision 1.9.2.1  2000/08/07 09:19:24  dpg1
 # Long long support
@@ -439,7 +444,7 @@ class TypeCode_struct (TypeCode_base):
         return equivalentDescriptors(self._d, tc._d)
 
     def get_compact_typecode(self):
-        return TypeCode_struct(getCompactDescriptor(self._d))
+        return TypeCode_struct(getCompactDescriptor(self._d), None)
 
     def id(self):                 return self._d[2]
     def name(self):               return self._d[3]
@@ -475,7 +480,7 @@ class TypeCode_union (TypeCode_base):
         return equivalentDescriptors(self._d, tc._d)
 
     def get_compact_typecode(self):
-        return TypeCode_union(getCompactDescriptor(self._d))
+        return TypeCode_union(getCompactDescriptor(self._d), None)
 
     def id(self):                  return self._d[2]
     def name(self):                return self._d[3]
@@ -544,7 +549,7 @@ class TypeCode_sequence (TypeCode_base):
         return equivalentDescriptors(self._d, tc._d)
 
     def get_compact_typecode(self):
-        return TypeCode_sequence(getCompactDescriptor(self._d))
+        return TypeCode_sequence(getCompactDescriptor(self._d), None)
 
     def length(self):       return self._d[2]
     def content_type(self):
@@ -571,7 +576,7 @@ class TypeCode_array (TypeCode_base):
         return equivalentDescriptors(self._d, tc._d)
 
     def get_compact_typecode(self):
-        return TypeCode_sequence(getCompactDescriptor(self._d))
+        return TypeCode_sequence(getCompactDescriptor(self._d), None)
 
     def length(self):       return self._d[2]
     def content_type(self): return createTypeCode(self._d[1])
@@ -594,7 +599,7 @@ class TypeCode_alias (TypeCode_base):
         return equivalentDescriptors(self._d, tc._d)
 
     def get_compact_typecode(self):
-        return TypeCode_alias(getCompactDescriptor(self._d))
+        return TypeCode_alias(getCompactDescriptor(self._d), None)
 
     def id(self):           return self._d[1]
     def name(self):         return self._d[2]
@@ -618,7 +623,7 @@ class TypeCode_except (TypeCode_base):
         return equivalentDescriptors(self._d, tc._d)
 
     def get_compact_typecode(self):
-        return TypeCode_except(getCompactDescriptor(self._d))
+        return TypeCode_except(getCompactDescriptor(self._d), None)
 
     def id(self):                 return self._d[2]
     def name(self):               return self._d[3]
@@ -638,28 +643,38 @@ class TypeCode_except (TypeCode_base):
 
 
 # Functions to test descriptor equivalent
-def equivalentDescriptors(a, b, seen={}):
+def equivalentDescriptors(a, b, seen=None):
+
+    if seen is None: seen = {}
 
     try:
-
-        if seen.has_key(id(a)): return 1
-        if a == b:              return 1
+        if a == b: return 1
 
         # If they don't trivially match, they must be tuples:
         if type(a) is not types.TupleType or type(b) is not types.TupleType:
             return 0
 
-        while a[0] == tv_alias:
-            a = a[3]
+        # Follow aliases and indirections
+        while a[0] == tv_alias or a[0] == tv__indirect:
+            if a[0] == tv_alias:
+                a = a[3]
+            else:
+                a = a[1][0]
 
-        while b[0] == tv_alias:
-            b = b[3]
+        while b[0] == tv_alias or b[0] == tv__indirect:
+            if b[0] == tv_alias:
+                b = b[3]
+            else:
+                b = b[1][0]
+
+        if seen.has_key((id(a),id(b))):
+            return 1
+
+        seen[id(a),id(b)] = None
 
         # Must be same kind
         if a[0] != b[0]:
             return 0
-
-        seen[id(a)] = 1
 
         if a[0] == tv_struct:
             # id
@@ -670,11 +685,14 @@ def equivalentDescriptors(a, b, seen={}):
                     return 0
 
             # members:
-            for i in range(4, len(a), 2):
+            if len(a) != len(b):
+                return 0
             
+            for i in range(4, len(a), 2):
                 # Member type
                 if not equivalentDescriptors(a[i+1], b[i+1], seen):
                     return 0
+
             return 1
 
         elif a[0] == tv_union:
@@ -747,15 +765,15 @@ def equivalentDescriptors(a, b, seen={}):
                     return 0
 
                 # members:
-                for i in range(4, len(self._d), 2):
+                if len(a) != len(b):
+                    return 0
 
+                for i in range(4, len(self._d), 2):
                     # Member type
                     if not equivalentDescriptors(a[i+1], b[i+1], seen):
                         return 0
-            return 1
 
-        elif a[0] == tv__indirect:
-            return equivalentDescriptors(a[1][0], b[1][0], seen)
+            return 1
 
         return 0
 
@@ -804,7 +822,6 @@ def r_getCompactDescriptor(d, seen, ind):
     
     elif k == tv_struct:
         c = list(d)
-        c[2] = ""
         c[3] = ""
         for i in range(4, len(c), 2):
             c[i]   = ""
@@ -814,7 +831,6 @@ def r_getCompactDescriptor(d, seen, ind):
     
     elif k == tv_union:
         c = list(d)
-        c[2] = ""
         c[3] = ""
         c[4] = r_getCompactDescriptor(d[4], seen, ind)
 
@@ -833,7 +849,7 @@ def r_getCompactDescriptor(d, seen, ind):
         m = []
         for e in d[3]:
             m.append(omniORB.AnonymousEnumItem(e._v))
-        r = (k, "", "", tuple(m))
+        r = (k, d[1], "", tuple(m))
 
     elif k == tv_sequence:
         r = (k, r_getCompactDescriptor(d[1], seen, ind), d[2])
@@ -842,7 +858,7 @@ def r_getCompactDescriptor(d, seen, ind):
         r = (k, r_getCompactDescriptor(d[1], seen, ind), d[2])
 
     elif k == tv_alias:
-        r = (k, "", "", r_getCompactDescriptor(d[3], seen, ind))
+        r = (k, d[1], "", r_getCompactDescriptor(d[3], seen, ind))
 
     elif k == tv_except:
         c = list(d)

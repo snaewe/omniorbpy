@@ -1520,7 +1520,6 @@ if __name__ == "__main__":
 
     if "-r" in sys.argv:
         print "\nRepeating tests..."
-        global output
         output = 0
         while 1:
             doTests(orb, poa, io)

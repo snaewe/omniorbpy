@@ -30,8 +30,13 @@
 
 // $Id$
 // $Log$
-// Revision 1.18  2001/02/21 14:21:46  dpg1
-// Merge from omnipy1_develop for 1.3 release.
+// Revision 1.19  2001/06/18 09:40:02  dpg1
+// 1.4 release.
+//
+// Revision 1.17.2.4  2001/05/03 15:25:02  dpg1
+// Various places released object references while holding the
+// interpreter lock. Object reference deletion locks omni::internalLock,
+// so this could cause deadlocks against Servant::_add_ref().
 //
 // Revision 1.17.2.3  2001/02/14 15:22:20  dpg1
 // Fix bug using repoId strings after deletion.
@@ -581,8 +586,8 @@ omniPy::stringToObject(const char* uri)
 				  CORBA::Object::_PD_repoId,
 				  cxxobjref->_iopProfiles(),
 				  0, 0);
+    CORBA::release(cxxobj);
   }
-  CORBA::release(cxxobj);
   return (CORBA::Object_ptr)objref->_ptrToObjRef(CORBA::Object::_PD_repoId);
 }
 

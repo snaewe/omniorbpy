@@ -28,10 +28,12 @@
 //    Marshalling / unmarshalling of Python objects
 
 // $Id$
-
 // $Log$
-// Revision 1.26  2001/02/21 14:21:47  dpg1
-// Merge from omnipy1_develop for 1.3 release.
+// Revision 1.27  2001/06/18 09:40:02  dpg1
+// 1.4 release.
+//
+// Revision 1.23.2.5  2001/05/14 10:07:46  dpg1
+// Stupid bug in struct marshalling with inherited members.
 //
 // Revision 1.23.2.4  2000/09/21 13:20:15  dpg1
 // Silly bug marshalling sequences of anys and TypeCodes
@@ -442,34 +444,38 @@ omniPy::alignedSize(CORBA::ULong            msgsize,
 
 	PyObject* sdict = ((PyInstanceObject*)a_o)->in_dict;
 
-	for (i=0,j=4; i < cnt; i++) {
+	for (i=0,j=4; i < cnt; i++,j++) {
 	  name    = PyTuple_GET_ITEM(d_o, j++);
 	  OMNIORB_ASSERT(PyString_Check(name));
 	  value   = PyDict_GetItem(sdict, name);
 
 	  if (value) {
-	    msgsize = alignedSize(msgsize, PyTuple_GET_ITEM(d_o, j++),
+	    msgsize = alignedSize(msgsize, PyTuple_GET_ITEM(d_o, j),
 				  value, compstatus);
 	  }
 	  else {
 	    // Not such a fast case after all
 	    value = PyObject_GetAttr(a_o, name);
 	    if (!value) AS_THROW_BAD_PARAM;
-	    msgsize = alignedSize(msgsize, PyTuple_GET_ITEM(d_o, j++),
-				  value, compstatus);
+
+	    // DECREF now in case alignedSize() throws an exception.
+	    // Safe because the struct object still holds a reference
+	    // to the value.
 	    Py_DECREF(value);
+	    msgsize = alignedSize(msgsize, PyTuple_GET_ITEM(d_o, j),
+				  value, compstatus);
 	  }
 	}
       }
       else {
-	for (i=0,j=4; i < cnt; i++) {
+	for (i=0,j=4; i < cnt; i++,j++) {
 	  name    = PyTuple_GET_ITEM(d_o, j++);
 	  OMNIORB_ASSERT(PyString_Check(name));
 	  value   = PyObject_GetAttr(a_o, name);
 	  if (!value) AS_THROW_BAD_PARAM;
-	  msgsize = alignedSize(msgsize, PyTuple_GET_ITEM(d_o, j++),
-				value, compstatus);
 	  Py_DECREF(value);
+	  msgsize = alignedSize(msgsize, PyTuple_GET_ITEM(d_o, j),
+				value, compstatus);
 	}
       }
     }
@@ -1549,25 +1555,25 @@ omniPy::marshalPyObject(NetBufferedStream& stream,
 
       if (PyInstance_Check(a_o)) {
 	PyObject* sdict = ((PyInstanceObject*)a_o)->in_dict;
-	for (i=0,j=4; i < cnt; i++) {
+	for (i=0,j=4; i < cnt; i++,j++) {
 	  name  = PyTuple_GET_ITEM(d_o, j++);
 	  value = PyDict_GetItem(sdict, name);
 
 	  if (value) {
-	    marshalPyObject(stream, PyTuple_GET_ITEM(d_o, j++), value);
+	    marshalPyObject(stream, PyTuple_GET_ITEM(d_o, j), value);
 	  }
 	  else {
 	    value = PyObject_GetAttr(a_o, name);
-	    marshalPyObject(stream, PyTuple_GET_ITEM(d_o, j++), value);
 	    Py_DECREF(value);
+	    marshalPyObject(stream, PyTuple_GET_ITEM(d_o, j), value);
 	  }
 	}
       }
       else {
-	for (i=0,j=4; i < cnt; i++) {
+	for (i=0,j=4; i < cnt; i++,j++) {
 	  name  = PyTuple_GET_ITEM(d_o, j++);
 	  value = PyObject_GetAttr(a_o, name);
-	  marshalPyObject(stream, PyTuple_GET_ITEM(d_o, j++), value);
+	  marshalPyObject(stream, PyTuple_GET_ITEM(d_o, j), value);
 	  Py_DECREF(value);
 	}
       }
@@ -2472,25 +2478,25 @@ omniPy::marshalPyObject(MemBufferedStream& stream,
 
       if (PyInstance_Check(a_o)) {
 	PyObject* sdict = ((PyInstanceObject*)a_o)->in_dict;
-	for (i=0,j=4; i < cnt; i++) {
+	for (i=0,j=4; i < cnt; i++,j++) {
 	  name  = PyTuple_GET_ITEM(d_o, j++);
 	  value = PyDict_GetItem(sdict, name);
 
 	  if (value) {
-	    marshalPyObject(stream, PyTuple_GET_ITEM(d_o, j++), value);
+	    marshalPyObject(stream, PyTuple_GET_ITEM(d_o, j), value);
 	  }
 	  else {
 	    value = PyObject_GetAttr(a_o, name);
-	    marshalPyObject(stream, PyTuple_GET_ITEM(d_o, j++), value);
 	    Py_DECREF(value);
+	    marshalPyObject(stream, PyTuple_GET_ITEM(d_o, j), value);
 	  }
 	}
       }
       else {
-	for (i=0,j=4; i < cnt; i++) {
+	for (i=0,j=4; i < cnt; i++,j++) {
 	  name  = PyTuple_GET_ITEM(d_o, j++);
 	  value = PyObject_GetAttr(a_o, name);
-	  marshalPyObject(stream, PyTuple_GET_ITEM(d_o, j++), value);
+	  marshalPyObject(stream, PyTuple_GET_ITEM(d_o, j), value);
 	  Py_DECREF(value);
 	}
       }
@@ -4800,20 +4806,19 @@ omniPy::copyArgument(PyObject*               d_o,
 
 	PyObject* sdict = ((PyInstanceObject*)a_o)->in_dict;
 
-	for (i=0,j=4; i < cnt; i++) {
+	for (i=0,j=4; i < cnt; i++,j++) {
 	  name  = PyTuple_GET_ITEM(d_o, j++);
 	  OMNIORB_ASSERT(PyString_Check(name));
 	  value = PyDict_GetItem(sdict, name);
 
 	  if (value) {
-	    t_o = copyArgument(PyTuple_GET_ITEM(d_o, j++), value, compstatus);
+	    t_o = copyArgument(PyTuple_GET_ITEM(d_o, j), value, compstatus);
 	  }
 	  else {
 	    // Not such a fast case after all
 	    value = PyObject_GetAttr(a_o, name);
 	    if (value) {
-	      t_o = copyArgument(PyTuple_GET_ITEM(d_o, j++),
-				 value, compstatus);
+	      t_o = copyArgument(PyTuple_GET_ITEM(d_o, j), value, compstatus);
 	      Py_DECREF(value);
 	    }
 	  }
@@ -4821,36 +4826,24 @@ omniPy::copyArgument(PyObject*               d_o,
 	    PyTuple_SET_ITEM(argtuple, i, t_o);
 	  }
 	  else {
-	    // Fill in the remainder of the argtuple with Py_Nones
-	    // then destroy it
-	    for (; i < cnt; i++) {
-	      Py_INCREF(Py_None);
-	      PyTuple_SET_ITEM(argtuple, i, Py_None);
-	    }
 	    Py_DECREF(argtuple);
 	    return setPyBadParam(compstatus);
 	  }
 	}
       }
       else {
-	for (i=0,j=4; i < cnt; i++) {
+	for (i=0,j=4; i < cnt; i++,j++) {
 	  name  = PyTuple_GET_ITEM(d_o, j++);
 	  OMNIORB_ASSERT(PyString_Check(name));
 	  value = PyObject_GetAttr(a_o, name);
 
 	  if (value) {
-	    t_o = copyArgument(PyTuple_GET_ITEM(d_o, j++), value, compstatus);
+	    t_o = copyArgument(PyTuple_GET_ITEM(d_o, j), value, compstatus);
 	    if (t_o)
 	      PyTuple_SET_ITEM(argtuple, i, t_o);
 	    Py_DECREF(value);
 	  }
 	  if (!(value && t_o)) {
-	    // Fill in the remainder of the argtuple with Py_Nones
-	    // then destroy it
-	    for (; i < cnt; i++) {
-	      Py_INCREF(Py_None);
-	      PyTuple_SET_ITEM(argtuple, i, Py_None);
-	    }
 	    Py_DECREF(argtuple);
 	    return setPyBadParam(compstatus);
 	  }
@@ -5952,12 +5945,6 @@ omniPy::copyArgument(PyObject*               d_o,
 	  PyTuple_SET_ITEM(argtuple, i, t_o);
 	}
 	else {
-	  // Fill in the remainder of the argtuple with Py_Nones
-	  // then destroy it
-	  for (; i < cnt; i++) {
-	    Py_INCREF(Py_None);
-	    PyTuple_SET_ITEM(argtuple, i, Py_None);
-	  }
 	  Py_DECREF(argtuple);
 	  return setPyBadParam(compstatus);
 	}

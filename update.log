@@ -1,21 +1,162 @@
+Mon Jun 18 10:31:10 BST 2001 dpg1
+=================================
+
+- 1.4 release.
+
+bugfixes.xml
+bugfixes.xsl
+bugfixes10.xml
+bugfixes11.xml
+bugfixes12.xml
+bugfixes13.xml                          -- new
+external_merge/ReleaseNote
+external_merge/THIS_IS_OMNIORBPY_1_3    -- deleted
+external_merge/THIS_IS_OMNIORBPY_1_4    -- new
+
+
+Tue Jun 12 11:19:56 BST 2001 dpg1
+=================================
+
+- Scoping bug in stub code.
+
+omniidl_be/python.py
+python/omniORB/__init__.py
+
+
+Fri May 18 15:19:46 BST 2001 dpg1
+=================================
+
+- Python long int constants fail on Python 2.x.
+
+omniidl_be/python.py
+
+
+Thu May 17 15:01:57 BST 2001 dpg1
+=================================
+
+- Implement _get_interface()
+
+python/omniORB/CORBA.py
+
+
+Mon May 14 15:17:31 BST 2001 dpg1
+=================================
+
+- TypeCode.equivalent() was broken in a similar manner to
+  get_compact_typecode()
+
+python/omniORB/tcInternal.py
+
+
+Mon May 14 11:02:47 BST 2001 dpg1
+=================================
+
+- Stupid bug in struct marshalling with inherited members.
+
+modules/common/pyMarshal.cc
+
+
+Fri May 11 17:22:00 BST 2001 dpg1
+=================================
+
+- TypeCode.get_compact_typecode() was broken.
+
+python/omniORB/tcInternal.py
+
+
+Thu May  3 15:30:03 BST 2001 dpg1
+=================================
+
+- Various places released object references while holding the
+  interpreter lock. Object reference deletion locks
+  omni::internalLock, so this could cause deadlocks against
+  Servant::_add_ref().
+
+modules/omni30/pyObjectRef.cc
+modules/omni30/pyPOAFunc.cc
+modules/omni30/pyServant.cc
+
+
+Tue May  1 12:14:57 BST 2001 dpg1
+=================================
+
+- omnipy_narrow() called createObjRef() while holding the interpreter
+  lock.
+
+modules/omni30/omnipy.cc
+
+
+Tue Apr 10 17:31:53 BST 2001 dpg1
+=================================
+
+- Minor bugs in Any coercion.
+
+python/omniORB/__init__.py
+
+
+Mon Apr  9 17:25:49 BST 2001 dpg1
+=================================
+
+- De-uglify ORB_init command line argument eating.
+
+modules/omni30/omnipy.cc
+
+
+Mon Apr  9 12:40:02 BST 2001 dpg1
+=================================
+
+- Forgot to add known enums to offset desctriptor map.
+
+modules/common/pyTypeCode.cc
+
+
+Mon Mar 19 11:33:37 GMT 2001 dpg1
+=================================
+
+- Invalid stub code generated for typedef to struct/union inside an
+  interface.
+
+omniidl_be/python.py
+
+
+Wed Mar 14 17:40:59 GMT 2001 dpg1
+=================================
+
+- Minor misuse of "global" statement, warned about by Python 2.1.
+
+examples/tests/tclient.py
+
+
+Mon Mar 12 10:19:08 GMT 2001 dpg1
+=================================
+
+- Missing try around object_to_string()
+
+modules/omni30/pyORBFunc.cc
+
+- Suppress annoying compiler warnings about uninitialised variables.
+
+modules/common/pyTypeCode.cc
+
+
 Tue Feb 20 10:34:35 GMT 2001 dpg1
 =================================
 
 - Updates for 1.3 release.
 
-src/lib/omniORBpy/bugfixes.xml
-src/lib/omniORBpy/bugfixes.xsl
-src/lib/omniORBpy/bugfixes12.xml                          -- new
-src/lib/omniORBpy/update.log
-src/lib/omniORBpy/doc/tex/omniORBpy.tex
-src/lib/omniORBpy/external_merge/ReleaseNote
-src/lib/omniORBpy/external_merge/THIS_IS_OMNIORBPY_1_2    -- deleted
-src/lib/omniORBpy/external_merge/THIS_IS_OMNIORBPY_1_3    -- new
-src/lib/omniORBpy/external_merge/doc/omniORBpy.pdf
-src/lib/omniORBpy/external_merge/doc/omniORBpy.ps
-src/lib/omniORBpy/external_merge/doc/omniORBpy/index.html
-src/lib/omniORBpy/external_merge/doc/omniORBpy/omniORBpy007.html
-src/lib/omniORBpy/modules/dir.mk
+bugfixes.xml
+bugfixes.xsl
+bugfixes12.xml                          -- new
+update.log
+doc/tex/omniORBpy.tex
+external_merge/ReleaseNote
+external_merge/THIS_IS_OMNIORBPY_1_2    -- deleted
+external_merge/THIS_IS_OMNIORBPY_1_3    -- new
+external_merge/doc/omniORBpy.pdf
+external_merge/doc/omniORBpy.ps
+external_merge/doc/omniORBpy/index.html
+external_merge/doc/omniORBpy/omniORBpy007.html
+modules/dir.mk
 
 
 Wed Feb 14 15:10:33 GMT 2001 dpg1

@@ -28,10 +28,16 @@
 //    Main entry points for _omnipy Python module
 
 // $Id$
-
 // $Log$
-// Revision 1.38  2001/02/21 14:21:46  dpg1
-// Merge from omnipy1_develop for 1.3 release.
+// Revision 1.39  2001/06/18 09:40:02  dpg1
+// 1.4 release.
+//
+// Revision 1.37.2.3  2001/05/01 11:16:42  dpg1
+// omnipy_narrow() called createObjRef() while holding the interpreter
+// lock.
+//
+// Revision 1.37.2.2  2001/04/09 16:32:23  dpg1
+// De-uglify ORB_init command line argument eating.
 //
 // Revision 1.37.2.1  2000/11/02 17:45:42  dpg1
 // Unnecessary extra call to _is_a() after narrow()
@@ -438,27 +444,27 @@ extern "C" {
 
     omniPy::orb = orb;
 
-    // This is extremely horrid -- modify the Python list in place to
-    // reflect the changed argv. This leaks PyStringObjects, but they
-    // would have hung around for the program's life time anyway...
+    // Remove eaten arguments from Python argv list
     if (argc < orig_argc) {
-      int j;
+      int r;
       char *s, *t;
-      for (i=0, j=0; i<argc; i++, j++) {
+      for (i=0; i<argc; ++i) {
 	s = argv[i];
 
 	while (1) {
-	  o = PyList_GET_ITEM(pyargv, j);
+	  o = PyList_GetItem(pyargv, i); OMNIORB_ASSERT(o != 0);
 	  t = PyString_AS_STRING(o);
 	  if (s == t) break;
-	  j++;
-	  OMNIORB_ASSERT(j < orig_argc);
+	  r = PySequence_DelItem(pyargv, i);
+	  OMNIORB_ASSERT(r != -1);
 	}
-	PyList_SET_ITEM(pyargv, i, o);
       }
-      ((PyListObject*)pyargv)->ob_size = argc;
+      while (PyList_Size(pyargv) > argc) {
+	// Delete -ORB arguments at end
+	r = PySequence_DelItem(pyargv, i);
+	OMNIORB_ASSERT(r != -1);
+      }
     }
-
     delete [] argv;
 
     omniPy::setTwin(pyorb, orb, ORB_TWIN);
@@ -739,22 +745,27 @@ OMNIORB_FOR_EACH_SYS_EXCEPTION(DO_CALL_DESC_SYSTEM_EXCEPTON)
 
     RAISE_PY_BAD_PARAM_IF(!cxxsource);
 
-    CORBA::Boolean isa;
+    CORBA::Boolean    isa;
+    CORBA::Object_ptr cxxdest;
+
     try {
       omniPy::InterpreterUnlocker ul;
       isa = cxxsource->_is_a(repoId);
+
+      if (isa) {
+	omniObjRef* oosource = cxxsource->_PR_getobj();
+	omniObjRef* oodest =
+	  omniPy::createObjRef(oosource->_mostDerivedRepoId(),
+			       repoId,
+			       oosource->_iopProfiles(),
+			       0, 1);
+	cxxdest =
+	  (CORBA::Object_ptr)(oodest->_ptrToObjRef(CORBA::Object::_PD_repoId));
+      }
     }
     OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
 
     if (isa) {
-      omniObjRef* oosource = cxxsource->_PR_getobj();
-      omniObjRef* oodest = omniPy::createObjRef(oosource->_mostDerivedRepoId(),
-						repoId,
-						oosource->_iopProfiles(),
-						0, 1);
-      CORBA::Object_ptr cxxdest =
-	(CORBA::Object_ptr)(oodest->_ptrToObjRef(CORBA::Object::_PD_repoId));
-
       return omniPy::createPyCorbaObjRef(repoId, cxxdest);
     }
     else {

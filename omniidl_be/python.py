@@ -28,8 +28,21 @@
 
 # $Id$
 # $Log$
-# Revision 1.30  2001/02/21 14:21:44  dpg1
-# Merge from omnipy1_develop for 1.3 release.
+# Revision 1.31  2001/06/18 09:40:01  dpg1
+# 1.4 release.
+#
+# Revision 1.27.2.8  2001/06/12 10:56:01  dpg1
+# Scoping bug in stub code.
+#
+# Revision 1.27.2.7  2001/05/18 14:30:53  dpg1
+# Python long int constants fail on Python 2.x.
+#
+# Revision 1.27.2.6  2001/04/23 13:53:08  dpg1
+# Cosmetic output change.
+#
+# Revision 1.27.2.5  2001/03/19 12:01:24  dpg1
+# Invalid stub code generated for typedef to struct/union inside an
+# interface.
 #
 # Revision 1.27.2.4  2000/11/01 11:25:56  dpg1
 # Recursive structs inside interfaces were broken
@@ -182,7 +195,7 @@ _omnipy.checkVersion(0,5, __file__)
 """
 
 file_end = """\
-_exported_modules = ( @export_string@, )
+_exported_modules = ( @export_string@)
 
 # The end."""
 
@@ -207,7 +220,7 @@ import_idl_file = """\
 import @ifilename@"""
 
 open_imported_module_name = """\
-_0_@imodname@     = omniORB.openModule("@package@@imodname@")
+_0_@imodname@ = omniORB.openModule("@package@@imodname@")
 _0_@s_imodname@ = omniORB.openModule("@package@@s_imodname@")"""
 
 forward_interface = """\
@@ -220,6 +233,7 @@ interface_class = """\
 
 # interface @ifid@
 _0_@modname@._d_@ifid@ = (omniORB.tcInternal.tv_objref, "@repoId@", "@ifid@")
+_0_@modname@.@ifid@ = omniORB.newEmptyClass()
 class @ifid@ @inherits@:
     _NP_RepositoryId = _0_@modname@._d_@ifid@[1]
 
@@ -345,10 +359,12 @@ _0_@modname@._d_@sname@ = (omniORB.tcInternal.tv__indirect, ["@repoId@"])"""
 
 recursive_struct_descr = """
 # Recursive struct @sname@
-_d_@sname@ = (omniORB.tcInternal.tv__indirect, ["@repoId@"])"""
+_d_@sname@ = (omniORB.tcInternal.tv__indirect, ["@repoId@"])
+_0_@scope@._d_@sname@ = _d_@sname@"""
 
 struct_class = """
 # struct @sname@
+_0_@scopedname@ = omniORB.newEmptyClass()
 class @sname@:
     _NP_RepositoryId = "@repoId@"
 """
@@ -374,7 +390,7 @@ del @sname@"""
 
 struct_descriptor = """\
 
-_d_@sname@  = (omniORB.tcInternal.tv_struct, @sname@, @sname@._NP_RepositoryId, "@sname@"@mdescs@)"""
+_d_@sname@  = _0_@scope@._d_@sname@ = (omniORB.tcInternal.tv_struct, @sname@, @sname@._NP_RepositoryId, "@sname@"@mdescs@)"""
 
 struct_indirect = """\
 omniORB.tcInternal.insertIndirections(_d_@sname@)"""
@@ -391,6 +407,7 @@ del @sname@, _d_@sname@, _tc_@sname@"""
 exception_class = """\
 
 # exception @sname@
+_0_@scopedname@ = omniORB.newEmptyClass()
 class @sname@ (CORBA.UserException):
     _NP_RepositoryId = "@repoId@"
 """
@@ -423,10 +440,12 @@ _0_@modname@._d_@uname@ = (omniORB.tcInternal.tv__indirect, ["@repoId@"])"""
 
 recursive_union_descr = """
 # Recursive union @uname@
-_d_@uname@ = (omniORB.tcInternal.tv__indirect, ["@repoId@"])"""
+_d_@uname@ = (omniORB.tcInternal.tv__indirect, ["@repoId@"])
+_0_@scope@._d_@uname@ = _d_@uname@"""
 
 union_class = """
 # union @uname@
+_0_@scopedname@ = omniORB.newEmptyClass()
 class @uname@ (omniORB.Union):
     _NP_RepositoryId = "@repoId@"\
 """
@@ -457,7 +476,7 @@ union_descriptor = """
 @uname@._def_d  = @def_d@
 
 _m_@uname@  = (@m_un@,)
-_d_@uname@  = (omniORB.tcInternal.tv_union, @uname@, @uname@._NP_RepositoryId, "@uname@", @stype@, @defpos@, _m_@uname@, @m_def@, {@d_map@})"""
+_d_@uname@  = _0_@scope@._d_@uname@ = (omniORB.tcInternal.tv_union, @uname@, @uname@._NP_RepositoryId, "@uname@", @stype@, @defpos@, _m_@uname@, @m_def@, {@d_map@})"""
 
 union_indirect = """\
 omniORB.tcInternal.insertIndirections(_d_@uname@)"""
@@ -581,6 +600,7 @@ def run(tree, args):
     exports = exported_modules.keys()
     exports.sort()
     export_list   = map(lambda s: '"' + module_package + s + '"', exports)
+    if len(export_list) == 1: export_list.append("")
     export_string = string.join(export_list, ", ")
 
     st.out(file_end, export_string=export_string)
@@ -997,8 +1017,19 @@ class PythonVisitor:
                    unaliased_type.kind() in [idltype.tk_struct,
                                              idltype.tk_union]:
 
-                    parent = dotName(fixupScopedName(unaliased_type.decl().\
-                                                     scopedName()))
+                    psname  = unaliased_type.decl().scopedName()
+                    myscope = decl.scopedName()[:-1]
+
+                    # If the struct/union definition is in the same
+                    # scope as the typedef, we must use a relative
+                    # name to refer to the parent class, since the
+                    # enclosing Python class has not yet been fully
+                    # defined.
+
+                    if psname[:len(myscope)] == myscope:
+                        parent = dotName(psname[len(myscope):])
+                    else:
+                        parent = dotName(fixupScopedName(psname))
 
                     self.st.out(typedef_struct_union_header,
                                 tdname = tdname,
@@ -1021,6 +1052,8 @@ class PythonVisitor:
 
         sname = mangle(node.identifier())
 
+        fscopedName = fixupScopedName(node.scopedName(), "")
+
         if node.recursive():
             if self.at_module_scope:
                 self.st.out(recursive_struct_descr_at_module_scope,
@@ -1031,9 +1064,12 @@ class PythonVisitor:
                 self.st.out(recursive_struct_descr,
                             sname   = sname,
                             repoId  = node.repoId(),
-                            modname = self.modname)
+                            scope   = dotName(fscopedName[:-1]))
 
-        self.st.out(struct_class, sname = sname, repoId = node.repoId())
+        self.st.out(struct_class,
+                    sname      = sname,
+                    repoId     = node.repoId(),
+                    scopedname = dotName(fscopedName))
 
         mnamel = []
         mdescl = []
@@ -1095,9 +1131,14 @@ class PythonVisitor:
                         sname   = sname,
                         modname = self.modname)
         else:
-            self.st.out(struct_descriptor, sname = sname, mdescs = mdescs)
+            self.st.out(struct_descriptor,
+                        sname  = sname,
+                        mdescs = mdescs,
+                        scope  = dotName(fscopedName[:-1]))
+
             if node.recursive():
                 self.st.out(struct_indirect, sname = sname)
+
             self.st.out(struct_register, sname = sname)
 
     #
@@ -1107,7 +1148,11 @@ class PythonVisitor:
         if self.handleImported(node): return
 
         sname = mangle(node.identifier())
-        self.st.out(exception_class, sname = sname, repoId = node.repoId())
+        fscopedName = fixupScopedName(node.scopedName(), "")
+        self.st.out(exception_class,
+                    sname = sname,
+                    repoId = node.repoId(),
+                    scopedname = dotName(fscopedName))
 
         mnamel = []
         mdescl = []
@@ -1172,6 +1217,8 @@ class PythonVisitor:
         else:
             stype = typeToDescriptor(node.switchType(), self.currentScope)
 
+        fscopedName = fixupScopedName(node.scopedName(), "")
+        
         if node.recursive():
             if self.at_module_scope:
                 self.st.out(recursive_union_descr_at_module_scope,
@@ -1179,12 +1226,16 @@ class PythonVisitor:
                             repoId  = node.repoId(),
                             modname = self.modname)
             else:
+                scopedName = node.scopedName()
                 self.st.out(recursive_union_descr,
                             uname   = uname,
                             repoId  = node.repoId(),
-                            modname = self.modname)
+                            scope   = dotName(fscopedName[:-1]))
 
-        self.st.out(union_class, uname=uname, repoId=node.repoId())
+        self.st.out(union_class,
+                    uname      = uname,
+                    repoId     = node.repoId(),
+                    scopedname = dotName(fscopedName))
 
         if node.constrType():
             self.st.inc_indent()
@@ -1313,7 +1364,8 @@ class PythonVisitor:
                         stype   = stype,
                         defpos  = defpos,
                         m_def   = m_def,
-                        d_map   = d_map)
+                        d_map   = d_map,
+                        scope   = dotName(fscopedName[:-1]))
             
             if node.recursive():
                 self.st.out(union_indirect, uname = uname)
@@ -1575,6 +1627,10 @@ def valueToString(val, kind, scope=[]):
 
     elif kind == idltype.tk_long and val == -2147483647 - 1:
         return "-2147483647 - 1"
+
+    elif type(val) is type(1L):
+        return repr(val)
+
     else:
         return str(val)
 

@@ -28,10 +28,14 @@
 //    Implementation of Python servant object
 
 // $Id$
-
 // $Log$
-// Revision 1.27  2001/02/21 14:21:46  dpg1
-// Merge from omnipy1_develop for 1.3 release.
+// Revision 1.28  2001/06/18 09:40:01  dpg1
+// 1.4 release.
+//
+// Revision 1.24.2.7  2001/05/03 15:25:03  dpg1
+// Various places released object references while holding the
+// interpreter lock. Object reference deletion locks omni::internalLock,
+// so this could cause deadlocks against Servant::_add_ref().
 //
 // Revision 1.24.2.6  2001/02/14 15:22:20  dpg1
 // Fix bug using repoId strings after deletion.
@@ -391,12 +395,14 @@ PyObject*
 omniPy::
 Py_omniServant::py_this()
 {
-  CORBA::Object_var objref;
   CORBA::Object_ptr lobjref;
   {
     omniPy::InterpreterUnlocker _u;
-    objref  = (CORBA::Object_ptr)_do_this(CORBA::Object::_PD_repoId);
-    lobjref = omniPy::makeLocalObjRef(repoId_, objref);
+    {
+      CORBA::Object_var objref;
+      objref  = (CORBA::Object_ptr)_do_this(CORBA::Object::_PD_repoId);
+      lobjref = omniPy::makeLocalObjRef(repoId_, objref);
+    }
   }
   return omniPy::createPyCorbaObjRef(repoId_, lobjref);
 }
