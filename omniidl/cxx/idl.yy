@@ -28,8 +28,9 @@
 
 // $Id$
 // $Log$
-// Revision 1.11  2000/03/03 17:41:40  dpg1
-// Major reorganisation to support omniORB 3.0 as well as 2.8.
+// Revision 1.12  2000/06/05 18:13:25  dpg1
+// Comments can be attached to subsequent declarations (with -K). Better
+// idea of most recent decl in operation declarations
 //
 // Revision 1.9  2000/02/04 12:17:09  dpg1
 // Support for VMS.
@@ -683,11 +684,15 @@ member_access:
     ;
 
 init_dcl:
-    init_dcl_header '(' init_param_decls_opt ')' ';' {
+    init_dcl_header '(' init_param_decls_opt ')' {
+      $1->closeParens();
+    } ';' {
       $1->finishConstruction($3);
       $$ = $1;
     }
-  | init_dcl_header '(' error ')' ';' {
+  | init_dcl_header '(' error ')' {
+      $1->closeParens();
+    } ';' {
       IdlSyntaxError(currentFile, yylineno,
 		     "Syntax error in factory parameters");
       $1->finishConstruction(0);
@@ -1265,14 +1270,16 @@ member_star:
     ;
 
 op_dcl:
-    op_header pragmas_opt parameter_dcls pragmas_opt
-        raises_expr_opt context_expr_opt {
-      $1->finishConstruction($3, $5, $6);
+    op_header pragmas_opt parameter_dcls {
+      $1->closeParens();
+    } pragmas_opt raises_expr_opt context_expr_opt {
+      $1->finishConstruction($3, $6, $7);
       $$ = $1;
     }
   | op_header error {
       IdlSyntaxError(currentFile, yylineno,
 		     "Syntax error in operation declaration");
+      $1->closeParens();
       $1->finishConstruction(0, 0, 0);
       $$ = $1;
     }
