@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.24.2.1  2000/08/17 08:46:06  dpg1
+// Support for omniORB.LOCATION_FORWARD exception
+//
 // Revision 1.24  2000/06/12 15:36:09  dpg1
 // Support for exception handler functions. Under omniORB 3, local
 // operation dispatch modified so exceptions handlers are run.
@@ -286,29 +289,6 @@ Py_omniServant::_mostDerivedRepoId()
 }
 
 
-CORBA::Boolean
-omniPy::
-Py_omniServant::_is_a(const char* logical_type_id)
-{
-  if (!strcmp(logical_type_id, repoId_))
-    return 1;
-  else if (!strcmp(logical_type_id, CORBA::Object::_PD_repoId))
-    return 1;
-  else {
-    omnipyThreadCache::lock _t;
-    PyObject* pyisa = PyObject_CallMethod(omniPy::pyomniORBmodule,
-					  (char*)"static_is_a", (char*)"Os",
-					  pyskeleton_, logical_type_id);
-    if (!pyisa) PyErr_Print();
-    OMNIORB_ASSERT(pyisa && PyInt_Check(pyisa));
-
-    CORBA::Boolean isa = PyInt_AS_LONG(pyisa);
-    Py_DECREF(pyisa);
-    return isa;
-  }
-}
-
-
 PortableServer::POA_ptr
 omniPy::
 Py_omniServant::_default_POA()
@@ -356,6 +336,93 @@ Py_omniServant::py_this()
   }
   CORBA::Object_ptr lobjref = omniPy::makeLocalObjRef(repoId_, objref);
   return omniPy::createPyCorbaObjRef(repoId_, lobjref);
+}
+
+
+CORBA::Boolean
+omniPy::
+Py_omniServant::_is_a(const char* logical_type_id)
+{
+  if (!strcmp(logical_type_id, repoId_))
+    return 1;
+  else if (!strcmp(logical_type_id, CORBA::Object::_PD_repoId))
+    return 1;
+  else {
+    omnipyThreadCache::lock _t;
+    PyObject* pyisa = PyObject_CallMethod(omniPy::pyomniORBmodule,
+					  (char*)"static_is_a", (char*)"Os",
+					  pyskeleton_, logical_type_id);
+    if (!pyisa) PyErr_Print();
+    OMNIORB_ASSERT(pyisa && PyInt_Check(pyisa));
+
+    CORBA::Boolean isa = PyInt_AS_LONG(pyisa);
+    Py_DECREF(pyisa);
+
+    if (isa)
+      return 1;
+
+    // Last resort -- does the servant have an _is_a method?
+    if (PyObject_HasAttrString(pyservant_, (char*)"_is_a")) {
+
+      pyisa = PyObject_CallMethod(pyservant_, (char*)"_is_a",
+				  (char*)"s", logical_type_id);
+
+      if (pyisa && PyInt_Check(pyisa)) {
+	CORBA::Boolean isa = PyInt_AS_LONG(pyisa);
+	Py_DECREF(pyisa);
+	return isa;
+      }
+      if (!pyisa) {
+	// Some sort of exception
+	PyObject *etype, *evalue, *etraceback;
+	PyObject *erepoId = 0;
+	PyErr_Fetch(&etype, &evalue, &etraceback);
+	OMNIORB_ASSERT(etype);
+
+	if (evalue && PyInstance_Check(evalue))
+	  erepoId = PyObject_GetAttrString(evalue, (char*)"_NP_RepositoryId");
+
+	if (!(erepoId && PyString_Check(erepoId))) {
+	  Py_XDECREF(erepoId);
+	  if (omniORB::trace(1)) {
+	    {
+	      omniORB::logger l;
+	      l << "Caught an unexpected Python exception during up-call.\n";
+	    }
+	    PyErr_Restore(etype, evalue, etraceback);
+	    PyErr_Print();
+	  }
+	  OMNIORB_THROW(UNKNOWN, 0,CORBA::COMPLETED_MAYBE);
+	}
+
+	Py_DECREF(etype);
+	Py_XDECREF(etraceback);
+
+	// Is it a LOCATION_FORWARD?
+	if (!strcmp(PyString_AS_STRING(erepoId), "omniORB.LOCATION_FORWARD")) {
+	  PyObject* pyfwd = PyObject_GetAttrString(evalue, (char*)"_forward");
+	  OMNIORB_ASSERT(pyfwd);
+
+	  CORBA::Object_ptr fwd = (CORBA::Object_ptr)getTwin(pyfwd,
+							     OBJREF_TWIN);
+	  Py_DECREF(pyfwd);
+	  Py_DECREF(evalue);
+	  Py_DECREF(erepoId);
+	  if (fwd)
+	    throw omniORB::LOCATION_FORWARD(CORBA::Object::_duplicate(fwd));
+	  else {
+	    omniORB::logs(1, "Invalid object reference inside "
+			  "omniORB.LOCATION_FORWARD exception");
+	    OMNIORB_THROW(BAD_PARAM,0,CORBA::COMPLETED_NO);
+	  }
+	}
+
+	// System exception
+	omniPy::produceSystemException(evalue, erepoId);
+      }
+    }
+  }
+  return 0;
 }
 
 
@@ -472,7 +539,8 @@ Py_omniServant::_dispatch(GIOP_S& giop_s)
     if (evalue && PyInstance_Check(evalue))
       erepoId = PyObject_GetAttrString(evalue, (char*)"_NP_RepositoryId");
 
-    if (!erepoId) {
+    if (!(erepoId && PyString_Check(erepoId))) {
+      Py_XDECREF(erepoId);
       if (omniORB::trace(1)) {
 	{
 	  omniORB::logger l;
@@ -483,7 +551,6 @@ Py_omniServant::_dispatch(GIOP_S& giop_s)
       }
       OMNIORB_THROW(UNKNOWN, 0,CORBA::COMPLETED_MAYBE);
     }
-
     Py_DECREF(etype);
     Py_XDECREF(etraceback);
 
@@ -505,6 +572,26 @@ Py_omniServant::_dispatch(GIOP_S& giop_s)
 	return 1;
       }
     }
+
+    // Is it a LOCATION_FORWARD?
+    if (!strcmp(PyString_AS_STRING(erepoId), "omniORB.LOCATION_FORWARD")) {
+      PyObject* pyfwd = PyObject_GetAttrString(evalue, (char*)"_forward");
+      OMNIORB_ASSERT(pyfwd);
+
+      CORBA::Object_ptr fwd = (CORBA::Object_ptr)getTwin(pyfwd, OBJREF_TWIN);
+      Py_DECREF(pyfwd);
+      Py_DECREF(evalue);
+      Py_DECREF(erepoId);
+      if (fwd)
+	throw omniORB::LOCATION_FORWARD(CORBA::Object::_duplicate(fwd));
+      else {
+	omniORB::logs(1, "Invalid object reference inside "
+		      "omniORB.LOCATION_FORWARD exception");
+	OMNIORB_THROW(BAD_PARAM,0,CORBA::COMPLETED_NO);
+      }
+    }
+
+    // System exception or unknown user exception
     omniPy::produceSystemException(evalue, erepoId);
   }
   OMNIORB_ASSERT(0); // Never reach here.
@@ -556,7 +643,7 @@ Py_omniServant::local_dispatch(const char* op,
     Py_DECREF(argtuple);
 
     if (result) {
-      PyObject* retval;
+      PyObject* retval = 0;
 
       if (out_l == -1 || out_l == 0) {
 	if (result == Py_None) {
@@ -605,7 +692,8 @@ Py_omniServant::local_dispatch(const char* op,
       if (evalue && PyInstance_Check(evalue))
 	erepoId = PyObject_GetAttrString(evalue, (char*)"_NP_RepositoryId");
 
-      if (!erepoId) {
+      if (!(erepoId && PyString_Check(erepoId))) {
+	Py_XDECREF(erepoId);
 	if (omniORB::trace(1)) {
 	  {
 	    omniORB::logger l;
@@ -640,13 +728,27 @@ Py_omniServant::local_dispatch(const char* op,
 	  return 0;
 	}
       }
-      // System exception?
-      if (PyDict_GetItem(pyCORBAsysExcMap, erepoId))
-	produceSystemException(evalue, erepoId);
 
-      Py_DECREF(erepoId);
-      Py_DECREF(evalue);
-      OMNIORB_THROW(UNKNOWN, 0, CORBA::COMPLETED_MAYBE);
+      // Is it a LOCATION_FORWARD?
+      if (!strcmp(PyString_AS_STRING(erepoId), "omniORB.LOCATION_FORWARD")) {
+	PyObject* pyfwd = PyObject_GetAttrString(evalue, (char*)"_forward");
+	OMNIORB_ASSERT(pyfwd);
+
+	CORBA::Object_ptr fwd = (CORBA::Object_ptr)getTwin(pyfwd, OBJREF_TWIN);
+	Py_DECREF(pyfwd);
+	Py_DECREF(evalue);
+	Py_DECREF(erepoId);
+	if (fwd)
+	  throw omniORB::LOCATION_FORWARD(CORBA::Object::_duplicate(fwd));
+	else {
+	  omniORB::logs(1, "Invalid object reference inside "
+			"omniORB.LOCATION_FORWARD exception");
+	  OMNIORB_THROW(BAD_PARAM,0,CORBA::COMPLETED_NO);
+	}
+      }
+
+      // System exception or unknown user exception
+      omniPy::produceSystemException(evalue, erepoId);
     }
   }
   else {
@@ -717,14 +819,17 @@ Py_ServantActivator::incarnate(const PortableServer::ObjectId& oid,
     if (evalue && PyInstance_Check(evalue))
       erepoId = PyObject_GetAttrString(evalue, (char*)"_NP_RepositoryId");
 
-    if (!erepoId) {
-      omniORB::log << "omniORBpy: *** Warning: caught an unexpected "
-		   << "exception during up-call.\n"
-		   << "omniORBPy: Traceback follows:\n";
-      omniORB::log.flush();
-      PyErr_Restore(etype, evalue, etraceback);
-      PyErr_Print();
-      OMNIORB_THROW(UNKNOWN, 0,CORBA::COMPLETED_NO);
+    if (!(erepoId && PyString_Check(erepoId))) {
+      Py_XDECREF(erepoId);
+      if (omniORB::trace(1)) {
+	{
+	  omniORB::logger l;
+	  l << "Caught an unexpected Python exception during up-call.\n";
+	}
+	PyErr_Restore(etype, evalue, etraceback);
+	PyErr_Print();
+      }
+      OMNIORB_THROW(UNKNOWN, 0,CORBA::COMPLETED_MAYBE);
     }
     Py_DECREF(etype);
     Py_XDECREF(etraceback);
@@ -749,6 +854,27 @@ Py_ServantActivator::incarnate(const PortableServer::ObjectId& oid,
 	OMNIORB_THROW(BAD_PARAM, 0, CORBA::COMPLETED_NO);
       }
     }
+
+    // Is it a LOCATION_FORWARD?
+    if (!strcmp(PyString_AS_STRING(erepoId), "omniORB.LOCATION_FORWARD")) {
+      PyObject* pyfwd = PyObject_GetAttrString(evalue, (char*)"_forward");
+      OMNIORB_ASSERT(pyfwd);
+
+      CORBA::Object_ptr fwd = (CORBA::Object_ptr)
+	                                  omniPy::getTwin(pyfwd, OBJREF_TWIN);
+      Py_DECREF(pyfwd);
+      Py_DECREF(evalue);
+      Py_DECREF(erepoId);
+      if (fwd)
+	throw omniORB::LOCATION_FORWARD(CORBA::Object::_duplicate(fwd));
+      else {
+	omniORB::logs(1, "Invalid object reference inside "
+		      "omniORB.LOCATION_FORWARD exception");
+	OMNIORB_THROW(BAD_PARAM,0,CORBA::COMPLETED_NO);
+      }
+    }
+
+    // System exception or unknown user exception
     omniPy::produceSystemException(evalue, erepoId);
   }
   OMNIORB_ASSERT(0); // Never reach here
@@ -895,14 +1021,17 @@ Py_ServantLocator::preinvoke(const PortableServer::ObjectId& oid,
     if (evalue && PyInstance_Check(evalue))
       erepoId = PyObject_GetAttrString(evalue, (char*)"_NP_RepositoryId");
 
-    if (!erepoId) {
-      omniORB::log << "omniORBpy: *** Warning: caught an unexpected "
-		   << "exception during up-call.\n"
-		   << "omniORBPy: Traceback follows:\n";
-      omniORB::log.flush();
-      PyErr_Restore(etype, evalue, etraceback);
-      PyErr_Print();
-      OMNIORB_THROW(UNKNOWN, 0, CORBA::COMPLETED_NO);
+    if (!(erepoId && PyString_Check(erepoId))) {
+      Py_XDECREF(erepoId);
+      if (omniORB::trace(1)) {
+	{
+	  omniORB::logger l;
+	  l << "Caught an unexpected Python exception during up-call.\n";
+	}
+	PyErr_Restore(etype, evalue, etraceback);
+	PyErr_Print();
+      }
+      OMNIORB_THROW(UNKNOWN, 0,CORBA::COMPLETED_MAYBE);
     }
     Py_DECREF(etype);
     Py_XDECREF(etraceback);
@@ -927,6 +1056,26 @@ Py_ServantLocator::preinvoke(const PortableServer::ObjectId& oid,
 	OMNIORB_THROW(BAD_PARAM, 0, CORBA::COMPLETED_NO);
       }
     }
+    // Is it a LOCATION_FORWARD?
+    if (!strcmp(PyString_AS_STRING(erepoId), "omniORB.LOCATION_FORWARD")) {
+      PyObject* pyfwd = PyObject_GetAttrString(evalue, (char*)"_forward");
+      OMNIORB_ASSERT(pyfwd);
+
+      CORBA::Object_ptr fwd = (CORBA::Object_ptr)
+	                                 omniPy::getTwin(pyfwd, OBJREF_TWIN);
+      Py_DECREF(pyfwd);
+      Py_DECREF(evalue);
+      Py_DECREF(erepoId);
+      if (fwd)
+	throw omniORB::LOCATION_FORWARD(CORBA::Object::_duplicate(fwd));
+      else {
+	omniORB::logs(1, "Invalid object reference inside "
+		      "omniORB.LOCATION_FORWARD exception");
+	OMNIORB_THROW(BAD_PARAM,0,CORBA::COMPLETED_NO);
+      }
+    }
+
+    // System exception or unknown user exception
     omniPy::produceSystemException(evalue, erepoId);
   }
   OMNIORB_ASSERT(0); // Never reach here

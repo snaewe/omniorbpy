@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.27.2.2  2000/08/17 08:46:06  dpg1
+# Support for omniORB.LOCATION_FORWARD exception
+#
 # Revision 1.27.2.1  2000/08/07 09:19:24  dpg1
 # Long long support
 #
@@ -176,11 +179,11 @@ class UserException (Exception):
 
     def __str__(self):
         if not self.__args:
-            return ""
+            return "User exception with no members"
         elif len(self.__args) == 1:
-            return str(self.__args[0])
+            return "User exception member: " + str(self.__args[0])
         else:
-            return str(self.__args)
+            return "User exception members: " + str(self.__args)
 
     def __getitem__(self, i):
         return self.__args[i]
