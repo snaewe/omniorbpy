@@ -1,3 +1,11 @@
+Tue Nov 21 14:21:03 GMT 2000 dpg1
+=================================
+
+- resolve_initial_references has the same bug as string_to_object
+
+src/lib/omniORBpy/modules/omni30/pyORBFunc.cc
+
+
 Tue Nov 21 10:46:54 GMT 2000 dpg1
 =================================
 

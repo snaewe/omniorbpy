@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.7.2.1  2000/11/21 14:27:16  dpg1
+// Fix resolve_initial_references.
+//
 // Revision 1.7  2000/06/02 14:25:51  dpg1
 // orb.run() now properly exits when the ORB is shut down
 //
@@ -169,7 +172,7 @@ extern "C" {
     }
     OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
 
-    if (!objref->_NP_is_pseudo()) {
+    if (!(CORBA::is_nil(objref) || objref->_NP_is_pseudo())) {
       omniObjRef* cxxref = objref->_PR_getobj();
       omniObjRef* pyref  = omniPy::createObjRef(cxxref->_mostDerivedRepoId(),
 						CORBA::Object::_PD_repoId,
