@@ -28,6 +28,10 @@
 
 # $Id$
 # $Log$
+# Revision 1.24  2000/03/29 10:15:47  dpg1
+# Exceptions now more closely follow the interface of
+# exceptions.Exception.
+#
 # Revision 1.23  2000/03/17 12:28:09  dpg1
 # Comma missing in nested union descriptor.
 #
@@ -348,7 +352,8 @@ class @sname@ (CORBA.UserException):
 """
 
 exception_class_init = """\
-    def __init__(self@mnames@):"""
+    def __init__(self@mnames@):
+        CORBA.UserException.__init__(self@mnames@)"""
 
 exception_init_member = """\
         self.@mname@ = @mname@"""
@@ -1006,13 +1011,12 @@ class PythonVisitor:
                         typeAndDeclaratorToDescriptor(mem.memberType(),
                                                       decl,
                                                       self.currentScope))
+
         if len(mnamel) > 0:
             mnames = ", " + string.join(mnamel, ", ")
-
             self.st.out(exception_class_init, mnames = mnames)
 
             for mname in mnamel:
-
                 self.st.out(exception_init_member, mname = mname)
 
         if len(mdescl) > 0:

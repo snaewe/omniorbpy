@@ -31,6 +31,10 @@
 # $Id$
 
 # $Log$
+# Revision 1.22  2000/03/29 10:15:47  dpg1
+# Exceptions now more closely follow the interface of
+# exceptions.Exception.
+#
 # Revision 1.21  2000/03/28 14:46:36  dpg1
 # Undo the last change.
 #
@@ -140,167 +144,119 @@ class SystemException (Exception):
             self.completed = completion_status._item(completed)
         else:
             self.completed = completed
+        Exception.__init__(self, minor, self.completed)
 
     def __str__(self):
         return "Minor: " + str(self.minor) + \
                ", Completed: " + str(self.completed) + "."
 
 class UserException (Exception):
+    def __init__(self, *args):
+        self.__args = args
+
     def __str__(self):
-        return ""
+        if not self.__args:
+            return ""
+        elif len(self.__args) == 1:
+            return str(self.__args[0])
+        else:
+            return str(self.__args)
+
+    def __getitem__(self, i):
+        return self.__args[i]
+
 
 # All the standard system exceptions...
 
 class UNKNOWN (SystemException):
     _NP_RepositoryId = "IDL:omg.org/CORBA/UNKNOWN:1.0"
-    def __init__(self, minor=0, completed=COMPLETED_NO):
-        SystemException.__init__(self, minor, completed)
 
 class BAD_PARAM (SystemException):
     _NP_RepositoryId = "IDL:omg.org/CORBA/BAD_PARAM:1.0"
-    def __init__(self, minor=0, completed=COMPLETED_NO):
-        SystemException.__init__(self, minor, completed)
 
 class NO_MEMORY (SystemException):
     _NP_RepositoryId = "IDL:omg.org/CORBA/NO_MEMORY:1.0"
-    def __init__(self, minor=0, completed=COMPLETED_NO):
-        SystemException.__init__(self, minor, completed)
-        return
 
 class IMP_LIMIT (SystemException):
     _NP_RepositoryId = "IDL:omg.org/CORBA/IMP_LIMIT:1.0"
-    def __init__(self, minor=0, completed=COMPLETED_NO):
-        SystemException.__init__(self, minor, completed)
 
 class COMM_FAILURE (SystemException):
     _NP_RepositoryId = "IDL:omg.org/CORBA/COMM_FAILURE:1.0"
-    def __init__(self, minor=0, completed=COMPLETED_NO):
-        SystemException.__init__(self, minor, completed)
 
 class INV_OBJREF (SystemException):
     _NP_RepositoryId = "IDL:omg.org/CORBA/INV_OBJREF:1.0"
-    def __init__(self, minor=0, completed=COMPLETED_NO):
-        SystemException.__init__(self, minor, completed)
 
 class OBJECT_NOT_EXIST (SystemException):
     _NP_RepositoryId = "IDL:omg.org/CORBA/OBJECT_NOT_EXIST:1.0"
-    def __init__(self, minor=0, completed=COMPLETED_NO):
-        SystemException.__init__(self, minor, completed)
 
 class NO_PERMISSION (SystemException):
     _NP_RepositoryId = "IDL:omg.org/CORBA/NO_PERMISSION:1.0"
-    def __init__(self, minor=0, completed=COMPLETED_NO):
-        SystemException.__init__(self, minor, completed)
 
 class INTERNAL (SystemException):
     _NP_RepositoryId = "IDL:omg.org/CORBA/INTERNAL:1.0"
-    def __init__(self, minor=0, completed=COMPLETED_NO):
-        SystemException.__init__(self, minor, completed)
 
 class MARSHAL (SystemException):
     _NP_RepositoryId = "IDL:omg.org/CORBA/MARSHAL:1.0"
-    def __init__(self, minor=0, completed=COMPLETED_NO):
-        SystemException.__init__(self, minor, completed)
 
 class INITIALIZE (SystemException):
     _NP_RepositoryId = "IDL:omg.org/CORBA/INITIALIZE:1.0"
-    def __init__(self, minor=0, completed=COMPLETED_NO):
-        SystemException.__init__(self, minor, completed)
 
 class NO_IMPLEMENT (SystemException):
     _NP_RepositoryId = "IDL:omg.org/CORBA/NO_IMPLEMENT:1.0"
-    def __init__(self, minor=0, completed=COMPLETED_NO):
-        SystemException.__init__(self, minor, completed)
 
 class BAD_TYPECODE (SystemException):
     _NP_RepositoryId = "IDL:omg.org/CORBA/BAD_TYPECODE:1.0"
-    def __init__(self, minor=0, completed=COMPLETED_NO):
-        SystemException.__init__(self, minor, completed)
 
 class BAD_OPERATION (SystemException):
     _NP_RepositoryId = "IDL:omg.org/CORBA/BAD_OPERATION:1.0"
-    def __init__(self, minor=0, completed=COMPLETED_NO):
-        SystemException.__init__(self, minor, completed)
 
 class NO_RESOURCES (SystemException):
     _NP_RepositoryId = "IDL:omg.org/CORBA/NO_RESOURCES:1.0"
-    def __init__(self, minor=0, completed=COMPLETED_NO):
-        SystemException.__init__(self, minor, completed)
 
 class NO_RESPONSE (SystemException):
     _NP_RepositoryId = "IDL:omg.org/CORBA/NO_RESPONSE:1.0"
-    def __init__(self, minor=0, completed=COMPLETED_NO):
-        SystemException.__init__(self, minor, completed)
 
 class PERSIST_STORE (SystemException):
     _NP_RepositoryId = "IDL:omg.org/CORBA/PERSIST_STORE:1.0"
-    def __init__(self, minor=0, completed=COMPLETED_NO):
-        SystemException.__init__(self, minor, completed)
 
 class BAD_INV_ORDER (SystemException):
     _NP_RepositoryId = "IDL:omg.org/CORBA/BAD_INV_ORDER:1.0"
-    def __init__(self, minor=0, completed=COMPLETED_NO):
-        SystemException.__init__(self, minor, completed)
 
 class TRANSIENT (SystemException):
     _NP_RepositoryId = "IDL:omg.org/CORBA/TRANSIENT:1.0"
-    def __init__(self, minor=0, completed=COMPLETED_NO):
-        SystemException.__init__(self, minor, completed)
 
 class FREE_MEM (SystemException):
     _NP_RepositoryId = "IDL:omg.org/CORBA/FREE_MEM:1.0"
-    def __init__(self, minor=0, completed=COMPLETED_NO):
-        SystemException.__init__(self, minor, completed)
 
 class INV_IDENT (SystemException):
     _NP_RepositoryId = "IDL:omg.org/CORBA/INV_IDENT:1.0"
-    def __init__(self, minor=0, completed=COMPLETED_NO):
-        SystemException.__init__(self, minor, completed)
 
 class INV_FLAG (SystemException):
     _NP_RepositoryId = "IDL:omg.org/CORBA/INV_FLAG:1.0"
-    def __init__(self, minor=0, completed=COMPLETED_NO):
-        SystemException.__init__(self, minor, completed)
 
 class INTF_REPOS (SystemException):
     _NP_RepositoryId = "IDL:omg.org/CORBA/INTF_REPOS:1.0"
-    def __init__(self, minor=0, completed=COMPLETED_NO):
-        SystemException.__init__(self, minor, completed)
 
 class BAD_CONTEXT (SystemException):
     _NP_RepositoryId = "IDL:omg.org/CORBA/BAD_CONTEXT:1.0"
-    def __init__(self, minor=0, completed=COMPLETED_NO):
-        SystemException.__init__(self, minor, completed)
 
 class OBJ_ADAPTER (SystemException):
     _NP_RepositoryId = "IDL:omg.org/CORBA/OBJ_ADAPTER:1.0"
-    def __init__(self, minor=0, completed=COMPLETED_NO):
-        SystemException.__init__(self, minor, completed)
 
 class DATA_CONVERSION (SystemException):
     _NP_RepositoryId = "IDL:omg.org/CORBA/DATA_CONVERSION:1.0"
-    def __init__(self, minor=0, completed=COMPLETED_NO):
-        SystemException.__init__(self, minor, completed)
 
 class TRANSACTION_REQUIRED (SystemException):
     _NP_RepositoryId = "IDL:omg.org/CORBA/TRANSACTION_REQUIRED:1.0"
-    def __init__(self, minor=0, completed=COMPLETED_NO):
-        SystemException.__init__(self, minor, completed)
 
 class TRANSACTION_ROLLEDBACK (SystemException):
     _NP_RepositoryId = "IDL:omg.org/CORBA/TRANSACTION_ROLLEDBACK:1.0"
-    def __init__(self, minor=0, completed=COMPLETED_NO):
-        SystemException.__init__(self, minor, completed)
 
 class INVALID_TRANSACTION (SystemException):
     _NP_RepositoryId = "IDL:omg.org/CORBA/INVALID_TRANSACTION:1.0"
-    def __init__(self, minor=0, completed=COMPLETED_NO):
-        SystemException.__init__(self, minor, completed)
 
 class WRONG_TRANSACTION (SystemException):
     _NP_RepositoryId = "IDL:omg.org/CORBA/WRONG_TRANSACTION:1.0"
-    def __init__(self, minor=0, completed=COMPLETED_NO):
-        SystemException.__init__(self, minor, completed)
 
 
 #############################################################################
