@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.24.2.6  2002/05/27 01:43:15  dgrisby
+# Fix AttributeError bug with nested structs/unions.
+#
 # Revision 1.24.2.5  2001/06/21 09:36:37  dpg1
 # New "inline" argument to importIDL(). objref classes no longer
 # needlessly call base class constructors.
@@ -318,43 +321,24 @@ orb_cond = threading.Condition(orb_lock)
 orb      = None
 
 # Maps for object reference classes and IDL-defined types:
-map_lock = threading.Lock()
-
 objrefMapping   = {}
 typeMapping     = {}
 typeCodeMapping = {}
 
 
 def registerObjref(repoId, objref):
-    map_lock.acquire()
     objrefMapping[repoId] = objref
-    map_lock.release()
 
 def registerType(repoId, desc, tc):
-    map_lock.acquire()
     typeMapping[repoId]     = desc
     typeCodeMapping[repoId] = tc
-    map_lock.release()
 
 def findType(repoId):
-    map_lock.acquire()
-    try:
-        d = typeMapping[repoId]
-        map_lock.release()
-        return d
-    except KeyError:
-        map_lock.release()
-        return None
+    return typeMapping.get(repoId)
 
 def findTypeCode(repoId):
-    map_lock.acquire()
-    try:
-        tc = typeCodeMapping[repoId]
-        map_lock.release()
-        return tc
-    except KeyError:
-        map_lock.release()
-        return None
+    return typeCodeMapping.get(repoId)
+
 
 # Function to return a Python module for the required IDL module name
 def openModule(mname, fname=None):

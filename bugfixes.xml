@@ -8,6 +8,15 @@
 
 <buglist version="1.4">
 
+<bug id="2" date="Mon May 27 02:32:48 BST 2002" user="dgrisby">
+  <summary>AttributeError in generated code</summary>
+  <reported>Bob Barry</reported>
+  <text>
+  IDL with nested structs/unions could sometime lead to invalid Python
+  stubs.
+  </text>
+</bug>
+
 <bug id="1" date="Mon Dec 10 18:01:14 GMT 2001" user="dpg1">
   <summary>Segfault with narrow on pseudo object</summary>
   <reported>Krzysztof Czarnowski</reported>

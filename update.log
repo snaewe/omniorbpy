@@ -1,3 +1,15 @@
+Mon May 27 02:32:48 BST 2002 dgrisby
+====================================
+
+- Fix AttributeError bug with nested structs/unions.
+
+bugfixes.xml
+omniidl_be/python.py
+python/omniORB/CORBA.py
+python/omniORB/__init__.py
+python/omniORB/tcInternal.py
+
+
 Mon Dec 10 18:01:14 GMT 2001 dpg1
 =================================
 

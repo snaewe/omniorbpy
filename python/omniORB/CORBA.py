@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.27.2.4  2002/05/27 01:43:15  dgrisby
+# Fix AttributeError bug with nested structs/unions.
+#
 # Revision 1.27.2.3  2001/05/17 14:05:01  dpg1
 # Implement _get_interface()
 #
@@ -637,6 +640,10 @@ _d_Object  = (omniORB.tcInternal.tv_objref, Object._NP_RepositoryId, "Object")
 TC_Object  = _tc_Object = omniORB.tcInternal.createTypeCode(_d_Object)
 omniORB.registerType(Object._NP_RepositoryId, _d_Object, _tc_Object)
 omniORB.registerObjref(Object._NP_RepositoryId, Object)
+other_id = "IDL:omg.org/CORBA/Object:1.0"
+omniORB.registerType(other_id, _d_Object, _tc_Object)
+omniORB.registerObjref(other_id, Object)
+del other_id
 
 
 #############################################################################

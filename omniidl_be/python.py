@@ -28,6 +28,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.27.2.10  2002/05/27 01:43:15  dgrisby
+# Fix AttributeError bug with nested structs/unions.
+#
 # Revision 1.27.2.9  2001/06/21 09:36:36  dpg1
 # New "inline" argument to importIDL(). objref classes no longer
 # needlessly call base class constructors.
@@ -227,13 +230,15 @@ _0_@s_imodname@ = omniORB.openModule("@package@@s_imodname@")"""
 forward_interface = """\
 
 # interface @ifid@;
-_0_@modname@._d_@ifid@ = (omniORB.tcInternal.tv_objref, "@repoId@", "@ifid@")"""
+_0_@modname@._d_@ifid@ = (omniORB.tcInternal.tv_objref, "@repoId@", "@ifid@")
+omniORB.typeMapping["@repoId@"] = _0_@modname@._d_@ifid@"""
 
 
 interface_class = """\
 
 # interface @ifid@
 _0_@modname@._d_@ifid@ = (omniORB.tcInternal.tv_objref, "@repoId@", "@ifid@")
+omniORB.typeMapping["@repoId@"] = _0_@modname@._d_@ifid@
 _0_@modname@.@ifid@ = omniORB.newEmptyClass()
 class @ifid@ @inherits@:
     _NP_RepositoryId = _0_@modname@._d_@ifid@[1]
@@ -349,12 +354,14 @@ omniORB.registerType(@tdname@._NP_RepositoryId, _ad_@tdname@, _tc_@tdname@)"""
 
 recursive_struct_descr_at_module_scope = """
 # Recursive struct @sname@
-_0_@modname@._d_@sname@ = (omniORB.tcInternal.tv__indirect, ["@repoId@"])"""
+_0_@modname@._d_@sname@ = (omniORB.tcInternal.tv__indirect, ["@repoId@"])
+omniORB.typeMapping["@repoId@"] = _0_@modname@._d_@sname@"""
 
 recursive_struct_descr = """
 # Recursive struct @sname@
 _d_@sname@ = (omniORB.tcInternal.tv__indirect, ["@repoId@"])
-_0_@scope@._d_@sname@ = _d_@sname@"""
+_0_@scope@._d_@sname@ = _d_@sname@
+omniORB.typeMapping["@repoId@"] = _d_@sname@"""
 
 struct_class = """
 # struct @sname@
@@ -430,12 +437,14 @@ omniORB.registerType(@sname@._NP_RepositoryId, _d_@sname@, _tc_@sname@)"""
 
 recursive_union_descr_at_module_scope = """
 # Recursive union @uname@
-_0_@modname@._d_@uname@ = (omniORB.tcInternal.tv__indirect, ["@repoId@"])"""
+_0_@modname@._d_@uname@ = (omniORB.tcInternal.tv__indirect, ["@repoId@"])
+omniORB.typeMapping["@repoId@"] = _0_@modname@._d_@uname@"""
 
 recursive_union_descr = """
 # Recursive union @uname@
 _d_@uname@ = (omniORB.tcInternal.tv__indirect, ["@repoId@"])
-_0_@scope@._d_@uname@ = _d_@uname@"""
+_0_@scope@._d_@uname@ = _d_@uname@
+omniORB.typeMapping["@repoId@"] = _d_@uname@"""
 
 union_class = """
 # union @uname@
@@ -1543,25 +1552,12 @@ def typeToDescriptor(tspec, from_scope=[], is_typedef=0):
     elif tspec.kind() == idltype.tk_alias:
         sn = fixupScopedName(tspec.scopedName())
         if is_typedef:
-            ret = dotName(sn[:-1] + ["_ad_" + sn[-1]], from_scope)
+            return 'omniORB.typeCodeMapping["%s"]._d' % tspec.decl().repoId()
         else:
-            ret = dotName(sn[:-1] + ["_d_" + sn[-1]], from_scope)
-        return ret
+            return 'omniORB.typeMapping["%s"]' % tspec.decl().repoId()
 
     else:
-        # ***
-#          if type(tspec.decl()) is types.TupleType:
-#              # No Decl object for type -- it must be a recursive type
-#              markRecursive(tspec)
-#              rscope, rname    = tspec.decl()
-#              rdesc            = ast.findDecl(rscope, rname)
-
-#              return '(omniORB.tcInternal.tv__indirect, ["' + \
-#                     rdesc.repoId() + '"])'
-            
-        sn  = fixupScopedName(tspec.scopedName())
-        ret = dotName(sn[:-1] + ["_d_" + sn[-1]], from_scope)
-        return ret
+        ret = 'omniORB.typeMapping["%s"]' % tspec.decl().repoId()
 
     tspec.python_desc = ret
     return ret

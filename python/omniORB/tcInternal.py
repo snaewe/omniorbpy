@@ -30,6 +30,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.9.2.4  2002/05/27 01:43:15  dgrisby
+# Fix AttributeError bug with nested structs/unions.
+#
 # Revision 1.9.2.3  2001/05/14 14:21:15  dpg1
 # TypeCode.equivalent() was broken in a similar manner to
 # get_compact_typecode()
@@ -910,7 +913,7 @@ def removeIndirections(desc):
             removeIndirections(desc[i])
 
     elif k == tv__indirect:
-        del(desc[1][0])
+        desc[1][0] = None
 
 
 # Function to insert indirections into a descriptor, replacing repoIds
