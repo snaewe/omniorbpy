@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.3  1999/09/24 13:26:00  dpg1
+# _default_POA() operation added to Servant.
+#
 # Revision 1.2  1999/09/24 09:22:01  dpg1
 # Added copyright notices.
 #
@@ -53,6 +56,10 @@ class Servant:
             poa = orb.resolve_initial_references("RootPOA")
             poa.activate_object(self)
             return self._objref
+
+    def _default_POA(self):
+        orb = CORBA.ORB_init()
+        return orb.resolve_initial_references("RootPOA")
 
 
 # ObjectId
