@@ -1,3 +1,12 @@
+Wed Nov 22 17:20:03 GMT 2000 dpg1
+=================================
+
+- Twin strings pre-allocated.
+
+src/lib/omniORBpy/modules/omnipy.cc
+src/lib/omniORBpy/modules/omnipy.h
+
+
 Wed Nov 22 14:40:58 GMT 2000 dpg1
 =================================
 

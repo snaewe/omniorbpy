@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.3  2000/11/22 17:23:03  dpg1
+// Twin strings pre-allocated.
+//
 // Revision 1.1.2.2  2000/11/06 17:06:38  dpg1
 // Fix to prevent extra _is_a call after narrow
 //
@@ -68,6 +71,12 @@ PyObject* omniPy::pyCreateTypeCode;	// Function to create a TypeCode object
 PyObject* omniPy::pyWorkerThreadClass;  // Worker thread class
 PyObject* omniPy::pyWorkerThreadDel;    // Method to delete worker thread
 PyObject* omniPy::pyEmptyTuple;         // Zero element tuple.
+
+PyObject* omniPy::pyORB_TWIN;
+PyObject* omniPy::pyOBJREF_TWIN;
+PyObject* omniPy::pySERVANT_TWIN;
+PyObject* omniPy::pyPOA_TWIN;
+PyObject* omniPy::pyPOAMANAGER_TWIN;
 
 
 ////////////////////////////////////////////////////////////////////////////
@@ -266,6 +275,18 @@ extern "C" {
     OMNIORB_ASSERT(omniPy::pyWorkerThreadDel);
     OMNIORB_ASSERT(PyMethod_Check(omniPy::pyWorkerThreadDel));
     OMNIORB_ASSERT(omniPy::pyEmptyTuple);
+
+    omniPy::pyORB_TWIN        = PyString_FromString((char*)"__omni_orb");
+    omniPy::pyOBJREF_TWIN     = PyString_FromString((char*)"__omni_obj");
+    omniPy::pySERVANT_TWIN    = PyString_FromString((char*)"__omni_svt");
+    omniPy::pyPOA_TWIN        = PyString_FromString((char*)"__omni_poa");
+    omniPy::pyPOAMANAGER_TWIN = PyString_FromString((char*)"__omni_mgr");
+
+    OMNIORB_ASSERT(omniPy::pyORB_TWIN);
+    OMNIORB_ASSERT(omniPy::pyOBJREF_TWIN);
+    OMNIORB_ASSERT(omniPy::pySERVANT_TWIN);
+    OMNIORB_ASSERT(omniPy::pyPOA_TWIN);
+    OMNIORB_ASSERT(omniPy::pyPOAMANAGER_TWIN);
 
     Py_INCREF(Py_None);
     return Py_None;

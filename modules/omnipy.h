@@ -54,11 +54,11 @@ extern "C" {
 }
 
 // Twin attribute names
-#define ORB_TWIN        (char*)"__omni_orb"           // ORB_ptr
-#define OBJREF_TWIN     (char*)"__omni_obj"           // Object_ptr
-#define SERVANT_TWIN    (char*)"__omni_svt"           // Py_omniServant
-#define POA_TWIN        (char*)"__omni_poa"           // POA_ptr
-#define POAMANAGER_TWIN (char*)"__omni_poaManager"    // POAManager_ptr
+#define ORB_TWIN        omniPy::pyORB_TWIN
+#define OBJREF_TWIN     omniPy::pyOBJREF_TWIN
+#define SERVANT_TWIN    omniPy::pySERVANT_TWIN
+#define POA_TWIN        omniPy::pyPOA_TWIN
+#define POAMANAGER_TWIN omniPy::pyPOAMANAGER_TWIN
 
 
 // Useful macro
@@ -97,6 +97,16 @@ public:
   static PyObject* pyEmptyTuple;       // Zero element tuple
 
   ////////////////////////////////////////////////////////////////////////////
+  // Twin name strings                                                      //
+  ////////////////////////////////////////////////////////////////////////////
+
+  static PyObject* pyORB_TWIN;
+  static PyObject* pyOBJREF_TWIN;
+  static PyObject* pySERVANT_TWIN;
+  static PyObject* pyPOA_TWIN;
+  static PyObject* pyPOAMANAGER_TWIN;
+
+  ////////////////////////////////////////////////////////////////////////////
   // Pointer to the ORB                                                     //
   ////////////////////////////////////////////////////////////////////////////
 
@@ -110,21 +120,19 @@ public:
 
   static
   inline void
-  setTwin(PyObject* obj, void* twin, char* name)
+  setTwin(PyObject* obj, void* twin, PyObject* name)
   {
     PyObject* ot = newTwin(twin);
 
-    PyDict_SetItemString(((PyInstanceObject*)obj)->in_dict,
-			 name, ot);
+    PyDict_SetItem(((PyInstanceObject*)obj)->in_dict, name, ot);
     Py_DECREF(ot);
   }
 
   static
   inline void*
-  getTwin(PyObject* obj, char* name)
+  getTwin(PyObject* obj, PyObject* name)
   {
-    PyObject* ot = PyDict_GetItemString(((PyInstanceObject*)obj)->in_dict,
-					name);
+    PyObject* ot = PyDict_GetItem(((PyInstanceObject*)obj)->in_dict, name);
     if (ot)
       return ((omnipyTwin*)ot)->ob_twin;
     else
@@ -133,9 +141,9 @@ public:
 
   static
   inline void
-  remTwin(PyObject* obj, char* name)
+  remTwin(PyObject* obj, PyObject* name)
   {
-    PyDict_DelItemString(((PyInstanceObject*)obj)->in_dict, name);
+    PyDict_DelItem(((PyInstanceObject*)obj)->in_dict, name);
   }
 
   ////////////////////////////////////////////////////////////////////////////
