@@ -31,6 +31,10 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.16  2002/08/02 13:33:49  dgrisby
+// C++ API didn't allow ORB to be passed from C++ to Python, and required
+// Python to have imported omniORB.
+//
 // Revision 1.1.2.15  2001/10/18 15:48:39  dpg1
 // Track ORB core changes.
 //
@@ -224,6 +228,13 @@ omniPy::createPyCorbaObjRef(const char*             targetRepoId,
 PyObject*
 omniPy::createPyPseudoObjRef(const CORBA::Object_ptr objref)
 {
+  {
+    CORBA::ORB_var orb = CORBA::ORB::_narrow(objref);
+    if (!CORBA::is_nil(orb)) {
+      OMNIORB_ASSERT(omniPy::orb);
+      return PyObject_GetAttrString(omniPy::pyomniORBmodule, (char*)"orb");
+    }
+  }
   {
     PortableServer::POA_var poa = PortableServer::POA::_narrow(objref);
     if (!CORBA::is_nil(poa)) return createPyPOAObject(poa);

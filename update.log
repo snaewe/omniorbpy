@@ -1,3 +1,13 @@
+Fri Aug  2 14:20:03 BST 2002 dgrisby
+====================================
+
+- C++ API didn't allow ORB to be passed from C++ to Python, and
+  required Python to have imported omniORB.
+
+modules/cxxAPI.cc
+modules/pyObjectRef.cc
+
+
 Thu Jul  4 14:10:35 BST 2002 dgrisby
 ====================================
 

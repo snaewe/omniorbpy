@@ -34,6 +34,23 @@ static
 PyObject*
 lockedCxxObjRefToPyObjRef(const CORBA::Object_ptr cxx_obj)
 {
+  // Make sure the omniORB Python module has been imported
+  if (!omniPy::pyomniORBmodule) {
+    omniORB::logs(15, "Import Python omniORB module.");
+    PyObject* pymod = PyImport_ImportModule((char*)"omniORB");
+    if (!pymod) return 0;
+    Py_DECREF(pymod);
+  }
+
+  // Make sure ORB_init has been called from Python
+  if (!omniPy::orb) {
+    omniORB::logs(15, "Call Python ORB_init().");
+    PyObject* pyorb = PyObject_CallMethod(omniPy::pyCORBAmodule,
+					  (char*)"ORB_init",
+					  (char*)"");
+    if (!pyorb) return 0;
+    Py_DECREF(pyorb);
+  }
   if (CORBA::is_nil(cxx_obj)) {
     Py_INCREF(Py_None);
     return Py_None;
