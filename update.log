@@ -1,16 +1,37 @@
+Tue Sep 19 12:24:15 BST 2000 dpg1
+=================================
+
+- Minor documentation updates: new INS spec, omniidl -T,
+  OMNIORB_PRINCIPAL.
+
+doc/tex/omniORBpy.bib
+doc/tex/omniORBpy.tex
+external_merge/doc/omniORBpy.pdf
+external_merge/doc/omniORBpy.ps
+external_merge/doc/omniORBpy/index.html
+external_merge/doc/omniORBpy/omniORBpy001.html
+external_merge/doc/omniORBpy/omniORBpy002.html
+external_merge/doc/omniORBpy/omniORBpy003.html
+external_merge/doc/omniORBpy/omniORBpy004.html
+external_merge/doc/omniORBpy/omniORBpy005.html
+external_merge/doc/omniORBpy/omniORBpy006.html
+external_merge/doc/omniORBpy/omniORBpy007.html
+external_merge/doc/omniORBpy/omniORBpy009.html
+
+
 Tue Sep 19 10:22:39 BST 2000 dpg1
 =================================
 
 - More paranoid about clearing Python error status
 
-src/lib/omniORBpy/modules/common/pyomniFunc.cc
-src/lib/omniORBpy/modules/omni30/pyServant.cc
+modules/common/pyomniFunc.cc
+modules/omni30/pyServant.cc
 
 - Rename Scope::Entry::Kind to Scope::Entry::EntryKind to avoid
   compiler bugs.
 
-src/lib/omniORBpy/omniidl/cxx/idlscope.cc
-src/lib/omniORBpy/omniidl/cxx/idlscope.h
+omniidl/cxx/idlscope.cc
+omniidl/cxx/idlscope.h
 
 
 Mon Sep 11 15:12:38 BST 2000 dpg1

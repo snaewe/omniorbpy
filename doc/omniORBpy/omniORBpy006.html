@@ -331,7 +331,18 @@ can disable this feature with the
 interoperability.<BR>
 <BR>
 <A NAME="toc30"></A>
-<H2>6.9&nbsp;&nbsp; System Exception Handlers</H2>
+<H2>6.9&nbsp;&nbsp; GIOP Requesting Principal field</H2>In versions 1.0 and 1.1 of the GIOP specification, request messages
+contain a `principal' field which was intended to identify the client.
+The meaning of the principal field was never specified, and its use is
+now deprecated. The field is not present in GIOP 1.2. omniORB normally
+uses the string `<TT>nobody</TT>' in the principal field. However,
+some systems (e.g. the GNOME desktop environment) use the principal
+field as an authentication mechanism, so omniORB allows you to
+configure the principal by setting the <TT>OMNIORB_PRINCIPAL</TT>
+environment variable.<BR>
+<BR>
+<A NAME="toc31"></A>
+<H2>6.10&nbsp;&nbsp; System Exception Handlers</H2>
 <A NAME="sec:exHandlers"></A>By default, all system exceptions which are raised during an operation
 invocation, with the exception of <TT>CORBA.TRANSIENT</TT>, are
 propagated to the application code. Some applications may prefer to
@@ -353,7 +364,7 @@ individual proxy objects, or it can be installed for all proxy objects
 in the address space.<BR>
 <BR>
 
-<H3>6.9.1&nbsp;&nbsp; CORBA.TRANSIENT handlers</H3>When a <TT>CORBA.TRANSIENT</TT> exception is raised by the ORB runtime,
+<H3>6.10.1&nbsp;&nbsp; CORBA.TRANSIENT handlers</H3>When a <TT>CORBA.TRANSIENT</TT> exception is raised by the ORB runtime,
 the default behaviour of the proxy objects is to retry indefinitely
 until the operation succeeds, with an exponentially increasing delay
 (up to a limit) between retries.<BR>
@@ -397,7 +408,7 @@ function returns true, the operation is retried; if it returns false,
 the TRANSIENT exception is raised in the application.<BR>
 <BR>
 
-<H3>6.9.2&nbsp;&nbsp; CORBA.COMM_FAILURE and CORBA.SystemException</H3>There are two other functions for registering exception handlers: one
+<H3>6.10.2&nbsp;&nbsp; CORBA.COMM_FAILURE and CORBA.SystemException</H3>There are two other functions for registering exception handlers: one
 for <TT>CORBA.COMM_FAILURE</TT>, and one for all other
 exceptions. For both these cases, the default is for there to be no
 handler, so exceptions are propagated to the application.<BR>
@@ -408,8 +419,8 @@ omniORB.installSystemExceptionHandler(cookie, function [, object])
 </PRE>In both cases, the call-back function has the same signature
 as for <TT>TRANSIENT</TT> handlers.<BR>
 <BR>
-<A NAME="toc31"></A>
-<H2>6.10&nbsp;&nbsp; Location forwarding</H2>
+<A NAME="toc32"></A>
+<H2>6.11&nbsp;&nbsp; Location forwarding</H2>
 <A NAME="sec:locationForward"></A>Any CORBA operation invocation can return a <TT>LOCATION_FORWARD</TT>
 message to the caller, indicating that it should retry the invocation
 on a new object reference. The standard allows ServantManagers to
@@ -422,8 +433,8 @@ reference. It can be thrown by any operation
 implementation. <TT>omniORB.LOCATION_FORWARD</TT> is not supported on
 omniORB 2.8.0.<BR>
 <BR>
-<A NAME="toc32"></A>
-<H2>6.11&nbsp;&nbsp; Dynamic importing of IDL</H2>
+<A NAME="toc33"></A>
+<H2>6.12&nbsp;&nbsp; Dynamic importing of IDL</H2>
 <A NAME="sec:importIDL"></A>omniORBpy is usually used with pre-generated stubs. Since Python is a
 dynamic language, however, it is possible to compile and import new
 stubs at run-time.<BR>

@@ -15,7 +15,7 @@
 <HR>
 
 <H1>Chapter&nbsp;3&nbsp;&nbsp; Python language mapping issues</H1>
-omniORBpy adheres to the standard Python mapping&nbsp;[<A HREF="omniORBpy009.html#pythonmapping"><CITE>OMG00</CITE></A>],
+omniORBpy adheres to the standard Python mapping&nbsp;[<A HREF="omniORBpy009.html#pythonmapping"><CITE>OMG00b</CITE></A>],
 so there is no need to describe the mapping here. This chapter
 outlines a number of issues which are not addressed by the standard
 (or are optional), and how they are resolved in omniORBpy.<BR>
@@ -185,7 +185,7 @@ other Python ORBs may not be so accommodating.<BR>
 <BR>
 The equivalent of DynAny creation can be achieved by dynamically
 writing and importing new IDL, as described in
-section&nbsp;<A HREF="omniORBpy006.html#sec:importIDL">6.11</A>.<BR>
+section&nbsp;<A HREF="omniORBpy006.html#sec:importIDL">6.12</A>.<BR>
 <BR>
 There is, however, a minor fly in the ointment when it comes to
 receiving Anys. When an Any is transmitted, it is sent as a TypeCode
@@ -328,7 +328,7 @@ argument types are correct, the operation is executed.<BR>
 <BR>
 
 <LI> Exception handlers (described later in
-section&nbsp;<A HREF="omniORBpy006.html#sec:exHandlers">6.9</A>) are not executed when local objects
+section&nbsp;<A HREF="omniORBpy006.html#sec:exHandlers">6.10</A>) are not executed when local objects
 raise system exceptions. Exceptions are always propagated to the
 caller.</UL>In all of these cases, omniORB 3 properly preserves local/remote
 transparency.<BR>
