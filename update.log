@@ -1,3 +1,11 @@
+Mon Apr  9 12:40:02 BST 2001 dpg1
+=================================
+
+- Forgot to add known enums to offset desctriptor map.
+
+modules/common/pyTypeCode.cc
+
+
 Mon Mar 19 11:33:37 GMT 2001 dpg1
 =================================
 
