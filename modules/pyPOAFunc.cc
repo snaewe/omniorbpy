@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.8  2003/04/25 15:25:37  dgrisby
+// Implement missing bidir policy.
+//
 // Revision 1.1.2.7  2001/10/18 16:43:35  dpg1
 // Segfault with invalid policy list in create_POA().
 //
@@ -113,65 +116,73 @@ CORBA::Policy_ptr createPolicyObject(PortableServer::POA_ptr poa,
   PyObject* pyvalue  = PyObject_GetAttrString(pypolicy, (char*)"_value");
   PyObject* pyivalue = 0;
 
-  if (pyptype && PyInt_Check(pyptype) &&
-      pyvalue && PyInstance_Check(pyvalue)) {
-
+  if (PyInstance_Check(pyvalue)) {
     pyivalue = PyObject_GetAttrString(pyvalue, (char*)"_v");
+  }
+  else {
+    Py_INCREF(pyvalue);
+    pyivalue = pyvalue;
+  }
 
-    if (pyivalue && PyInt_Check(pyivalue)) {
-      CORBA::ULong ivalue = PyInt_AS_LONG(pyivalue);
+  if (pyptype && PyInt_Check(pyptype) &&
+      pyivalue && PyInt_Check(pyivalue)) {
 
-      switch (PyInt_AS_LONG(pyptype)) {
+    CORBA::ULong ivalue = PyInt_AS_LONG(pyivalue);
 
-      case 16: // ThreadPolicy
-	policy = poa->
-	  create_thread_policy((PortableServer::
-				ThreadPolicyValue)
+    switch (PyInt_AS_LONG(pyptype)) {
+
+    case 16: // ThreadPolicy
+      policy = poa->
+	create_thread_policy((PortableServer::
+			      ThreadPolicyValue)
+			     ivalue);
+      break;
+
+    case 17: // LifespanPolicy
+      policy = poa->
+	create_lifespan_policy((PortableServer::
+				LifespanPolicyValue)
 			       ivalue);
-	break;
+      break;
 
-      case 17: // LifespanPolicy
-	policy = poa->
-	  create_lifespan_policy((PortableServer::
-				  LifespanPolicyValue)
-				 ivalue);
-	break;
+    case 18: // IdUniquenessPolicy
+      policy = poa->
+	create_id_uniqueness_policy((PortableServer::
+				     IdUniquenessPolicyValue)
+				    ivalue);
+      break;
 
-      case 18: // IdUniquenessPolicy
-	policy = poa->
-	  create_id_uniqueness_policy((PortableServer::
-				       IdUniquenessPolicyValue)
-				      ivalue);
-	break;
+    case 19: // IdAssignmentPolicy
+      policy = poa->
+	create_id_assignment_policy((PortableServer::
+				     IdAssignmentPolicyValue)
+				    ivalue);
+      break;
 
-      case 19: // IdAssignmentPolicy
-	policy = poa->
-	  create_id_assignment_policy((PortableServer::
-				       IdAssignmentPolicyValue)
-				      ivalue);
-	break;
-
-      case 20: // ImplicitActivationPolicy
-	policy = poa->
-	  create_implicit_activation_policy((PortableServer::
-					     ImplicitActivationPolicyValue)
-					    ivalue);
-	break;
-
-      case 21: // ServantRetentionPolicy
-	policy = poa->
-	  create_servant_retention_policy((PortableServer::
-					   ServantRetentionPolicyValue)
+    case 20: // ImplicitActivationPolicy
+      policy = poa->
+	create_implicit_activation_policy((PortableServer::
+					   ImplicitActivationPolicyValue)
 					  ivalue);
-	break;
+      break;
 
-      case 22: // RequestProcessingPolicy
-	policy = poa->
-	  create_request_processing_policy((PortableServer::
-					    RequestProcessingPolicyValue)
-					   ivalue);
-	break;
-      }
+    case 21: // ServantRetentionPolicy
+      policy = poa->
+	create_servant_retention_policy((PortableServer::
+					 ServantRetentionPolicyValue)
+					ivalue);
+      break;
+
+    case 22: // RequestProcessingPolicy
+      policy = poa->
+	create_request_processing_policy((PortableServer::
+					  RequestProcessingPolicyValue)
+					 ivalue);
+      break;
+
+    case 37: // BidirectionalPolicy
+      policy = new BiDirPolicy::BidirectionalPolicy(ivalue);
+      break;
     }
   }
   Py_XDECREF(pyptype);
