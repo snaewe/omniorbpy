@@ -28,6 +28,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.29.2.18  2004/02/16 13:56:06  dgrisby
+# Operation names clashing with keywords were broken.
+#
 # Revision 1.29.2.17  2003/11/19 16:56:36  dgrisby
 # Extern package option to omniidl backend. Thanks Rene Jager.
 #
@@ -311,7 +314,7 @@ objref_attribute_set = """
         return _omnipy.invoke(self, "_set_@attr@", _0_@modname@.@ifid@._d__set_@attr@, args)"""
 objref_operation = """
     def @opname@(self, *args):
-        return _omnipy.invoke(self, "@opname@", _0_@modname@.@ifid@._d_@opname@, args)"""
+        return _omnipy.invoke(self, "@r_opname@", _0_@modname@.@ifid@._d_@opname@, args)"""
 objref_methods = """
     __methods__ = @methods@"""
 
@@ -1022,9 +1025,10 @@ class PythonVisitor:
                 opname = mangle(c.identifier())
                 
                 self.st.out(objref_operation,
-                            opname  = opname,
-                            ifid    = ifid,
-                            modname = self.modname)
+                            opname   = opname,
+                            r_opname = c.identifier(),
+                            ifid     = ifid,
+                            modname  = self.modname)
                 
                 methodl.append('"' + opname + '"')
 
