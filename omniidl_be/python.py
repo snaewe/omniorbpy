@@ -28,6 +28,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.14  1999/12/07 15:35:14  dpg1
+# Bug in currentScope handling.
+#
 # Revision 1.13  1999/11/30 10:41:20  dpg1
 # Back-ends can now have their own usage string.
 #
@@ -527,7 +530,7 @@ class PythonVisitor:
             n.accept(self)
 
         if ags:
-            self.currentScope = ["_GlobalIDL"]
+            self.currentScope = ["_0__GlobalIDL"]
         else:
             self.currentScope.pop()
         self.at_global_scope = ags
