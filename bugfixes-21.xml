@@ -8,6 +8,13 @@
 
 <buglist version="2.1">
 
-<nobugs/>
+<bug id="1" date="Fri Mar 28 17:31:12 GMT 2003" user="dgrisby">
+  <summary>Mis-placed DECREF led to segfaults.</summary>
+  <reported>Adam Kerrison</reported>
+  <text>
+  A DECREF in the wrong place in the exception handling code could
+  lead to premature deletion of repository ids, leading to a crash.
+  </text>
+</bug>
 
 </buglist>
