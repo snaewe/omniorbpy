@@ -29,6 +29,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.20  2000/03/16 11:10:47  dpg1
+# Better error reporting if import fails.
+#
 # Revision 1.19  2000/03/14 15:02:19  dpg1
 # Incorrect message with omniidl -E.
 #
@@ -310,13 +313,15 @@ def main(argv=None):
                              backend + "'\n")
         try:
             be = be_import(backend)
-        except ImportError:
+        except ImportError, msg:
             if not quiet:
                 sys.stderr.write(cmdname + \
                                  ": Could not import back-end `" + \
                                  backend + "'\n")
                 sys.stderr.write(cmdname + \
                                  ": Maybe you need to use the -p option?\n")
+                sys.stderr.write(cmdname + \
+                                 ": (The error was `" + str(msg) + "')\n")
             sys.exit(1)
 
         if verbose:
