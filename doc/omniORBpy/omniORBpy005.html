@@ -15,7 +15,7 @@
 <A HREF="omniORBpy006.html"><IMG SRC ="next_motif.gif" ALT="Next"></A>
 <HR>
 
-<H1><A NAME="htoc55">Chapter&nbsp;5</A>&nbsp;&nbsp;The IDL compiler</H1>
+<H1><A NAME="htoc57">Chapter&nbsp;5</A>&nbsp;&nbsp;The IDL compiler</H1>
 <A NAME="chap:omniidl"></A>
 omniORBpy's IDL compiler is called omniidl. It consists of a generic
 front-end parser written in C++, and a number of back-ends written in
@@ -25,8 +25,8 @@ compilers.<BR>
 <BR>
 The general form of an omniidl command line is:
 <BLOCKQUOTE> <TT>omniidl </TT>[<I>options</I>]<TT> -b</TT>&lt;<I>back-end</I>&gt;<TT> </TT>[<I>back-end options</I>]<TT> </TT>&lt;<I>file 1</I>&gt;<TT> </TT>&lt;<I>file 2</I>&gt;<TT> </TT>...</BLOCKQUOTE>
-<A NAME="toc22"></A>
-<H2><A NAME="htoc56">5.1</A>&nbsp;&nbsp;Common options</H2>
+<A NAME="toc23"></A>
+<H2><A NAME="htoc58">5.1</A>&nbsp;&nbsp;Common options</H2>
 The following options are common to all back-ends:<BR>
 <TABLE border=0 cellspacing=0 cellpadding=0>
 <TR><TD ALIGN=left NOWRAP></TD>
@@ -93,7 +93,7 @@ Most of these options are self explanatory, but some are not
 so obvious.<BR>
 <BR>
 
-<H3><A NAME="htoc57">5.1.1</A>&nbsp;&nbsp;Preprocessor interactions</H3>
+<H3><A NAME="htoc59">5.1.1</A>&nbsp;&nbsp;Preprocessor interactions</H3>
 IDL is processed by the C preprocessor before omniidl parses it.
 Unlike the old IDL compiler, which used different C preprocessors on
 different platforms, omniidl always uses the GNU C preprocessor (which
@@ -116,7 +116,7 @@ problem, use the `<TT>-T</TT>' option to create a temporary file
 between the two stages.<BR>
 <BR>
 
-<H3><A NAME="htoc58">5.1.2</A>&nbsp;&nbsp;Forward-declared interfaces</H3>
+<H3><A NAME="htoc60">5.1.2</A>&nbsp;&nbsp;Forward-declared interfaces</H3>
 If you have an IDL file like:
 <PRE>
 interface I;
@@ -136,7 +136,7 @@ under the warning messages. Use the <TT>-nf</TT> option to suppress
 them.<BR>
 <BR>
 
-<H3><A NAME="htoc59">5.1.3</A>&nbsp;&nbsp;Comments</H3>
+<H3><A NAME="htoc61">5.1.3</A>&nbsp;&nbsp;Comments</H3>
 By default, omniidl discards comments in the input IDL. However, with
 the <TT>-k</TT> and <TT>-K</TT> options, it preserves the comments
 for use by the back-ends. The C++ back-end ignores this information,
@@ -155,8 +155,8 @@ interface I {
 the <TT>-k</TT> flag will attach the comment to <TT>op1()</TT>;
 the <TT>-K</TT> flag will attach it to <TT>op2()</TT>.<BR>
 <BR>
-<A NAME="toc23"></A>
-<H2><A NAME="htoc60">5.2</A>&nbsp;&nbsp;Python back-end options</H2>
+<A NAME="toc24"></A>
+<H2><A NAME="htoc62">5.2</A>&nbsp;&nbsp;Python back-end options</H2>
 <A NAME="sec:Wbglobal"></A>
 When you specify the Python back-end (with <TT>-bpython</TT>), the
 following <TT>-Wb</TT> options are available. Note that the
@@ -239,8 +239,8 @@ interface to the generated code is not strictly-speaking CORBA
 compliant. You may have to change your code if you ever use a Python
 ORB other than omniORBpy.<BR>
 <BR>
-<A NAME="toc24"></A>
-<H2><A NAME="htoc61">5.3</A>&nbsp;&nbsp;Examples</H2>
+<A NAME="toc25"></A>
+<H2><A NAME="htoc63">5.3</A>&nbsp;&nbsp;Examples</H2>
 Generate the Python stubs for a file <TT>a.idl</TT>:
 <BLOCKQUOTE>
 <TT>omniidl -bpython a.idl</TT>

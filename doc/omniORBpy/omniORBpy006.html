@@ -15,7 +15,7 @@
 <A HREF="omniORBpy007.html"><IMG SRC ="next_motif.gif" ALT="Next"></A>
 <HR>
 
-<H1><A NAME="htoc62">Chapter&nbsp;6</A>&nbsp;&nbsp;Interoperable Naming Service</H1>
+<H1><A NAME="htoc64">Chapter&nbsp;6</A>&nbsp;&nbsp;Interoperable Naming Service</H1>
 <A NAME="chap:ins"></A>
 omniORB 3 supports the Interoperable Naming Service (INS), which will
 be part of CORBA 2.4. The following is a summary of the new facilities
@@ -23,8 +23,8 @@ described in the INS edited chapters document&nbsp;[<A HREF="omniORBpy009.html#i
 These facilities are not available when using omniORBpy with omniORB
 2.8.<BR>
 <BR>
-<A NAME="toc25"></A>
-<H2><A NAME="htoc63">6.1</A>&nbsp;&nbsp;Object URIs</H2>
+<A NAME="toc26"></A>
+<H2><A NAME="htoc65">6.1</A>&nbsp;&nbsp;Object URIs</H2>
 As well as accepting IOR-format strings, <TT>ORB::string_to_object()</TT>
 now also supports two new Uniform Resource Identifier
 (URI)&nbsp;[<A HREF="omniORBpy009.html#rfc2396"><CITE>BLFIM98</CITE></A>] formats, which can be used to specify objects in
@@ -32,7 +32,7 @@ a convenient human-readable form. The existing IOR-format strings are
 now also considered URIs.<BR>
 <BR>
 
-<H3><A NAME="htoc64">6.1.1</A>&nbsp;&nbsp;corbaloc</H3>
+<H3><A NAME="htoc66">6.1.1</A>&nbsp;&nbsp;corbaloc</H3>
 <TT>corbaloc</TT> URIs allow you to specify object references which
 can be contacted by IIOP, or found through
 <TT>ORB::resolve_initial_references()</TT>. To specify an IIOP object
@@ -86,7 +86,7 @@ use a URI of the form:
 <TT>corbaloc:rir:/NameService</TT>
 </BLOCKQUOTE>
 
-<H3><A NAME="htoc65">6.1.2</A>&nbsp;&nbsp;corbaname</H3>
+<H3><A NAME="htoc67">6.1.2</A>&nbsp;&nbsp;corbaname</H3>
 <A NAME="sec:corbaname"></A>
 <TT>corbaname</TT> URIs cause <TT>string_to_object()</TT> to look-up a
 name in a CORBA Naming service. They are an extension of the
@@ -117,14 +117,14 @@ have been used for a look-up:
 The first of these examples is the easiest way of specifying
 the location of a naming service.<BR>
 <BR>
-<A NAME="toc26"></A>
-<H2><A NAME="htoc66">6.2</A>&nbsp;&nbsp;Configuring resolve_initial_references</H2>
+<A NAME="toc27"></A>
+<H2><A NAME="htoc68">6.2</A>&nbsp;&nbsp;Configuring resolve_initial_references</H2>
 <A NAME="sec:insargs"></A>
 The INS adds two new command line arguments which provide a portable
 way of configuring <TT>ORB::resolve_initial_references()</TT>:<BR>
 <BR>
 
-<H3><A NAME="htoc67">6.2.1</A>&nbsp;&nbsp;ORBInitRef</H3>
+<H3><A NAME="htoc69">6.2.1</A>&nbsp;&nbsp;ORBInitRef</H3>
 <TT>-ORBInitRef</TT> takes an argument of the form
 &lt;<I>ObjectId</I>&gt;<TT>=</TT>&lt;<I>ObjectURI</I>&gt;. So, for example,
 with command line arguments of:
@@ -139,7 +139,7 @@ URIs, you can also say things like:
 <TT>-ORBInitRef NameService=IOR:00ff...</TT>
 </BLOCKQUOTE>
 
-<H3><A NAME="htoc68">6.2.2</A>&nbsp;&nbsp;ORBDefaultInitRef</H3>
+<H3><A NAME="htoc70">6.2.2</A>&nbsp;&nbsp;ORBDefaultInitRef</H3>
 <TT>-ORBDefaultInitRef</TT> provides a prefix string which is used to
 resolve otherwise unknown names. When
 <TT>resolve_initial_references()</TT> is unable to resolve a name which
@@ -163,7 +163,7 @@ service---you have to use a sub-context, like:
 <TT>-ORBDefaultInitRef corbaname::myhost.example.com#services</TT>
 </BLOCKQUOTE>
 
-<H3><A NAME="htoc69">6.2.3</A>&nbsp;&nbsp;omniORB configuration file</H3>
+<H3><A NAME="htoc71">6.2.3</A>&nbsp;&nbsp;omniORB configuration file</H3>
 As an extension to the standard facilities of the INS, omniORB
 supports configuration file entries named <TT>ORBInitRef</TT> and
 <TT>ORBDefaultInitRef</TT>. The syntax is identical to the command
@@ -174,7 +174,7 @@ ORBInitRef NameService=corbaname::myhost.example.com
 ORBDefaultInitRef corbaname:rir:#services
 </PRE></BLOCKQUOTE>
 
-<H3><A NAME="htoc70">6.2.4</A>&nbsp;&nbsp;Resolution order</H3>
+<H3><A NAME="htoc72">6.2.4</A>&nbsp;&nbsp;Resolution order</H3>
 With all these options for specifying object references to be returned
 by <TT>resolve_initial_references()</TT>, it is important to
 understand the order in which the options are tried. The resolution
@@ -203,7 +203,7 @@ command line with:
 <TT>-ORBDefaultInitRef corbaname:rir:#services</TT>
 </BLOCKQUOTE>
 expecting unknown services to be looked up in the configured
-naming service. Now, step&nbsp;<A HREF="#itm:defaultgotcha">342Resolution orderItem.14</A> above means that
+naming service. Now, step&nbsp;<A HREF="#itm:defaultgotcha">344Resolution orderItem.14</A> above means that
 <TT>resolve_initial_references("MyService")</TT> should be processed
 with the steps:
 <OL type=1><LI>Construct the URI `<TT>corbaname:rir:#services/MyService</TT>'
@@ -230,10 +230,10 @@ problem you must either specify the <TT>NameService</TT> reference on
 the command line, or put the <TT>DefaultInitRef</TT> in the
 configuration file.<BR>
 <BR>
-<A NAME="toc27"></A>
-<H2><A NAME="htoc71">6.3</A>&nbsp;&nbsp;omniNames</H2>
+<A NAME="toc28"></A>
+<H2><A NAME="htoc73">6.3</A>&nbsp;&nbsp;omniNames</H2>
 
-<H3><A NAME="htoc72">6.3.1</A>&nbsp;&nbsp;NamingContextExt</H3>
+<H3><A NAME="htoc74">6.3.1</A>&nbsp;&nbsp;NamingContextExt</H3>
 omniNames now supports the <TT>CosNaming::NamingContextExt</TT>
 interface:
 <PRE>
@@ -288,7 +288,7 @@ the inherited <TT>resolve()</TT> operation. There are no string-based
 equivalents of the various bind operations.<BR>
 <BR>
 
-<H3><A NAME="htoc73">6.3.2</A>&nbsp;&nbsp;Use with corbaname</H3>
+<H3><A NAME="htoc75">6.3.2</A>&nbsp;&nbsp;Use with corbaname</H3>
 To make it easy to use omniNames with <TT>corbaname</TT> URIs, it
 now starts with the default port of 2809, and an object key of
 `<TT>NameService</TT>' for the root naming context. This is only
@@ -315,8 +315,8 @@ the omniNames log.<BR>
 <BR>
 The second option is to use omniMapper, as described below.<BR>
 <BR>
-<A NAME="toc28"></A>
-<H2><A NAME="htoc74">6.4</A>&nbsp;&nbsp;omniMapper</H2>
+<A NAME="toc29"></A>
+<H2><A NAME="htoc76">6.4</A>&nbsp;&nbsp;omniMapper</H2>
 
 omniMapper is a simple daemon which listens on port 2809 (or any other
 port), and redirects IIOP requests for configured object keys to
@@ -356,8 +356,8 @@ file could contain the line:
 <PRE>
 ORBDefaultInitRef corbaloc::localhost
 </PRE></BLOCKQUOTE>
-<A NAME="toc29"></A>
-<H2><A NAME="htoc75">6.5</A>&nbsp;&nbsp;Creating objects with simple object keys</H2>
+<A NAME="toc30"></A>
+<H2><A NAME="htoc77">6.5</A>&nbsp;&nbsp;Creating objects with simple object keys</H2>
 In normal use, omniORB creates object keys containing various
 information including POA names and various non-ASCII characters.
 Since object keys are supposed to be opaque, this is not usually a

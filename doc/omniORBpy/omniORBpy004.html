@@ -15,7 +15,7 @@
 <A HREF="omniORBpy005.html"><IMG SRC ="next_motif.gif" ALT="Next"></A>
 <HR>
 
-<H1><A NAME="htoc37">Chapter&nbsp;4</A>&nbsp;&nbsp;omniORB configuration and API</H1>
+<H1><A NAME="htoc38">Chapter&nbsp;4</A>&nbsp;&nbsp;omniORB configuration and API</H1>
 <A NAME="chap:config"></A>
 omniORB 4.0, and thus omniORBpy 2, has a wide range of parameters that
 can be configured. They can be set in the configuration file / Windows
@@ -24,7 +24,7 @@ parameters can be configured at run time. This chapter lists all the
 configuration parameters, and how they are used.<BR>
 <BR>
 <A NAME="toc13"></A>
-<H2><A NAME="htoc38">4.1</A>&nbsp;&nbsp;Setting parameters</H2>
+<H2><A NAME="htoc39">4.1</A>&nbsp;&nbsp;Setting parameters</H2>
 When <TT>CORBA::ORB_init()</TT> is called, the value for each configuration
 parameter is searched for in the following order:
 <OL type=1><LI>Command line arguments
@@ -32,21 +32,21 @@ parameter is searched for in the following order:
 <LI>Configuration file / Windows registry
 <LI>Built-in defaults</OL>
 
-<H3><A NAME="htoc39">4.1.1</A>&nbsp;&nbsp;Command line arguments</H3>
+<H3><A NAME="htoc40">4.1.1</A>&nbsp;&nbsp;Command line arguments</H3>
 <A NAME="sec:ORBargs"></A>
 Command line arguments take the form
 `<TT>-ORB</TT><I>parameter</I>', and usually expect another
 argument. An example is `<TT>-ORBtraceLevel 10</TT>'.<BR>
 <BR>
 
-<H3><A NAME="htoc40">4.1.2</A>&nbsp;&nbsp;Environment variables</H3>
+<H3><A NAME="htoc41">4.1.2</A>&nbsp;&nbsp;Environment variables</H3>
 Environment variables consist of the parameter name prefixed with
 `<TT>ORB</TT>'. Using bash, for example
 <PRE>
 export ORBtraceLevel=10
 </PRE>
 
-<H3><A NAME="htoc41">4.1.3</A>&nbsp;&nbsp;Configuration file</H3>
+<H3><A NAME="htoc42">4.1.3</A>&nbsp;&nbsp;Configuration file</H3>
 The best way to understand the format of the configuration file is to
 look at the <TT>sample.cfg</TT> file in the omniORB distribution. Each
 parameter is set on a single line like
@@ -68,7 +68,7 @@ a prefix.
 </DL><HR SIZE=2><BR>
 <BR>
 
-<H3><A NAME="htoc42">4.1.4</A>&nbsp;&nbsp;Windows registry</H3>
+<H3><A NAME="htoc43">4.1.4</A>&nbsp;&nbsp;Windows registry</H3>
 On Windows, configuration parameters can be stored in the registry,
 under the key
 <CODE>HKEY_LOCAL_MACHINE\SOFTWARE\omniORB</CODE>.<BR>
@@ -77,7 +77,7 @@ The file <TT>sample.reg</TT> shows the settings that can be made. It can
 be edited and then imported into regedit.<BR>
 <BR>
 <A NAME="toc14"></A>
-<H2><A NAME="htoc43">4.2</A>&nbsp;&nbsp;Tracing options</H2>
+<H2><A NAME="htoc44">4.2</A>&nbsp;&nbsp;Tracing options</H2>
 The following options control debugging trace output.<BR>
 <BR>
 <TT>traceLevel</TT> &nbsp;&nbsp; <I>default</I> =
@@ -135,7 +135,7 @@ for tracking down race conditions, but it adds significant overhead to
 the logging function so it is turned off by default.<BR>
 <BR>
 
-<H3><A NAME="htoc44">4.2.1</A>&nbsp;&nbsp;Tracing API</H3>
+<H3><A NAME="htoc45">4.2.1</A>&nbsp;&nbsp;Tracing API</H3>
 The three tracing parameters can be inspected or modified at runtime
 with the <TT>traceLevel()</TT>, <TT>traceInvocations()</TT> and <TT>traceThreadId()</TT>
 functions in the <TT>omniORB</TT> module. Calling one of the functions
@@ -143,7 +143,7 @@ with no arguments returns the current value; calling it with a single
 integer argument sets the value.<BR>
 <BR>
 <A NAME="toc15"></A>
-<H2><A NAME="htoc45">4.3</A>&nbsp;&nbsp;Miscellaneous global options</H2>
+<H2><A NAME="htoc46">4.3</A>&nbsp;&nbsp;Miscellaneous global options</H2>
 These options control miscellaneous features that affect the whole ORB
 runtime.<BR>
 <BR>
@@ -158,7 +158,7 @@ at start-up.<BR>
  <TT>5</TT><BR>
 <BR>
 <BR>
-As explained in chapter&nbsp;<A HREF="omniORBpy007.html#chap:connections">747Connection and Thread Managementchapter.7</A>, omniORB regularly
+As explained in chapter&nbsp;<A HREF="omniORBpy007.html#chap:connections">749Connection and Thread Managementchapter.7</A>, omniORB regularly
 scans incoming and outgoing connections, so it can close unused
 ones. This value is the granularity in seconds at which the ORB
 performs its scans. A value of zero turns off the scanning altogether.<BR>
@@ -168,7 +168,7 @@ performs its scans. A value of zero turns off the scanning altogether.<BR>
 <BR>
 <BR>
 The native code set the application is using for <TT>char</TT> and
-<TT>string</TT>. See chapter&nbsp;<A HREF="omniORBpy008.html#chap:codesets">857Code set conversionchapter.8</A>.<BR>
+<TT>string</TT>. See chapter&nbsp;<A HREF="omniORBpy008.html#chap:codesets">859Code set conversionchapter.8</A>.<BR>
 <BR>
 <TT>omniORB_27_CompatibleAnyExtraction</TT> &nbsp;&nbsp; <I>default</I> =
  <TT>0</TT><BR>
@@ -192,7 +192,7 @@ This can be helpful for tracking down bugs, since it leaves the call
 stack intact.<BR>
 <BR>
 <A NAME="toc16"></A>
-<H2><A NAME="htoc46">4.4</A>&nbsp;&nbsp;Client side options</H2>
+<H2><A NAME="htoc47">4.4</A>&nbsp;&nbsp;Client side options</H2>
 These options control aspects of client-side behaviour.<BR>
 <BR>
 <TT>InitRef</TT> &nbsp;&nbsp; <I>default</I> =
@@ -204,7 +204,7 @@ Specify the objects available from
 &lt;<I>key</I>&gt;=&lt;<I>uri</I>&gt;, where the <I>key</I> is the name
 given to <TT>resolve_initial_references()</TT> and
 <I>uri</I> is a valid CORBA object reference URI, as detailed in
-chapter&nbsp;<A HREF="omniORBpy006.html#chap:ins">639Interoperable Naming Servicechapter.6</A>.<BR>
+chapter&nbsp;<A HREF="omniORBpy006.html#chap:ins">641Interoperable Naming Servicechapter.6</A>.<BR>
 <BR>
 <TT>DefaultInitRef</TT> &nbsp;&nbsp; <I>default</I> =
  <TT><I>none</I></TT><BR>
@@ -212,14 +212,14 @@ chapter&nbsp;<A HREF="omniORBpy006.html#chap:ins">639Interoperable Naming Servic
 <BR>
 Specify the default URI prefix for
 <TT>resolve_initial_references()</TT>, as explained in
-chapter&nbsp;<A HREF="omniORBpy006.html#chap:ins">639Interoperable Naming Servicechapter.6</A>.<BR>
+chapter&nbsp;<A HREF="omniORBpy006.html#chap:ins">641Interoperable Naming Servicechapter.6</A>.<BR>
 <BR>
 <TT>clientTransportRule</TT> &nbsp;&nbsp; <I>default</I> =
  <TT>* unix,tcp,ssl</TT><BR>
 <BR>
 <BR>
 Used to specify the way the client contacts a server, depending on the
-server's address. See section&nbsp;<A HREF="omniORBpy007.html#sec:clientRule">7.7.153Client transport rulessubsection.7.7.1</A> for details.<BR>
+server's address. See section&nbsp;<A HREF="omniORBpy007.html#sec:clientRule">7.7.155Client transport rulessubsection.7.7.1</A> for details.<BR>
 <BR>
 <TT>clientCallTimeOutPeriod</TT> &nbsp;&nbsp; <I>default</I> =
  <TT>0</TT><BR>
@@ -229,7 +229,7 @@ Call timeout in milliseconds for the client side. If a call takes
 longer than the specified number of milliseconds, the ORB closes the
 connection and raises a <TT>COMM_FAILURE</TT> exception. A value
 of zero means no timeout; calls can block for ever. See
-section&nbsp;<A HREF="omniORBpy007.html#sec:timeoutAPI">7.3.149Client side timeoutssubsection.7.3.1</A> for more information about timeouts.<BR>
+section&nbsp;<A HREF="omniORBpy007.html#sec:timeoutAPI">7.3.151Client side timeoutssubsection.7.3.1</A> for more information about timeouts.<BR>
 <BR>
 <B>Note</B>: omniORB 3 had timeouts specified in seconds; omniORB
 4.0 uses milliseconds for timeouts.<BR>
@@ -248,7 +248,7 @@ has a noticeable performance impact, so it is turned off by default.<BR>
 <BR>
 Idle timeout in seconds for outgoing (i.e. client initiated)
 connections. If a connection has been idle for this amount of time,
-the ORB closes it. See section&nbsp;<A HREF="omniORBpy007.html#sec:connShutdown">7.551Idle connection shutdownsection.7.5</A>.<BR>
+the ORB closes it. See section&nbsp;<A HREF="omniORBpy007.html#sec:connShutdown">7.553Idle connection shutdownsection.7.5</A>.<BR>
 <BR>
 <TT>maxGIOPConnectionPerServer</TT> &nbsp;&nbsp; <I>default</I> =
  <TT>5</TT><BR>
@@ -282,7 +282,7 @@ single connection.<BR>
 If set true, the client will indicate to servers that it is willing to
 accept callbacks on client-initiated connections using bidirectional
 GIOP, provided the relevant POA policies are set. See
-section&nbsp;<A HREF="omniORBpy007.html#sec:bidir">7.854Bidirectional GIOPsection.7.8</A>.<BR>
+section&nbsp;<A HREF="omniORBpy007.html#sec:bidir">7.856Bidirectional GIOPsection.7.8</A>.<BR>
 <BR>
 <TT>diiThrowsSysExceptions</TT> &nbsp;&nbsp; <I>default</I> =
  <TT>0</TT><BR>
@@ -338,7 +338,7 @@ authentication scheme. This parameter sets the data omniORB uses in
 the principal field. The default is an empty sequence.<BR>
 <BR>
 <A NAME="toc17"></A>
-<H2><A NAME="htoc47">4.5</A>&nbsp;&nbsp;Server side options</H2>
+<H2><A NAME="htoc48">4.5</A>&nbsp;&nbsp;Server side options</H2>
 These parameters affect server-side operations.<BR>
 <BR>
 <TT>endPoint&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT> &nbsp;&nbsp; <I>default</I> = <TT>giop:tcp::</TT><BR>
@@ -347,7 +347,7 @@ These parameters affect server-side operations.<BR>
 <TT>endPointPublishAllIFs</TT><BR>
 These options determine the end-points the ORB should listen on, and
 the details that should be published in IORs. See
-chapter&nbsp;<A HREF="omniORBpy007.html#chap:connections">747Connection and Thread Managementchapter.7</A> for details.<BR>
+chapter&nbsp;<A HREF="omniORBpy007.html#chap:connections">749Connection and Thread Managementchapter.7</A> for details.<BR>
 <BR>
 <TT>serverTransportRule</TT> &nbsp;&nbsp; <I>default</I> =
  <TT>* unix,tcp,ssl</TT><BR>
@@ -373,7 +373,7 @@ timeout.<BR>
 <BR>
 Idle timeout in seconds for incoming. If a connection has been idle
 for this amount of time, the ORB closes it. See
-section&nbsp;<A HREF="omniORBpy007.html#sec:connShutdown">7.551Idle connection shutdownsection.7.5</A>.<BR>
+section&nbsp;<A HREF="omniORBpy007.html#sec:connShutdown">7.553Idle connection shutdownsection.7.5</A>.<BR>
 <BR>
 <TT>threadPerConnectionPolicy</TT> &nbsp;&nbsp; <I>default</I> =
  <TT>1</TT><BR>
@@ -425,14 +425,14 @@ should start again.<BR>
 <BR>
 If true, threads from the pool temporarily behave a bit like thread
 per connection after dispatching a call. See
-section&nbsp;<A HREF="omniORBpy007.html#sec:watchConn">7.4.250Thread pool modesubsection.7.4.2</A> for details.<BR>
+section&nbsp;<A HREF="omniORBpy007.html#sec:watchConn">7.4.252Thread pool modesubsection.7.4.2</A> for details.<BR>
 <BR>
 <TT>acceptBiDirectionalGIOP</TT> &nbsp;&nbsp; <I>default</I> =
  <TT>0</TT><BR>
 <BR>
 <BR>
 Determines whether a server will ever accept clients' offers of
-bidirectional GIOP connections. See section&nbsp;<A HREF="omniORBpy007.html#sec:bidir">7.854Bidirectional GIOPsection.7.8</A>.<BR>
+bidirectional GIOP connections. See section&nbsp;<A HREF="omniORBpy007.html#sec:bidir">7.856Bidirectional GIOPsection.7.8</A>.<BR>
 <BR>
 <TT>unixTransportDirectory</TT> &nbsp;&nbsp; <I>default</I> =
  <TT>/tmp/omni-%u</TT><BR>
@@ -486,7 +486,7 @@ out after the specified number of milliseconds, by raising a
 If set true, servers support the Sun bootstrap agent protocol.<BR>
 <BR>
 <A NAME="toc18"></A>
-<H2><A NAME="htoc48">4.6</A>&nbsp;&nbsp;GIOP and interoperability options</H2>
+<H2><A NAME="htoc49">4.6</A>&nbsp;&nbsp;GIOP and interoperability options</H2>
 These options control omniORB's use of GIOP, and cover some areas
 where omniORB can work around buggy behaviour by other ORBs.<BR>
 <BR>
@@ -551,7 +551,7 @@ If true, try to fix a mis-aligned indirection in a typecode. This is
 used to work around a bug in some versions of Visibroker's Java ORB.<BR>
 <BR>
 <A NAME="toc19"></A>
-<H2><A NAME="htoc49">4.7</A>&nbsp;&nbsp;System Exception Handlers</H2>
+<H2><A NAME="htoc50">4.7</A>&nbsp;&nbsp;System Exception Handlers</H2>
 <A NAME="sec:exHandlers"></A>
 By default, all system exceptions that are raised during an operation
 invocation, with the exception of some cases of
@@ -574,7 +574,7 @@ individual proxy objects, or it can be installed for all proxy objects
 in the address space.<BR>
 <BR>
 
-<H3><A NAME="htoc50">4.7.1</A>&nbsp;&nbsp;Minor codes</H3>
+<H3><A NAME="htoc51">4.7.1</A>&nbsp;&nbsp;Minor codes</H3>
 A new feature in omniORB 4.0 is extensive use of exception minor codes
 to indicate the specific circumstances surrounding a system exception.
 The C++ file <TT>include/omniORB4/minorCode.h</TT> contains definitions
@@ -589,7 +589,7 @@ calling the <TT>omniORB.minorCodeToString()</TT> function, passing an
 exception object as its argument.<BR>
 <BR>
 
-<H3><A NAME="htoc51">4.7.2</A>&nbsp;&nbsp;CORBA::TRANSIENT handlers</H3>
+<H3><A NAME="htoc52">4.7.2</A>&nbsp;&nbsp;CORBA::TRANSIENT handlers</H3>
 <TT>TRANSIENT</TT> exceptions can occur in many circumstances. One
 circumstance is as follows:
 <OL type=1><LI>The client invokes on an object reference.
@@ -635,7 +635,7 @@ function returns true, the operation is retried; if it returns false,
 the TRANSIENT exception is raised in the application.<BR>
 <BR>
 
-<H3><A NAME="htoc52">4.7.3</A>&nbsp;&nbsp;CORBA.COMM_FAILURE and CORBA.SystemException</H3>
+<H3><A NAME="htoc53">4.7.3</A>&nbsp;&nbsp;CORBA.COMM_FAILURE and CORBA.SystemException</H3>
 There are two other functions for registering exception handlers: one
 for <TT>CORBA.COMM_FAILURE</TT>, and one for all other
 exceptions. For both these cases, the default is for there to be no
@@ -648,7 +648,7 @@ In both cases, the call-back function has the same signature
 as for <TT>TRANSIENT</TT> handlers.<BR>
 <BR>
 <A NAME="toc20"></A>
-<H2><A NAME="htoc53">4.8</A>&nbsp;&nbsp;Location forwarding</H2>
+<H2><A NAME="htoc54">4.8</A>&nbsp;&nbsp;Location forwarding</H2>
 <A NAME="sec:locationForward"></A>
 Any CORBA operation invocation can return a <TT>LOCATION_FORWARD</TT>
 message to the caller, indicating that it should retry the invocation
@@ -660,7 +660,7 @@ provide a similar mechanism for normal servants. omniORB provides the
 can be thrown by any operation implementation.<BR>
 <BR>
 <A NAME="toc21"></A>
-<H2><A NAME="htoc54">4.9</A>&nbsp;&nbsp;Dynamic importing of IDL</H2>
+<H2><A NAME="htoc55">4.9</A>&nbsp;&nbsp;Dynamic importing of IDL</H2>
 <A NAME="sec:importIDL"></A>
 omniORBpy is usually used with pre-generated stubs. Since Python is a
 dynamic language, however, it is possible to compile and import new
@@ -711,6 +711,42 @@ From Python:
 5
 &gt;&gt;&gt; sys.modules["_GlobalIDL"].s
 'Hello'
+</PRE>
+<A NAME="toc22"></A>
+<H2><A NAME="htoc56">4.10</A>&nbsp;&nbsp;C++ API</H2>
+omniORBpy has a C++ API that can be used by programs that embed Python
+in C++, or by C++ extension modules to Python. The API has functions
+to convert object references between their Python representation and
+their C++ representation. For extensions to omniORBpy itself, it has a
+mechanism for adding pseudo object types to omniORBpy.<BR>
+<BR>
+The definitions used by the C++ API are in the <TT>omniORBpy.h</TT>
+header. An example of its use is in <TT>examples/embed/</TT>.<BR>
+<BR>
+The API is accessed through a singleton structure containing function
+pointers. A pointer to the API struct is stored as a <TT>PyCObject</TT>
+in the <TT>_omnipy</TT> module with the name <TT>API</TT>. It can be
+accessed with code like:
+<PRE>
+PyObject*     omnipy = PyImport_ImportModule((char*)"_omnipy");
+PyObject*     pyapi  = PyObject_GetAttrString(omnipy, (char*)"API");
+omniORBpyAPI* api    = (omniORBpyAPI*)PyCObject_AsVoidPtr(pyapi);
+Py_DECREF(pyapi);
+</PRE>
+The structure has this definition:
+<PRE>
+struct omniORBpyAPI {
+
+  PyObject* (*cxxObjRefToPyObjRef)(const CORBA::Object_ptr cxx_obj,
+       CORBA::Boolean hold_lock);
+  // Convert a C++ object reference to a Python object reference.
+  // If &lt;hold_lock&gt; is true, caller holds the Python interpreter lock.
+
+  CORBA::Object_ptr (*pyObjRefToCxxObjRef)(PyObject* py_obj,
+        CORBA::Boolean hold_lock);
+  // Convert a Python object reference to a C++ object reference.
+  // Raises BAD_PARAM if the Python object is not an object reference.
+  // If &lt;hold_lock&gt; is true, caller holds the Python interpreter lock.
 </PRE>
 <HR>
 <A HREF="omniORBpy003.html"><IMG SRC ="previous_motif.gif" ALT="Previous"></A>
