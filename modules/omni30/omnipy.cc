@@ -5,6 +5,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.3  1999/06/04 13:59:54  dpg1
+// Structs, enums and sequences.
+//
 // Revision 1.2  1999/06/03 10:36:51  dpg1
 // Different proxy scheme.
 // Thread control.
@@ -219,7 +222,8 @@ public:
 
   virtual void unmarshalReturnedValues(GIOP_C& giop_client) {
     PyEval_RestoreThread(tstate_);
-    result_ = r_unmarshalReturnedValues(giop_client, out_d_, out_l_);
+    result_ = r_unmarshalReturnedValues(giop_client, out_d_, out_l_,
+					out_l_ != 1);
   }
 
   virtual void userException(GIOP_C& giop_client, const char* repoId);
@@ -234,14 +238,17 @@ public:
 private:
   // Recursive marshalling functions:
   CORBA::ULong r_alignedSize(CORBA::ULong msgsize,
-			     PyObject* in_d, PyObject* args);
+			     PyObject* in_d, PyObject* args,
+			     CORBA::Boolean tuple_args = 1);
 
   void r_marshalArguments(GIOP_C& giop_client,
-			  PyObject* in_d, PyObject* args);
+			  PyObject* in_d, PyObject* args,
+			  CORBA::Boolean tuple_args = 1);
 
-  PyObject* r_unmarshalReturnedValues(GIOP_C&   giop_client,
-				      PyObject* out_d,
-				      size_t    r_l);
+  PyObject* r_unmarshalReturnedValues(GIOP_C&        giop_client,
+				      PyObject*      out_d,
+				      size_t         r_l,
+				      CORBA::Boolean makeTuple = 1);
   PyObject*      in_d_;
   size_t         in_l_;
   PyObject*      out_d_;
@@ -254,18 +261,25 @@ private:
 
 
 CORBA::ULong
-Py_OmniProxyCallDesc::r_alignedSize(CORBA::ULong msgsize,
-				    PyObject*    in_d,
-				    PyObject*    args)
+Py_OmniProxyCallDesc::r_alignedSize(CORBA::ULong   msgsize,
+				    PyObject*      in_d,
+				    PyObject*      args,
+				    CORBA::Boolean tuple_args)
 {
   size_t        a, d, a_l, d_l;
-  CORBA::TCKind tk;
+  CORBA::ULong  tk;
   PyObject*     a_o; // Current argument object
   PyObject*     d_o; // Current descriptor object
 
   //  cout << "alignedSize() adding to " << msgsize << "..." << endl;
 
-  a_l = PyTuple_GET_SIZE(args);
+  if (tuple_args)
+    a_l = PyTuple_GET_SIZE(args);
+  else {
+    a_l = 1;
+    a_o = args;
+  }
+
   d_l = PyTuple_GET_SIZE(in_d);
 
   for (a=0, d=0; a < a_l; a++) {
@@ -273,8 +287,11 @@ Py_OmniProxyCallDesc::r_alignedSize(CORBA::ULong msgsize,
 
     //    cout << "  processing arg " << a << "..." << endl;
 
+    if (tuple_args)
+      a_o = PyTuple_GET_ITEM(args, a);
+
     d_o = PyTuple_GET_ITEM(in_d, d++);
-    tk  = (CORBA::TCKind)PyInt_AS_LONG(d_o);
+    tk  = PyInt_AS_LONG(d_o);
 
     switch (tk) {
 
@@ -342,10 +359,9 @@ Py_OmniProxyCallDesc::r_alignedSize(CORBA::ULong msgsize,
 
       // Complex types
 
-    case CORBA::tk_objref:
+    case CORBA::tk_objref: // string repoId
       {
 	d_o = PyTuple_GET_ITEM(in_d, d++); // IDL specified repoId
-	a_o = PyTuple_GET_ITEM(args, a);   // The object reference
 
 	CORBA::Object_ptr obj = (CORBA::Object_ptr)getTwin(a_o);
 
@@ -358,16 +374,84 @@ Py_OmniProxyCallDesc::r_alignedSize(CORBA::ULong msgsize,
       }
       break;
 
-    case CORBA::tk_string:
-      //      cout << "    string." << endl;
+    case CORBA::tk_struct: // tuple names, tuple descriptors
+      {
+	if (!PyInstance_Check(a_o)) throw CORBA::BAD_PARAM();
+
+	PyObject* names    = PyTuple_GET_ITEM(in_d, d++); // Member names
+	PyObject* descr    = PyTuple_GET_ITEM(in_d, d++); // Member descriptors
+
+	PyObject* sdict    = ((PyInstanceObject*)a_o)->in_dict;
+
+	int       namecnt  = PyTuple_GET_SIZE(names);
+	PyObject* strtuple = PyTuple_New(namecnt);
+
+	if (!strtuple) throw CORBA::NO_MEMORY();
+
+	PyObject* name;
+	PyObject* value;
+
+	// Construct tuple containing struct members in order
+	for (int n=0; n < namecnt; n++) {
+	  name  = PyTuple_GET_ITEM(names, n);
+	  value = PyDict_GetItem(sdict, name);
+	  Py_INCREF(value);
+	  PyTuple_SET_ITEM(strtuple, n, value);
+	}
+
+	// Record the tuple in the struct object so marshalArguments()
+	// can get it later
+	PyDict_SetItemString(sdict, "__omnipy_s", strtuple);
+
+	msgsize = r_alignedSize(msgsize, descr, strtuple);
+      }
+      break;
+
+
+    case CORBA::tk_enum:
+      {
+	msgsize = omni::align_to(msgsize,omni::ALIGN_4);
+	msgsize += 4;
+      }
+      break;
+
+    case CORBA::tk_sequence: // tuple element_desc, int max_length
+      {
+	PyObject*    descr   = PyTuple_GET_ITEM(in_d, d++);
+	d_o                  = PyTuple_GET_ITEM(in_d, d++);
+	CORBA::ULong max_len = PyInt_AS_LONG(d_o);
+
+	a_o = PyTuple_GET_ITEM(args, a);   // The list
+
+	if (!PyList_Check(a_o)) throw CORBA::BAD_PARAM();
+
+	CORBA::ULong list_len = PyList_GET_SIZE(a_o);
+
+	if (max_len > 0 && list_len > max_len) throw CORBA::BAD_PARAM();
+
+	msgsize = omni::align_to(msgsize,omni::ALIGN_4);
+	msgsize += 4;
+
+	if (list_len > 0) {
+	  for (CORBA::ULong i=0; i<list_len; i++) {
+	    msgsize = r_alignedSize(msgsize, descr,
+				    PyList_GET_ITEM(a_o, i), 0);
+	  }
+	}
+      }
+      break;
+
+
+    case CORBA::tk_string: // int max_length
       {
 	CORBA::Long max_len;
 	d_o     = PyTuple_GET_ITEM(in_d, d++);
 	max_len = PyInt_AS_LONG(d_o);
 
-	a_o = PyTuple_GET_ITEM(args, a);
-
 	if (!PyString_Check(a_o)) throw CORBA::BAD_PARAM();
+
+	if (max_len > 0 && PyString_GET_SIZE(a_o) > max_len)
+	  throw CORBA::BAD_PARAM();
 
 	msgsize  = omni::align_to(msgsize, omni::ALIGN_4);
 	msgsize += 4 + PyString_GET_SIZE(a_o) + 1;
@@ -386,18 +470,25 @@ Py_OmniProxyCallDesc::r_alignedSize(CORBA::ULong msgsize,
 
 
 void
-Py_OmniProxyCallDesc::r_marshalArguments(GIOP_C&   giop_client,
-					 PyObject* in_d,
-					 PyObject* args)
+Py_OmniProxyCallDesc::r_marshalArguments(GIOP_C&        giop_client,
+					 PyObject*      in_d,
+					 PyObject*      args,
+					 CORBA::Boolean tuple_args)
 {
   size_t        a, d, a_l, d_l;
-  CORBA::TCKind tk;
+  CORBA::ULong  tk;
   PyObject*     a_o; // Current argument object
   PyObject*     d_o; // Current descriptor object
 
   //  cout << "marshalArguments()..." << endl;
 
-  a_l = PyTuple_GET_SIZE(args);
+  if (tuple_args)
+    a_l = PyTuple_GET_SIZE(args);
+  else {
+    a_l = 1;
+    a_o = args;
+  }
+
   d_l = PyTuple_GET_SIZE(in_d);
 
   for (a=0, d=0; a < a_l; a++) {
@@ -405,9 +496,11 @@ Py_OmniProxyCallDesc::r_marshalArguments(GIOP_C&   giop_client,
 
     //    cout << "  processing arg " << a << "..." << endl;
 
-    a_o = PyTuple_GET_ITEM(args, a);
+    if (tuple_args)
+      a_o = PyTuple_GET_ITEM(args, a);
+
     d_o = PyTuple_GET_ITEM(in_d, d++);
-    tk  = (CORBA::TCKind)PyInt_AS_LONG(d_o);
+    tk  = PyInt_AS_LONG(d_o);
 
     switch (tk) {
 
@@ -497,7 +590,7 @@ Py_OmniProxyCallDesc::r_marshalArguments(GIOP_C&   giop_client,
 
       // Complex types
 
-    case CORBA::tk_objref:
+    case CORBA::tk_objref: // string repoId
       {
 	d_o = PyTuple_GET_ITEM(in_d, d++); // IDL specified repoId
 
@@ -512,8 +605,52 @@ Py_OmniProxyCallDesc::r_marshalArguments(GIOP_C&   giop_client,
       }
       break;
 
-    case CORBA::tk_string:
-      //      cout << "    string." << endl;
+    case CORBA::tk_struct: // tuple names, tuple descriptors
+      {
+	d++; // Skip over member names
+	PyObject* descr    = PyTuple_GET_ITEM(in_d, d++);
+
+	PyObject* sdict    = ((PyInstanceObject*)a_o)->in_dict;
+	PyObject* strtuple = PyDict_GetItemString(sdict, "__omnipy_s");
+
+	r_marshalArguments(giop_client, descr, strtuple);
+
+	PyDict_DelItemString(sdict, "__omnipy_s");
+	Py_DECREF(strtuple);
+      }
+      break;
+
+    case CORBA::tk_enum:
+      {
+	if (!PyInstance_Check(a_o)) throw CORBA::BAD_PARAM();
+
+	PyObject* ev = PyDict_GetItemString(((PyInstanceObject*)a_o)->in_dict,
+					    "_v");
+	CORBA::ULong e = PyInt_AS_LONG(ev);
+	e >>= giop_client;
+      }
+      break;
+
+    case CORBA::tk_sequence: // tuple element_desc, int max_length
+      {
+	PyObject*    descr    = PyTuple_GET_ITEM(in_d, d++);
+
+	d++; // Skip max length.
+
+	CORBA::ULong list_len = PyList_GET_SIZE(a_o);
+
+	list_len >>= giop_client;
+
+	if (list_len > 0) {
+	  for (CORBA::ULong i=0; i<list_len; i++) {
+	    r_marshalArguments(giop_client, descr,
+			       PyList_GET_ITEM(a_o, i), 0);
+	  }
+	}
+      }
+      break;
+
+    case CORBA::tk_string: // int max_length
       {
 	CORBA::Long max_len;
 	d_o     = PyTuple_GET_ITEM(in_d, d++);
@@ -522,10 +659,6 @@ Py_OmniProxyCallDesc::r_marshalArguments(GIOP_C&   giop_client,
 	if (!PyString_Check(a_o)) throw CORBA::BAD_PARAM();
 
 	CORBA::Long slen = PyString_GET_SIZE(a_o) + 1;
-
-	if (max_len > 0 && slen > max_len) {
-	  //	  cout << "  string longer than max length!" << endl;
-	}
 
 	slen >>= giop_client;
 
@@ -550,12 +683,13 @@ Py_OmniProxyCallDesc::r_marshalArguments(GIOP_C&   giop_client,
   
 
 PyObject*
-Py_OmniProxyCallDesc::r_unmarshalReturnedValues(GIOP_C& giop_client,
-						PyObject* out_d,
-						size_t    r_l)
+Py_OmniProxyCallDesc::r_unmarshalReturnedValues(GIOP_C&        giop_client,
+						PyObject*      out_d,
+						size_t         r_l,
+						CORBA::Boolean makeTuple)
 {
   size_t        r, d, d_l;
-  CORBA::TCKind tk;
+  CORBA::ULong  tk;
   PyObject*     r_o = 0;	// Current result object
   PyObject*     d_o;		// Current descriptor object
   PyObject*     result = 0;	// Complete result object
@@ -569,8 +703,10 @@ Py_OmniProxyCallDesc::r_unmarshalReturnedValues(GIOP_C& giop_client,
 
   d_l = PyTuple_GET_SIZE(out_d);
 
-  if (r_l > 1)
+  if (makeTuple)
     result = PyTuple_New(r_l);
+  else
+    assert(r_l == 1);
 
   for (r=0,d=0; r < r_l; r++) {
     assert(d < d_l);
@@ -578,7 +714,7 @@ Py_OmniProxyCallDesc::r_unmarshalReturnedValues(GIOP_C& giop_client,
     //    cout << "  processing result " << r << "..." << endl;
 
     d_o = PyTuple_GET_ITEM(out_d, d++);
-    tk  = (CORBA::TCKind)PyInt_AS_LONG(d_o);
+    tk  = PyInt_AS_LONG(d_o);
 
     switch (tk) {
 
@@ -661,7 +797,7 @@ Py_OmniProxyCallDesc::r_unmarshalReturnedValues(GIOP_C& giop_client,
 
       // Complex types
 
-    case CORBA::tk_objref:
+    case CORBA::tk_objref: // string repoId
       {
 	d_o                   = PyTuple_GET_ITEM(out_d, d++);
 	char*  targetRepoId   = PyString_AS_STRING(d_o);
@@ -672,8 +808,57 @@ Py_OmniProxyCallDesc::r_unmarshalReturnedValues(GIOP_C& giop_client,
       }
       break;
 
-    case CORBA::tk_string:
-      //      cout << "    string." << endl;
+    case CORBA::tk_struct: // class struct_class, tuple descriptors, int count
+      {
+	PyObject* strclass = PyTuple_GET_ITEM(out_d, d++);
+	PyObject* descr    = PyTuple_GET_ITEM(out_d, d++);
+	d_o                = PyTuple_GET_ITEM(out_d, d++);
+	size_t    memcnt   = PyInt_AS_LONG(d_o);
+
+	PyObject* strtuple = r_unmarshalReturnedValues(giop_client,
+						       descr, memcnt);
+	r_o = PyEval_CallObject(strclass, strtuple);
+	Py_DECREF(strtuple);
+      }
+      break;
+
+    case CORBA::tk_enum: // list enum_items
+      {
+	d_o = PyTuple_GET_ITEM(out_d, d++);
+
+	CORBA::ULong e;
+	e <<= giop_client;
+	
+	PyObject* ev = PyList_GET_ITEM(d_o, e);
+	Py_INCREF(ev);
+	r_o = ev;
+      }
+      break;
+
+    case CORBA::tk_sequence: // tuple element_desc, int max_length
+      {
+	PyObject*    descr   = PyTuple_GET_ITEM(out_d, d++);
+	d_o                  = PyTuple_GET_ITEM(out_d, d++);
+	CORBA::ULong max_len = PyInt_AS_LONG(d_o);
+
+	CORBA::ULong seq_len;
+	seq_len <<= giop_client;
+
+	if (max_len > 0 && seq_len > max_len) throw CORBA::BAD_PARAM();
+
+	r_o = PyList_New(seq_len);
+
+	if (seq_len > 0) {
+	  for (CORBA::ULong i=0; i<seq_len; i++) {
+	    PyList_SET_ITEM(r_o, i,
+			    r_unmarshalReturnedValues(giop_client,
+						      descr, 1, 0));
+	  }
+	}
+      }
+      break;
+
+    case CORBA::tk_string: // int max_length
       {
 	CORBA::Long max_len;
 	d_o     = PyTuple_GET_ITEM(out_d, d++);
@@ -694,7 +879,7 @@ Py_OmniProxyCallDesc::r_unmarshalReturnedValues(GIOP_C& giop_client,
       cout << " !!! unmarshalReturnedValues(): unsupported typecode: "
 	   << (CORBA::ULong)tk << endl;
     }
-    if (r_l > 1)
+    if (makeTuple)
       PyTuple_SET_ITEM(result, r, r_o);
     else
       result = r_o;
@@ -722,16 +907,9 @@ Py_OmniProxyCallDesc::userException(GIOP_C& giop_client, const char* repoId)
 
     if (exc_l == 0)
       exc_a = PyTuple_New(0);
-    else {
-      o = r_unmarshalReturnedValues(giop_client, exc_d, exc_l);
+    else
+      exc_a = r_unmarshalReturnedValues(giop_client, exc_d, exc_l);
 
-      if (exc_l == 1) {
-	exc_a = PyTuple_New(1);
-	PyTuple_SET_ITEM(exc_a, 0, o);
-      }
-      else
-	exc_a = o;
-    }
     giop_client.RequestCompleted();
 
     PyObject* exc_i = PyEval_CallObject(exc_c, exc_a);
