@@ -1,3 +1,12 @@
+Wed May 24 12:07:37 BST 2000 dpg1
+=================================
+
+- POA functions now properly release servant references when
+  exceptions are thrown.
+
+modules/omni30/pyPOAFunc.cc
+
+
 Wed May 24 11:34:31 BST 2000 dpg1
 =================================
 
