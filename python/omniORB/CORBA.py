@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.8  1999/09/24 13:28:37  dpg1
+# RootPOA added to list_initial_services() list.
+#
 # Revision 1.7  1999/09/24 09:22:01  dpg1
 # Added copyright notices.
 #
@@ -444,7 +447,9 @@ class ORB:
         return _omnipy.objectToString(self, obj)
 
     def list_initial_services(self):
-        return _omnipy.listInitialServices(self)
+        isl = _omnipy.listInitialServices(self)
+        isl.append("RootPOA")
+        return isl
 
     def resolve_initial_references(self, identifier):
 
