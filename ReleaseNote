@@ -1,0 +1,358 @@
+Release Notes for omniORBpy 0.1
+===============================
+
+This is the first pre-release of Python bindings for omniORB.
+
+The bindings adhere to the proposed IDL to Python mapping which you
+may find at ftp://ftp.omg.org/pub/docs/orbos/98-08-02.pdf. There are a
+number of errors in the mapping document, which are outlined below.
+
+omniORBpy is currently available for Linux and Solaris. Windows NT
+support will be available soon.
+
+The omniORBpy runtime is believed to be reasonably stable. The IDL
+compiler, omniidlpy, is less stable, since the front-end parser is
+still in development. The majority of valid IDL will be handled
+correctly, but many invalid IDL files will also be accepted.
+
+Please report any bugs you find to Duncan Grisby,
+
+                                         dgrisby@uk.research.att.com
+
+Building
+--------
+
+You must install the omniORBpy source in the $TOP/src/lib directory of
+a working omniORB 2.8 tree. Then, in the $TOP/src/lib/omniORBpy
+directory, simple do a gnumake export.
+
+
+Using omniORBpy
+---------------
+
+To use omniORBpy, simply add two paths to your PYTHONPATH environment
+variable, like:
+
+  export PYTHONPATH=$PYTHONPATH:$TOP/lib/python:$TOP/lib
+
+where $TOP is the root of your omniORB tree.
+
+You should also have $TOP/bin/scripts in your PATH, so you can run the
+IDL compiler, omniidlpy.
+
+omniORBpy requires Python version 1.5.2. Be careful not to use
+/usr/bin/python on RedHat 5.2 machines, since that is Python 1.5.1.
+
+If you have been using Fnorb, make sure you remove any of its stub
+files before using omniidlpy in a particular directory. If you don't,
+omniidlpy will refuse to modify the stub files.
+
+
+A brief tutorial
+----------------
+
+The CORBA to Python mapping is extremely easy to use. You can learn
+most of what you need to know just by trying the Echo example. All of
+the files below are available in
+
+  $TOP/src/lib/omniORBpy/examples/
+
+
+First, lets start with a slight modification of the normal omniORB
+Echo interface, as follows:
+
+  // echo_example.idl
+  module Example {
+    interface Echo {
+      string echoString(in string mesg);
+    };
+  };
+
+The modification is that the Echo interface has been placed in a
+module named Example. This is because Python maps IDL modules to
+Python modules, and there is no global Python module. You'll see how
+to cope with things in the IDL global scope a bit later (it's the same
+as Fnorb).
+
+Anyway, first compile the echo_example.idl file with:
+
+  omniidlpy echo_example.idl
+
+This generates the Python modules named Example and POA_Example.
+
+
+Here is a client of the Echo interface:
+
+  #!/usr/bin/env python
+
+  import sys
+
+  # Import the CORBA module
+  from omniORB import CORBA
+
+  # Import the stubs for the Example module
+  import Example
+
+  # Initialise the ORB
+  orb = CORBA.ORB_init(sys.argv, CORBA.ORB_ID)
+
+  # Get the IOR of an Echo object from the command line (without
+  # checking that the arguments are sensible!)
+  ior = sys.argv[1]
+
+  # Convert the IOR to an object reference
+  object = orb.string_to_object(ior)
+
+  # Invoke the echoString operation
+  message = "Hello from Python"
+  result  = object.echoString(message)
+  print "I said '" + result + "'. The object said '" + result + "'"
+
+
+And here's the server:
+
+  #!/usr/bin/env python
+
+  import sys
+  from omniORB import CORBA, PortableServer
+
+  # Import the skeletons for the Example module
+  import POA_Example
+
+  # Initialise the ORB
+  orb = CORBA.ORB_init(sys.argv, CORBA.ORB_ID)
+
+  # Find the POA
+  poa = orb.resolve_initial_references("RootPOA")
+
+  # Activate the POA
+  poaManager = poa._get_the_POAManager()
+  poaManager.activate()
+
+  # Define an implementation of the Echo interface
+  class Echo_i (POA_Example.Echo):
+      def echoString(self, mesg):
+          print "echoString() called with message:", mesg
+          return mesg
+
+  # Create an instance of it
+  ei = Echo_i()
+
+  # Create an object reference, and implicitly activate the object
+  eo = ei._this()
+
+  # Print out the IOR
+  print orb.object_to_string(eo)
+
+  # Everything is running now, but if this thread drops out of the end
+  # of the file, the process will exit. orb.run() just blocks for ever
+  orb.run()
+
+
+Now, you can run the server, then run the client with the IOR it
+prints out.
+
+
+To interoperate with the normal omniORB Echo example, we have to use
+the same IDL:
+
+  // echo.idl
+  interface Echo {
+    string echoString(in string mesg);
+  };
+
+If you run this though omniidlpy, you'll find that you get a Python
+module named _GlobalIDL. To modify the client shown above, simply
+change the line which reads:
+
+  import Example
+
+to read:
+
+  import _GlobalIDL
+
+Nothing else needs to change. To change the server, change the import
+to be:
+
+  import POA__GlobalIDL
+
+(note the two underscores), and also change the class definition to
+start:
+
+  class Echo_i (POA__GlobalIDL.Echo):
+
+
+You'll now find that you can use the Python client with the C++
+eg2_impl, and the Python server with eg2_clt.
+
+
+
+
+Differences from Fnorb
+----------------------
+
+omniORBpy is largely compatible with programs written for Fnorb,
+although a few minor modifications are required. Some of these are
+mandated by the mapping specification; others are in areas not covered
+by the spec.
+
+The significant differences are as follows:
+
+1. In Fnorb, to import the CORBA module, you say:
+
+     from Fnorb.orb import CORBA
+
+   in omniORBpy, say:
+
+     from omniORB import CORBA
+
+
+2. Fnorb uses a simplistic mapping for IDL unions which forces the
+   programmer to directly manipulate discriminator values, rather than
+   using the union's member names. For omniORBpy we suggested a more
+   powerful mapping which has now been accepted as the standard.
+   Unfortunately, it is not quite compatible with Fnorb's mapping.
+
+   For a union declared, for example:
+
+     union U switch (long) {
+       case 1:  string s;
+       case 2:  long   l;
+       default: double d;
+     };
+
+   You can now construct and manipulate the union as follows:
+
+     u = U(s = "Hello")    # The discriminator is set to 1
+     print u.s             # Outputs "Hello"
+     u.l = 123             # The discriminator is now 2
+     u.d = 3.14            # The discriminator is now some value other
+                           #  than 1 or 2
+     print u.s             # Throws a BAD_PARAM exception since the
+                           #  union does not hold a string.
+
+   Fnorb permits you to access the discriminator and value of a union
+   with members named d and v. As you can see from the above, this can
+   clash with union member names. In omniORBpy (and in the standard
+   mapping), you can read or set the discriminator with the name _d
+   and the value with the name _v, as follows:
+
+     u = U(l = 123)
+     print u._d            # Outputs 2
+     u._d = 5
+     u._v = 2.18
+     print u.d             # Outputs 2.18
+
+   You can still construct a union by giving the discriminator and
+   value, as in Fnorb:
+
+     u = U(1, "Test")
+     print u.s             # Outputs "Test"
+
+
+3. Fnorb provides a Basic Object Adapter (BOA). Although omniORB
+   currently also provides a BOA, omniORBpy dresses it up to look like
+   a Portable Object Adapter (POA). Many of the advanced POA
+   facilities are not available, however. This design is so that code
+   written for omniORBpy will not have to be changed when proper POA
+   support is available in omniORB.
+
+   The echo example given above shows what this means for object
+   implementation code.
+
+
+4. omniORBpy's IDL compiler properly supports separate compilation of
+   IDL files. For example, consider the following two IDL files:
+
+     // a.idl
+     module M {
+       interface I {
+         void op();
+       };
+     };
+
+     // b.idl
+     module M {
+       interface J {
+         void another_op();
+       };
+     };
+
+   With Fnorb, if you do "fnidl a.idl" followed by "fnidl b.idl", then
+   the Python module named M will only contain the definition of
+   interface J, having overwritten the definition of I. Under
+   omniORBpy, "omniidlpy a.idl" followed by "omniidlpy b.idl" results
+   in Python module M containing both I and J.
+
+5. omniORBpy copes better with inherited interfaces when it does not
+   have full knowledge of the most derived interfaces. For example,
+   given the IDL files:
+
+     // a.idl
+     interface A {
+       ...
+     };
+
+     interface B {
+       void acceptA(in A the_A);
+     };
+
+     // b.idl
+     #include <a.idl>
+
+     interface C : A {
+       ...
+     };
+
+   Suppose that the Python program only has knowledge of the
+   definitions in a.idl. Now suppose that a caller passes a reference
+   to an object with interface C to the acceptA() operation. omniORBpy
+   will permit this, since it will make a call to _is_a() before the
+   first call, to ensure that the object is of the right type. Fnorb
+   does not do this, so you must explicitly narrow the reference
+   received by acceptA() just in case a more derived object is
+   transmitted.
+
+6. omniORBpy is fully multi-threaded, so you do not need to run a main
+   loop. If you wish to block the main thread in a CORBA server, so it
+   doesn't drop out of the end of the program, you can use orb.run().
+
+
+Errors in the mapping specification
+-----------------------------------
+
+The current version of the mapping specification has a number of
+errors:
+
+1. On page 13, it claims that the enum members declared inside an
+   interface should be named M.O_rot, etc. In fact, they should be
+   named M.O.rot, etc.
+
+2. On pages 18 and 19, it says that the Python module name for
+   skeletons in IDL module M should be M__POA. Later on page 19, it
+   contradicts itself, and says POA_M. POA_M is the correct mapping.
+
+
+
+Missing features
+----------------
+
+There are a number of features which are currently missing from
+omniORBpy. Most (with the exception of object by value) will be
+available in the near future.
+
+
+1. There is currently no support for DII and DSI.
+
+2. The long long, unsigned long long, long double, wchar, and wstring
+   types are not supported.
+
+3. The majority of POA functions are not supported, since the Python
+   POA is actually implemented with the C++ BOA.
+
+4. Context is not supported.
+
+5. Some omniORB specific things, like default exception handlers, are
+   not yet available without writing a C++ extension module.
+
+6. Objects by value are not supported.
