@@ -190,16 +190,17 @@ endif
 
 ifdef Win32Platform
 
-PYPREFIX1 := $(shell python -c 'import sys,string; sys.stdout.write(string.lower(sys.prefix))')
-PYPREFIX  := $(subst program files,progra~1,$(PYPREFIX1))
-PYVERSION := $(shell $(PYTHON) -c 'import sys; print sys.version[:3]')
+PYPREFIX1 := "$(shell python -c 'import sys,string; sys.stdout.write(string.lower(sys.prefix))')"
+PYPREFIX  := $(subst program files,progra~1,$(subst \,/,$(PYPREFIX1)))
+PYVERSION := $(shell $(PYTHON) -c 'import sys; sys.stdout.write(sys.version[:3])')
 PYINCDIR  := $(PYPREFIX)/include
 PYLIBDIR  := $(PYPREFIX)/libs
 PYLIB     := python$(subst .,,$(PYVERSION)).lib
 
 DIR_CPPFLAGS += -I$(PYINCDIR) -I$(PYINCDIR)/python$(PYVERSION) \
                 -DPYTHON_INCLUDE="<Python.h>"
-PYLIBPATH = -libpath:"$(PYLIBDIR)"
+
+PYLIBPATH = $(patsubst %,-libpath:%,$(PYLIBDIR))
 
 implib = _omnipy.lib
 lib = $(patsubst %.lib,%.pyd,$(implib))

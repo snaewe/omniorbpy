@@ -1,3 +1,12 @@
+Thu Sep  7 17:20:37 BST 2000 dpg1
+=================================
+
+- Yesterday's Python 1.6+ update broke on Windows.
+
+modules/dir.mk
+omniidl/cxx/dir.mk
+
+
 Wed Sep  6 12:13:30 BST 2000 dpg1
 =================================
 
