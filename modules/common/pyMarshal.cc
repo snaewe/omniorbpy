@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.10  1999/09/30 11:27:08  dpg1
+// Unmarshalling object references specified as CORBA::Object now works.
+//
 // Revision 1.9  1999/09/29 11:38:59  dpg1
 // Oops -- fix to Nil object references was broken.
 //
@@ -1453,6 +1456,8 @@ omniPy::unmarshalPyObject(NetBufferedStream& stream,
       else {
 	assert(PyString_Check(t_o));
 	targetRepoId = PyString_AS_STRING(t_o);
+	if (targetRepoId[0] == '\0') // Empty string => CORBA.Object
+	  targetRepoId = 0;
       }
 
       CORBA::Object_ptr obj = omniPy::UnMarshalObjRef(targetRepoId,
@@ -1875,6 +1880,8 @@ omniPy::unmarshalPyObject(MemBufferedStream& stream,
       else {
 	assert(PyString_Check(t_o));
 	targetRepoId = PyString_AS_STRING(t_o);
+	if (targetRepoId[0] == '\0') // Empty string => CORBA.Object
+	  targetRepoId = 0;
       }
 
       CORBA::Object_ptr obj = omniPy::UnMarshalObjRef(targetRepoId,
