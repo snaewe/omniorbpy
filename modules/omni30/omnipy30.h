@@ -27,10 +27,14 @@
 // Description:
 //    Master header file for omnipy internals, omniORB 3.0 version.
 
-
 // $Id$
 
 // $Log$
+// Revision 1.21  2000/03/24 16:48:57  dpg1
+// Local calls now have proper pass-by-value semantics.
+// Lots of little stability improvements.
+// Memory leaks fixed.
+//
 // Revision 1.20  2000/03/07 16:52:16  dpg1
 // Support for compilers which do not allow exceptions to be caught by
 // base class. (Like MSVC 5, surprise surprise.)
@@ -332,6 +336,15 @@ public:
   PyObject* unmarshalPyObject(MemBufferedStream& stream,
 			      PyObject*          d_o);
 
+  // Take a descriptor and an argument object, and return a "copy" of
+  // the argument. Immutable types need not be copied. If the argument
+  // does not match the descriptor, set Python's exception status to
+  // BAD_PARAM and return 0.
+  static
+  PyObject* copyArgument(PyObject*               d_o,
+			 PyObject*               a_o,
+			 CORBA::CompletionStatus compstatus);
+
 
   ////////////////////////////////////////////////////////////////////////////
   // TypeCode and Any support functions                                     //
@@ -381,10 +394,16 @@ public:
 	args_(args)
     {
       OMNIORB_ASSERT(PyTuple_Check(in_d));
-      OMNIORB_ASSERT(PyTuple_Check(out_d));
       tstate_ = 0;
       in_l_   = PyTuple_GET_SIZE(in_d_);
-      out_l_  = PyTuple_GET_SIZE(out_d_);
+      if (oneway) {
+	OMNIORB_ASSERT(out_d_ == Py_None);
+	out_l_ = -1;
+      }
+      else {
+	OMNIORB_ASSERT(PyTuple_Check(out_d));
+	out_l_ = PyTuple_GET_SIZE(out_d_);
+      }
     }
 
     virtual ~Py_omniCallDescriptor() {
@@ -418,16 +437,14 @@ public:
 
     inline PyObject* result() { return result_; }
 
-  private:
+    // These should be private, but MSVC won't let me declare
+    // Py_localCallBackFunction to be a friend :-(
+  public:
     PyObject*      in_d_;
     int            in_l_;
     PyObject*      out_d_;
     int            out_l_;
     PyObject*      exc_d_;
-
-    // These should be private, but MSVC won't let me declare
-    // Py_localCallBackFunction to be a friend :-(
-  public:
     PyObject*      args_;
     PyObject*      result_;
 
@@ -454,23 +471,11 @@ public:
 
     virtual CORBA::Boolean _dispatch(GIOP_S& giop_s);
 
-    inline PyObject* local_dispatch(const char* op, PyObject* args) {
-      PyObject* method = PyObject_GetAttrString(pyservant_, (char*)op);
-      if (method) {
-	PyObject* ret = PyEval_CallObject(method, args);
-	Py_DECREF(method);
-	return ret;
-      }
-      else {
-	PyObject* err =
-	  PyString_FromString("Local servant has no operation named ");
-
-	PyString_ConcatAndDel(&err, PyString_FromString(op));
-	PyErr_SetObject(PyExc_AttributeError, err);
-	Py_DECREF(err);
-	return 0;
-      }
-    }
+    PyObject* local_dispatch(const char* op,
+			     PyObject*   in_d,  int in_l,
+			     PyObject*   out_d, int out_l,
+			     PyObject*   exc_d,
+			     PyObject*   args);
 
     PyObject* py_this();
 

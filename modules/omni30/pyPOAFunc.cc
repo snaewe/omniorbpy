@@ -29,6 +29,11 @@
 
 // $Id$
 // $Log$
+// Revision 1.4  2000/03/24 16:48:57  dpg1
+// Local calls now have proper pass-by-value semantics.
+// Lots of little stability improvements.
+// Memory leaks fixed.
+//
 // Revision 1.3  2000/03/07 16:52:16  dpg1
 // Support for compilers which do not allow exceptions to be caught by
 // base class. (Like MSVC 5, surprise surprise.)
@@ -56,8 +61,10 @@ omniPy::createPyPOAObject(const PortableServer::POA_ptr poa)
   OMNIORB_ASSERT(pypoa_class);
 
   PyObject* pypoa = PyEval_CallObject(pypoa_class, omniPy::pyEmptyTuple);
-  OMNIORB_ASSERT(pypoa);
-
+  if (!pypoa) {
+    // Oh dear!  Return the exception to python
+    return 0;
+  }
   omniPy::setTwin(pypoa, (PortableServer::POA_ptr)poa, POA_TWIN);
   omniPy::setTwin(pypoa, (CORBA::Object_ptr)      poa, OBJREF_TWIN);
   return pypoa;
@@ -929,9 +936,15 @@ extern "C" {
 
     PortableServer::POA_ptr poa =
       (PortableServer::POA_ptr)omniPy::getTwin(pyPOA, POA_TWIN);
-    OMNIORB_ASSERT(poa);
 
-    CORBA::release(poa);
+    if (poa) {
+      {
+	omniPy::InterpreterUnlocker _u;
+	CORBA::release(poa);
+      }
+      omniPy::remTwin(pyPOA, POA_TWIN);
+      omniPy::remTwin(pyPOA, OBJREF_TWIN);
+    }
 
     Py_INCREF(Py_None);
     return Py_None;

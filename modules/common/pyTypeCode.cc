@@ -31,6 +31,11 @@
 // $Id$
 
 // $Log$
+// Revision 1.10  2000/03/24 16:48:58  dpg1
+// Local calls now have proper pass-by-value semantics.
+// Lots of little stability improvements.
+// Memory leaks fixed.
+//
 // Revision 1.9  2000/03/03 17:41:43  dpg1
 // Major reorganisation to support omniORB 3.0 as well as 2.8.
 //
@@ -1517,12 +1522,12 @@ r_unmarshalTypeCode(NetBufferedStream& stream, OffsetDescriptorMap& odm)
 	  PyTuple_SET_ITEM(mems, i, mem);
 
 	  if (def_used > 0 && i == (CORBA::ULong)def_used) {
-	    Py_INCREF(mem);
+	    Py_INCREF(mem); // **** Error here?
 	    PyTuple_SET_ITEM(d_o, 7, mem);
 	  }
 	  else {
-	    Py_INCREF(mem);
-	    Py_INCREF(label);
+	    Py_INCREF(mem); // ****
+	    Py_INCREF(label); // ****
 	    PyDict_SetItem(dict, label, mem);
 	  }
 	}

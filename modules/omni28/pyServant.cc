@@ -31,6 +31,11 @@
 // $Id$
 
 // $Log$
+// Revision 1.14  2000/03/24 16:48:58  dpg1
+// Local calls now have proper pass-by-value semantics.
+// Lots of little stability improvements.
+// Memory leaks fixed.
+//
 // Revision 1.13  2000/03/03 17:41:42  dpg1
 // Major reorganisation to support omniORB 3.0 as well as 2.8.
 //
@@ -98,17 +103,21 @@ public:
     // happy.
     worker_thread_ = PyEval_CallObject(omniPy::pyWorkerThreadClass,
 				       omniPy::pyEmptyTuple);
-    OMNIORB_ASSERT(worker_thread_);
+    // If the user hits Ctrl-C during the above call, it will
+    // fail. There's not much we can do except carry on without the
+    // Thread object...
   }
 
   ~lockWithNewThreadState() {
     // Delete worker thread
-    PyObject* argtuple = PyTuple_New(1);
-    PyTuple_SET_ITEM(argtuple, 0, worker_thread_);
+    if (worker_thread_) {
+      PyObject* argtuple = PyTuple_New(1);
+      PyTuple_SET_ITEM(argtuple, 0, worker_thread_);
 
-    PyObject* tmp = PyEval_CallObject(omniPy::pyWorkerThreadDel, argtuple);
-    Py_XDECREF(tmp);
-    Py_DECREF(argtuple);
+      PyObject* tmp = PyEval_CallObject(omniPy::pyWorkerThreadDel, argtuple);
+      Py_XDECREF(tmp);
+      Py_DECREF(argtuple);
+    }
 
     // Return to the previous thread state
     PyThreadState_Swap(oldstate_);
@@ -158,7 +167,7 @@ Py_Servant::Py_Servant(PyObject* pyservant, PyObject* opdict,
 omniPy::
 Py_Servant::~Py_Servant()
 {
-  //  cout << "Py_Servant destructor." << endl;
+  lockWithNewThreadState _t;
   omniPy::remTwin(pyservant_, SERVANT_TWIN);
   Py_DECREF(pyservant_);
   Py_DECREF(opdict_);
@@ -354,6 +363,178 @@ Py_Servant::dispatch(GIOP_S&        giop_server,
   }
   OMNIORB_ASSERT(0); // Never reach here.
   return 0;
+}
+
+
+PyObject*
+omniPy::
+Py_Servant::local_dispatch(const char* op,
+			   PyObject*   in_d,  int in_l,
+			   PyObject*   out_d, int out_l,
+			   PyObject*   exc_d,
+			   PyObject*   args)
+{
+  PyObject* method = PyObject_GetAttrString(pyservant_, (char*)op);
+  if (!method) {
+    CORBA::NO_IMPLEMENT ex;
+    return omniPy::handleSystemException(ex);
+  }
+
+  // Copy args which would otherwise have reference semantics
+  PyObject* argtuple = PyTuple_New(in_l);
+  PyObject* t_o;
+
+  int i, valid = 1;
+  for (i=0; i < in_l; i++) {
+    t_o = copyArgument(PyTuple_GET_ITEM(in_d, i),
+		       PyTuple_GET_ITEM(args, i),
+		       CORBA::COMPLETED_NO);
+    if (t_o)
+      PyTuple_SET_ITEM(argtuple, i, t_o);
+    else {
+      Py_INCREF(Py_None);
+      PyTuple_SET_ITEM(argtuple, i, Py_None);
+      valid = 0;
+    }
+  }
+
+  if (valid) {
+    // Do the call
+    PyObject* result = PyEval_CallObject(method, argtuple);
+    Py_DECREF(method);
+    Py_DECREF(argtuple);
+
+    if (result) {
+      PyObject* retval;
+
+      if (out_l == -1 || out_l == 0) {
+	if (result == Py_None) {
+	  return result;
+	}
+	else {
+	  Py_DECREF(result);
+	  CORBA::BAD_PARAM ex(0,CORBA::COMPLETED_MAYBE);
+	  return omniPy::handleSystemException(ex);
+	}
+      }
+      else if (out_l == 1) {
+	retval = copyArgument(PyTuple_GET_ITEM(out_d, 0),
+			      result, CORBA::COMPLETED_MAYBE);
+      }
+      else {
+	valid = 1;
+	retval = PyTuple_New(out_l);
+	
+	for (i=0; i < out_l; i++) {
+	  t_o = copyArgument(PyTuple_GET_ITEM(out_d, i),
+			     PyTuple_GET_ITEM(result, i),
+			     CORBA::COMPLETED_MAYBE);
+	  if (t_o)
+	    PyTuple_SET_ITEM(retval, i, t_o);
+	  else {
+	    Py_INCREF(Py_None);
+	    PyTuple_SET_ITEM(retval, i, Py_None);
+	    valid = 0;
+	  }
+	}
+	if (!valid) {
+	  Py_DECREF(retval);
+	  retval = 0;
+	}
+      }
+      Py_DECREF(result);
+      return retval;
+    }
+    else {
+      // The call raised a Python exception
+      PyObject *etype, *evalue, *etraceback;
+      PyObject *erepoId = 0;
+      PyErr_Fetch(&etype, &evalue, &etraceback);
+      OMNIORB_ASSERT(etype);
+
+      if (evalue && PyInstance_Check(evalue))
+	erepoId = PyObject_GetAttrString(evalue, (char*)"_NP_RepositoryId");
+
+      if (!erepoId) {
+	omniORB::log << "omniORBpy: *** Warning: caught an unexpected "
+		     << "exception during up-call.\n"
+		     << "omniORBPy: Traceback follows:\n";
+	omniORB::log.flush();
+	PyErr_Restore(etype, evalue, etraceback);
+	PyErr_Print();
+	CORBA::UNKNOWN ex(0,CORBA::COMPLETED_MAYBE);
+	return omniPy::handleSystemException(ex);
+      }
+
+      Py_DECREF(etype);
+      Py_XDECREF(etraceback);
+
+      // Is it a user exception?
+      if (exc_d != Py_None) {
+	OMNIORB_ASSERT(PyDict_Check(exc_d));
+
+	PyObject* edesc = PyDict_GetItem(exc_d, erepoId);
+
+	if (edesc) {
+	  PyObject* cevalue = copyArgument(edesc, evalue,
+					   CORBA::COMPLETED_MAYBE);
+	  Py_DECREF(erepoId);
+	  Py_DECREF(evalue);
+
+	  if (cevalue) {
+	    PyErr_SetObject(PyTuple_GET_ITEM(edesc, 1), cevalue);
+	    Py_DECREF(cevalue);
+	  }
+	  else{
+	    CORBA::MARSHAL ex(0,CORBA::COMPLETED_MAYBE);
+	    omniPy::handleSystemException(ex);
+	  }
+	  return 0;
+	}
+      }
+      // System exception?
+      PyObject* excc = PyDict_GetItem(pyCORBAsysExcMap, erepoId);
+      if (excc) {
+	PyObject *pyminor, *pycompl;
+	pyminor = PyObject_GetAttrString(evalue, "minor");
+	pycompl = PyObject_GetAttrString(evalue, "completed");
+	OMNIORB_ASSERT(pyminor && PyInt_Check(pyminor));
+	OMNIORB_ASSERT(pycompl && PyInstance_Check(pycompl));
+	PyObject* exca = Py_BuildValue((char*)"(NN)", pyminor, pycompl);
+	PyObject* exci = PyEval_CallObject(excc, exca);
+	Py_DECREF(exca);
+	Py_DECREF(erepoId);
+	Py_DECREF(evalue);
+	if (exci) {
+	  PyErr_SetObject(excc, exci);
+	  Py_DECREF(exci);
+	}
+	return 0;
+      }
+      Py_DECREF(erepoId);
+      Py_DECREF(evalue);
+      CORBA::UNKNOWN ex(0, CORBA::COMPLETED_MAYBE);
+      return omniPy::handleSystemException(ex);
+    }
+  }
+  else {
+    // Args were in invalid
+    Py_DECREF(argtuple);
+    Py_DECREF(method);
+    return 0;
+  }
+}
+
+
+void
+omniPy::
+Py_Servant::deactivate(CORBA::BOA_ptr boa)
+{
+  int r = PyObject_DelAttrString(pyservant_, (char*)"_omni_objref");
+  {
+    omniPy::InterpreterUnlocker _u;
+    boa->dispose(this);
+  }
 }
 
 

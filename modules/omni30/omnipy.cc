@@ -30,6 +30,11 @@
 // $Id$
 
 // $Log$
+// Revision 1.32  2000/03/24 16:48:57  dpg1
+// Local calls now have proper pass-by-value semantics.
+// Lots of little stability improvements.
+// Memory leaks fixed.
+//
 // Revision 1.31  2000/03/07 16:52:16  dpg1
 // Support for compilers which do not allow exceptions to be caught by
 // base class. (Like MSVC 5, surprise surprise.)
@@ -540,7 +545,6 @@ extern "C" {
 	return call_desc.result();
       }
       else {
-	call_desc.reacquireInterpreterLock();
 	Py_INCREF(Py_None);
 	return Py_None;
       }
@@ -577,7 +581,10 @@ OMNIORB_FOR_EACH_SYS_EXCEPTION(DO_CALL_DESC_SYSTEM_EXCEPTON)
       (CORBA::Object_ptr)omniPy::getTwin(pyobjref, OBJREF_TWIN);
 
     if (cxxobjref) {
-      CORBA::release(cxxobjref);
+      {
+	omniPy::InterpreterUnlocker _u;
+	CORBA::release(cxxobjref);
+      }
       omniPy::remTwin(pyobjref, OBJREF_TWIN);
     }
     Py_INCREF(Py_None);
@@ -757,7 +764,6 @@ OMNIORB_FOR_EACH_SYS_EXCEPTION(DO_CALL_DESC_SYSTEM_EXCEPTON)
     PyObject* d = PyModule_GetDict(m);
     PyDict_SetItemString(d, (char*)"omnipyTwinType",
 			 (PyObject*)&omnipyTwinType);
-
     omniPy::initORBFunc(d);
     omniPy::initPOAFunc(d);
     omniPy::initPOAManagerFunc(d);

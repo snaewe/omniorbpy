@@ -27,10 +27,14 @@
 // Description:
 //    Implementation of Python call descriptor object
 
-
 // $Id$
 
 // $Log$
+// Revision 1.14  2000/03/24 16:48:57  dpg1
+// Local calls now have proper pass-by-value semantics.
+// Lots of little stability improvements.
+// Memory leaks fixed.
+//
 // Revision 1.13  2000/03/03 17:41:42  dpg1
 // Major reorganisation to support omniORB 3.0 as well as 2.8.
 //
@@ -76,9 +80,7 @@ omniPy::Py_omniCallDescriptor::unmarshalReturnedValues(GIOP_C& giop_client)
 {
   reacquireInterpreterLock();
 
-  OMNIORB_ASSERT(out_l_ >= 0);
-  // out_l_ == -1 if it's a oneway operation, but we should never
-  // reach here if that is the case.
+  if (out_l_ == -1) return;  // Oneway operation
 
   if (out_l_ == 0) {
     Py_INCREF(Py_None);
@@ -128,7 +130,11 @@ omniPy::Py_omniCallDescriptor::userException(GIOP_C&     giop_client,
     PyObject* exc_i = PyEval_CallObject(excclass, exctuple);
     Py_DECREF(exctuple);
 
-    PyErr_SetObject(excclass, exc_i);
+    if (exc_i) {
+      PyErr_SetObject(excclass, exc_i);
+      Py_DECREF(exc_i); // *** Find out why I don't need to Py_DECREF(excclass)
+    }
+    giop_client.RequestCompleted();
     throw UserExceptionHandled();
   }
   else {
@@ -147,12 +153,8 @@ omniPy::Py_localCallBackFunction(omniCallDescriptor* cd, omniServant* svnt)
 
   pycd->reacquireInterpreterLock();
 
-  // *** TODO: Copy args which would otherwise have reference semantics
-
-  pycd->result_ = pyos->local_dispatch(pycd->op(), pycd->args_);
-
-  // invokeOp() expects us to come back from oneways with the
-  // interpreter unlocked
-  if (pycd->is_oneway())
-    pycd->releaseInterpreterLock();
+  pycd->result_ = pyos->local_dispatch(pycd->op(),
+				       pycd->in_d_,  pycd->in_l_,
+				       pycd->out_d_, pycd->out_l_,
+				       pycd->exc_d_, pycd->args_);
 }

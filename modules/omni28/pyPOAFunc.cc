@@ -29,6 +29,11 @@
 
 // $Id$
 // $Log$
+// Revision 1.5  2000/03/24 16:48:58  dpg1
+// Local calls now have proper pass-by-value semantics.
+// Lots of little stability improvements.
+// Memory leaks fixed.
+//
 // Revision 1.4  2000/03/10 12:13:54  dpg1
 // servant_to_id() and servant_to_reference() correctly throw
 // ServantNotActive if necessary.
@@ -299,8 +304,8 @@ extern "C" {
 
     RAISE_PY_BAD_PARAM_IF(!serv);
 
-    CORBA::release(serv);
-    boa->dispose(serv);
+    serv->deactivate(boa);
+
     Py_INCREF(Py_None);
     return Py_None;
   }
@@ -504,10 +509,14 @@ extern "C" {
     if (!PyArg_ParseTuple(args, (char*)"O", &pyPOA)) return 0;
 
     CORBA::BOA_ptr boa = (CORBA::BOA_ptr)omniPy::getTwin(pyPOA, BOA_TWIN);
-    OMNIORB_ASSERT(boa);
 
-    CORBA::release(boa);
-
+    if (boa) {
+      {
+	omniPy::InterpreterUnlocker _u;
+	CORBA::release(boa);
+      }
+      omniPy::remTwin(pyPOA, BOA_TWIN);
+    }
     Py_INCREF(Py_None);
     return Py_None;
   }

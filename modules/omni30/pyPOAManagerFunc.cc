@@ -30,6 +30,11 @@
 // $Id$
 
 // $Log$
+// Revision 1.3  2000/03/24 16:48:57  dpg1
+// Local calls now have proper pass-by-value semantics.
+// Lots of little stability improvements.
+// Memory leaks fixed.
+//
 // Revision 1.2  2000/03/06 18:46:55  dpg1
 // (char*)s for Solaris.
 //
@@ -184,6 +189,10 @@ extern "C" {
 
     OMNIORB_ASSERT(pm);
     CORBA::release(pm);
+
+    omniPy::remTwin(pyPM, POAMANAGER_TWIN);
+    omniPy::remTwin(pyPM, OBJREF_TWIN);
+
     Py_INCREF(Py_None);
     return Py_None;
   }

@@ -31,6 +31,11 @@
 // $Id$
 
 // $Log$
+// Revision 1.7  2000/03/24 16:48:58  dpg1
+// Local calls now have proper pass-by-value semantics.
+// Lots of little stability improvements.
+// Memory leaks fixed.
+//
 // Revision 1.6  2000/03/03 17:41:43  dpg1
 // Major reorganisation to support omniORB 3.0 as well as 2.8.
 //
@@ -69,7 +74,12 @@ omniPy::handleSystemException(const CORBA::SystemException& ex)
   PyObject* exca = Py_BuildValue((char*)"(ii)", ex.minor(), ex.completed());
   PyObject* exci = PyEval_CallObject(excc, exca);
   Py_DECREF(exca);
-  PyErr_SetObject(excc, exci);
+  if (exci) {
+    // If we couldn't create the exception object, there will be a
+    // suitable error set already
+    PyErr_SetObject(excc, exci);
+    Py_DECREF(exci); // *** Find out why I don't need to Py_DECREF(excc)
+  }
   return 0;
 }
 

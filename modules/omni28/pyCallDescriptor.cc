@@ -31,6 +31,11 @@
 // $Id$
 
 // $Log$
+// Revision 1.15  2000/03/24 16:48:58  dpg1
+// Local calls now have proper pass-by-value semantics.
+// Lots of little stability improvements.
+// Memory leaks fixed.
+//
 // Revision 1.14  2000/03/07 16:52:17  dpg1
 // Support for compilers which do not allow exceptions to be caught by
 // base class. (Like MSVC 5, surprise surprise.)
@@ -170,7 +175,11 @@ omniPy::Py_OmniProxyCallDesc::userException(GIOP_C&     giop_client,
     PyObject* exc_i = PyEval_CallObject(excclass, exctuple);
     Py_DECREF(exctuple);
 
-    PyErr_SetObject(PyTuple_GET_ITEM(d_o, 1), exc_i);
+    if (exc_i) {
+      PyErr_SetObject(excclass, exc_i);
+      Py_DECREF(exc_i); // *** Find out why I don't need to Py_DECREF(excclass)
+    }
+    giop_client.RequestCompleted();
     throw UserExceptionHandled();
   }
   else {
