@@ -2,23 +2,26 @@
             "http://www.w3.org/TR/REC-html40/loose.dtd">
 <HTML>
 <HEAD>
+
 <META http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<META name="GENERATOR" content="hevea 1.05">
+<META name="GENERATOR" content="hevea 1.06">
 <TITLE>
  Connection Management
 </TITLE>
 </HEAD>
 <BODY >
 <A HREF="omniORBpy006.html"><IMG SRC ="previous_motif.gif" ALT="Previous"></A>
-<A HREF="index.html"><IMG SRC ="contents_motif.gif" ALT="Contents"></A>
+<A HREF="index.html"><IMG SRC ="contents_motif.gif" ALT="Up"></A>
 <A HREF="omniORBpy008.html"><IMG SRC ="next_motif.gif" ALT="Next"></A>
 <HR>
 
-<H1>Chapter&nbsp;7&nbsp;&nbsp; Connection Management</H1>
-<A NAME="ch_conn"></A>This chapter describes how omniORB manages network connections.<BR>
+<H1><A NAME="htoc76">Chapter&nbsp;7</A>&nbsp;&nbsp;Connection Management</H1>
+<A NAME="ch_conn"></A>
+This chapter describes how omniORB manages network connections.<BR>
 <BR>
 <A NAME="toc34"></A>
-<H2>7.1&nbsp;&nbsp; Background</H2>In CORBA, the ORB is the `middleware' that allows a client to invoke
+<H2><A NAME="htoc77">7.1</A>&nbsp;&nbsp;Background</H2>
+In CORBA, the ORB is the `middleware' that allows a client to invoke
 an operation on an object without regard to its implementation or
 location. In order to invoke an operation on an object, a client needs
 to `bind' to the object by acquiring its object reference. Such a
@@ -50,7 +53,8 @@ connections and the programming interface to fine tune the management
 policy.<BR>
 <BR>
 <A NAME="toc35"></A>
-<H2>7.2&nbsp;&nbsp; The Model</H2>omniORB is designed from the ground up to be fully multi-threaded. The
+<H2><A NAME="htoc78">7.2</A>&nbsp;&nbsp;The Model</H2>
+omniORB is designed from the ground up to be fully multi-threaded. The
 objective is to maximise the degree of concurrency and at the same
 time eliminate any unnecessary thread overhead. Another objective is
 to minimise the interference by the activities of other threads on the
@@ -92,8 +96,9 @@ value can be increased to a maximum of a thousand or more by changing
 the `ulimit' in the shell.<BR>
 <BR>
 <A NAME="toc36"></A>
-<H2>7.3&nbsp;&nbsp; Idle Connection Shutdown and Remote Call Timeout</H2>
-<A NAME="sec:shut"></A>Inside the ORB, a thread is dedicated to scan for idle connections.
+<H2><A NAME="htoc79">7.3</A>&nbsp;&nbsp;Idle Connection Shutdown and Remote Call Timeout</H2>
+<A NAME="sec:shut"></A>
+Inside the ORB, a thread is dedicated to scan for idle connections.
 The thread looks after both the outgoing connections and the incoming
 connections.<BR>
 <BR>
@@ -127,7 +132,8 @@ The timeout can be changed with the
 completely by setting the scan granularity to 0.<BR>
 <BR>
 <A NAME="toc37"></A>
-<H2>7.4&nbsp;&nbsp; Interoperability Considerations</H2>The IIOP specification allows both the client and the server to
+<H2><A NAME="htoc80">7.4</A>&nbsp;&nbsp;Interoperability Considerations</H2>
+The IIOP specification allows both the client and the server to
 shutdown a connection unilaterally. When one end is about to shutdown
 a connection, it should send a closeConnection message to the other
 end. It should also make sure that the message will reach the other
@@ -151,8 +157,9 @@ in the application code and retry, or to turn off the idle connection
 shutdown inside the omniORB server.<BR>
 <BR>
 <A NAME="toc38"></A>
-<H2>7.5&nbsp;&nbsp; Connection Acceptance</H2>
-<A NAME="sec:accept"></A>omniORB provides the hook to implement a connection acceptance policy.
+<H2><A NAME="htoc81">7.5</A>&nbsp;&nbsp;Connection Acceptance</H2>
+<A NAME="sec:accept"></A>
+omniORB provides the hook to implement a connection acceptance policy.
 Inside the ORB runtime, a thread is dedicated to receive new
 connections. When the thread is given the handle of a new connection
 by the operating system, it calls the policy module to decide if the
@@ -170,7 +177,7 @@ the connection can be accepted. The module is implemented using
 rules in two access control files: <TT>hosts.allow</TT> and
 <TT>hosts.deny</TT>. The syntax of the rules is described in the manual
 page <TT>hosts_access(5)</TT> which can be found in
-appendix&nbsp;<A HREF="omniORBpy008.html#apx:hostsaccess">A</A>. The syntax defines a simple access
+appendix&nbsp;<A HREF="omniORBpy008.html#apx:hostsaccess">A49hosts_access(5)appendix.A</A>. The syntax defines a simple access
 control language that is based on client (host name/address, user
 name), and server (process name, host name/address) patterns. When
 searching for a match on the server process name, the ORB uses the
@@ -181,8 +188,7 @@ overridden by the application with the <TT>-ORBserverName
 <BR>
 The default location of the access control files is <TT>/etc</TT>. This
 can be overridden by the extra options in <TT>omniORB.cfg</TT>. For
-instance:<BR>
-<BR>
+instance:
 <PRE>
 # omniORB configuration file - extra options
 
@@ -190,23 +196,24 @@ GATEKEEPER_ALLOWFILE   /project/omni/var/hosts.allow
 
 GATEKEEPER_DENYFILE    /project/omni/var/hosts.deny
 
-</PRE>As each policy module is implemented as a separate library, the choice
+</PRE>
+As each policy module is implemented as a separate library, the choice
 of policy module is determined at program linkage time. For instance,
-if the host-based access control module is in use:<BR>
-<BR>
+if the host-based access control module is in use:
 <PRE>
 % eg1 -ORBtraceLevel 2
 omniORB gateKeeper is tcpwrapGK 1.0 - based on tcp_wrappers_7.6 
 I said,"Hello!". The Object said,"Hello!"
-</PRE>Whereas if the dummy module is in use:<BR>
-<BR>
+</PRE>
+Whereas if the dummy module is in use:
 <PRE>
 % eg1 -ORBtraceLevel 2
 omniORB gateKeeper is not installed. All incoming are accepted.
 I said,"Hello!". The Object said,"Hello!"
-</PRE><HR>
+</PRE>
+<HR>
 <A HREF="omniORBpy006.html"><IMG SRC ="previous_motif.gif" ALT="Previous"></A>
-<A HREF="index.html"><IMG SRC ="contents_motif.gif" ALT="Contents"></A>
+<A HREF="index.html"><IMG SRC ="contents_motif.gif" ALT="Up"></A>
 <A HREF="omniORBpy008.html"><IMG SRC ="next_motif.gif" ALT="Next"></A>
 </BODY>
 </HTML>
