@@ -33,9 +33,10 @@ Using omniORBpy
 To use omniORBpy, simply add two paths to your PYTHONPATH environment
 variable, like:
 
-  export PYTHONPATH=$PYTHONPATH:$TOP/lib/python:$TOP/lib
+  export PYTHONPATH=$PYTHONPATH:$TOP/lib/python:$TOP/lib/$FARCH
 
-where $TOP is the root of your omniORB tree.
+where $TOP is the root of your omniORB tree and $FARCH is the platform
+name you selected in config.mk.
 
 You should also have $TOP/bin/scripts in your PATH, so you can run the
 IDL compiler, omniidlpy.
