@@ -29,6 +29,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.6  2000/03/31 14:20:18  dpg1
+// Arguments to activate_object_with_id() were in the wrong order.
+//
 // Revision 1.5  2000/03/30 13:01:14  dpg1
 // Locking fixed for ~Py_omniServant().
 //
@@ -576,8 +579,8 @@ extern "C" {
     char*     oidstr;
     int       oidlen;
 
-    if (!PyArg_ParseTuple(args, (char*)"OOs#",
-			  &pyPOA, &pyServant, &oidstr, &oidlen))
+    if (!PyArg_ParseTuple(args, (char*)"Os#O",
+			  &pyPOA, &oidstr, &oidlen, &pyServant))
       return 0;
 
     PortableServer::POA_ptr poa =
