@@ -1,4 +1,4 @@
-SUBDIRS = modules python omniidl
+SUBDIRS = modules python tmp_omniidl
 
 all::
 	@$(MakeSubdirs)
