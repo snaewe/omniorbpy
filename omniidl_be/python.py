@@ -28,6 +28,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.29.2.8  2001/08/29 11:57:16  dpg1
+# Const fixes.
+#
 # Revision 1.29.2.7  2001/06/15 10:59:26  dpg1
 # Apply fixes from omnipy1_develop.
 #
@@ -1628,7 +1631,7 @@ def valueToString(val, kind, scope=[]):
     if kind == idltype.tk_enum:
         return dotName(fixupScopedName(val.scopedName()), scope)
 
-    elif kind == idltype.tk_string or kind == idltype.tk_char:
+    elif kind in [idltype.tk_string, idltype.tk_char]:
         return '"' + idlutil.escapifyString(val) + '"'
 
     elif kind == idltype.tk_wstring:
@@ -1639,6 +1642,10 @@ def valueToString(val, kind, scope=[]):
 
     elif kind == idltype.tk_long and val == -2147483647 - 1:
         return "-2147483647 - 1"
+
+    elif kind in [idltype.tk_float, idltype.tk_double, idltype.tk_longdouble]:
+        return idlutil.reprFloat(val)
+
     else:
         return str(val)
 
