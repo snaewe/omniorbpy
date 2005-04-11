@@ -1,3 +1,15 @@
+Mon Apr 11 14:01:26 BST 2005 dgrisby
+====================================
+
+- Another merge.
+
+mk/beforeauto.mk.in
+mk/version.mk         -- new
+modules/dir.mk
+modules/omnipy.cc
+
+
+
 Wed Mar  2 13:36:30 GMT 2005 dgrisby
 ====================================
 
