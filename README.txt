@@ -1,4 +1,4 @@
-omniORBpy 2.5  (October 2004)
+omniORBpy 2.6  (April 2005)
 =============
 
 This is omniORBpy 2, a robust high-performance CORBA ORB for Python.

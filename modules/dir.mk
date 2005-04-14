@@ -1,6 +1,6 @@
 # Version number
 OMNIPY_MAJOR = 2
-OMNIPY_MINOR = 5
+OMNIPY_MINOR = 6
 
 DIR_CPPFLAGS += -DOMNIPY_MAJOR=$(OMNIPY_MAJOR) -DOMNIPY_MINOR=$(OMNIPY_MINOR)
 
@@ -254,7 +254,7 @@ all:: $(lib)
 $(lib): $(OBJS)
 	(set -x; \
 	 $(RM) $@; \
-	 libs="$(OMNIORB_LIB) $(PYLIB)"; \
+	 libs="$(OMNIORB_LIB_NODYN) $(PYLIB)"; \
 	 $(CXXLINK) -out:$@ -DLL $(CXXLINKOPTIONS) $(IMPORT_LIBRARY_FLAGS) $(PYLIBPATH) $(OBJS) $$libs; \
 	)
 

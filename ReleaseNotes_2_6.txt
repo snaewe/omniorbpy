@@ -1,9 +1,17 @@
-RELEASE NOTES for omniORBpy 2.5
+RELEASE NOTES for omniORBpy 2.6
 ===============================
 
-This is omniORBpy 2.5. It is a stable release.
+This is omniORBpy 2.6. It is a stable release.
 
 See README for building instructions.
+
+
+New features since omniORBpy 2.5
+--------------------------------
+
+ - Bug fixes.
+ - cdrMarshal and cdrUnmarshal take an option endian parameter to
+   create raw marshalled data rather than GIOP encapsulations.
 
 
 New features since omniORBpy 2.4
