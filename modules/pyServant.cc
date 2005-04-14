@@ -29,6 +29,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.4.5  2005/04/14 13:50:59  dgrisby
+// New traceTime, traceInvocationReturns functions; removal of omniORB::logf.
+//
 // Revision 1.1.4.4  2005/01/25 11:45:48  dgrisby
 // Merge from omnipy2_develop; set RPM version.
 //
@@ -903,10 +906,11 @@ Py_ServantActivator::etherealize(const PortableServer::ObjectId& oid,
   if (result)
     Py_DECREF(result);
   else {
-    if (omniORB::trace(5))
-      omniORB::logf("omniORBpy: Servant etherealization raised an exception!");
+    omniORB::logs(5, "omniORBpy: Servant etherealization "
+		  "raised an exception!");
+
     if (omniORB::trace(10)) {
-      omniORB::logf("omniORBpy: Traceback follows:");
+      omniORB::logs(10, "omniORBpy: Traceback follows:");
       PyErr_Print();
     }
     else
@@ -1169,11 +1173,11 @@ Py_AdapterActivator::unknown_adapter(PortableServer::POA_ptr parent,
     return result;
   }
   else {
-    if (omniORB::trace(5))
-      omniORB::logf("omniORBpy: AdapterActivator::unknown_adapter "
-		    "raised an exception!");
+    omniORB::logs(5, "omniORBpy: AdapterActivator::unknown_adapter "
+		  "raised an exception!");
+
     if (omniORB::trace(10)) {
-      omniORB::logf("omniORBpy: Traceback follows:");
+      omniORB::logs(10, "omniORBpy: Traceback follows:");
       PyErr_Print();
     }
     else

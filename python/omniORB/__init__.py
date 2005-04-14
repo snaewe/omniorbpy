@@ -30,6 +30,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.30.2.8  2005/04/14 13:50:45  dgrisby
+# New traceTime, traceInvocationReturns functions; removal of omniORB::logf.
+#
 # Revision 1.30.2.7  2005/03/02 13:39:16  dgrisby
 # Another merge from omnipy2_develop.
 #
@@ -414,7 +417,9 @@ Make stubs for the Interface Repository appear in the CORBA module"""
 #   installSystemExceptionHandler()
 #   traceLevel
 #   traceInvocations
+#   traceInvocationReturns
 #   traceThreadId
+#   traceTime
 #   log
 #   nativeCharCodeSet
 #   fixed

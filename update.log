@@ -1,3 +1,13 @@
+Thu Apr 14 14:49:05 BST 2005 dgrisby
+====================================
+
+- New traceTime, traceInvocationReturns functions; removal of omniORB::logf.
+
+modules/pyServant.cc
+modules/pyomniFunc.cc
+python/omniORB/__init__.py
+
+
 Mon Apr 11 14:01:26 BST 2005 dgrisby
 ====================================
 
