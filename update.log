@@ -1,3 +1,11 @@
+Mon Apr 25 19:02:12 BST 2005 dgrisby
+====================================
+
+- Log failure to delete worker thread at traceLevel 10 instead of 1.
+
+modules/pyThreadCache.cc
+
+
 Thu Apr 14 17:35:27 BST 2005 dgrisby
 ====================================
 

@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.10  2005/04/25 18:03:32  dgrisby
+// Log failure to delete worker thread at traceLevel 10 instead of 1.
+//
 // Revision 1.1.2.9  2005/02/23 18:58:30  dgrisby
 // Last fix did not cope with an omniORB thread having an id of a
 // previous Python thread.
@@ -268,7 +271,7 @@ threadExit(CacheNode* cn)
     PyObject* tmp = PyEval_CallObject(omniPy::pyWorkerThreadDel,
 				      argtuple);
     if (!tmp) {
-      if (omniORB::trace(1)) {
+      if (omniORB::trace(10)) {
 	{
 	  omniORB::logger l;
 	  l << "Exception trying to delete worker thread.\n";
