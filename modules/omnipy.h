@@ -31,6 +31,9 @@
 #define _omnipy_h_
 
 // $Log$
+// Revision 1.3.2.5  2005/04/25 18:27:41  dgrisby
+// Maintain forwarded location when narrowing forwarded references.
+//
 // Revision 1.3.2.4  2005/01/07 00:22:32  dgrisby
 // Big merge from omnipy2_develop.
 //
@@ -353,7 +356,8 @@ public:
 			   omniIOR*           ior,
 			   CORBA::Boolean     locked,
 			   omniIdentity*      id = 0,
-			   CORBA::Boolean     type_verified = 0);
+			   CORBA::Boolean     type_verified = 0,
+			   CORBA::Boolean     is_forwarded = 0);
 
   static
   omniObjRef* createLocalObjRef(const char*        mostDerivedRepoId,

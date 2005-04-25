@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.4.9  2005/04/25 18:27:41  dgrisby
+// Maintain forwarded location when narrowing forwarded references.
+//
 // Revision 1.1.4.8  2005/04/11 13:02:38  dgrisby
 // Another merge.
 //
@@ -905,9 +908,13 @@ OMNIORB_FOR_EACH_SYS_EXCEPTION(DO_CALL_DESC_SYSTEM_EXCEPTON)
       if (isa) {
 	if (!cxxsource->_NP_is_pseudo()) {
 	  omniObjRef* oosource = cxxsource->_PR_getobj();
-	  omniObjRef* oodest   = omniPy::createObjRef(repoId,
-						      oosource->_getIOR(),
-						      0, 0, 1);
+	  omniObjRef* oodest;
+	  {
+	    omni_tracedmutex_lock sync(*omni::internalLock);
+	    oodest = omniPy::createObjRef(repoId, oosource->_getIOR(), 1,
+					  oosource->_identity(), 1,
+					  oosource->_isForwardLocation());
+	  }
 	  cxxdest = (CORBA::Object_ptr)
 	                   (oodest->_ptrToObjRef(CORBA::Object::_PD_repoId));
 	}

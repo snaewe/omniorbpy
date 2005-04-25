@@ -30,6 +30,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.4.3  2005/04/25 18:27:41  dgrisby
+// Maintain forwarded location when narrowing forwarded references.
+//
 // Revision 1.1.4.2  2005/01/07 00:22:32  dgrisby
 // Big merge from omnipy2_develop.
 //
@@ -315,7 +318,8 @@ omniPy::createObjRef(const char*    	targetRepoId,
 		     omniIOR*       	ior,
 		     CORBA::Boolean 	locked,
 		     omniIdentity*  	id,
-		     CORBA::Boolean     type_verified)
+		     CORBA::Boolean     type_verified,
+		     CORBA::Boolean     is_forwarded)
 {
   ASSERT_OMNI_TRACEDMUTEX_HELD(*omni::internalLock, locked);
   OMNIORB_ASSERT(targetRepoId);
@@ -348,6 +352,11 @@ omniPy::createObjRef(const char*    	targetRepoId,
       !omni::ptrStrMatch(targetRepoId, CORBA::Object::_PD_repoId)) {
 
     objref->pd_flags.type_verified = 0;
+  }
+
+  if (is_forwarded) {
+    omniORB::logs(10, "Reference has been forwarded.");
+    objref->pd_flags.forward_location = 1;
   }
 
   {
