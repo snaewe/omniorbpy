@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.4.5  2005/04/25 18:28:04  dgrisby
+// Minor log output changes.
+//
 // Revision 1.1.4.4  2005/03/02 13:39:16  dgrisby
 // Another merge from omnipy2_develop.
 //
@@ -149,7 +152,7 @@ addNewNode(long id, unsigned int hash)
   if (ot) {
     if (omniORB::trace(20)) {
       omniORB::logger l;
-      l << "Creating new Python state for omni thread id " << id << "\n";
+      l << "Creating new Python state for thread id " << id << "\n";
     }
 
 #if PY_VERSION_HEX >= 0x02030000
@@ -238,7 +241,7 @@ threadExit(CacheNode* cn)
 
   if (omniORB::trace(20)) {
     omniORB::logger l;
-    l << "Deleting Python state for omni thread id " << cn->id
+    l << "Deleting Python state for thread id " << cn->id
       << " (thread exit)\n";
   }
 
