@@ -1,3 +1,25 @@
+Mon Apr 25 19:26:20 BST 2005 dgrisby
+====================================
+
+- Maintain forwarded location when narrowing forwarded references.
+
+modules/omnipy.cc
+modules/omnipy.h
+modules/pyObjectRef.cc
+
+- Minor log output changes.
+
+modules/pyThreadCache.cc
+
+- Implement narrow as a no-op if the Python classes have the right inheritance.
+
+python/omniORB/CORBA.py
+
+- Minor code for TRANSIENT_FailedOnForwarded.
+
+python/omniORB/__init__.py
+
+
 Thu Apr 14 14:49:05 BST 2005 dgrisby
 ====================================
 
@@ -17,7 +39,6 @@ mk/beforeauto.mk.in
 mk/version.mk         -- new
 modules/dir.mk
 modules/omnipy.cc
-
 
 
 Wed Mar  2 13:36:30 GMT 2005 dgrisby
