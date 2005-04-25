@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.11  2005/04/25 18:21:26  dgrisby
+// Minor log output changes.
+//
 // Revision 1.1.2.10  2005/04/25 18:03:32  dgrisby
 // Log failure to delete worker thread at traceLevel 10 instead of 1.
 //
@@ -157,7 +160,7 @@ addNewNode(long id, unsigned int hash)
   if (ot) {
     if (omniORB::trace(20)) {
       omniORB::logger l;
-      l << "Creating new Python state for omni thread id " << id << "\n";
+      l << "Creating new Python state for thread id " << id << "\n";
     }
 
 #if PY_VERSION_HEX >= 0x02030000
@@ -246,7 +249,7 @@ threadExit(CacheNode* cn)
 
   if (omniORB::trace(20)) {
     omniORB::logger l;
-    l << "Deleting Python state for omni thread id " << cn->id
+    l << "Deleting Python state for thread id " << cn->id
       << " (thread exit)\n";
   }
 
