@@ -1,3 +1,25 @@
+Mon Apr 25 19:18:20 BST 2005 dgrisby
+====================================
+
+- Maintain forwarded location when narrowing forwarded references.
+
+modules/omnipy.cc
+modules/omnipy.h
+modules/pyObjectRef.cc
+
+- Minor log output changes.
+
+modules/pyThreadCache.cc
+
+- Implement narrow as a no-op if the Python classes have the right inheritance.
+
+python/omniORB/CORBA.py
+
+- Minor code for TRANSIENT_FailedOnForwarded.
+
+python/omniORB/__init__.py
+
+
 Mon Apr 25 19:02:12 BST 2005 dgrisby
 ====================================
 
