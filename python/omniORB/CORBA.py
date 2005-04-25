@@ -30,6 +30,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.31.2.5  2005/04/25 18:28:16  dgrisby
+# Implement narrow as a no-op if the Python classes have the right inheritance.
+#
 # Revision 1.31.2.4  2005/01/07 00:22:34  dgrisby
 # Big merge from omnipy2_develop.
 #
@@ -700,7 +703,14 @@ class Object:
         return
 
     def _narrow(self, dest):
-        return _omnipy.narrow(self, dest._NP_RepositoryId)
+        repoId = dest._NP_RepositoryId
+        try:
+            dest_objref = omniORB.objrefMapping[repoId]
+            if isinstance(self, dest_objref):
+                return self
+        except KeyError:
+            pass
+        return _omnipy.narrow(self, repoId)
 
     __methods__ = ["_is_a", "_non_existent", "_is_equivalent",
                    "_get_interface", "_hash", "_narrow"]
