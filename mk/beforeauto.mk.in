@@ -944,8 +944,27 @@ OMNITHREAD_LIB += -lpthread
 #SHAREDLIB_SUFFIX = so
 PythonSHAREDLIB_SUFFIX = so
 
-# this works only for xlc version >= 5
-SharedLibraryPlatformLinkFlagsTemplate = -qmkshrobj
+# (Not used on AIX)
+SharedLibraryPlatformLinkFlagsTemplate :=
+
+# Need to use the script 'ld_so_aix' to make Python modules on AIX.
+# For details see the file Misc/AIX-NOTES that is distributed with the Python
+# source code.
+
+# The pythonX.Y/config directory only exists in Python v2.3+, so this solution
+# doesn't work for earlier versions of Python. (But omniORBpy did't work for
+# earlier versions of Python anyway.)
+PYCONFIGDIR := $(INSTALLPYTHONDIR)/../config
+
+define MakeCXXSharedLibrary
+ $(ParseNameSpec); \
+ soname=$(SharedLibrarySoNameTemplate); \
+ set -x; \
+ $(RM) $@; \
+ PATH=$(PYCONFIGDIR):$$PATH \
+   ld_so_aix $(CXX) -bI:$(PYCONFIGDIR)/python.exp -G -o $@ \
+   $(IMPORT_LIBRARY_FLAGS) $(filter-out $(LibSuffixPattern),$^) $$extralibs;
+endef
 
 endif	# compiler not gcc
 endif	# AIX

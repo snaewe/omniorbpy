@@ -1,3 +1,11 @@
+Wed Jun  1 11:46:25 BST 2005 dgrisby
+====================================
+
+- AIX fix from Alex Tingle.
+
+mk/beforeauto.mk.in
+
+
 Mon Apr 25 19:18:20 BST 2005 dgrisby
 ====================================
 
