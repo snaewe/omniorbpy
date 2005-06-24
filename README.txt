@@ -109,4 +109,5 @@ The following features are currently missing from omniORBpy.
 1. There is no support for DII and DSI. Since you can write IDL and
    Python code on-the-fly, this is not a significant limitation.
 
-2. Objects by value are not supported.
+2. Interceptors have only limited functionality, and do not adhere to
+   the portable interceptors API.

@@ -29,6 +29,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.1.4.2  2005/06/24 15:43:23  dgrisby
+# Update documentation.
+#
 # Revision 1.1.4.1  2005/01/07 00:22:35  dgrisby
 # Big merge from omnipy2_develop.
 #
@@ -50,7 +53,7 @@ To register an interceptor function, call the relevant registration
 function with a callable argument. The callable will be called with
 two or three arguments. The first argument is the name of the
 operation being invoked; the second is the set of service contexts to
-be retrieved or filled in. ServerSendException has a third agument,
+be retrieved or filled in. ServerSendException has a third argument,
 the repository id of the exception being thrown.
 
 When receiving service contexts (ClientReceiveReply,
