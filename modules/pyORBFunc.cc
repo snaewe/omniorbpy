@@ -30,6 +30,10 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.4.2  2005/06/24 17:36:01  dgrisby
+// Support for receiving valuetypes inside Anys; relax requirement for
+// old style classes in a lot of places.
+//
 // Revision 1.1.4.1  2003/03/23 21:51:57  dgrisby
 // New omnipy3_develop branch.
 //
@@ -115,11 +119,6 @@ extern "C" {
       objref = CORBA::Object::_nil();
     }
     else {
-      if (!PyInstance_Check(pyobjref)) {
-	PyErr_SetString(PyExc_TypeError,
-			(char*)"Argument must be an object reference.");
-	return NULL;
-      }	
       objref = (CORBA::Object_ptr)omniPy::getTwin(pyobjref, OBJREF_TWIN);
     }
     RAISE_PY_BAD_PARAM_IF(!objref, BAD_PARAM_WrongPythonType);

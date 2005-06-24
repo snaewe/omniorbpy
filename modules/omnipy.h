@@ -31,6 +31,10 @@
 #define _omnipy_h_
 
 // $Log$
+// Revision 1.3.2.6  2005/06/24 17:36:08  dgrisby
+// Support for receiving valuetypes inside Anys; relax requirement for
+// old style classes in a lot of places.
+//
 // Revision 1.3.2.5  2005/04/25 18:27:41  dgrisby
 // Maintain forwarded location when narrowing forwarded references.
 //
@@ -161,6 +165,7 @@ public:
   static PyObject* pyCORBAmodule;      	// CORBA module
   static PyObject* pyCORBAsysExcMap;   	//  The system exception map
   static PyObject* pyCORBAAnyClass;    	//  Any class
+  static PyObject* pyCORBATypeCodeClass;//  TypeCode class
   static PyObject* pyCORBAContextClass;	//  Context class
   static PyObject* pyCORBAValueBase;    //  ValueBase class
   static PyObject* pyCORBAValueBaseDesc;//  Descriptor for ValueBase
@@ -170,7 +175,10 @@ public:
   static PyObject* pyomniORBtypeMap;   	//  Type map
   static PyObject* pyomniORBvalueMap;  	//  Value factory map
   static PyObject* pyomniORBwordMap;   	//  Reserved word map
-  static PyObject* pyPortableServerModule; // Portable server module
+  static PyObject* pyomniORBUnknownValueBase;
+                                        //  Base class for unknown valuetypes
+  static PyObject* pyPortableServerModule;
+                                        // Portable server module
   static PyObject* pyServantClass;     	// Servant class
   static PyObject* pyCreateTypeCode;   	// Function to create a TypeCode object
   static PyObject* pyWorkerThreadClass;	// Worker thread class
@@ -222,8 +230,7 @@ public:
   setTwin(PyObject* obj, void* twin, PyObject* name)
   {
     PyObject* ot = newTwin(twin);
-
-    PyDict_SetItem(((PyInstanceObject*)obj)->in_dict, name, ot);
+    PyObject_SetAttr(obj, name, ot);
     Py_DECREF(ot);
   }
 
@@ -231,18 +238,24 @@ public:
   inline void*
   getTwin(PyObject* obj, PyObject* name)
   {
-    PyObject* ot = PyDict_GetItem(((PyInstanceObject*)obj)->in_dict, name);
-    if (ot)
-      return ((omnipyTwin*)ot)->ob_twin;
-    else
-      return 0;
+    void* twin;
+    PyObject* ot = PyObject_GetAttr(obj, name);
+    if (ot) {
+      twin = ((omnipyTwin*)ot)->ob_twin;
+      Py_DECREF(ot);
+    }
+    else {
+      PyErr_Clear();
+      twin = 0;
+    }
+    return twin;
   }
 
   static
   inline void
   remTwin(PyObject* obj, PyObject* name)
   {
-    PyDict_DelItem(((PyInstanceObject*)obj)->in_dict, name);
+    PyObject_DelAttr(obj, name);
   }
 
   ////////////////////////////////////////////////////////////////////////////

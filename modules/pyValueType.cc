@@ -28,6 +28,10 @@
 //    ValueType support
 
 // $Log$
+// Revision 1.1.2.9  2005/06/24 17:36:00  dgrisby
+// Support for receiving valuetypes inside Anys; relax requirement for
+// old style classes in a lot of places.
+//
 // Revision 1.1.2.8  2005/01/17 15:19:11  dgrisby
 // Minor changes to compile on Windows.
 //
@@ -662,7 +666,8 @@ unmarshalValueRepoId(cdrStream& stream, pyInputValueTracker* tracker)
 }
 
 static void
-unmarshalMembers(cdrStream& stream, PyObject* desc, PyObject* instance);
+unmarshalMembers(cdrStream& stream, PyObject* desc,
+		 PyObject* instance, PyObject* member_list);
 
 static PyObject*
 real_unmarshalPyObjectValue(cdrStream& stream, cdrValueChunkStream* cstreamp,
@@ -757,6 +762,7 @@ real_unmarshalPyObjectValue(cdrStream& stream, cdrValueChunkStream* cstreamp,
 	  // RepoId matches the target, but we don't have a factory
 	  // for it. We can't truncate any further. Break out here,
 	  // and throw MARSHAL below.
+	  desc = d_o;
 	  break;
 	}
       }
@@ -799,9 +805,24 @@ real_unmarshalPyObjectValue(cdrStream& stream, cdrValueChunkStream* cstreamp,
   // Check there's a factory and a type descriptor for the chosen repoId.
 
   try {
-    if (!factory || factory == Py_None)
-      OMNIORB_THROW(MARSHAL, MARSHAL_NoValueFactory,
-		    (CORBA::CompletionStatus)stream.completion());
+    PyObject* member_list = 0;
+
+    if (!factory || factory == Py_None) {
+      if (desc) {
+	PyObject* vclass = PyTuple_GET_ITEM(desc, 1);
+	if (omniPy::isInstance(vclass, omniPy::pyomniORBUnknownValueBase)) {
+	  // Value is inside an Any, and has a TypeCode for which we
+	  // have no static knowledge. We create an instance of the
+	  // class created as the TypeCode was unmarshalled.
+	  factory = vclass;
+	  member_list = PyList_New(0);
+	}
+      }
+      if (!factory || factory == Py_None) {
+	OMNIORB_THROW(MARSHAL, MARSHAL_NoValueFactory,
+		      (CORBA::CompletionStatus)stream.completion());
+      }
+    }
 
     if (!desc)
       OMNIORB_THROW(NO_IMPLEMENT, NO_IMPLEMENT_NoValueImpl,
@@ -826,7 +847,11 @@ real_unmarshalPyObjectValue(cdrStream& stream, cdrValueChunkStream* cstreamp,
       tracker->add(instance, pos);
 
       // Finally, we have a blank value which we can unmarshal the members to.
-      unmarshalMembers(stream, desc, instance);
+      unmarshalMembers(stream, desc, instance, member_list);
+      if (member_list) {
+	PyObject_SetAttrString(instance, (char*)"_values", member_list);
+	Py_DECREF(member_list);
+      }
     }
     else if (dtype == CORBA::tk_value_box) {
       PyObject* boxedtype = PyTuple_GET_ITEM(desc, 4);
@@ -882,11 +907,12 @@ real_unmarshalPyObjectValue(cdrStream& stream, cdrValueChunkStream* cstreamp,
 }
 
 static void
-unmarshalMembers(cdrStream& stream, PyObject* desc, PyObject* instance)
+unmarshalMembers(cdrStream& stream, PyObject* desc,
+		 PyObject* instance, PyObject* member_list)
 {
   PyObject* t_o = PyTuple_GET_ITEM(desc, 6);
   if (PyTuple_Check(t_o))
-    unmarshalMembers(stream, t_o, instance);
+    unmarshalMembers(stream, t_o, instance, member_list);
 
   int members = (PyTuple_GET_SIZE(desc) - 7) / 3;
 
@@ -898,6 +924,10 @@ unmarshalMembers(cdrStream& stream, PyObject* desc, PyObject* instance)
   for (i=0,j=7; i < members; i++, j+=3) {
     name  = PyTuple_GET_ITEM(desc, j);
     value = omniPy::unmarshalPyObject(stream, PyTuple_GET_ITEM(desc, j+1));
+
+    if (member_list)
+      PyList_Append(member_list, value);
+
     if (PyObject_SetAttr(instance, name, value) == -1) {
       // Error setting attribute, probably because the object has a
       // __setattr__ or __slots__.

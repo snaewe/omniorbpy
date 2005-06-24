@@ -29,6 +29,10 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.4.3  2005/06/24 17:36:00  dgrisby
+// Support for receiving valuetypes inside Anys; relax requirement for
+// old style classes in a lot of places.
+//
 // Revision 1.1.4.2  2005/01/07 00:22:33  dgrisby
 // Big merge from omnipy2_develop.
 //
@@ -852,9 +856,6 @@ extern "C" {
       (PortableServer::POA_ptr)omniPy::getTwin(pyPOA, POA_TWIN);
     OMNIORB_ASSERT(poa);
 
-    RAISE_PY_BAD_PARAM_IF(!PyInstance_Check(pyobjref),
-			  BAD_PARAM_WrongPythonType);
-
     CORBA::Object_ptr objref =
       (CORBA::Object_ptr)omniPy::getTwin(pyobjref, OBJREF_TWIN);
 
@@ -908,9 +909,6 @@ extern "C" {
     PortableServer::POA_ptr poa =
       (PortableServer::POA_ptr)omniPy::getTwin(pyPOA, POA_TWIN);
     OMNIORB_ASSERT(poa);
-
-    RAISE_PY_BAD_PARAM_IF(!PyInstance_Check(pyobjref),
-			  BAD_PARAM_WrongPythonType);
 
     CORBA::Object_ptr objref =
       (CORBA::Object_ptr)omniPy::getTwin(pyobjref, OBJREF_TWIN);

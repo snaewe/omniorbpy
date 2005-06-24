@@ -1297,9 +1297,10 @@ sent with empty strings where the names would normally be. In this
 situation, the types which omniORBpy creates cannot be given the
 correct names. The contents of all types except structs and exceptions
 can be accessed without having to know their names, through the
-standard interfaces. Unknown structs and exceptions received by
-omniORBpy have an attribute named `\code{\_values}' which contains a
-sequence of the member values. This attribute is omniORBpy specific.
+standard interfaces. Unknown structs, exceptions and valuetypes
+received by omniORBpy have an attribute named `\code{\_values}' which
+contains a sequence of the member values. This attribute is omniORBpy
+specific.
 
 Similarly, TypeCodes for constructed types such as structs and unions
 normally contain the repository ids of those types. This means that

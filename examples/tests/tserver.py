@@ -104,6 +104,7 @@ class I_i (TypeTest__POA.I):
 
     def except3(self, a):
         if a == 1:
+            sys.stderr.write("\nExpect to see an exception traceback here:\n")
             raise TypeTest.X1()
         elif a == 2:
             raise CORBA.NO_PERMISSION(123, CORBA.COMPLETED_YES)

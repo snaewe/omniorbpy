@@ -28,6 +28,10 @@
 //    Abstract interface support
 
 // $Log$
+// Revision 1.1.2.2  2005/06/24 17:36:08  dgrisby
+// Support for receiving valuetypes inside Anys; relax requirement for
+// old style classes in a lot of places.
+//
 // Revision 1.1.2.1  2003/07/10 22:13:25  dgrisby
 // Abstract interface support.
 //
@@ -48,7 +52,7 @@ validateTypeAbstractInterface(PyObject* d_o, PyObject* a_o,
     return;
 
   // Object reference?
-  if (PyInstance_Check(a_o) && omniPy::getTwin(a_o, OBJREF_TWIN))
+  if (omniPy::getTwin(a_o, OBJREF_TWIN))
     return;
 
   // Value?
@@ -98,14 +102,12 @@ marshalPyObjectAbstractInterface(cdrStream& stream,
   }
 
   // Object reference?
-  if (PyInstance_Check(a_o)) {
-    CORBA::Object_ptr obj;
-    obj = (CORBA::Object_ptr)omniPy::getTwin(a_o, OBJREF_TWIN);
-    if (obj) {
-      stream.marshalBoolean(1);
-      CORBA::Object::_marshalObjRef(obj, stream);
-      return;
-    }
+  CORBA::Object_ptr obj;
+  obj = (CORBA::Object_ptr)omniPy::getTwin(a_o, OBJREF_TWIN);
+  if (obj) {
+    stream.marshalBoolean(1);
+    CORBA::Object::_marshalObjRef(obj, stream);
+    return;
   }
 
   // Valuetype
@@ -142,7 +144,7 @@ copyArgumentAbstractInterface(PyObject* d_o, PyObject* a_o,
     return Py_None;
   }
 
-  if (PyInstance_Check(a_o) && omniPy::getTwin(a_o, OBJREF_TWIN)) {
+  if (omniPy::getTwin(a_o, OBJREF_TWIN)) {
     return omniPy::copyObjRefArgument(PyTuple_GET_ITEM(d_o, 1),
 				      a_o, compstatus);
   }

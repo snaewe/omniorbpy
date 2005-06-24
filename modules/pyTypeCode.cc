@@ -29,6 +29,10 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.4.5  2005/06/24 17:36:00  dgrisby
+// Support for receiving valuetypes inside Anys; relax requirement for
+// old style classes in a lot of places.
+//
 // Revision 1.1.4.4  2005/01/07 00:22:33  dgrisby
 // Big merge from omnipy2_develop.
 //
@@ -1038,8 +1042,7 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
 
 	  Py_DECREF(mname);
 
-	  OMNIORB_ASSERT(t_o && PyInstance_Check(t_o));
-
+	  OMNIORB_ASSERT(t_o);
 	  PyTuple_SET_ITEM(mems, i, t_o);
 	}
       }
@@ -1203,6 +1206,161 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
     }
     break;
 
+  case CORBA::tk_value:
+    {
+      CORBA::ULong size; size <<= stream;
+      cdrEncapsulationStream encap(stream, size);
+
+      PyObject* repoId = omniPy::unmarshalRawPyString(encap);
+
+      d_o = PyDict_GetItem(omniPy::pyomniORBtypeMap, repoId);
+
+      if (d_o) {
+	// Static knowledge of the value
+	Py_INCREF(d_o);
+	Py_DECREF(repoId);
+
+	// Unmarshal the rest in case of later indirections
+	odm.add(d_o, tc_offset);
+	OffsetDescriptorMap eodm(odm, tc_offset + 8);
+
+	skipString(encap); // Name
+	CORBA::ValueModifier mod; mod <<= encap; // Modifier
+	
+	// Skip concrete base
+	t_o = r_unmarshalTypeCode(encap, eodm); Py_DECREF(t_o);
+	
+	CORBA::ULong cnt; cnt <<= encap;
+	for (CORBA::ULong i=0; i < cnt; i++) {
+	  // Member name, type, visibility
+	  skipString(encap);
+	  t_o = r_unmarshalTypeCode(encap, eodm); Py_DECREF(t_o);
+	  CORBA::UShort vis; vis <<= encap;
+	}
+      }
+      else {
+	// Don't know this value
+	OffsetDescriptorMap eodm(odm, tc_offset + 8);
+
+	PyObject* name = omniPy::unmarshalRawPyString(encap);
+	CORBA::ValueModifier mod; mod <<= encap;
+	PyObject* base = r_unmarshalTypeCode(encap, eodm);
+
+	CORBA::ULong basekind = omniPy::descriptorToTK(base);
+	if (!(basekind == CORBA::tk_value || basekind == CORBA::tk_null))
+	  OMNIORB_THROW(MARSHAL, MARSHAL_InvalidTypeCodeKind,
+			(CORBA::CompletionStatus)stream.completion());
+
+	CORBA::ULong cnt; cnt <<= encap;
+
+	d_o = PyTuple_New(cnt * 3 + 7);	odm.add(d_o, tc_offset);
+	PyTuple_SET_ITEM(d_o, 0, PyInt_FromLong(tk));
+	PyTuple_SET_ITEM(d_o, 2, repoId);
+	PyTuple_SET_ITEM(d_o, 3, name);
+	PyTuple_SET_ITEM(d_o, 4, PyInt_FromLong(mod));
+	Py_INCREF(Py_None);
+	PyTuple_SET_ITEM(d_o, 5, Py_None); // Empty truncatable bases
+	PyTuple_SET_ITEM(d_o, 6, base);
+
+	PyObject* mems = PyTuple_New(cnt);
+
+	CORBA::ULong i, j;
+
+	PyObject* word;
+
+	for (i=0, j=7; i < cnt; i++) {
+	  // member name
+	  t_o = omniPy::unmarshalRawPyString(encap);
+
+	  if ((word = PyDict_GetItem(omniPy::pyomniORBwordMap, t_o))) {
+	    Py_INCREF(word);
+	    Py_DECREF(t_o);
+	    t_o = word;
+	  }
+	  PyTuple_SET_ITEM(d_o, j++, t_o);
+	  Py_INCREF(t_o);
+	  PyTuple_SET_ITEM(mems, i, t_o);
+
+	  // member type
+	  t_o = r_unmarshalTypeCode(encap, eodm);
+	  PyTuple_SET_ITEM(d_o, j++, t_o);
+
+	  // member visibility
+	  CORBA::UShort vis; vis <<= encap;
+	  PyTuple_SET_ITEM(d_o, j++, PyInt_FromLong(vis));
+	}
+
+	// Create class object
+	t_o = PyObject_GetAttrString(omniPy::pyomniORBmodule,
+				     (char*)"createUnknownValue");
+	OMNIORB_ASSERT(t_o && PyFunction_Check(t_o));
+
+	t_o = PyObject_CallFunction(t_o, (char*)"OOO", repoId, mems, base);
+	OMNIORB_ASSERT(t_o && PyClass_Check(t_o));
+
+	Py_DECREF(mems);
+
+	PyTuple_SET_ITEM(d_o, 1, t_o);
+      }
+    }
+    break;
+
+  case CORBA::tk_value_box:
+    {
+      CORBA::ULong size; size <<= stream;
+      cdrEncapsulationStream encap(stream, size);
+
+      PyObject* repoId = omniPy::unmarshalRawPyString(encap);
+
+      d_o = PyDict_GetItem(omniPy::pyomniORBtypeMap, repoId);
+
+      if (d_o) {
+	// Static knowledge of the valuebox
+	Py_INCREF(d_o);
+	Py_DECREF(repoId);
+
+	odm.add(d_o, tc_offset);
+	OffsetDescriptorMap eodm(odm, tc_offset + 8);
+	skipString(encap); // name
+	t_o = r_unmarshalTypeCode(encap, eodm); Py_DECREF(t_o);
+      }
+      else {
+	OffsetDescriptorMap eodm(odm, tc_offset + 8);
+
+	d_o = PyTuple_New(5); odm.add(d_o, tc_offset);
+	PyTuple_SET_ITEM(d_o, 0, PyInt_FromLong(tk));
+
+	// Member 1 is valuebox class in static stubs, but it's not used.
+	Py_INCREF(Py_None);
+	PyTuple_SET_ITEM(d_o, 1, Py_None);
+
+	PyTuple_SET_ITEM(d_o, 2, repoId);
+	
+	// name
+	t_o = omniPy::unmarshalRawPyString(encap);
+	PyTuple_SET_ITEM(d_o, 3, t_o);
+
+	// TypeCode
+	t_o = r_unmarshalTypeCode(encap, eodm);
+	PyTuple_SET_ITEM(d_o, 4, t_o);
+      }
+    }
+    break;
+
+  case CORBA::tk_abstract_interface:
+    {
+      CORBA::ULong size; size <<= stream;
+      cdrEncapsulationStream encap(stream, size);
+
+      d_o = PyTuple_New(3); odm.add(d_o, tc_offset);
+      PyTuple_SET_ITEM(d_o, 0, PyInt_FromLong(tk));
+
+      // RepoId and name
+      t_o = omniPy::unmarshalRawPyString(encap); PyTuple_SET_ITEM(d_o, 1, t_o);
+      t_o = omniPy::unmarshalRawPyString(encap); PyTuple_SET_ITEM(d_o, 2, t_o);
+    }
+    break;
+
   case 0xffffffff:
     {
       CORBA::Long position, offset;
@@ -1230,7 +1388,7 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
   return d_o;
 }
 
-
+// *** HERE: unmarshal tk_value!!
 
 void
 omniPy::marshalTypeCode(cdrStream& stream, PyObject* d_o)

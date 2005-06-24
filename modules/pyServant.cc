@@ -29,6 +29,10 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.4.6  2005/06/24 17:36:00  dgrisby
+// Support for receiving valuetypes inside Anys; relax requirement for
+// old style classes in a lot of places.
+//
 // Revision 1.1.4.5  2005/04/14 13:50:59  dgrisby
 // New traceTime, traceInvocationReturns functions; removal of omniORB::logf.
 //
@@ -220,7 +224,6 @@ Py_omniServant::Py_omniServant(PyObject* pyservant, PyObject* opdict,
 {
   repoId_ = CORBA::string_dup(repoId);
 
-  OMNIORB_ASSERT(PyInstance_Check(pyservant));
   OMNIORB_ASSERT(PyDict_Check(opdict));
   Py_INCREF(pyservant_);
   Py_INCREF(opdict_);
@@ -542,7 +545,7 @@ Py_omniServant::remote_dispatch(Py_omniCallDescriptor* pycd)
     PyErr_NormalizeException(&etype, &evalue, &etraceback);
     OMNIORB_ASSERT(etype);
 
-    if (evalue && PyInstance_Check(evalue))
+    if (evalue)
       erepoId = PyObject_GetAttrString(evalue, (char*)"_NP_RepositoryId");
 
     if (!(erepoId && PyString_Check(erepoId))) {
@@ -703,7 +706,7 @@ Py_omniServant::local_dispatch(Py_omniCallDescriptor* pycd)
     PyErr_NormalizeException(&etype, &evalue, &etraceback);
     OMNIORB_ASSERT(etype);
 
-    if (evalue && PyInstance_Check(evalue))
+    if (evalue)
       erepoId = PyObject_GetAttrString(evalue, (char*)"_NP_RepositoryId");
 
     if (!(erepoId && PyString_Check(erepoId))) {
@@ -803,7 +806,7 @@ Py_ServantActivator::incarnate(const PortableServer::ObjectId& oid,
     PyErr_NormalizeException(&etype, &evalue, &etraceback);
     OMNIORB_ASSERT(etype);
 
-    if (evalue && PyInstance_Check(evalue))
+    if (evalue)
       erepoId = PyObject_GetAttrString(evalue, (char*)"_NP_RepositoryId");
 
     if (!(erepoId && PyString_Check(erepoId))) {
@@ -1004,7 +1007,7 @@ Py_ServantLocator::preinvoke(const PortableServer::ObjectId& oid,
     PyErr_NormalizeException(&etype, &evalue, &etraceback);
     OMNIORB_ASSERT(etype);
 
-    if (evalue && PyInstance_Check(evalue))
+    if (evalue)
       erepoId = PyObject_GetAttrString(evalue, (char*)"_NP_RepositoryId");
 
     if (!(erepoId && PyString_Check(erepoId))) {
@@ -1225,9 +1228,6 @@ newSpecialServant(PyObject* pyservant, PyObject* opdict, char* repoId)
 omniPy::Py_omniServant*
 omniPy::getServantForPyObject(PyObject* pyservant)
 {
-  if (!PyInstance_Check(pyservant))
-    return 0;
-
   Py_omniServant* pyos;
 
   // Is there a Py_omniServant already?
@@ -1238,9 +1238,7 @@ omniPy::getServantForPyObject(PyObject* pyservant)
   }
 
   // Is it an instance of the right class?
-  PyClassObject* pysc = ((PyInstanceObject*)pyservant)->in_class;
-
-  if (!PyClass_IsSubclass((PyObject*)pysc, omniPy::pyServantClass))
+  if (!omniPy::isInstance(pyservant, omniPy::pyServantClass))
     return 0;
 
   PyObject* opdict = PyObject_GetAttrString(pyservant, (char*)"_omni_op_d");
