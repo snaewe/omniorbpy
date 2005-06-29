@@ -1,9 +1,0 @@
-
-#include "value1.idl"
-
-module Derived {
-
-  valuetype Three : truncatable ValueTest::One {
-    public string extra;
-  };
-};

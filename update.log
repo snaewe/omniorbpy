@@ -1,3 +1,23 @@
+Wed Jun 29 18:29:11 BST 2005 dgrisby
+====================================
+
+- Update valuetype examples; fix values in Anys.
+
+examples/valuetype/client.py         -- deleted
+examples/valuetype/server.py         -- deleted
+examples/valuetype/value1.idl        -- deleted
+examples/valuetype/value2.idl        -- deleted
+examples/valuetype/simple/client.py  -- new
+examples/valuetype/simple/server.py  -- new
+examples/valuetype/simple/value.idl  -- new
+examples/valuetype/tests/client.py   -- new
+examples/valuetype/tests/server.py   -- new
+examples/valuetype/tests/value1.idl  -- new
+examples/valuetype/tests/value2.idl  -- new
+modules/pyTypeCode.cc
+modules/pyValueType.cc
+
+
 Fri Jun 24 18:33:37 BST 2005 dgrisby
 ====================================
 

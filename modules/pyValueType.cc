@@ -28,6 +28,9 @@
 //    ValueType support
 
 // $Log$
+// Revision 1.1.2.10  2005/06/29 17:31:42  dgrisby
+// Update valuetype examples; fix values in Anys.
+//
 // Revision 1.1.2.9  2005/06/24 17:36:00  dgrisby
 // Support for receiving valuetypes inside Anys; relax requirement for
 // old style classes in a lot of places.
@@ -810,10 +813,11 @@ real_unmarshalPyObjectValue(cdrStream& stream, cdrValueChunkStream* cstreamp,
     if (!factory || factory == Py_None) {
       if (desc) {
 	PyObject* vclass = PyTuple_GET_ITEM(desc, 1);
-	if (omniPy::isInstance(vclass, omniPy::pyomniORBUnknownValueBase)) {
+	if (PyClass_IsSubclass(vclass, omniPy::pyomniORBUnknownValueBase)) {
 	  // Value is inside an Any, and has a TypeCode for which we
 	  // have no static knowledge. We create an instance of the
 	  // class created as the TypeCode was unmarshalled.
+	  omniORB::logs(25, "Unmarshal unknown valuetype inside Any.");
 	  factory = vclass;
 	  member_list = PyList_New(0);
 	}
