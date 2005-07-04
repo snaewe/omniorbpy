@@ -30,6 +30,10 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.19  2005/07/04 13:45:30  dgrisby
+// Reference counting error with ForwardRequest in servant activator
+// incarnate. Thanks Alexey Bulavitsky.
+//
 // Revision 1.1.2.18  2005/01/13 16:54:35  dgrisby
 // Fix possible deadlock in user exception deletion.
 //
@@ -822,8 +826,6 @@ Py_ServantActivator::incarnate(const PortableServer::ObjectId& oid,
       }
       OMNIORB_THROW(UNKNOWN, UNKNOWN_PythonException, CORBA::COMPLETED_MAYBE);
     }
-    Py_DECREF(etype);
-    Py_XDECREF(etraceback);
 
     if (omni::strMatch(PyString_AS_STRING(erepoId),
 		       PortableServer::ForwardRequest::_PD_repoId)) {

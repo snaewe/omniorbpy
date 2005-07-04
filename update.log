@@ -1,3 +1,12 @@
+Mon Jul  4 14:42:03 BST 2005 dgrisby
+====================================
+
+- Reference counting error with ForwardRequest in servant activator
+  incarnate. Thanks Alexey Bulavitsky.
+
+modules/pyServant.cc
+
+
 Wed Jun  1 11:46:25 BST 2005 dgrisby
 ====================================
 
