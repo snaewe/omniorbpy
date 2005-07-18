@@ -30,6 +30,10 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.16  2005/07/18 11:40:03  dgrisby
+// Always clear Python exception state when unable to convert long
+// integers to smaller types.
+//
 // Revision 1.1.2.15  2005/01/13 16:55:26  dgrisby
 // Normalize exceptions thrown from extensions. Thanks Scott Yang.
 //
@@ -133,6 +137,8 @@ omniPy::produceSystemException(PyObject* eobj, PyObject* erepoId,
     }
     else if (PyLong_Check(m)) {
       minor = PyLong_AsUnsignedLong(m);
+      if (minor == (CORBA::ULong)-1 && PyErr_Occurred())
+	PyErr_Clear();
     }
     c = PyObject_GetAttrString(eobj, (char*)"completed");
 

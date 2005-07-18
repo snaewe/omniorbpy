@@ -1,3 +1,15 @@
+Mon Jul 18 12:36:46 BST 2005 dgrisby
+====================================
+
+- Always clear Python exception state when unable to convert long
+  integers to smaller types.
+
+modules/pyExceptions.cc
+modules/pyInterceptors.cc
+modules/pyMarshal.cc
+modules/pyomniFunc.cc
+
+
 Mon Jul  4 14:42:03 BST 2005 dgrisby
 ====================================
 
