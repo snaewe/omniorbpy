@@ -1,4 +1,4 @@
-\documentclass[draft,11pt,twoside,a4paper]{book}
+\documentclass[11pt,twoside,a4paper]{book}
 \usepackage[T1]{fontenc}
 \usepackage{palatino}
 
@@ -64,29 +64,41 @@
 
 % URL-like things:
 \usepackage[T1]{url}
-\newcommand{\weburl}{\begingroup \urlstyle{sf}\Url}
 \newcommand{\email}{\begingroup \urlstyle{sf}\Url}
 \newcommand{\file}{\begingroup \urlstyle{tt}\Url}
 \newcommand{\envvar}{\begingroup \urlstyle{tt}\Url}
 \newcommand{\makevar}{\begingroup \urlstyle{tt}\Url}
 \newcommand{\corbauri}{\begingroup \urlstyle{tt}\Url}
+%BEGIN LATEX
+\newcommand{\weburl}{\begingroup \urlstyle{sf}\Url}
+%END LATEX
+%HEVEA\def\weburl{\begingroup%
+%HEVEA\def\UrlLeft##1\UrlRight{\ahrefurl{##1}}%
+%HEVEA\urlstyle{tt}%
+%HEVEA\Url}
+
 
 % Mark-up for configuration options
-\makeatletter
 \newcommand{\confopt}[2]
+  {\vspace{\baselineskip}\par\noindent\code{#1} ~~ \textit{default} =
+   \code{#2}}
+
+%BEGIN LATEX
+\makeatletter
+\renewcommand{\confopt}[2]
   {\vspace{\baselineskip}\par\noindent\code{#1} ~~ \textit{default} =
    \code{#2}\\[-1ex]\@afterheading}
 \makeatother
-
-% HeVeA barfs at the following:
-
-%BEGIN LATEX
+%END LATEX
 
 \addtolength{\oddsidemargin}{-0.2in}
 \addtolength{\evensidemargin}{-0.6in}
 \addtolength{\textwidth}{0.5in}
 
+%BEGIN LATEX
 \newcommand{\dsc}{\discretionary{}{}{}}
+%END LATEX
+%HEVEA\newcommand{\dsc}{}
 
 \pagestyle{headings}
 \setcounter{secnumdepth}{3}
@@ -109,16 +121,6 @@
      include,pragma,undef,warning}%
  }[keywords,comments,strings,directives]%
 
-%% \lstset{basicstyle=\ttfamily\small,
-%%         keywordstyle=,
-%%         commentstyle=\itshape,
-%%         labelstyle=\tiny,
-%%         stringspaces=false,
-%%         abovecaptionskip=0pt,
-%%         belowcaptionskip=0pt,
-%%         indent=\parindent,
-%%         fontadjust}
-
 \lstset{basicstyle=\ttfamily\small,
         keywordstyle=,
         commentstyle=\itshape,
@@ -131,26 +133,15 @@
 
 
 \lstnewenvironment{idllisting}{\lstset{language=idl}}{}
+\lstnewenvironment{pylisting}{\lstset{language=python}}{}
 \lstnewenvironment{cxxlisting}{\lstset{language=C++}}{}
 \lstnewenvironment{makelisting}{\lstset{language=[gnu]make}}{}
-\lstnewenvironment{pylisting}{\lstset{language=python}}{}
-
-%END LATEX
 
 % These things make up for HeVeA's lack of understanding:
 
-%HEVEA\newcommand{\dsc}{}
 %HEVEA\newcommand{\vfill}{}
 %HEVEA\newcommand{\mainmatter}{}
 %HEVEA\newcommand{\backmatter}{}
-%HEVEA\newcommand{\lstset}[1]{}
-%HEVEA\newcommand{\textbackslash}{$\backslash$}
-%HEVEA\usepackage{verbatim}
-%HEVEA\newenvironment{idllisting}{\verbatim}{\endverbatim}
-%HEVEA\newenvironment{cxxlisting}{\verbatim}{\endverbatim}
-%HEVEA\newenvironment{makelisting}{\verbatim}{\endverbatim}
-%HEVEA\newenvironment{pylisting}{\verbatim}{\endverbatim}
-
 
 % Hyperref things for pdf and html:
 \usepackage{hyperref}
@@ -197,7 +188,7 @@ Apasphere Ltd.\\}
 
 \vfill
 \vfill
-June 2005
+July 2005
 \vfill
 
 \end{center}
@@ -705,7 +696,7 @@ example. In the next example, we shall introduce a better way of
 passing the object reference using the CORBA Naming Service.
 
 
-\subsection{Object Implementation: Generating a Stringified Object Reference}
+\subsection{Object Implementation: Making a Stringified Object Reference}
 
 \lstset{stepnumber=1,gobble=4}
 \begin{pylisting}
