@@ -29,6 +29,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.4.5  2005/07/22 17:41:07  dgrisby
+// Update from omnipy2_develop.
+//
 // Revision 1.1.4.4  2005/06/24 17:36:00  dgrisby
 // Support for receiving valuetypes inside Anys; relax requirement for
 // old style classes in a lot of places.
@@ -699,12 +702,17 @@ extern "C" {
     CORBA::ULong minor;
     if (PyInt_Check(pyminor))
       minor = PyInt_AS_LONG(pyminor);
-    else
+    else {
       minor = PyLong_AsUnsignedLong(pyminor);
+      if (minor == (CORBA::ULong)-1 && PyErr_Occurred())
+	PyErr_Clear();
+    }
 
     const char* str = 0;
 
     if (0) {
+      // Empty case to allow us to have a big chain of else ifs due to
+      // the macro expansion below.
     }
 #define ToStringIfMatch(name) \
     else if (!strcmp(repoId, "IDL:omg.org/CORBA/" #name ":1.0")) \

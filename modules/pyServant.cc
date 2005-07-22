@@ -28,7 +28,11 @@
 //    Implementation of Python servant object
 
 // $Id$
+
 // $Log$
+// Revision 1.1.4.7  2005/07/22 17:41:07  dgrisby
+// Update from omnipy2_develop.
+//
 // Revision 1.1.4.6  2005/06/24 17:36:00  dgrisby
 // Support for receiving valuetypes inside Anys; relax requirement for
 // old style classes in a lot of places.
@@ -824,8 +828,6 @@ Py_ServantActivator::incarnate(const PortableServer::ObjectId& oid,
       }
       OMNIORB_THROW(UNKNOWN, UNKNOWN_PythonException, CORBA::COMPLETED_MAYBE);
     }
-    Py_DECREF(etype);
-    Py_XDECREF(etraceback);
 
     if (omni::strMatch(PyString_AS_STRING(erepoId),
 		       PortableServer::ForwardRequest::_PD_repoId)) {

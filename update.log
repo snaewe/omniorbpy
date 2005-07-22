@@ -1,3 +1,20 @@
+Fri Jul 22 18:39:24 BST 2005 dgrisby
+====================================
+
+- Update from omnipy2_develop.
+
+configure
+configure.ac
+mk/beforeauto.mk.in
+modules/dir.mk
+modules/pyExceptions.cc
+modules/pyInterceptors.cc
+modules/pyMarshal.cc
+modules/pyServant.cc
+modules/pyThreadCache.cc
+modules/pyomniFunc.cc
+
+
 Tue Jul 19 12:41:08 BST 2005 dgrisby
 ====================================
 

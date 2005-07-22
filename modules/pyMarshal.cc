@@ -29,6 +29,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.4.6  2005/07/22 17:41:08  dgrisby
+// Update from omnipy2_develop.
+//
 // Revision 1.1.4.5  2005/06/24 17:36:08  dgrisby
 // Support for receiving valuetypes inside Anys; relax requirement for
 // old style classes in a lot of places.
@@ -191,8 +194,10 @@ validateTypeShort(PyObject* d_o, PyObject* a_o,
     l = PyInt_AS_LONG(a_o);
   else if (PyLong_Check(a_o)) {
     l = PyLong_AsLong(a_o);
-    if (l == -1 && PyErr_Occurred())
+    if (l == -1 && PyErr_Occurred()) {
+      PyErr_Clear();
       OMNIORB_THROW(BAD_PARAM, BAD_PARAM_PythonValueOutOfRange, compstatus);
+    }
   }
   else
     OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
@@ -212,8 +217,10 @@ validateTypeLong(PyObject* d_o, PyObject* a_o,
     l = PyInt_AS_LONG(a_o);
   else if (PyLong_Check(a_o)) {
     l = PyLong_AsLong(a_o);
-    if (l == -1 && PyErr_Occurred())
+    if (l == -1 && PyErr_Occurred()) {
+      PyErr_Clear();
       OMNIORB_THROW(BAD_PARAM, BAD_PARAM_PythonValueOutOfRange, compstatus);
+    }
   }
   else
     OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
@@ -233,8 +240,13 @@ validateTypeUShort(PyObject* d_o, PyObject* a_o,
 
   if (PyInt_Check(a_o))
     l = PyInt_AS_LONG(a_o);
-  else if (PyLong_Check(a_o))
+  else if (PyLong_Check(a_o)) {
     l = PyLong_AsLong(a_o);
+    if (l == -1 && PyErr_Occurred()) {
+      PyErr_Clear();
+      OMNIORB_THROW(BAD_PARAM, BAD_PARAM_PythonValueOutOfRange, compstatus);
+    }
+  }
   else
     OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
 
@@ -277,7 +289,17 @@ validateTypeFloat(PyObject* d_o, PyObject* a_o,
 		  CORBA::CompletionStatus compstatus,
 		  PyObject* track)
 {
-  if (!(PyFloat_Check(a_o) || PyInt_Check(a_o) || PyLong_Check(a_o)))
+  if (PyFloat_Check(a_o) || PyInt_Check(a_o))
+    return;
+
+  if (PyLong_Check(a_o)) {
+    double d = PyLong_AsDouble(a_o);
+    if (d == -1.0 && PyErr_Occurred()) {
+      PyErr_Clear();
+      OMNIORB_THROW(BAD_PARAM, BAD_PARAM_PythonValueOutOfRange, compstatus);
+    }
+  }
+  else
     OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
 }
 
@@ -286,7 +308,17 @@ validateTypeDouble(PyObject* d_o, PyObject* a_o,
 		   CORBA::CompletionStatus compstatus,
 		   PyObject* track)
 {
-  if (!(PyFloat_Check(a_o) || PyInt_Check(a_o) || PyLong_Check(a_o)))
+  if (PyFloat_Check(a_o) || PyInt_Check(a_o))
+    return;
+
+  if (PyLong_Check(a_o)) {
+    double d = PyLong_AsDouble(a_o);
+    if (d == -1.0 && PyErr_Occurred()) {
+      PyErr_Clear();
+      OMNIORB_THROW(BAD_PARAM, BAD_PARAM_PythonValueOutOfRange, compstatus);
+    }
+  }
+  else
     OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
 }
 
@@ -317,8 +349,13 @@ validateTypeOctet(PyObject* d_o, PyObject* a_o,
 
   if (PyInt_Check(a_o))
     l = PyInt_AS_LONG(a_o);
-  else if (PyLong_Check(a_o))
+  else if (PyLong_Check(a_o)) {
     l = PyLong_AsLong(a_o);
+    if (l == -1 && PyErr_Occurred()) {
+      PyErr_Clear();
+      OMNIORB_THROW(BAD_PARAM, BAD_PARAM_PythonValueOutOfRange, compstatus);
+    }
+  }
   else
     OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
 
@@ -600,9 +637,11 @@ validateTypeSequence(PyObject* d_o, PyObject* a_o,
 	    long_val = PyInt_AS_LONG(t_o);
 	  else if (PyLong_Check(t_o)) {
 	    long_val = PyLong_AsLong(t_o);
-	    if (long_val == -1 && PyErr_Occurred())
+	    if (long_val == -1 && PyErr_Occurred()) {
+	      PyErr_Clear();
 	      OMNIORB_THROW(BAD_PARAM,
 			    BAD_PARAM_PythonValueOutOfRange, compstatus);
+	    }
 	  }
 	  else
 	    OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
@@ -620,9 +659,11 @@ validateTypeSequence(PyObject* d_o, PyObject* a_o,
 	    long_val = PyInt_AS_LONG(t_o);
 	  else if (PyLong_Check(t_o)) {
 	    long_val = PyLong_AsLong(t_o);
-	    if (long_val == -1 && PyErr_Occurred())
+	    if (long_val == -1 && PyErr_Occurred()) {
+	      PyErr_Clear();
 	      OMNIORB_THROW(BAD_PARAM,
 			    BAD_PARAM_PythonValueOutOfRange, compstatus);
+	    }
 	  }
 	  else
 	    OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
@@ -640,8 +681,14 @@ validateTypeSequence(PyObject* d_o, PyObject* a_o,
 	  t_o = PyList_GET_ITEM(a_o, i);
 	  if (PyInt_Check(t_o))
 	    long_val = PyInt_AS_LONG(t_o);
-	  else if (PyLong_Check(t_o))
+	  else if (PyLong_Check(t_o)) {
 	    long_val = PyLong_AsLong(t_o);
+	    if (long_val == -1 && PyErr_Occurred()) {
+	      PyErr_Clear();
+	      OMNIORB_THROW(BAD_PARAM, BAD_PARAM_PythonValueOutOfRange,
+			    compstatus);
+	    }
+	  }
 	  else
 	    OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
 
@@ -773,9 +820,11 @@ validateTypeSequence(PyObject* d_o, PyObject* a_o,
 	    long_val = PyInt_AS_LONG(t_o);
 	  else if (PyLong_Check(t_o)) {
 	    long_val = PyLong_AsLong(t_o);
-	    if (long_val == -1 && PyErr_Occurred())
+	    if (long_val == -1 && PyErr_Occurred()) {
+	      PyErr_Clear();
 	      OMNIORB_THROW(BAD_PARAM,
 			    BAD_PARAM_PythonValueOutOfRange, compstatus);
+	    }
 	  }
 	  else
 	    OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
@@ -793,9 +842,11 @@ validateTypeSequence(PyObject* d_o, PyObject* a_o,
 	    long_val = PyInt_AS_LONG(t_o);
 	  else if (PyLong_Check(t_o)) {
 	    long_val = PyLong_AsLong(t_o);
-	    if (long_val == -1 && PyErr_Occurred())
+	    if (long_val == -1 && PyErr_Occurred()) {
+	      PyErr_Clear();
 	      OMNIORB_THROW(BAD_PARAM,
 			    BAD_PARAM_PythonValueOutOfRange, compstatus);
+	    }
 	  }
 	  else
 	    OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
@@ -813,8 +864,14 @@ validateTypeSequence(PyObject* d_o, PyObject* a_o,
 	  t_o = PyTuple_GET_ITEM(a_o, i);
 	  if (PyInt_Check(t_o))
 	    long_val = PyInt_AS_LONG(t_o);
-	  else if (PyLong_Check(t_o))
+	  else if (PyLong_Check(t_o)) {
 	    long_val = PyLong_AsLong(t_o);
+	    if (long_val == -1 && PyErr_Occurred()) {
+	      PyErr_Clear();
+	      OMNIORB_THROW(BAD_PARAM, BAD_PARAM_PythonValueOutOfRange,
+			    compstatus);
+	    }
+	  }
 	  else
 	    OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
 
@@ -1002,9 +1059,11 @@ validateTypeArray(PyObject* d_o, PyObject* a_o,
 	    long_val = PyInt_AS_LONG(t_o);
 	  else if (PyLong_Check(t_o)) {
 	    long_val = PyLong_AsLong(t_o);
-	    if (long_val == -1 && PyErr_Occurred())
+	    if (long_val == -1 && PyErr_Occurred()) {
+	      PyErr_Clear();
 	      OMNIORB_THROW(BAD_PARAM,
 			    BAD_PARAM_PythonValueOutOfRange, compstatus);
+	    }
 	  }
 	  else
 	    OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
@@ -1022,9 +1081,11 @@ validateTypeArray(PyObject* d_o, PyObject* a_o,
 	    long_val = PyInt_AS_LONG(t_o);
 	  else if (PyLong_Check(t_o)) {
 	    long_val = PyLong_AsLong(t_o);
-	    if (long_val == -1 && PyErr_Occurred())
+	    if (long_val == -1 && PyErr_Occurred()) {
+	      PyErr_Clear();
 	      OMNIORB_THROW(BAD_PARAM,
 			    BAD_PARAM_PythonValueOutOfRange, compstatus);
+	    }
 	  }
 	  else
 	    OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
@@ -1041,8 +1102,14 @@ validateTypeArray(PyObject* d_o, PyObject* a_o,
 	for (i=0; i<len; i++) {
 	  if (PyInt_Check(t_o))
 	    long_val = PyInt_AS_LONG(t_o);
-	  else if (PyLong_Check(t_o))
+	  else if (PyLong_Check(t_o)) {
 	    long_val = PyLong_AsLong(t_o);
+	    if (long_val == -1 && PyErr_Occurred()) {
+	      PyErr_Clear();
+	      OMNIORB_THROW(BAD_PARAM, BAD_PARAM_PythonValueOutOfRange,
+			    compstatus);
+	    }
+	  }
 	  else
 	    OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
 
@@ -1174,9 +1241,11 @@ validateTypeArray(PyObject* d_o, PyObject* a_o,
 	    long_val = PyInt_AS_LONG(t_o);
 	  else if (PyLong_Check(t_o)) {
 	    long_val = PyLong_AsLong(t_o);
-	    if (long_val == -1 && PyErr_Occurred())
+	    if (long_val == -1 && PyErr_Occurred()) {
+	      PyErr_Clear();
 	      OMNIORB_THROW(BAD_PARAM,
 			    BAD_PARAM_PythonValueOutOfRange, compstatus);
+	    }
 	  }
 	  else
 	    OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
@@ -1194,9 +1263,11 @@ validateTypeArray(PyObject* d_o, PyObject* a_o,
 	    long_val = PyInt_AS_LONG(t_o);
 	  else if (PyLong_Check(t_o)) {
 	    long_val = PyLong_AsLong(t_o);
-	    if (long_val == -1 && PyErr_Occurred())
+	    if (long_val == -1 && PyErr_Occurred()) {
+	      PyErr_Clear();
 	      OMNIORB_THROW(BAD_PARAM,
 			    BAD_PARAM_PythonValueOutOfRange, compstatus);
+	    }
 	  }
 	  else
 	    OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
@@ -1214,8 +1285,14 @@ validateTypeArray(PyObject* d_o, PyObject* a_o,
 	  t_o = PyTuple_GET_ITEM(a_o, i);
 	  if (PyInt_Check(t_o))
 	    long_val = PyInt_AS_LONG(t_o);
-	  else if (PyLong_Check(t_o))
+	  else if (PyLong_Check(t_o)) {
 	    long_val = PyLong_AsLong(t_o);
+	    if (long_val == -1 && PyErr_Occurred()) {
+	      PyErr_Clear();
+	      OMNIORB_THROW(BAD_PARAM, BAD_PARAM_PythonValueOutOfRange,
+			    compstatus);
+	    }
+	  }
 	  else
 	    OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
 
@@ -3534,8 +3611,13 @@ copyArgumentShort(PyObject* d_o, PyObject* a_o,
   }
   else if (PyLong_Check(a_o)) {
     long l = PyLong_AsLong(a_o);
-    if (l < -0x8000 || l > 0x7fff || (l == -1 && PyErr_Occurred()))
+    if (l == -1 && PyErr_Occurred()) {
+      PyErr_Clear();
       OMNIORB_THROW(BAD_PARAM, BAD_PARAM_PythonValueOutOfRange, compstatus);
+    }
+    else if (l < -0x8000 || l > 0x7fff)
+      OMNIORB_THROW(BAD_PARAM, BAD_PARAM_PythonValueOutOfRange, compstatus);
+
     return PyInt_FromLong(l);
   }
   else OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
@@ -3556,11 +3638,12 @@ copyArgumentLong(PyObject* d_o, PyObject* a_o,
   }
   else if (PyLong_Check(a_o)) {
     long l = PyLong_AsLong(a_o);
-#if SIZEOF_LONG > 4
-    if (l < -0x80000000L || l > 0x7fffffffL || (l == -1 && PyErr_Occurred()))
+    if (l == -1 && PyErr_Occurred()) {
+      PyErr_Clear();
       OMNIORB_THROW(BAD_PARAM, BAD_PARAM_PythonValueOutOfRange, compstatus);
-#else
-    if (l == -1 && PyErr_Occurred())
+    }
+#if SIZEOF_LONG > 4
+    if (l < -0x80000000L || l > 0x7fffffffL)
       OMNIORB_THROW(BAD_PARAM, BAD_PARAM_PythonValueOutOfRange, compstatus);
 #endif
     return PyInt_FromLong(l);
@@ -3581,8 +3664,13 @@ copyArgumentUShort(PyObject* d_o, PyObject* a_o,
   }
   else if (PyLong_Check(a_o)) {
     long l = PyLong_AsLong(a_o);
-    if (l < 0 || l > 0xffff)
+    if (l == -1 && PyErr_Occurred()) {
+      PyErr_Clear();
       OMNIORB_THROW(BAD_PARAM, BAD_PARAM_PythonValueOutOfRange, compstatus);
+    }
+    else if (l < 0 || l > 0xffff)
+      OMNIORB_THROW(BAD_PARAM, BAD_PARAM_PythonValueOutOfRange, compstatus);
+
     return PyInt_FromLong(l);
   }
   else OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
@@ -3637,9 +3725,10 @@ copyArgumentFloat(PyObject* d_o, PyObject* a_o,
   else if (PyLong_Check(a_o)) {
     double d;
     d = PyLong_AsDouble(a_o);
-    if (d == -1.0 && PyErr_Occurred())
+    if (d == -1.0 && PyErr_Occurred()) {
+      PyErr_Clear();
       OMNIORB_THROW(BAD_PARAM, BAD_PARAM_PythonValueOutOfRange, compstatus);
-
+    }
     return PyFloat_FromDouble(d);
   }
   else
@@ -3660,9 +3749,10 @@ copyArgumentDouble(PyObject* d_o, PyObject* a_o,
   else if (PyLong_Check(a_o)) {
     double d;
     d = PyLong_AsDouble(a_o);
-    if (d == -1.0 && PyErr_Occurred())
+    if (d == -1.0 && PyErr_Occurred()) {
+      PyErr_Clear();
       OMNIORB_THROW(BAD_PARAM, BAD_PARAM_PythonValueOutOfRange, compstatus);
-
+    }
     return PyFloat_FromDouble(d);
   }
   else
@@ -3686,6 +3776,8 @@ copyArgumentBoolean(PyObject* d_o, PyObject* a_o,
     l = PyLong_AsLong(a_o);
     if (l == 0)
       return PyInt_FromLong(0);
+    if (l == -1 && PyErr_Occurred())
+      PyErr_Clear(); // Too big for long, but we consider it true
   }
   else
     OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
@@ -3717,6 +3809,10 @@ copyArgumentOctet(PyObject* d_o, PyObject* a_o,
   }
   else if (PyLong_Check(a_o)) {
     long l = PyLong_AsLong(a_o);
+    if (l == -1 && PyErr_Occurred()) {
+      PyErr_Clear();
+      OMNIORB_THROW(BAD_PARAM, BAD_PARAM_PythonValueOutOfRange, compstatus);
+    }
     if (l < 0 || l > 0xff)
       OMNIORB_THROW(BAD_PARAM, BAD_PARAM_PythonValueOutOfRange, compstatus);
     return PyInt_FromLong(l);
@@ -4053,8 +4149,12 @@ copyArgumentSequence(PyObject* d_o, PyObject* a_o,
 	  }
 	  else if (PyLong_Check(t_o)) {
 	    long_val = PyLong_AsLong(t_o);
-	    if (long_val >= -0x8000 && long_val <= 0x7fff &&
-		!(long_val == -1 && PyErr_Occurred())) {
+	    if (long_val == -1 && PyErr_Occurred()) {
+	      PyErr_Clear();
+	      OMNIORB_THROW(BAD_PARAM, BAD_PARAM_PythonValueOutOfRange,
+			    compstatus);
+	    }
+	    if (long_val >= -0x8000 && long_val <= 0x7fff) {
 	      PyList_SET_ITEM(r_o, i, PyInt_FromLong(long_val)); continue;
 	    }
 	    OMNIORB_THROW(BAD_PARAM,
@@ -4081,9 +4181,11 @@ copyArgumentSequence(PyObject* d_o, PyObject* a_o,
 	  }
 	  else if (PyLong_Check(t_o)) {
 	    long_val = PyLong_AsLong(t_o);
-	    if (long_val == -1 && PyErr_Occurred())
+	    if (long_val == -1 && PyErr_Occurred()) {
+	      PyErr_Clear();
 	      OMNIORB_THROW(BAD_PARAM,
 			    BAD_PARAM_PythonValueOutOfRange, compstatus);
+	    }
 #if SIZEOF_LONG > 4
 	    if (long_val >= -0x80000000L && long_val <= 0x7fffffffL) {
 #endif
@@ -4111,6 +4213,11 @@ copyArgumentSequence(PyObject* d_o, PyObject* a_o,
 	  }
 	  else if (PyLong_Check(t_o)) {
 	    long_val = PyLong_AsLong(t_o);
+	    if (long_val == -1 && PyErr_Occurred()) {
+	      PyErr_Clear();
+	      OMNIORB_THROW(BAD_PARAM,
+			    BAD_PARAM_PythonValueOutOfRange, compstatus);
+	    }
 	    if (long_val >= 0 && long_val <= 0xffff) {
 	      PyList_SET_ITEM(r_o, i, PyInt_FromLong(long_val)); continue;
 	    }
@@ -4173,9 +4280,11 @@ copyArgumentSequence(PyObject* d_o, PyObject* a_o,
 	  }
 	  else if (PyLong_Check(t_o)) {
 	    double_val = PyLong_AsDouble(t_o);
-	    if (double_val == -1.0 && PyErr_Occurred())
+	    if (double_val == -1.0 && PyErr_Occurred()) {
+	      PyErr_Clear();
 	      OMNIORB_THROW(BAD_PARAM,
 			    BAD_PARAM_PythonValueOutOfRange, compstatus);
+	    }
 	    PyList_SET_ITEM(r_o, i, PyFloat_FromDouble(double_val));
 	  }
 	  else
@@ -4197,6 +4306,7 @@ copyArgumentSequence(PyObject* d_o, PyObject* a_o,
 	  }
 	  else if (PyLong_Check(t_o)) {
 	    long_val = PyLong_AsLong(t_o);
+	    if (long_val == -1 && PyErr_Occurred()) PyErr_Clear();
 	    PyList_SET_ITEM(r_o, i, PyInt_FromLong(long_val ? 1:0));
 	  }
 	  else
@@ -4294,8 +4404,12 @@ copyArgumentSequence(PyObject* d_o, PyObject* a_o,
 	  }
 	  else if (PyLong_Check(t_o)) {
 	    long_val = PyLong_AsLong(t_o);
-	    if (long_val >= -0x8000 && long_val <= 0x7fff &&
-		!(long_val == -1 && PyErr_Occurred())) {
+	    if (long_val == -1 && PyErr_Occurred()) {
+	      PyErr_Clear();
+	      OMNIORB_THROW(BAD_PARAM,
+			    BAD_PARAM_PythonValueOutOfRange, compstatus);
+	    }
+	    if (long_val >= -0x8000 && long_val <= 0x7fff) {
 	      PyList_SET_ITEM(r_o, i, PyInt_FromLong(long_val)); continue;
 	    }
 	    OMNIORB_THROW(BAD_PARAM,
@@ -4322,9 +4436,11 @@ copyArgumentSequence(PyObject* d_o, PyObject* a_o,
 	  }
 	  else if (PyLong_Check(t_o)) {
 	    long_val = PyLong_AsLong(t_o);
-	    if (long_val == -1 && PyErr_Occurred())
+	    if (long_val == -1 && PyErr_Occurred()) {
+	      PyErr_Clear();
 	      OMNIORB_THROW(BAD_PARAM,
 			    BAD_PARAM_PythonValueOutOfRange, compstatus);
+	    }
 #if SIZEOF_LONG > 4
 	    if (long_val >= -0x80000000L && long_val <= 0x7fffffffL) {
 #endif
@@ -4352,6 +4468,11 @@ copyArgumentSequence(PyObject* d_o, PyObject* a_o,
 	  }
 	  else if (PyLong_Check(t_o)) {
 	    long_val = PyLong_AsLong(t_o);
+	    if (long_val == -1 && PyErr_Occurred()) {
+	      PyErr_Clear();
+	      OMNIORB_THROW(BAD_PARAM,
+			    BAD_PARAM_PythonValueOutOfRange, compstatus);
+	    }
 	    if (long_val >= 0 && long_val <= 0xffff) {
 	      PyList_SET_ITEM(r_o, i, PyInt_FromLong(long_val)); continue;
 	    }
@@ -4414,9 +4535,11 @@ copyArgumentSequence(PyObject* d_o, PyObject* a_o,
 	  }
 	  else if (PyLong_Check(t_o)) {
 	    double_val = PyLong_AsDouble(t_o);
-	    if (double_val == -1.0 && PyErr_Occurred())
+	    if (double_val == -1.0 && PyErr_Occurred()) {
+	      PyErr_Clear();
 	      OMNIORB_THROW(BAD_PARAM,
 			    BAD_PARAM_PythonValueOutOfRange, compstatus);
+	    }
 	    PyList_SET_ITEM(r_o, i, PyFloat_FromDouble(double_val));
 	  }
 	  else
@@ -4438,6 +4561,7 @@ copyArgumentSequence(PyObject* d_o, PyObject* a_o,
 	  }
 	  else if (PyLong_Check(t_o)) {
 	    long_val = PyLong_AsLong(t_o);
+	    if (long_val == -1 && PyErr_Occurred()) PyErr_Clear();
 	    PyList_SET_ITEM(r_o, i, PyInt_FromLong(long_val ? 1:0));
 	  }
 	  else
@@ -4606,8 +4730,12 @@ copyArgumentArray(PyObject* d_o, PyObject* a_o,
 	  }
 	  else if (PyLong_Check(t_o)) {
 	    long_val = PyLong_AsLong(t_o);
-	    if (long_val >= -0x8000 && long_val <= 0x7fff &&
-		!(long_val == -1 && PyErr_Occurred())) {
+	    if (long_val == -1 && PyErr_Occurred()) {
+	      PyErr_Clear();
+	      OMNIORB_THROW(BAD_PARAM,
+			    BAD_PARAM_PythonValueOutOfRange, compstatus);
+	    }
+	    if (long_val >= -0x8000 && long_val <= 0x7fff) {
 	      PyList_SET_ITEM(r_o, i, PyInt_FromLong(long_val)); continue;
 	    }
 	    OMNIORB_THROW(BAD_PARAM,
@@ -4634,9 +4762,11 @@ copyArgumentArray(PyObject* d_o, PyObject* a_o,
 	  }
 	  else if (PyLong_Check(t_o)) {
 	    long_val = PyLong_AsLong(t_o);
-	    if (long_val == -1 && PyErr_Occurred())
+	    if (long_val == -1 && PyErr_Occurred()) {
+	      PyErr_Clear();
 	      OMNIORB_THROW(BAD_PARAM,
 			    BAD_PARAM_PythonValueOutOfRange, compstatus);
+	    }
 #if SIZEOF_LONG > 4
 	    if (long_val >= -0x80000000L && long_val <= 0x7fffffffL) {
 #endif
@@ -4664,6 +4794,11 @@ copyArgumentArray(PyObject* d_o, PyObject* a_o,
 	  }
 	  else if (PyLong_Check(t_o)) {
 	    long_val = PyLong_AsLong(t_o);
+	    if (long_val == -1 && PyErr_Occurred()) {
+	      PyErr_Clear();
+	      OMNIORB_THROW(BAD_PARAM,
+			    BAD_PARAM_PythonValueOutOfRange, compstatus);
+	    }
 	    if (long_val >= 0 && long_val <= 0xffff) {
 	      PyList_SET_ITEM(r_o, i, PyInt_FromLong(long_val)); continue;
 	    }
@@ -4726,9 +4861,11 @@ copyArgumentArray(PyObject* d_o, PyObject* a_o,
 	  }
 	  else if (PyLong_Check(t_o)) {
 	    double_val = PyLong_AsDouble(t_o);
-	    if (double_val == -1.0 && PyErr_Occurred())
+	    if (double_val == -1.0 && PyErr_Occurred()) {
+	      PyErr_Clear();
 	      OMNIORB_THROW(BAD_PARAM,
 			    BAD_PARAM_PythonValueOutOfRange, compstatus);
+	    }
 	    PyList_SET_ITEM(r_o, i, PyFloat_FromDouble(double_val));
 	  }
 	  else
@@ -4750,6 +4887,7 @@ copyArgumentArray(PyObject* d_o, PyObject* a_o,
 	  }
 	  else if (PyLong_Check(t_o)) {
 	    long_val = PyLong_AsLong(t_o);
+	    if (long_val == -1 && PyErr_Occurred()) PyErr_Clear();
 	    PyList_SET_ITEM(r_o, i, PyInt_FromLong(long_val ? 1:0));
 	  }
 	  else
@@ -4847,8 +4985,12 @@ copyArgumentArray(PyObject* d_o, PyObject* a_o,
 	  }
 	  else if (PyLong_Check(t_o)) {
 	    long_val = PyLong_AsLong(t_o);
-	    if (long_val >= -0x8000 && long_val <= 0x7fff &&
-		!(long_val == -1 && PyErr_Occurred())) {
+	    if (long_val == -1 && PyErr_Occurred()) {
+	      PyErr_Clear();
+	      OMNIORB_THROW(BAD_PARAM,
+			    BAD_PARAM_PythonValueOutOfRange, compstatus);
+	    }
+	    if (long_val >= -0x8000 && long_val <= 0x7fff) {
 	      PyList_SET_ITEM(r_o, i, PyInt_FromLong(long_val)); continue;
 	    }
 	    OMNIORB_THROW(BAD_PARAM,
@@ -4875,9 +5017,11 @@ copyArgumentArray(PyObject* d_o, PyObject* a_o,
 	  }
 	  else if (PyLong_Check(t_o)) {
 	    long_val = PyLong_AsLong(t_o);
-	    if (long_val == -1 && PyErr_Occurred())
+	    if (long_val == -1 && PyErr_Occurred()) {
+	      PyErr_Clear();
 	      OMNIORB_THROW(BAD_PARAM,
 			    BAD_PARAM_PythonValueOutOfRange, compstatus);
+	    }
 #if SIZEOF_LONG > 4
 	    if (long_val >= -0x80000000L && long_val <= 0x7fffffffL) {
 #endif
@@ -4905,6 +5049,11 @@ copyArgumentArray(PyObject* d_o, PyObject* a_o,
 	  }
 	  else if (PyLong_Check(t_o)) {
 	    long_val = PyLong_AsLong(t_o);
+	    if (long_val == -1 && PyErr_Occurred()) {
+	      PyErr_Clear();
+	      OMNIORB_THROW(BAD_PARAM,
+			    BAD_PARAM_PythonValueOutOfRange, compstatus);
+	    }
 	    if (long_val >= 0 && long_val <= 0xffff) {
 	      PyList_SET_ITEM(r_o, i, PyInt_FromLong(long_val)); continue;
 	    }
@@ -4967,9 +5116,11 @@ copyArgumentArray(PyObject* d_o, PyObject* a_o,
 	  }
 	  else if (PyLong_Check(t_o)) {
 	    double_val = PyLong_AsDouble(t_o);
-	    if (double_val == -1.0 && PyErr_Occurred())
+	    if (double_val == -1.0 && PyErr_Occurred()) {
+	      PyErr_Clear();
 	      OMNIORB_THROW(BAD_PARAM,
 			    BAD_PARAM_PythonValueOutOfRange, compstatus);
+	    }
 	    PyList_SET_ITEM(r_o, i, PyFloat_FromDouble(double_val));
 	  }
 	  else
@@ -4991,6 +5142,7 @@ copyArgumentArray(PyObject* d_o, PyObject* a_o,
 	  }
 	  else if (PyLong_Check(t_o)) {
 	    long_val = PyLong_AsLong(t_o);
+	    if (long_val == -1 && PyErr_Occurred()) PyErr_Clear();
 	    PyList_SET_ITEM(r_o, i, PyInt_FromLong(long_val ? 1:0));
 	  }
 	  else
