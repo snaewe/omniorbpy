@@ -30,6 +30,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.30.2.11  2005/07/29 11:21:35  dgrisby
+# Fix long-standing problem with module re-opening by #included files.
+#
 # Revision 1.30.2.10  2005/06/24 17:36:00  dgrisby
 # Support for receiving valuetypes inside Anys; relax requirement for
 # old style classes in a lot of places.
@@ -321,8 +324,21 @@ sys.modules."""
             raise ImportError("Error spawning omniidl")
     try:
         m.__file__ = idlname
-        return m._exported_modules
-    except AttributeError:
+        mods = m._exported_modules
+
+        for mod in mods:
+            for m in (mod, skeletonModuleName(mod)):
+                if _partialModules.has_key(m):
+                    if sys.modules.has_key(m):
+                        sys.modules[m].__dict__.update(
+                            _partialModules[m].__dict__)
+                    else:
+                        sys.modules[m] = _partialModules[m]
+                    del _partialModules[m]
+
+        return mods
+
+    except (AttributeError, KeyError):
         del sys.modules[modname]
         raise ImportError("Invalid output from omniidl")
 
@@ -483,12 +499,26 @@ def findValueFactory(repoId):
     return valueFactoryMapping.get(repoId)
 
 
+# Map of partially-opened modules
+_partialModules = {}
+
+
 # Function to return a Python module for the required IDL module name
 def openModule(mname, fname=None):
     if mname == "CORBA":
         mod = sys.modules["omniORB.CORBA"]
+
     elif sys.modules.has_key(mname):
         mod = sys.modules[mname]
+
+        if _partialModules.has_key(mname):
+            pmod = _partialModules[mname]
+            mod.__dict__.update(pmod.__dict__)
+            del _partialModules[mname]
+            
+    elif _partialModules.has_key(mname):
+        mod = _partialModules[mname]
+
     else:
         mod = newModule(mname)
 
@@ -513,14 +543,34 @@ def newModule(mname):
 
         if sys.modules.has_key(current):
             mod = sys.modules[current]
+
+        elif _partialModules.has_key(current):
+            mod = _partialModules[current]
+
         else:
             newmod = imp.new_module(current)
             if mod: setattr(mod, name, newmod)
-            sys.modules[current] = mod = newmod
+            _partialModules[current] = mod = newmod
 
         current = current + "."
 
     return mod
+
+# Function to update a module with the partial module store in the
+# partial module map
+def updateModule(mname):
+    if _partialModules.has_key(mname):
+        pmod = _partialModules[mname]
+        mod  = sys.modules[mname]
+        mod.__dict__.update(pmod.__dict__)
+        del _partialModules[mname]
+
+
+def skeletonModuleName(mname):
+    l = string.split(mname, ".")
+    l[0] = l[0] + "__POA"
+    return string.join(l, ".")
+
 
 
 # Function to create a new empty class as a scope place-holder
