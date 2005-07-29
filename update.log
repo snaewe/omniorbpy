@@ -1,3 +1,11 @@
+Fri Jul 29 12:23:40 BST 2005 dgrisby
+====================================
+
+- Static map of basic TypeCodes for speed.
+
+python/omniORB/tcInternal.py
+
+
 Fri Jul 29 12:20:37 BST 2005 dgrisby
 ====================================
 

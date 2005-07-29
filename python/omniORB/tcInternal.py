@@ -30,6 +30,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.13.2.5  2005/07/29 11:27:23  dgrisby
+# Static map of basic TypeCodes for speed.
+#
 # Revision 1.13.2.4  2005/01/07 00:22:35  dgrisby
 # Big merge from omnipy2_develop.
 #
@@ -289,55 +292,46 @@ def createRecursiveTC(id):
 # Function to create a TypeCode object given a descriptor. Returns a
 # static (stub generated) TypeCode object if possible.
 
+typeCodeMapping = omniORB.typeCodeMapping
+
 def createTypeCode(d, parent=None):
-    if type(d) is types.TupleType:
-        k = d[0]
-    else:
-        k = d
+    try:
+        r = basicTypeCodes.get(d)
+        if r is not None:
+            return r
+    except TypeError:
+        # Happens if d contains a mutable object
+        pass
 
-    if   k == tv_null:      return TypeCode_empty(d)
-    elif k == tv_void:      return TypeCode_empty(d)
-    elif k == tv_short:     return TypeCode_empty(d)
-    elif k == tv_long:      return TypeCode_empty(d)
-    elif k == tv_ushort:    return TypeCode_empty(d)
-    elif k == tv_ulong:     return TypeCode_empty(d)
-    elif k == tv_float:     return TypeCode_empty(d)
-    elif k == tv_double:    return TypeCode_empty(d)
-    elif k == tv_boolean:   return TypeCode_empty(d)
-    elif k == tv_char:      return TypeCode_empty(d)
-    elif k == tv_octet:     return TypeCode_empty(d)
-    elif k == tv_any:       return TypeCode_empty(d)
-    elif k == tv_TypeCode:  return TypeCode_empty(d)
-    elif k == tv_Principal: return TypeCode_empty(d)
-    elif k == tv_longlong:  return TypeCode_empty(d)
-    elif k == tv_ulonglong: return TypeCode_empty(d)
-    elif k == tv_longdouble:return TypeCode_empty(d)
-    elif k == tv_wchar:     return TypeCode_empty(d)
+    if type(d) is not types.TupleType:
+        raise CORBA.INTERNAL()
 
-    elif k == tv_string:    return TypeCode_string(d)
-    elif k == tv_wstring:   return TypeCode_wstring(d)
-    elif k == tv_fixed:     return TypeCode_fixed(d)
+    k = d[0]
+
+    if   k == tv_string:  return TypeCode_string(d)
+    elif k == tv_wstring: return TypeCode_wstring(d)
+    elif k == tv_fixed:   return TypeCode_fixed(d)
 
     elif k in [ tv_objref, tv_abstract_interface ]:
-        tc = omniORB.findTypeCode(d[1])
+        tc = typeCodeMapping.get(d[1])
         if tc is None:
             tc = TypeCode_objref(d)
         return tc
 
     elif k == tv_struct:
-        tc = omniORB.findTypeCode(d[2])
+        tc = typeCodeMapping.get(d[2])
         if tc is None:
             tc = TypeCode_struct(d, parent)
         return tc
     
     elif k == tv_union:
-        tc = omniORB.findTypeCode(d[2])
+        tc = typeCodeMapping.get(d[2])
         if tc is None:
             tc = TypeCode_union(d, parent)
         return tc
     
     elif k == tv_enum:
-        tc = omniORB.findTypeCode(d[1])
+        tc = typeCodeMapping.get(d[1])
         if tc is None:
             tc = TypeCode_enum(d)
         return tc
@@ -346,25 +340,25 @@ def createTypeCode(d, parent=None):
     elif k == tv_array:     return TypeCode_array(d, parent)
 
     elif k == tv_alias:
-        tc = omniORB.findTypeCode(d[1])
+        tc = typeCodeMapping.get(d[1])
         if tc is None:
             tc = TypeCode_alias(d, parent)
         return tc
     
     elif k == tv_except:
-        tc = omniORB.findTypeCode(d[2])
+        tc = typeCodeMapping.get(d[2])
         if tc is None:
             tc = TypeCode_except(d, parent)
         return tc
 
     elif k == tv_value:
-        tc = omniORB.findTypeCode(d[2])
+        tc = typeCodeMapping.get(d[2])
         if tc is None:
             tc = TypeCode_value(d, parent)
         return tc
 
     elif k == tv_value_box:
-        tc = omniORB.findTypeCode(d[2])
+        tc = typeCodeMapping.get(d[2])
         if tc is None:
             tc = TypeCode_value_box(d, parent)
         return tc
@@ -788,6 +782,33 @@ class TypeCode_value_box (TypeCode_base):
     def id(self):           return self._d[2]
     def name(self):         return self._d[3]
     def content_type(self): return createTypeCode(self._d[4])
+
+
+# Map of pre-created basic TypeCodes
+basicTypeCodes = {
+    tv_null:      TypeCode_empty(tv_null),
+    tv_void:      TypeCode_empty(tv_void),
+    tv_short:     TypeCode_empty(tv_short),
+    tv_long:      TypeCode_empty(tv_long),
+    tv_ushort:    TypeCode_empty(tv_ushort),
+    tv_ulong:     TypeCode_empty(tv_ulong),
+    tv_float:     TypeCode_empty(tv_float),
+    tv_double:    TypeCode_empty(tv_double),
+    tv_boolean:   TypeCode_empty(tv_boolean),
+    tv_char:      TypeCode_empty(tv_char),
+    tv_octet:     TypeCode_empty(tv_octet),
+    tv_any:       TypeCode_empty(tv_any),
+    tv_TypeCode:  TypeCode_empty(tv_TypeCode),
+    tv_Principal: TypeCode_empty(tv_Principal),
+    tv_longlong:  TypeCode_empty(tv_longlong),
+    tv_ulonglong: TypeCode_empty(tv_ulonglong),
+    tv_longdouble:TypeCode_empty(tv_longdouble),
+    tv_wchar:     TypeCode_empty(tv_wchar),
+
+    (tv_string, 0): TypeCode_string ((tv_string,  0)),
+    (tv_wstring,0): TypeCode_wstring((tv_wstring, 0)),
+}
+
 
 
 
