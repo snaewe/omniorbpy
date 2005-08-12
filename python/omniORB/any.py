@@ -54,12 +54,24 @@ _idbase  = "%08x" % random.randrange(0, 0x7fffffff)
 _idcount = 0
 
 
-# Fudge things for Pythons without unicode
+# Fudge things for Pythons without unicode / bool
 try:
     UnicodeType
 except NameError:
     class UnicodeType:
         pass
+
+try:
+    BooleanType
+except NameError:
+    class BooleanType:
+        pass
+
+try:
+    bool(1)
+except:
+    def bool(x): return x
+
 
 # Fixed type
 _f = CORBA.fixed(0)
@@ -83,6 +95,9 @@ def _to_tc_value(data):
 
     elif isinstance(data, UnicodeType):
         return CORBA.TC_wstring, data
+
+    elif isinstance(data, BooleanType):
+        return CORBA.TC_boolean, data
 
     elif isinstance(data, IntType):
         return CORBA.TC_long, data
@@ -129,6 +144,15 @@ def _to_tc_value(data):
                 # List of wstrings
                 tc = tcInternal.createTypeCode((tcInternal.tv_sequence,
                                                 CORBA.TC_wstring._d, 0))
+                return tc, data
+
+        elif isinstance(d0, BooleanType):
+            for d in data:
+                if not isinstance(d, BooleanType):
+                    break
+            else:
+                tc = tcInternal.createTypeCode((tcInternal.tv_sequence,
+                                                tcInternal.tv_boolean, 0))
                 return tc, data
 
         elif isinstance(d0, IntType) or isinstance(d0, LongType):
@@ -262,7 +286,10 @@ def _from_desc_value(desc, value, keep_structs=0):
     """_from_desc_value(desc,val,keep_structs) -- de-Any value"""
 
     if type(desc) is IntType:
-        if desc != tcInternal.tv_any:
+        if desc == tcInternal.tv_boolean:
+            return bool(value)
+        
+        elif desc != tcInternal.tv_any:
             # Nothing to do
             return value
         else:
@@ -273,7 +300,10 @@ def _from_desc_value(desc, value, keep_structs=0):
     while k == tcInternal.tv_alias:
         desc = desc[3]
         if type(desc) is IntType:
-            if desc != tcInternal.tv_any:
+            if desc == tcInternal.tv_boolean:
+                return bool(value)
+
+            elif desc != tcInternal.tv_any:
                 return value
             else:
                 k = desc

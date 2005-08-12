@@ -1,3 +1,12 @@
+Fri Aug 12 10:30:01 BST 2005 dgrisby
+====================================
+
+- Use Python bool type where available.
+
+modules/pyMarshal.cc
+python/omniORB/any.py
+
+
 Fri Jul 29 12:23:40 BST 2005 dgrisby
 ====================================
 

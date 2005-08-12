@@ -29,6 +29,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.4.7  2005/08/12 09:32:09  dgrisby
+// Use Python bool type where available.
+//
 // Revision 1.1.4.6  2005/07/22 17:41:08  dgrisby
 // Update from omnipy2_develop.
 //
@@ -140,6 +143,12 @@ static inline PyObject* MyPyLong_FromLongLong(_CORBA_LongLong ll)
 #  else
 #    define MyPyLong_FromLongLong(ll) PyLong_FromLongLong(ll)
 #  endif
+#endif
+
+// Boolean type support
+#if (PY_VERSION_HEX < 0x02030000)
+#  define PyBool_FromLong(x) PyInt_FromLong(x ? 1 : 0)
+#  define PyBool_Check(x) 0
 #endif
 
 
@@ -1170,7 +1179,7 @@ validateTypeArray(PyObject* d_o, PyObject* a_o,
 
       case CORBA::tk_boolean:
 	for (i=0; i<len; i++) {
-	  t_o =  PyList_GET_ITEM(a_o, i);
+	  t_o = PyList_GET_ITEM(a_o, i);
 	  if (!(PyInt_Check(t_o) || PyLong_Check(t_o)))
 	    OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
 	}
@@ -2832,7 +2841,7 @@ static PyObject*
 unmarshalPyObjectBoolean(cdrStream& stream, PyObject* d_o)
 {
   CORBA::Boolean b = stream.unmarshalBoolean();
-  return PyInt_FromLong(b);
+  return PyBool_FromLong(b);
 }
 
 static PyObject*
@@ -3146,7 +3155,7 @@ unmarshalPyObjectSequence(cdrStream& stream, PyObject* d_o)
 	  CORBA::Boolean e;
 	  for (i=0; i < len; i++) {
 	    e = stream.unmarshalBoolean();
-	    PyList_SET_ITEM(r_o, i, PyInt_FromLong(e));
+	    PyList_SET_ITEM(r_o, i, PyBool_FromLong(e));
 	  }
 	}
 	return r_o_holder.retn();
@@ -3302,7 +3311,7 @@ unmarshalPyObjectArray(cdrStream& stream, PyObject* d_o)
 	  CORBA::Boolean e;
 	  for (i=0; i < len; i++) {
 	    e = stream.unmarshalBoolean();
-	    PyList_SET_ITEM(r_o, i, PyInt_FromLong(e));
+	    PyList_SET_ITEM(r_o, i, PyBool_FromLong(e));
 	  }
 	}
 	return r_o_holder.retn();
@@ -3766,23 +3775,33 @@ copyArgumentBoolean(PyObject* d_o, PyObject* a_o,
 {
   long l;
   
-  if (PyInt_Check(a_o)) {
+  if (PyBool_Check(a_o)) {
+    Py_INCREF(a_o);
+    return a_o;
+  }
+  else if (PyInt_Check(a_o)) {
     l = PyInt_AS_LONG(a_o);
-    if (l == 0 || l == 1) {
-      Py_INCREF(a_o); return a_o;
-    }
   }
   else if (PyLong_Check(a_o)) {
     l = PyLong_AsLong(a_o);
-    if (l == 0)
-      return PyInt_FromLong(0);
     if (l == -1 && PyErr_Occurred())
       PyErr_Clear(); // Too big for long, but we consider it true
   }
   else
     OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
 
-  return PyInt_FromLong(1); // Normalise true value to 1
+#if (PY_VERSION_HEX >= 0x02030000)
+  if (l) {
+    Py_INCREF(Py_True);
+    return Py_True;
+  }
+  else {
+    Py_INCREF(Py_False);
+    return Py_False;
+  }
+#else
+  return PyInt_FromLong(l ? 1 : 0);
+#endif
 }
 
 static PyObject*
@@ -4295,19 +4314,17 @@ copyArgumentSequence(PyObject* d_o, PyObject* a_o,
       case CORBA::tk_boolean:
 	for (i=0; i<len; i++) {
 	  t_o = PyList_GET_ITEM(a_o, i);
-	  if (PyInt_Check(t_o)) {
+	  if (PyBool_Check(t_o)) {
+	    Py_INCREF(t_o); PyList_SET_ITEM(r_o, i, t_o);
+	  }
+	  else if (PyInt_Check(t_o)) {
 	    long_val = PyInt_AS_LONG(t_o);
-	    if (long_val == 0 || long_val == 1) {
-	      Py_INCREF(t_o); PyList_SET_ITEM(r_o, i, t_o);
-	    }
-	    else {
-	      PyList_SET_ITEM(r_o, i, PyInt_FromLong(1));
-	    }
+	    PyList_SET_ITEM(r_o, i, PyBool_FromLong(long_val));
 	  }
 	  else if (PyLong_Check(t_o)) {
 	    long_val = PyLong_AsLong(t_o);
 	    if (long_val == -1 && PyErr_Occurred()) PyErr_Clear();
-	    PyList_SET_ITEM(r_o, i, PyInt_FromLong(long_val ? 1:0));
+	    PyList_SET_ITEM(r_o, i, PyBool_FromLong(long_val));
 	  }
 	  else
 	    OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
@@ -4550,19 +4567,17 @@ copyArgumentSequence(PyObject* d_o, PyObject* a_o,
       case CORBA::tk_boolean:
 	for (i=0; i<len; i++) {
 	  t_o = PyTuple_GET_ITEM(a_o, i);
-	  if (PyInt_Check(t_o)) {
+	  if (PyBool_Check(t_o)) {
+	    Py_INCREF(t_o); PyList_SET_ITEM(r_o, i, t_o);
+	  }
+	  else if (PyInt_Check(t_o)) {
 	    long_val = PyInt_AS_LONG(t_o);
-	    if (long_val == 0 || long_val == 1) {
-	      Py_INCREF(t_o); PyList_SET_ITEM(r_o, i, t_o);
-	    }
-	    else {
-	      PyList_SET_ITEM(r_o, i, PyInt_FromLong(1));
-	    }
+	    PyList_SET_ITEM(r_o, i, PyBool_FromLong(long_val));
 	  }
 	  else if (PyLong_Check(t_o)) {
 	    long_val = PyLong_AsLong(t_o);
 	    if (long_val == -1 && PyErr_Occurred()) PyErr_Clear();
-	    PyList_SET_ITEM(r_o, i, PyInt_FromLong(long_val ? 1:0));
+	    PyList_SET_ITEM(r_o, i, PyBool_FromLong(long_val));
 	  }
 	  else
 	    OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
@@ -4876,19 +4891,17 @@ copyArgumentArray(PyObject* d_o, PyObject* a_o,
       case CORBA::tk_boolean:
 	for (i=0; i<len; i++) {
 	  t_o = PyList_GET_ITEM(a_o, i);
-	  if (PyInt_Check(t_o)) {
+	  if (PyBool_Check(t_o)) {
+	    Py_INCREF(t_o); PyList_SET_ITEM(r_o, i, t_o);
+	  }
+	  else if (PyInt_Check(t_o)) {
 	    long_val = PyInt_AS_LONG(t_o);
-	    if (long_val == 0 || long_val == 1) {
-	      Py_INCREF(t_o); PyList_SET_ITEM(r_o, i, t_o);
-	    }
-	    else {
-	      PyList_SET_ITEM(r_o, i, PyInt_FromLong(1));
-	    }
+	    PyList_SET_ITEM(r_o, i, PyBool_FromLong(long_val));
 	  }
 	  else if (PyLong_Check(t_o)) {
 	    long_val = PyLong_AsLong(t_o);
 	    if (long_val == -1 && PyErr_Occurred()) PyErr_Clear();
-	    PyList_SET_ITEM(r_o, i, PyInt_FromLong(long_val ? 1:0));
+	    PyList_SET_ITEM(r_o, i, PyBool_FromLong(long_val));
 	  }
 	  else
 	    OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
@@ -5131,19 +5144,17 @@ copyArgumentArray(PyObject* d_o, PyObject* a_o,
       case CORBA::tk_boolean:
 	for (i=0; i<len; i++) {
 	  t_o = PyTuple_GET_ITEM(a_o, i);
-	  if (PyInt_Check(t_o)) {
+	  if (PyBool_Check(t_o)) {
+	    Py_INCREF(t_o); PyList_SET_ITEM(r_o, i, t_o);
+	  }
+	  else if (PyInt_Check(t_o)) {
 	    long_val = PyInt_AS_LONG(t_o);
-	    if (long_val == 0 || long_val == 1) {
-	      Py_INCREF(t_o); PyList_SET_ITEM(r_o, i, t_o);
-	    }
-	    else {
-	      PyList_SET_ITEM(r_o, i, PyInt_FromLong(1));
-	    }
+	    PyList_SET_ITEM(r_o, i, PyBool_FromLong(long_val));
 	  }
 	  else if (PyLong_Check(t_o)) {
 	    long_val = PyLong_AsLong(t_o);
 	    if (long_val == -1 && PyErr_Occurred()) PyErr_Clear();
-	    PyList_SET_ITEM(r_o, i, PyInt_FromLong(long_val ? 1:0));
+	    PyList_SET_ITEM(r_o, i, PyBool_FromLong(long_val));
 	  }
 	  else
 	    OMNIORB_THROW(BAD_PARAM, BAD_PARAM_WrongPythonType, compstatus);
