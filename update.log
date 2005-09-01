@@ -1,3 +1,11 @@
+Thu Sep  1 16:12:41 BST 2005 dgrisby
+====================================
+
+- Forgot the new makeminors script.
+
+bin/scripts/makeminors.py  -- new
+
+
 Thu Sep  1 11:20:40 BST 2005 dgrisby
 ====================================
 
