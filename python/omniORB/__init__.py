@@ -30,6 +30,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.30.2.12  2005/09/01 15:14:41  dgrisby
+# Merge from omnipy3_develop.
+#
 # Revision 1.30.2.11  2005/07/29 11:21:35  dgrisby
 # Fix long-standing problem with module re-opening by #included files.
 #
@@ -971,17 +974,7 @@ def omniORBminorCode(c):
 def OMGminorCode(c):
     return 0x4f4d0000 | c
 
-BAD_INV_ORDER_ORBHasShutdown       = OMGminorCode(4)
-BAD_CONTEXT_NoMatchingProperty     = omniORBminorCode(75)
-BAD_CONTEXT_StartingScopeNotFound  = omniORBminorCode(76)
-BAD_PARAM_WrongPythonType          = omniORBminorCode(88)
-BAD_PARAM_PythonValueOutOfRange    = omniORBminorCode(95)
-BAD_PARAM_WrongUnionMemberSelected = omniORBminorCode(107)
-BAD_PARAM_InvalidFixedPointLimits  = omniORBminorCode(109)
-BAD_TYPECODE_InvalidIndirection    = omniORBminorCode(108)
-INTF_REPOS_NotAvailable            = omniORBminorCode(39)
-NO_IMPLEMENT_Unsupported           = omniORBminorCode(36)
-TRANSIENT_FailedOnForwarded        = omniORBminorCode(1)
+from omniORB.minorCodes import *
 
 
 # More public things, which depend on the CORBA module

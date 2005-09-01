@@ -10,12 +10,20 @@ ir_idl.py: ir.idl
         -I$(DATADIR)/idl/omniORB \
         -bpython -Wbinline -Wbno_package $^
 
-all:: ir_idl.py
+minorfile := $(shell file="$(INCDIR)/omniORB4/minorCode.h"; \
+               dirs="$(IMPORT_TREES)"; \
+               $(FindFileInDirs); \
+               echo "$$fullfile")
+
+minorCodes.py: $(minorfile)
+	$(PYTHON) $(BASE_OMNI_TREE)/bin/scripts/makeminors.py $^ $@
+
+all:: ir_idl.py minorCodes.py
 
 
 FILES = __init__.py CORBA.py PortableServer.py PortableServer__POA.py \
         tcInternal.py URI.py codesets.py any.py BiDirPolicy.py \
-        interceptors.py ir_idl.py
+        interceptors.py ir_idl.py minorCodes.py
 
 ifdef OPEN_SSL_ROOT
 FILES += sslTP.py
