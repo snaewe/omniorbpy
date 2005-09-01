@@ -1,3 +1,12 @@
+Thu Sep  1 11:20:40 BST 2005 dgrisby
+====================================
+
+- Generate all exception minor codes rather than using a hand-written list.
+
+python/omniORB/__init__.py
+python/omniORB/dir.mk
+
+
 Mon Jul 18 12:36:46 BST 2005 dgrisby
 ====================================
 
