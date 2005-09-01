@@ -1,8 +1,9 @@
-Thu Sep  1 16:13:08 BST 2005 dgrisby
+Thu Sep  1 16:18:17 BST 2005 dgrisby
 ====================================
 
 - Merge from omnipy3_develop.
 
+bin/scripts/makeminors.py   -- new
 python/omniORB/__init__.py
 python/omniORB/dir.mk
 
