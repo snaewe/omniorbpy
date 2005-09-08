@@ -16,7 +16,7 @@ minorfile := $(shell file="$(INCDIR)/omniORB4/minorCode.h"; \
                echo "$$fullfile")
 
 minorCodes.py: $(minorfile)
-	$(PYTHON) $(BASE_OMNI_TREE)/bin/scripts/makeminors.py $^ $@
+	$(PYTHON) $(TOP)/$(CURRENT)/../../bin/scripts/makeminors.py $^ $@
 
 all:: ir_idl.py minorCodes.py
 

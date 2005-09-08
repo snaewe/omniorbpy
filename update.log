@@ -5,6 +5,10 @@ Thu Sep  8 13:15:08 BST 2005 dgrisby
 
 modules/sslTP/dir.mk
 
+- makeminors.py script not found in traditional build.
+
+python/omniORB/dir.mk
+
 
 Thu Sep  1 16:12:41 BST 2005 dgrisby
 ====================================
