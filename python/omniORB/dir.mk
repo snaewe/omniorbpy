@@ -15,8 +15,14 @@ minorfile := $(shell file="$(INCDIR)/omniORB4/minorCode.h"; \
                $(FindFileInDirs); \
                echo "$$fullfile")
 
+ifeq ($(platform),autoconf)
+MAKEMINORS = $(BASE_OMNI_TREE)/bin/scripts/makeminors.py
+else
+MAKEMINORS = $(TOP)/$(CURRENT)/../../bin/scripts/makeminors.py
+endif
+
 minorCodes.py: $(minorfile)
-	$(PYTHON) $(TOP)/$(CURRENT)/../../bin/scripts/makeminors.py $^ $@
+	$(PYTHON) $(MAKEMINORS) $^ $@
 
 all:: ir_idl.py minorCodes.py
 
