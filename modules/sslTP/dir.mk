@@ -211,7 +211,7 @@ all:: $(lib)
 $(lib): $(OBJS)
 	(set -x; \
 	 $(RM) $@; \
-	 libs="$(OMNIORB_SSL_LIB) $(OMNIORB_LIB) $(PYLIB)"; \
+	 libs="$(OMNIORB_SSL_LIB) $(OMNIORB_LIB_NODYN) $(PYLIB)"; \
 	 $(CXXLINK) -out:$@ -DLL $(CXXLINKOPTIONS) $(IMPORT_LIBRARY_FLAGS) $(PYLIBPATH) $(OBJS) $$libs; \
 	)
 

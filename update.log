@@ -1,7 +1,16 @@
+Mon Sep 19 19:32:24 BST 2005 dgrisby
+====================================
+
+- Merge again.
+
+modules/sslTP/dir.mk
+python/omniORB/dir.mk
+
+
 Thu Sep  1 16:18:17 BST 2005 dgrisby
 ====================================
 
-- Merge from omnipy3_develop.
+- Merge from omnipy2_develop.
 
 bin/scripts/makeminors.py   -- new
 python/omniORB/__init__.py
