@@ -30,6 +30,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.13.2.6  2005/11/09 12:33:31  dgrisby
+# Support POA LocalObjects.
+#
 # Revision 1.13.2.5  2005/07/29 11:27:23  dgrisby
 # Static map of basic TypeCodes for speed.
 #
@@ -312,7 +315,7 @@ def createTypeCode(d, parent=None):
     elif k == tv_wstring: return TypeCode_wstring(d)
     elif k == tv_fixed:   return TypeCode_fixed(d)
 
-    elif k in [ tv_objref, tv_abstract_interface ]:
+    elif k in [ tv_objref, tv_abstract_interface, tv_local_interface ]:
         tc = typeCodeMapping.get(d[1])
         if tc is None:
             tc = TypeCode_objref(d)
@@ -480,7 +483,9 @@ class TypeCode_fixed (TypeCode_base):
 class TypeCode_objref (TypeCode_base):
     def __init__(self, desc):
         if type(desc) is not types.TupleType or \
-           desc[0] not in [ tv_objref, tv_abstract_interface ]:
+           desc[0] not in [ tv_objref,
+                            tv_abstract_interface,
+                            tv_local_interface ]:
             raise CORBA.INTERNAL()
         self._d = desc
         self._k = desc[0]
@@ -1144,7 +1149,11 @@ def r_getCompactDescriptor(d, seen, ind):
         seen[d[2]] = r
         seen[id(d)] = r
 
-    elif k == tv_abstract_interface: r = d
+    elif k == tv_abstract_interface:
+        r = d
+
+    elif k == tv_local_interface:
+        r = d
 
     elif k == tv__indirect:
         l = [d[1][0]]

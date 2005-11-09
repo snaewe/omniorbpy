@@ -14,6 +14,7 @@ CXXSRCS = omnipy.cc \
           pyObjectRef.cc \
           pyCallDescriptor.cc \
           pyServant.cc \
+          pyLocalObjects.cc \
           pyExceptions.cc \
           pyMarshal.cc \
           pyTypeCode.cc \
@@ -34,6 +35,7 @@ OBJS =    omnipy.o \
           pyObjectRef.o \
           pyCallDescriptor.o \
           pyServant.o \
+          pyLocalObjects.o \
           pyExceptions.o \
           pyMarshal.o \
           pyTypeCode.o \

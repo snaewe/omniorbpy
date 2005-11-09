@@ -1,3 +1,24 @@
+Wed Nov  9 12:27:49 GMT 2005 dgrisby
+====================================
+
+- Support POA LocalObjects.
+
+examples/poa/servantactivator.py
+examples/poa/servantlocator.py
+modules/dir.mk
+modules/omnipy.cc
+modules/omnipy.h
+modules/pyLocalObjects.cc        -- new
+modules/pyMarshal.cc
+modules/pyPOAFunc.cc
+modules/pyServant.cc
+modules/pyomniFunc.cc
+python/omniORB/CORBA.py
+python/omniORB/PortableServer.py
+python/omniORB/__init__.py
+python/omniORB/tcInternal.py
+
+
 Mon Sep 19 19:32:24 BST 2005 dgrisby
 ====================================
 

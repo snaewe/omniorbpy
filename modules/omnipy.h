@@ -31,6 +31,9 @@
 #define _omnipy_h_
 
 // $Log$
+// Revision 1.3.2.7  2005/11/09 12:33:32  dgrisby
+// Support POA LocalObjects.
+//
 // Revision 1.3.2.6  2005/06/24 17:36:08  dgrisby
 // Support for receiving valuetypes inside Anys; relax requirement for
 // old style classes in a lot of places.
@@ -203,6 +206,9 @@ public:
 
   static const char* string_Py_omniObjRef;
   static const char* string_Py_omniServant;
+  static const char* string_Py_ServantActivator;
+  static const char* string_Py_ServantLocator;
+  static const char* string_Py_AdapterActivator;
 
 
   ////////////////////////////////////////////////////////////////////////////
@@ -826,6 +832,95 @@ public:
 
 
   ////////////////////////////////////////////////////////////////////////////
+  // ServantManager / AdapterActivator implementations                      //
+  ////////////////////////////////////////////////////////////////////////////
+
+  class Py_ServantActivator
+  {
+  public:
+    Py_ServantActivator(PyObject* pysa) : pysa_(pysa) { Py_INCREF(pysa_); }
+    ~Py_ServantActivator() { Py_DECREF(pysa_); }
+
+    PortableServer::Servant incarnate(const PortableServer::ObjectId& oid,
+				      PortableServer::POA_ptr         poa);
+
+    void etherealize(const PortableServer::ObjectId& oid,
+		     PortableServer::POA_ptr         poa,
+		     PortableServer::Servant         serv,
+		     CORBA::Boolean                  cleanup_in_progress,
+		     CORBA::Boolean                  remaining_activations);
+
+    inline PyObject* pyobj() { return pysa_; }
+
+  private:
+    PyObject* pysa_;
+
+    // Not implemented
+    Py_ServantActivator(const Py_ServantActivator&);
+    Py_ServantActivator& operator=(const Py_ServantActivator&);
+  };
+
+  class Py_ServantLocator
+  {
+  public:
+    Py_ServantLocator(PyObject* pysl) : pysl_(pysl) { Py_INCREF(pysl_); }
+    ~Py_ServantLocator() { Py_DECREF(pysl_); }
+
+    PortableServer::Servant preinvoke(const PortableServer::ObjectId& oid,
+				      PortableServer::POA_ptr poa,
+				      const char*             operation,
+				      void*&                  cookie);
+
+    void postinvoke(const PortableServer::ObjectId& oid,
+		    PortableServer::POA_ptr         poa,
+		    const char*                     operation,
+		    void*                           cookie,
+		    PortableServer::Servant         serv);
+
+    inline PyObject* pyobj() { return pysl_; }
+
+  private:
+    PyObject* pysl_;
+
+    // Not implemented
+    Py_ServantLocator(const Py_ServantLocator&);
+    Py_ServantLocator& operator=(const Py_ServantLocator&);
+  };
+
+  class Py_AdapterActivator
+  {
+  public:
+    Py_AdapterActivator(PyObject* pyaa) : pyaa_(pyaa) { Py_INCREF(pyaa_); }
+    ~Py_AdapterActivator() { Py_DECREF(pyaa_); }
+
+    CORBA::Boolean unknown_adapter(PortableServer::POA_ptr parent,
+				   const char*             name);
+
+    inline PyObject* pyobj() { return pyaa_; }
+
+  private:
+    PyObject* pyaa_;
+
+    // Not implemented
+    Py_AdapterActivator(const Py_AdapterActivator&);
+    Py_AdapterActivator& operator=(const Py_AdapterActivator&);
+  };
+
+  // Function to create a C++ local object for a Python object. If the
+  // Python object is not an instance of a mapped local object,
+  // returns 0.
+  //
+  // Caller must hold the Python interpreter lock.
+  static CORBA::LocalObject_ptr getLocalObjectForPyObject(PyObject* pyobj);
+
+  // Convert a LocalObject to the underlying Python object. If the
+  // object is not a suitable Python LocalObject, throw INV_OBJREF.
+  //
+  // Caller must hold the Python interpreter lock.
+  static PyObject* getPyObjectForLocalObject(CORBA::LocalObject_ptr lobj);
+
+
+  ////////////////////////////////////////////////////////////////////////////
   // PyUserException is a special CORBA::UserException                      //
   ////////////////////////////////////////////////////////////////////////////
 
@@ -878,17 +973,24 @@ public:
 				   // this object is deleted.
   };
 
+
   ////////////////////////////////////////////////////////////////////////////
   // InterpreterUnlocker releases the Python interpreter lock               //
   ////////////////////////////////////////////////////////////////////////////
 
   class InterpreterUnlocker {
   public:
-    InterpreterUnlocker() {
+    inline InterpreterUnlocker() {
       tstate_ = PyEval_SaveThread();
     }
-    ~InterpreterUnlocker() {
+    inline ~InterpreterUnlocker() {
       PyEval_RestoreThread(tstate_);
+    }
+    inline void lock() {
+      PyEval_RestoreThread(tstate_);
+    }
+    inline void unlock() {
+      tstate_ = PyEval_SaveThread();
     }
   private:
     PyThreadState* tstate_;

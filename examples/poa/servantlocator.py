@@ -12,7 +12,7 @@
 # in the local, as well as the remote, case.
 
 import sys, time
-from omniORB import CORBA, PortableServer, PortableServer__POA
+from omniORB import CORBA, PortableServer
 
 import _GlobalIDL, _GlobalIDL__POA
 
@@ -28,7 +28,7 @@ class Echo_i (_GlobalIDL__POA.Echo):
               ", ObjectId =", repr(current.get_object_id())
         return mesg
 
-class ServantLocator_i (PortableServer__POA.ServantLocator):
+class ServantLocator_i (PortableServer.ServantLocator):
     def preinvoke(self, oid, poa, operation):
         print "preinvoke(): oid:", oid, "poa:", poa._get_the_name()
         if oid == "MyEcho2":
@@ -58,8 +58,7 @@ child = poa.create_POA("MyPOA", poaManager, ps)
 
 # Create the ServantLocator and set it as the child's ServantManager
 sli = ServantLocator_i()
-slo = sli._this()
-child.set_servant_manager(slo)
+child.set_servant_manager(sli)
 
 rooteo = Echo_i()._this()
 
@@ -91,6 +90,10 @@ time.sleep(1)
 print eo2.echoString("Hello object 2")
 time.sleep(1)
 
-print "Destroying POA..."
+print "Destroying child POA..."
 child.destroy(1, 1)
-print "Destroyed"
+print "Child POA Destroyed"
+
+print "Destroying ORB..."
+orb.destroy()
+print "ORB destroyed."

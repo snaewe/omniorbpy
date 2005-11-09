@@ -30,6 +30,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.31.2.6  2005/11/09 12:33:31  dgrisby
+# Support POA LocalObjects.
+#
 # Revision 1.31.2.5  2005/04/25 18:28:16  dgrisby
 # Implement narrow as a no-op if the Python classes have the right inheritance.
 #
@@ -723,6 +726,26 @@ other_id = "IDL:omg.org/CORBA/Object:1.0"
 omniORB.registerType(other_id, _d_Object, _tc_Object)
 omniORB.registerObjref(other_id, Object)
 del other_id
+
+#############################################################################
+#                                                                           #
+# LocalObject                                                               #
+#                                                                           #
+#############################################################################
+
+class LocalObject (Object):
+
+    _NP_RepositoryId = "IDL:omg.org/CORBA/LocalObject:1.0"
+
+    def __init__(self):
+        # Override base Object __init__
+        def no_release(obj): pass
+        self._Object__release = no_release
+
+_d_LocalObject  = (omniORB.tcInternal.tv_local_interface, LocalObject._NP_RepositoryId, "LocalObject")
+TC_LocalObject  = _tc_LocalObject = omniORB.tcInternal.createTypeCode(_d_LocalObject)
+omniORB.registerType(LocalObject._NP_RepositoryId, _d_LocalObject, _tc_LocalObject)
+
 
 
 #############################################################################

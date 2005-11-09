@@ -30,6 +30,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.30.2.13  2005/11/09 12:33:31  dgrisby
+# Support POA LocalObjects.
+#
 # Revision 1.30.2.12  2005/09/01 15:14:41  dgrisby
 # Merge from omnipy3_develop.
 #
@@ -453,6 +456,8 @@ Make stubs for the Interface Repository appear in the CORBA module"""
 #   setClientCallTimeout
 #   setClientThreadCallTimeout
 #   myIPAddresses
+#   setPersistentServerIdentifier
+#   locationForward
 
 from _omnipy.omni_func import *
 
@@ -765,7 +770,7 @@ class UnknownValueBase (CORBA.ValueBase):
     pass
 
 
-def createUnknownValue(repoId, members, base_desc):
+def createUnknownValue(repoId, base_desc):
 
     if base_desc == tcInternal.tv_null:
         class UnknownValue (UnknownValueBase):

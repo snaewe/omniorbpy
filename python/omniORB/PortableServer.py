@@ -30,6 +30,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.9.2.3  2005/11/09 12:33:31  dgrisby
+# Support POA LocalObjects.
+#
 # Revision 1.9.2.2  2005/01/07 00:22:35  dgrisby
 # Big merge from omnipy2_develop.
 #
@@ -743,14 +746,12 @@ omniORB.registerType(RequestProcessingPolicyValue._NP_RepositoryId,
 # ServantManagers
 
 # interface ServantManager
-_d_ServantManager = (omniORB.tcInternal.tv_objref,
+_d_ServantManager = (omniORB.tcInternal.tv_local_interface,
                      "IDL:omg.org/PortableServer/ServantManager:1.0",
                      "ServantManager")
-class ServantManager :
-    _NP_RepositoryId = _d_ServantManager[1]
 
-    def __init__(self):
-        raise RuntimeError("Cannot construct objects of this type.")
+class ServantManager (CORBA.LocalObject):
+    _NP_RepositoryId = _d_ServantManager[1]
 
     _nil = CORBA.Object._nil
 
@@ -771,16 +772,23 @@ omniORB.registerObjref(ServantManager._NP_RepositoryId, _objref_ServantManager)
 
 
 # interface ServantActivator
-_d_ServantActivator = (omniORB.tcInternal.tv_objref,
+_d_ServantActivator = (omniORB.tcInternal.tv_local_interface,
                        "IDL:omg.org/PortableServer/ServantActivator:1.0",
                        "ServantActivator")
+
 class ServantActivator (ServantManager):
     _NP_RepositoryId = _d_ServantActivator[1]
 
-    def __init__(self):
-        raise RuntimeError("Cannot construct objects of this type.")
-
     _nil = CORBA.Object._nil
+
+    def incarnate(self, oid, adapter):
+        raise CORBA.NO_IMPLEMENT(omniORB.NO_IMPLEMENT_NoPythonMethod,
+                                 CORBA.COMPLETED_NO)
+
+    def etherialize(self, oid, adapter, serv,
+                    cleanup_in_progress, remaining_activations):
+        raise CORBA.NO_IMPLEMENT(omniORB.NO_IMPLEMENT_NoPythonMethod,
+                                 CORBA.COMPLETED_NO)
 
 
 _tc_ServantActivator = omniORB.tcInternal.createTypeCode(_d_ServantActivator)
@@ -823,19 +831,24 @@ omniORB.registerObjref(ServantActivator._NP_RepositoryId,
 
 
 # interface ServantLocator
-_d_ServantLocator = (omniORB.tcInternal.tv_objref,
+_d_ServantLocator = (omniORB.tcInternal.tv_local_interface,
                      "IDL:omg.org/PortableServer/ServantLocator:1.0",
                      "ServantLocator")
 
 class ServantLocator (ServantManager):
     _NP_RepositoryId = _d_ServantLocator[1]
 
-    def __init__(self):
-        raise RuntimeError("Cannot construct objects of this type.")
-
     _nil = CORBA.Object._nil
 
     _d_Cookie = omniORB.tcInternal.tv_native
+
+    def preinvoke(self, oid, adapter, operation):
+        raise CORBA.NO_IMPLEMENT(omniORB.NO_IMPLEMENT_NoPythonMethod,
+                                 CORBA.COMPLETED_NO)
+
+    def postinvoke(self, oid, adapter, operations, the_cookie, the_servant):
+        raise CORBA.NO_IMPLEMENT(omniORB.NO_IMPLEMENT_NoPythonMethod,
+                                 CORBA.COMPLETED_NO)
 
 _tc_ServantLocator = omniORB.tcInternal.createTypeCode(_d_ServantLocator)
 omniORB.registerType(ServantLocator._NP_RepositoryId,
@@ -879,16 +892,19 @@ omniORB.registerObjref(ServantLocator._NP_RepositoryId, _objref_ServantLocator)
 # AdapterActivator
 
 # interface AdapterActivator
-_d_AdapterActivator = (omniORB.tcInternal.tv_objref,
+_d_AdapterActivator = (omniORB.tcInternal.tv_local_interface,
                        "IDL:omg.org/PortableServer/AdapterActivator:1.0",
                        "AdapterActivator")
-class AdapterActivator :
+
+class AdapterActivator (CORBA.LocalObject):
     _NP_RepositoryId = _d_AdapterActivator[1]
 
-    def __init__(self):
-        raise RuntimeError("Cannot construct objects of this type.")
-
     _nil = CORBA.Object._nil
+
+    def unknown_adapter(self, parent, name):
+        raise CORBA.NO_IMPLEMENT(omniORB.NO_IMPLEMENT_NoPythonMethod,
+                                 CORBA.COMPLETED_NO)
+
 
 _tc_AdapterActivator = omniORB.tcInternal.createTypeCode(_d_AdapterActivator)
 omniORB.registerType(AdapterActivator._NP_RepositoryId,

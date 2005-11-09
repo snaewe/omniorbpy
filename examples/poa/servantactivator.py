@@ -12,7 +12,7 @@
 
 
 import sys, time
-from omniORB import CORBA, PortableServer, PortableServer__POA
+from omniORB import CORBA, PortableServer
 
 import _GlobalIDL, _GlobalIDL__POA
 
@@ -27,7 +27,13 @@ class Echo_i (_GlobalIDL__POA.Echo):
         print "echoString() called with message:", mesg
         return mesg
 
-class ServantActivator_i (PortableServer__POA.ServantActivator):
+class ServantActivator_i (PortableServer.ServantActivator):
+    def __init__(self):
+        print "ServantActivator_i created"
+
+    def __del__(self):
+        print "ServantActivator_i deleted"
+
     def incarnate(self, oid, poa):
         print "incarnate(): oid:", oid, "poa:", poa._get_the_name()
         ei = Echo_i()
@@ -58,9 +64,13 @@ ps = [poa.create_id_assignment_policy(PortableServer.USER_ID),
 child = poa.create_POA("MyPOA", poaManager, ps)
 
 # Create the ServantActivator and set it as the child's ServantManager
+# Note that since ServantActivator is a LocalObject, we do not need to
+# activate the servant in a POA.
+
 sai = ServantActivator_i()
-sao = sai._this()
-child.set_servant_manager(sao)
+child.set_servant_manager(sai)
+
+del sai
 
 # Create an object reference with no servant
 eo = child.create_reference_with_id("MyEcho", CORBA.id(_GlobalIDL.Echo))
@@ -95,6 +105,11 @@ print eo.echoString("Hello again again")
 time.sleep(1)
 
 # Destroying the child POA causes the servant to be etherealized again
-print "Destroying POA..."
+print "Destroying child POA..."
 child.destroy(1, 1)
-print "Destroyed."
+del child
+print "Child POA Destroyed."
+
+print "Destroying ORB..."
+orb.destroy()
+print "ORB destroyed."

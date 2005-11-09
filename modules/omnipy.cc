@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.4.11  2005/11/09 12:33:32  dgrisby
+// Support POA LocalObjects.
+//
 // Revision 1.1.4.10  2005/06/24 17:36:09  dgrisby
 // Support for receiving valuetypes inside Anys; relax requirement for
 // old style classes in a lot of places.
@@ -185,8 +188,11 @@ CORBA::ORB_ptr omniPy::orb;
 // Constant strings to facilitate comparison by pointer                   //
 ////////////////////////////////////////////////////////////////////////////
 
-const char* omniPy::string_Py_omniObjRef  = "Py_omniObjRef";
-const char* omniPy::string_Py_omniServant = "Py_omniServant";
+const char* omniPy::string_Py_omniObjRef       = "Py_omniObjRef";
+const char* omniPy::string_Py_omniServant      = "Py_omniServant";
+const char* omniPy::string_Py_ServantActivator = "Py_ServantActivator";
+const char* omniPy::string_Py_ServantLocator   = "Py_ServantLocator";
+const char* omniPy::string_Py_AdapterActivator = "Py_AdapterActivator";
 
 
 ////////////////////////////////////////////////////////////////////////////
