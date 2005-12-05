@@ -30,6 +30,10 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.9  2005/12/05 16:52:39  dgrisby
+// Cache Python POA objects to avoid overheads of repeatedly creating
+// them in servant manager calls.
+//
 // Revision 1.1.2.8  2003/04/25 15:25:37  dgrisby
 // Implement missing bidir policy.
 //
@@ -73,22 +77,47 @@ private:
 PyObject*
 omniPy::createPyPOAObject(const PortableServer::POA_ptr poa)
 {
+  // Python POA objects are stateless -- all the state is in the C++
+  // object. For efficiency we try to reuse existing Python POA
+  // objects where we can, so we maintain a cache of existing Python
+  // POAs. Any operation that may destroy a POA clears the whole
+  // cache, since there is no way to be sure which C++ POAs are
+  // affected.
+
   if (CORBA::is_nil(poa)) {
     Py_INCREF(Py_None);
     return Py_None;
   }
 
+  // Look in the cache
+  PyObject* poa_twin = newTwin((PortableServer::POA_ptr)poa);
+  PyObject* pypoa = PyDict_GetItem(omniPy::pyomniORBpoaCache, poa_twin);
+
+  if (pypoa) {
+    Py_DECREF(poa_twin);
+    Py_INCREF(pypoa);
+    return pypoa;
+  }
+  
+  // Not in the cache -- create a new one
   PyObject* pypoa_class =
     PyObject_GetAttrString(omniPy::pyPortableServerModule, (char*)"POA");
-  OMNIORB_ASSERT(pypoa_class);
 
-  PyObject* pypoa = PyEval_CallObject(pypoa_class, omniPy::pyEmptyTuple);
-  if (!pypoa) {
+  if (!pypoa_class) {
     // Oh dear!  Return the exception to python
+    Py_DECREF(poa_twin);
     return 0;
   }
-  omniPy::setTwin(pypoa, (PortableServer::POA_ptr)poa, POA_TWIN);
-  omniPy::setTwin(pypoa, (CORBA::Object_ptr)      poa, OBJREF_TWIN);
+
+  pypoa = PyEval_CallObject(pypoa_class, omniPy::pyEmptyTuple);
+  if (!pypoa) {
+    // Oh dear!  Return the exception to python
+    Py_DECREF(poa_twin);
+    return 0;
+  }
+  omniPy::setExistingTwin(pypoa, poa_twin,       POA_TWIN);
+  omniPy::setTwin(pypoa, (CORBA::Object_ptr)poa, OBJREF_TWIN);
+  PyDict_SetItem(omniPy::pyomniORBpoaCache, poa_twin, pypoa);
   return pypoa;
 }
 

@@ -30,6 +30,10 @@
 
 # $Id$
 # $Log$
+# Revision 1.26.2.27  2005/12/05 16:52:39  dgrisby
+# Cache Python POA objects to avoid overheads of repeatedly creating
+# them in servant manager calls.
+#
 # Revision 1.26.2.26  2005/09/01 10:26:43  dgrisby
 # Generate all exception minor codes rather than using a hand-written list.
 #
@@ -445,9 +449,10 @@ from _omnipy.omni_func import *
 # Private things
 
 # ORB:
-orb     = None
-rootPOA = None
-lock    = threading.Lock()
+orb      = None
+rootPOA  = None
+poaCache = {}
+lock     = threading.Lock()
 
 # Maps for object reference classes and IDL-defined types:
 objrefMapping   = {}

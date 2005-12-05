@@ -31,6 +31,10 @@
 # $Id$
 
 # $Log$
+# Revision 1.7.4.11  2005/12/05 16:52:39  dgrisby
+# Cache Python POA objects to avoid overheads of repeatedly creating
+# them in servant manager calls.
+#
 # Revision 1.7.4.10  2003/04/25 15:25:40  dgrisby
 # Implement missing bidir policy.
 #
@@ -193,8 +197,8 @@ class POA (CORBA.Object) :
         return _omnipy.poa_func.find_POA(self, adapter_name, activate_it)
 
     def destroy(self, etherialize_objects, wait_for_completion):
-        return _omnipy.poa_func.destroy(self, etherialize_objects,
-                                        wait_for_completion)
+        _omnipy.poa_func.destroy(self, etherialize_objects,wait_for_completion)
+        omniORB.poaCache.clear()
 
     def create_thread_policy(self, value):
         return ThreadPolicy(value)

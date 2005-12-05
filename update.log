@@ -1,3 +1,17 @@
+Mon Dec  5 16:48:14 GMT 2005 dgrisby
+====================================
+
+- Cache Python POA objects to avoid overheads of repeatedly creating
+  them in servant manager calls.
+
+modules/omnipy.cc
+modules/omnipy.h
+modules/pyPOAFunc.cc
+python/omniORB/CORBA.py
+python/omniORB/PortableServer.py
+python/omniORB/__init__.py
+
+
 Thu Sep  8 13:35:05 BST 2005 dgrisby
 ====================================
 

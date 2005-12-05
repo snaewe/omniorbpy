@@ -31,6 +31,10 @@
 #define _omnipy_h_
 
 // $Log$
+// Revision 1.2.4.25  2005/12/05 16:52:39  dgrisby
+// Cache Python POA objects to avoid overheads of repeatedly creating
+// them in servant manager calls.
+//
 // Revision 1.2.4.24  2005/04/25 18:20:53  dgrisby
 // Maintain forwarded location when narrowing forwarded references.
 //
@@ -163,6 +167,7 @@ public:
   static PyObject* pyomniORBobjrefMap; //  The objref class map
   static PyObject* pyomniORBtypeMap;   //  Type map
   static PyObject* pyomniORBwordMap;   //  Reserved word map
+  static PyObject* pyomniORBpoaCache;  //  POA cache
   static PyObject* pyPortableServerModule; // Portable server module
   static PyObject* pyServantClass;     // Servant class
   static PyObject* pyCreateTypeCode;   // Function to create a TypeCode object
@@ -216,6 +221,14 @@ public:
   {
     PyObject* ot = newTwin(twin);
 
+    PyDict_SetItem(((PyInstanceObject*)obj)->in_dict, name, ot);
+    Py_DECREF(ot);
+  }
+
+  static
+  inline void
+  setExistingTwin(PyObject* obj, PyObject* ot, PyObject* name)
+  {
     PyDict_SetItem(((PyInstanceObject*)obj)->in_dict, name, ot);
     Py_DECREF(ot);
   }
