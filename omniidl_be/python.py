@@ -28,6 +28,10 @@
 
 # $Id$
 # $Log$
+# Revision 1.29.2.19  2005/12/15 12:56:40  dgrisby
+# References to items in modules with names clashing with keywords were
+# broken. Reported by David Fugate.
+#
 # Revision 1.29.2.18  2004/02/16 13:56:06  dgrisby
 # Operation names clashing with keywords were broken.
 #
@@ -2113,7 +2117,7 @@ def fixupScopedName(scopedName, prefix="_0_"):
     """Add a prefix and _GlobalIDL to the front of a ScopedName if necessary"""
 
     if isinstance(idlast.findDecl([scopedName[0]]), idlast.Module):
-        scopedName = [prefix + scopedName[0]] + scopedName[1:]
+        scopedName = [prefix + mangle(scopedName[0])] + scopedName[1:]
     else:
         scopedName = [prefix + global_module] + scopedName
     return scopedName
