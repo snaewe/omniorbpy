@@ -31,6 +31,10 @@
 # $Id$
 
 # $Log$
+# Revision 1.28.2.21  2005/12/30 22:26:12  dgrisby
+# __repr__ methods for most generated classes. Thanks (in part) to Luke
+# Deller.
+#
 # Revision 1.28.2.20  2005/12/05 16:52:39  dgrisby
 # Cache Python POA objects to avoid overheads of repeatedly creating
 # them in servant manager calls.
@@ -342,6 +346,7 @@ class TypeCode:
     def equivalent(self, tc):           return self._t.equivalent(tc)
     def get_compact_typecode(self):     return self._t.get_compact_typecode()
     def kind(self):                     return self._t.kind()
+    def __repr__(self):                 return self._t.__repr__()
     
     # Operations which are only available for some kinds:
     def id(self):                       return self._t.id()
@@ -432,6 +437,9 @@ class Any:
             raise TypeError("Argument 1 must be a TypeCode if present.")
 
         return omniORB.coerceAny(self._v, self._t._d, coerce._d)
+
+    def __repr__(self):
+        return "CORBA.Any(%s, %s)" % (repr(self._t), repr(self._v))
 
     __methods__ = ["typecode", "value"]
 

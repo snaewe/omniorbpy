@@ -30,6 +30,10 @@
 
 # $Id$
 # $Log$
+# Revision 1.26.2.28  2005/12/30 22:26:12  dgrisby
+# __repr__ methods for most generated classes. Thanks (in part) to Luke
+# Deller.
+#
 # Revision 1.26.2.27  2005/12/05 16:52:39  dgrisby
 # Cache Python POA objects to avoid overheads of repeatedly creating
 # them in servant manager calls.
@@ -569,7 +573,33 @@ class Enum:
         return self._items[n]
 
 
+class StructBase:
+    _NP_RepositoryId = None
+    _NP_ClassName = None
+    
+    def __repr__(self):
+        cname = self._NP_ClassName
+        if cname is None:
+            cname = "%s.%s" % (self.__module__, self.__class__.__name__)
+
+        desc = findType(self._NP_RepositoryId)
+        if desc is None:
+            # Type is not properly registered
+            return "<%s instance at 0x%x>" % (cname, long(id(t)) & 0xffffffffL)
+        vals = []
+        for i in range(4, len(desc), 2):
+            attr = desc[i]
+            try:
+                val = getattr(self, attr)
+                vals.append("%s=%s" % (attr,repr(val)))
+            except AttributeError:
+                vals.append("%s=<not set>" % attr)
+
+        return "%s(%s)" % (cname, string.join(vals, ", "))
+
+
 class Union:
+    _NP_ClassName = None
     _def_m = None
 
     def __init__(self, *args, **kw):
@@ -629,6 +659,18 @@ class Union:
                     self.__dict__["_v"] = val
                 else:
                     raise AttributeError(mem)
+
+    def __repr__(self):
+        cname = self._NP_ClassName
+        if cname is None:
+            cname = "%s.%s" % (self.__module__, self.__class__.__name__)
+
+        try:
+            return "%s(%s = %s)" % (cname, self._d_to_m[self._d],
+                                    repr(self._v))
+        except KeyError:
+            return "%s(%s, %s)" % (cname, repr(self._d), repr(self._v))
+
 
 # Import sub-modules
 import CORBA, tcInternal

@@ -28,6 +28,10 @@
 
 # $Id$
 # $Log$
+# Revision 1.29.2.20  2005/12/30 22:26:13  dgrisby
+# __repr__ methods for most generated classes. Thanks (in part) to Luke
+# Deller.
+#
 # Revision 1.29.2.19  2005/12/15 12:56:40  dgrisby
 # References to items in modules with names clashing with keywords were
 # broken. Reported by David Fugate.
@@ -410,8 +414,12 @@ omniORB.typeMapping["@repoId@"] = _d_@sname@"""
 struct_class = """
 # struct @sname@
 _0_@scopedname@ = omniORB.newEmptyClass()
-class @sname@:
+class @sname@ (omniORB.StructBase):
     _NP_RepositoryId = "@repoId@"
+"""
+
+struct_class_name = """\
+    _NP_ClassName = "@cname@"
 """
 
 struct_class_init = """\
@@ -498,6 +506,10 @@ union_class = """
 _0_@scopedname@ = omniORB.newEmptyClass()
 class @uname@ (omniORB.Union):
     _NP_RepositoryId = "@repoId@"\
+"""
+
+union_class_name = """\
+    _NP_ClassName = "@cname@"
 """
 
 union_descriptor_at_module_scope = """
@@ -1257,6 +1269,9 @@ class PythonVisitor:
                     repoId     = node.repoId(),
                     scopedname = dotName(fscopedName))
 
+        if not self.at_module_scope:
+            self.st.out(struct_class_name, cname = dotName(fscopedName))
+
         mnamel = []
         mdescl = []
         for mem in node.members():
@@ -1432,6 +1447,9 @@ class PythonVisitor:
                     uname      = uname,
                     repoId     = node.repoId(),
                     scopedname = dotName(fscopedName))
+
+        if not self.at_module_scope:
+            self.st.out(union_class_name, cname = dotName(fscopedName))
 
         if node.constrType():
             self.st.inc_indent()

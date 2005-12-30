@@ -1,3 +1,15 @@
+Fri Dec 30 22:24:56 GMT 2005 dgrisby
+====================================
+
+- __repr__ methods for most generated classes. Thanks (in part) to
+  Luke Deller.
+
+omniidl_be/python.py
+python/omniORB/CORBA.py
+python/omniORB/__init__.py
+python/omniORB/tcInternal.py
+
+
 Fri Dec 30 18:40:41 GMT 2005 dgrisby
 ====================================
 
