@@ -31,6 +31,9 @@
 # $Id$
 
 # $Log$
+# Revision 1.28.2.22  2006/01/01 19:07:51  dgrisby
+# More complete __repr__ support. New _tuple() method on structs.
+#
 # Revision 1.28.2.21  2005/12/30 22:26:12  dgrisby
 # __repr__ methods for most generated classes. Thanks (in part) to Luke
 # Deller.
@@ -198,7 +201,7 @@ Main omniORB CORBA module
 import _omnipy
 import omniORB
 
-import threading, types, time, exceptions
+import threading, types, time, exceptions, string
 
 
 #############################################################################
@@ -242,27 +245,56 @@ class SystemException (Exception):
             self.completed = completed
         Exception.__init__(self, minor, self.completed)
 
-    def __str__(self):
+    def __repr__(self):
         minorName = omniORB.minorCodeToString(self)
         if minorName is None:
             minorName = hex(self.minor)
-        return "Minor: " + minorName + \
-               ", " + str(self.completed) + "."
+        else:
+            minorName = "omniORB." + minorName
+
+        return "CORBA.%s(%s, CORBA.%s)" % (self.__class__.__name__,
+                                           minorName,
+                                           self.completed)
+    def __str__(self):
+        return self.__repr__()
+
+
 
 class UserException (Exception):
+    _NP_RepositoryId = None
+    _NP_ClassName = None
+
     def __init__(self, *args):
         self.__args = args
 
+    def __repr__(self):
+        cname = self._NP_ClassName
+        if cname is None:
+            cname = "%s.%s" % (self.__module__, self.__class__.__name__)
+
+        desc = omniORB.findType(self._NP_RepositoryId)
+        if desc is None:
+            # Type is not properly registered
+            return "<%s instance at 0x%x>" % (cname, long(id(t)) & 0xffffffffL)
+        vals = []
+        for i in range(4, len(desc), 2):
+            attr = desc[i]
+            try:
+                val = getattr(self, attr)
+                vals.append("%s=%s" % (attr,repr(val)))
+            except AttributeError:
+                vals.append("%s=<not set>" % attr)
+
+        return "%s(%s)" % (cname, string.join(vals, ", "))
+
     def __str__(self):
-        if not self.__args:
-            return "User exception with no members"
-        elif len(self.__args) == 1:
-            return "User exception: " + str(self.__args[0])
-        else:
-            return "User exception: " + str(self.__args)
+        return self.__repr__()
 
     def __getitem__(self, i):
         return self.__args[i]
+
+    def _tuple(self):
+        return tuple(self)
 
 
 # All the standard system exceptions...

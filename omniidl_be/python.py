@@ -28,6 +28,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.29.2.21  2006/01/01 19:07:51  dgrisby
+# More complete __repr__ support. New _tuple() method on structs.
+#
 # Revision 1.29.2.20  2005/12/30 22:26:13  dgrisby
 # __repr__ methods for most generated classes. Thanks (in part) to Luke
 # Deller.
@@ -230,6 +233,11 @@ from omniORB import CORBA, PortableServer
 _0_CORBA = CORBA
 
 _omnipy.checkVersion(2,0, __file__)
+
+try:
+    _omniORB_StructBase = omniORB.StructBase
+except AttributeError:
+    class _omniORB_StructBase: pass
 """
 
 file_end = """\
@@ -414,7 +422,7 @@ omniORB.typeMapping["@repoId@"] = _d_@sname@"""
 struct_class = """
 # struct @sname@
 _0_@scopedname@ = omniORB.newEmptyClass()
-class @sname@ (omniORB.StructBase):
+class @sname@ (_omniORB_StructBase):
     _NP_RepositoryId = "@repoId@"
 """
 
@@ -1366,6 +1374,9 @@ class PythonVisitor:
                     repoId = node.repoId(),
                     scopedname = dotName(fscopedName))
 
+        if not self.at_module_scope:
+            self.st.out(struct_class_name, cname = dotName(fscopedName))
+
         mnamel = []
         mdescl = []
         for mem in node.members():
@@ -1401,10 +1412,13 @@ class PythonVisitor:
 
         if len(mnamel) > 0:
             mnames = ", " + string.join(mnamel, ", ")
-            self.st.out(exception_class_init, mnames = mnames)
+        else:
+            mnames = ""
 
-            for mname in mnamel:
-                self.st.out(exception_init_member, mname = mname)
+        self.st.out(exception_class_init, mnames = mnames)
+
+        for mname in mnamel:
+            self.st.out(exception_init_member, mname = mname)
 
         if len(mdescl) > 0:
             mdescs = ", " + string.join(mdescl, ", ")

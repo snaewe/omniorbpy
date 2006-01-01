@@ -30,6 +30,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.26.2.29  2006/01/01 19:07:50  dgrisby
+# More complete __repr__ support. New _tuple() method on structs.
+#
 # Revision 1.26.2.28  2005/12/30 22:26:12  dgrisby
 # __repr__ methods for most generated classes. Thanks (in part) to Luke
 # Deller.
@@ -597,6 +600,18 @@ class StructBase:
 
         return "%s(%s)" % (cname, string.join(vals, ", "))
 
+    def _tuple(self):
+        desc = findType(self._NP_RepositoryId)
+        if desc is None:
+            # Type is not properly registered
+            raise CORBA.BAD_PARAM(BAD_PARAM_IncompletePythonType,
+                                  CORBA.COMPLETED_NO)
+        vals = []
+        for i in range(4, len(desc), 2):
+            attr = desc[i]
+            vals.append(getattr(self, attr))
+        return tuple(vals)
+
 
 class Union:
     _NP_ClassName = None
@@ -609,20 +624,9 @@ class Union:
         else:
             ks = kw.keys()
             if len(args) != 0 or len(ks) != 1:
-                raise AttributeError("require 2 arguments or one keyword argument.")
+                raise TypeError("require 2 arguments or one keyword argument.")
             k = ks[0]
             self.__setattr__(k, kw[k])
-
-    def __str__(self):
-        try:
-            mem = self._d_to_m[self._d]
-            return "_d = " + str(self._d) + ", " + mem + " = " + str(self._v)
-        except KeyError:
-            if self._def_m is not None:
-                return "_d = " + str(self._d) + ", " + self._def_m + \
-                       " = " + str(self._v)
-            else:
-                return "_d = " + str(self._d)
 
     def __getattr__(self, mem):
         try:
@@ -677,22 +681,33 @@ import CORBA, tcInternal
 
 def createUnknownStruct(repoId, members):
 
-    class UnknownStruct:
+    class UnknownStruct (StructBase):
         def __init__(self, *args):
-            if len(args) < len(self._members):
-                raise TypeError("not enough arguments; expected " + \
-                                str(len(self._members)) + ", got " + \
-                                str(len(args)))
-            elif len(args) > len(self._members):
-                raise TypeError("too many arguments; expected " + \
-                                str(len(self._members)) + ", got " + \
-                                str(len(args)))
+            if len(args) != len(self._members):
+                raise TypeError("__init__() takes exactly %d arguments "
+                                "(%d given)" %
+                                (len(self._members) + 1, len(args) + 1))
 
             self._values = args
 
             for i in range(len(args)):
                 if self._members[i] != "":
                     setattr(self, self._members[i], args[i])
+
+        def __repr__(self):
+            vals = []
+            for i in range(len(self._values)):
+                attr = self._members[i]
+                val  = self._values[i]
+                if attr:
+                    vals.append("%s=%s" % (attr, repr(val)))
+                else:
+                    vals.append(repr(val))
+
+            return "UnknownStruct<%s>(%s)" % (self._NP_RepositoryId,
+                                              string.join(vals, ", "))
+        def _tuple(self):
+            return tuple(self._values)
 
     UnknownStruct._NP_RepositoryId = repoId
     UnknownStruct._members         = members
@@ -704,6 +719,7 @@ def createUnknownUnion(repoId, def_used, members):
         pass
 
     UnknownUnion._NP_RepositoryId = repoId
+    UnknownUnion._NP_ClassName    = "UnknownUnion<%s>" % repoId
     UnknownUnion._d_to_m          = {}
     UnknownUnion._m_to_d          = {}
 
@@ -721,20 +737,29 @@ def createUnknownUserException(repoId, members):
 
     class UnknownUserException (CORBA.UserException):
         def __init__(self, *args):
-            if len(args) < len(self._members):
-                raise TypeError("not enough arguments; expected " + \
-                                str(len(self._members)) + ", got " + \
-                                str(len(args)))
-            elif len(args) > len(self._members):
-                raise TypeError("too many arguments; expected " + \
-                                str(len(self._members)) + ", got " + \
-                                str(len(args)))
+            if len(args) != len(self._members):
+                raise TypeError("__init__() takes exactly %d arguments "
+                                "(%d given)" %
+                                (len(self._members) + 1, len(args) + 1))
 
             self._values = args
 
             for i in range(len(args)):
                 if self._members[i] != "":
                     setattr(self, self._members[i], args[i])
+
+        def __repr__(self):
+            vals = []
+            for i in range(len(self._values)):
+                attr = self._members[i]
+                val  = self._values[i]
+                if attr:
+                    vals.append("%s=%s" % (attr, repr(val)))
+                else:
+                    vals.append(repr(val))
+
+            return "UnknownUserException<%s>(%s)" % (self._NP_RepositoryId,
+                                                     string.join(vals, ", "))
 
     UnknownUserException._NP_RepositoryId = repoId
     UnknownUserException._members         = members
@@ -957,7 +982,7 @@ is set to 1, a permanent location forward is requested."""
         self._perm    = perm
 
     def __str__(self):
-        return "Location forward exception"
+        return "omniORB.LOCATION_FORWARD exception"
 
 # "Static" objects required by the _omnipy module. They are here so
 # memory management works correctly if the omniORB modules are

@@ -1,3 +1,13 @@
+Sun Jan  1 19:06:59 GMT 2006 dgrisby
+====================================
+
+- More complete __repr__ support. New _tuple() method on structs.
+
+omniidl_be/python.py
+python/omniORB/CORBA.py
+python/omniORB/__init__.py
+
+
 Fri Dec 30 22:24:56 GMT 2005 dgrisby
 ====================================
 
