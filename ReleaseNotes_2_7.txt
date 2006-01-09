@@ -1,9 +1,18 @@
-RELEASE NOTES for omniORBpy 2.6
+RELEASE NOTES for omniORBpy 2.7
 ===============================
 
-This is omniORBpy 2.6. It is a stable release.
+This is omniORBpy 2.7. It is a stable release.
 
 See README for building instructions.
+
+
+New features since omniORBpy 2.6
+--------------------------------
+
+ - Bug fixes.
+ - Minor performance improvements.
+ - __repr__ methods for most generated classes.
+ - _tuple() method on structs.
 
 
 New features since omniORBpy 2.5

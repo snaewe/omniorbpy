@@ -1,4 +1,4 @@
-omniORBpy 2.6  (April 2005)
+omniORBpy 2.7  (January 2006)
 =============
 
 This is omniORBpy 2, a robust high-performance CORBA ORB for Python.
@@ -74,7 +74,7 @@ add this path:
   export PYTHONPATH=$PYTHONPATH:$PREFIX/lib/pythonX.Y/site-packages
 
 replacing pythonX.Y with the version of Python you are using,
-e.g. python2.2
+e.g. python2.4
 
 With the non Autoconf build, you must add two directories to
 PYTHONPATH:

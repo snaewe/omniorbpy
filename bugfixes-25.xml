@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+<?xml-stylesheet type="text/xml" href="buglayout.xml"?>
+
+<!-- The following bugs have been fixed since the omniORBpy 2.5     -->
+<!-- release. This file is transformed into html with bugfixes.xsl. -->
+
+<!-- Editors: make sure the content you add is well-formed XML.     -->
+
+<buglist version="2.5">
+
+<bug id="1" date="Mon Dec 20 17:20:40 GMT 2004" user="dgrisby">
+  <summary>ULong sequence / array marshalling bug</summary>
+  <reported>Teemu Torma</reported>
+  <text>
+  The code to deal with tuples as sequences or arrays of unsigned
+  longs was incorrect.
+  </text>
+</bug>
+
+<bug id="2" date="Mon Jan 24 17:23:41 GMT 2005" user="dgrisby">
+  <summary>Race condition in thread cache</summary>
+  <text>
+  Very rare case of a race between the thread cache and Python worker
+  thread creation.
+  </text>
+</bug>
+
+<bug id="3" date="Tue Feb 22 10:58:25 GMT 2005" user="dgrisby">
+  <summary>Improper thread state reuse</summary>
+  <text>
+  On Python >= 2.3, the thread state cache could incorrectly cache
+  thread state for a thread that had exited, and a new one started
+  with the same id.
+  </text>
+</bug>
+
+</buglist>

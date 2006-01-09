@@ -1,3 +1,25 @@
+Mon Jan  9 16:22:21 GMT 2006 dgrisby
+====================================
+
+- Updates in preparation for the 2.7 release.
+
+README.txt
+ReleaseNotes_2_6.txt   -- deleted
+ReleaseNotes_2_7.txt   -- new
+THIS_IS_OMNIORBPY_2_6  -- deleted
+THIS_IS_OMNIORBPY_2_7  -- new
+bugfixes-24.xml        -- new
+bugfixes-25.xml        -- new
+bugfixes-26.xml        -- new
+configure
+configure.ac
+mk/beforeauto.mk.in
+mk/version.mk
+modules/dir.mk
+modules/codesets/dir.mk
+modules/sslTP/dir.mk
+
+
 Sun Jan  1 19:06:59 GMT 2006 dgrisby
 ====================================
 

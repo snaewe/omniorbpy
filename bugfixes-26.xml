@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+<?xml-stylesheet type="text/xml" href="buglayout.xml"?>
+
+<!-- The following bugs have been fixed since the omniORBpy 2.6     -->
+<!-- release. This file is transformed into html with bugfixes.xsl. -->
+
+<!-- Editors: make sure the content you add is well-formed XML.     -->
+
+<buglist version="2.6">
+
+<bug id="1" date="Mon Jul  4 14:42:03 BST 2005" user="dgrisby">
+  <summary>ForwardRequest reference counting</summary>
+  <reported>Alexey Bulavitsky</reported>
+  <text>
+  Reference counting error with ForwardRequest in servant activator
+  incarnate.
+  </text>
+</bug>
+
+<bug id="2" date="Mon Jul 18 12:36:46 BST 2005" user="dgrisby">
+  <summary>Exception state not always cleared</summary>
+  <text>
+  The Python exception state was not always cleared when converting
+  long integers to smaller types, which meant that weird errors would
+  occur later on in processing.
+  </text>
+</bug>
+
+<bug id="3" date="Thu Dec 15 12:55:33 GMT 2005" user="dgrisby">
+  <summary>Module names clashing with keywords</summary>
+  <reported>David Fugate</reported>
+  <text>
+  References to items in modules with names clashing with keywords
+  were broken.
+  </text>
+</bug>
+
+</buglist>
