@@ -1,3 +1,13 @@
+Wed Jan 11 18:21:47 GMT 2006 dgrisby
+====================================
+
+- Support for Visual C++ 8.
+
+modules/dir.mk
+modules/codesets/dir.mk
+modules/sslTP/dir.mk
+
+
 Mon Jan  9 16:22:21 GMT 2006 dgrisby
 ====================================
 

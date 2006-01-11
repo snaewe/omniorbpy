@@ -204,6 +204,7 @@ $(lib): $(OBJS)
 	 $(RM) $@; \
 	 libs="$(OMNIORB_CODESETS_LIB) $(PYLIB)"; \
 	 $(CXXLINK) -out:$@ -DLL $(CXXLINKOPTIONS) $(IMPORT_LIBRARY_FLAGS) $(PYLIBPATH) $(OBJS) $$libs; \
+         $(MANIFESTTOOL) /outputresource:"$@;#2" /manifest $@.manifest; \
 	)
 
 export:: $(lib)

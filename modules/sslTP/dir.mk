@@ -206,6 +206,7 @@ $(lib): $(OBJS)
 	 $(RM) $@; \
 	 libs="$(OMNIORB_SSL_LIB) $(OMNIORB_LIB_NODYN) $(PYLIB)"; \
 	 $(CXXLINK) -out:$@ -DLL $(CXXLINKOPTIONS) $(IMPORT_LIBRARY_FLAGS) $(PYLIBPATH) $(OBJS) $$libs; \
+         $(MANIFESTTOOL) /outputresource:"$@;#2" /manifest $@.manifest; \
 	)
 
 export:: $(lib)
