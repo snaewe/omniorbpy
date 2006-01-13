@@ -8,7 +8,7 @@ Source0:  %{name}-%{version}.tar.gz
 URL:      http://omniorb.sourceforge.net/
 Prefix:   /usr
 Prereq:   /sbin/ldconfig
-Requires: omniORB = 4.0.6
+Requires: omniORB = 4.0.7
 BuildRequires: omniORB-devel python
 Buildroot: %{_tmppath}/%{name}-%{version}-root
 
