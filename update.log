@@ -1,3 +1,11 @@
+Sun Jan 15 23:02:50 GMT 2006 dgrisby
+====================================
+
+- Track change in omnisslTP library name.
+
+mk/beforeauto.mk.in
+
+
 Thu Dec  8 14:27:37 GMT 2005 dgrisby
 ====================================
 
