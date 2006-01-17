@@ -30,6 +30,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.30.2.14  2006/01/17 17:38:20  dgrisby
+# Expose omniORB.setClientConnectTimeout function.
+#
 # Revision 1.30.2.13  2005/11/09 12:33:31  dgrisby
 # Support POA LocalObjects.
 #
@@ -455,6 +458,7 @@ Make stubs for the Interface Repository appear in the CORBA module"""
 #   minorCodeToString
 #   setClientCallTimeout
 #   setClientThreadCallTimeout
+#   setClientConnectTimeout
 #   myIPAddresses
 #   setPersistentServerIdentifier
 #   locationForward

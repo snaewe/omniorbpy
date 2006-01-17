@@ -29,6 +29,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.4.7  2006/01/17 17:38:21  dgrisby
+// Expose omniORB.setClientConnectTimeout function.
+//
 // Revision 1.1.4.6  2005/11/09 12:33:32  dgrisby
 // Support POA LocalObjects.
 //
@@ -786,6 +789,24 @@ extern "C" {
     return Py_None;
   }
 
+  static char setClientConnectTimeout_doc [] =
+  "setClientConnectTimeout(millisecs)\n"
+  "\n"
+  "Set the client connection timeout.\n";
+
+  static PyObject* pyomni_setClientConnectTimeout(PyObject* self,
+						  PyObject* args)
+  {
+    int timeout;
+    if (!PyArg_ParseTuple(args, (char*)"i", &timeout))
+      return 0;
+
+    omniORB::setClientConnectTimeout(timeout);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
+
   static char myIPAddresses_doc [] =
   "myIPAddresses()\n"
   "\n"
@@ -928,6 +949,10 @@ extern "C" {
     {(char*)"setClientThreadCallTimeout",
      pyomni_setClientThreadCallTimeout,
      METH_VARARGS, setClientThreadCallTimeout_doc},
+
+    {(char*)"setClientConnectTimeout",
+     pyomni_setClientConnectTimeout,
+     METH_VARARGS, setClientConnectTimeout_doc},
 
     {(char*)"myIPAddresses",
      pyomni_myIPAddresses,
