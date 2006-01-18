@@ -28,6 +28,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.33.2.8  2006/01/18 19:25:13  dgrisby
+# Bug inheriting a valuetype from a typedef.
+#
 # Revision 1.33.2.7  2005/07/29 11:21:36  dgrisby
 # Fix long-standing problem with module re-opening by #included files.
 #
@@ -992,8 +995,7 @@ class PythonVisitor:
         if len(node.inherits()) > 0:
             inheritl = []
             for i in node.inherits():
-                while isinstance(i, idlast.Declarator):
-                    i = i.alias().aliasType()
+                i = i.fullDecl()
                 inheritl.append(dotName(fixupScopedName(i.scopedName())))
             
             inherits = "(" + string.join(inheritl, ", ") + ")"
@@ -1074,11 +1076,10 @@ class PythonVisitor:
                             ifid    = ifid)
 
         # Objref class
-        if len(node.inherits()) > 0:
+        if node.inherits():
             inheritl = []
             for i in node.inherits():
-                while isinstance(i, idlast.Declarator):
-                    i = i.alias().aliasType()
+                i = i.fullDecl()
                 sn = fixupScopedName(i.scopedName())
                 inheritl.append(dotName(sn[:-1] + ["_objref_" + sn[-1]]))
                 
@@ -1088,7 +1089,7 @@ class PythonVisitor:
 
         self.st.out(objref_class, ifid=ifid, inherits=inherits)
 
-        if len(node.inherits()) > 0:
+        if node.inherits():
             for inclass in inheritl:
                 self.st.out(objref_inherit_init, inclass=inclass)
         else:
@@ -1132,11 +1133,10 @@ class PythonVisitor:
         # __methods__ assignment
         methods = "[" + string.join(methodl, ", ") + "]"
 
-        if len(node.inherits()) > 0:
+        if node.inherits():
             inheritl = []
             for i in node.inherits():
-                while isinstance(i, idlast.Declarator):
-                    i = i.alias().aliasType()
+                i = i.fullDecl()
                 sn = fixupScopedName(i.scopedName())
                 methods = methods + " + " + \
                           dotName(sn[:-1] + ["_objref_" + sn[-1]]) + \
@@ -1150,11 +1150,10 @@ class PythonVisitor:
         self.st.out(objref_register, ifid = ifid, modname = self.modname)
 
         # Skeleton class
-        if len(node.inherits()) > 0:
+        if node.inherits():
             inheritl = []
             for i in node.inherits():
-                while isinstance(i, idlast.Declarator):
-                    i = i.alias().aliasType()
+                i = i.fullDecl()
                 fsn = fixupScopedName(i.scopedName())
                 dsn = dotName(fsn)
                 ssn = skeletonModuleName(dsn)
@@ -1199,7 +1198,7 @@ class PythonVisitor:
 
         self.st.out(skeleton_methodmap, methodmap = methodmap)
 
-        if len(node.inherits()) > 0:
+        if node.inherits():
             for inheritclass in inheritl:
                 self.st.out(skeleton_inheritmap, inheritclass = inheritclass)
 
@@ -1753,11 +1752,10 @@ class PythonVisitor:
         fscopedName = fixupScopedName(node.scopedName(), "")
         scopedname  = dotName(fscopedName)
 
-        if len(node.inherits()) > 0:
+        if node.inherits():
             inheritl = []
             for i in node.inherits():
-                while isinstance(i, idlast.Declarator):
-                    i = i.alias().aliasType()
+                i = i.fullDecl()
                 inheritl.append(dotName(fixupScopedName(i.scopedName())))
             
             inherits = string.join(inheritl, ", ")
@@ -1798,11 +1796,10 @@ class PythonVisitor:
         fscopedName = fixupScopedName(node.scopedName(), "")
         scopedname  = dotName(fscopedName)
 
-        if len(node.inherits()) > 0:
+        if node.inherits():
             inheritl = []
             for i in node.inherits():
-                while isinstance(i, idlast.Declarator):
-                    i = i.alias().aliasType()
+                i = i.fullDecl()
                 inheritl.append(dotName(fixupScopedName(i.scopedName())))
             
         else:
@@ -1810,8 +1807,7 @@ class PythonVisitor:
 
         skeleton_opl = []
         for i in node.supports():
-            while isinstance(i, idlast.Declarator):
-                i = i.alias().aliasType()
+            i = i.fullDecl()
             sn = fixupScopedName(i.scopedName())
             sn[0] = sn[0] + "__POA"
             dn = dotName(sn)
@@ -1830,9 +1826,7 @@ class PythonVisitor:
             cin = cnode.inherits()
             if not cin:
                 break
-            i = cin[0]
-            while isinstance(i, idlast.Declarator):
-                i = i.alias().aliasType()
+            i = cin[0].fullDecl()
             if not isinstance(i, idlast.Value):
                 break
             ilist.append(i)
@@ -1902,12 +1896,11 @@ class PythonVisitor:
                 if not cin:
                     break
                 for n in cin:
-                    while isinstance(n, idlast.Declarator):
-                        n = n.alias().aliasType()
+                    n = n.fullDecl()
                     if not isinstance(n, idlast.Value):
                         register_factory = 0
                         break
-                cnode = cin[0]
+                cnode = cin[0].fullDecl()
 
         if register_factory:
             self.st.out(value_register_factory, vname=vname)
@@ -1917,8 +1910,7 @@ class PythonVisitor:
             inheritl = []
             methodl  = []
             for i in node.supports():
-                while isinstance(i, idlast.Declarator):
-                    i = i.alias().aliasType()
+                i = i.fullDecl()
                 sn = fixupScopedName(i.scopedName())
                 inheritl.append(dotName(sn[:-1] + ["_objref_" + sn[-1]]))
                 methodl.append(dotName(sn[:-1] + ["_objref_" + sn[-1]]) +
@@ -1954,8 +1946,7 @@ class PythonVisitor:
             if not cin:
                 break
             i = cin[0]
-            while isinstance(i, idlast.Declarator):
-                i = i.alias().aliasType()
+            i = i.fullDecl()
             if not isinstance(i, idlast.Value):
                 break
             if cnode.truncatable():
@@ -1973,9 +1964,7 @@ class PythonVisitor:
 
         basedesc = None
         if node.inherits():
-            i = node.inherits()[0]
-            while isinstance(i, idlast.Declarator):
-                i = i.alias().aliasType()
+            i = node.inherits()[0].fullDecl()
             if isinstance(i, idlast.Value):
                 sn = i.scopedName()[:]
                 sn[-1] = "_d_" + sn[-1]
@@ -2190,7 +2179,7 @@ class ExampleVisitor (idlvisitor.AstVisitor, idlvisitor.TypeVisitor):
             inheritance_note = ""
 
         for inh in node.inherits():
-            iname = idlutil.ccolonName(inh.scopedName())
+            iname = idlutil.ccolonName(inh.fullDecl().scopedName())
             inheritance_note = inheritance_note + "    #   %s\n" % iname
         
         self.st.out(example_classdef, ifname=ifname,
@@ -2467,7 +2456,12 @@ def mangle(name):
 def fixupScopedName(scopedName, prefix="_0_"):
     """Add a prefix and _GlobalIDL to the front of a ScopedName if necessary"""
 
-    if isinstance(idlast.findDecl([scopedName[0]]), idlast.Module):
+    try:
+        decl = idlast.findDecl([scopedName[0]])
+    except idlast.DeclNotFound:
+        decl = None
+
+    if isinstance(decl, idlast.Module):
         scopedName = [prefix + scopedName[0]] + scopedName[1:]
     else:
         scopedName = [prefix + global_module] + scopedName

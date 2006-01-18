@@ -1,3 +1,11 @@
+Wed Jan 18 19:24:11 GMT 2006 dgrisby
+====================================
+
+- Bug inheriting a valuetype from a typedef.
+
+omniidl_be/python.py
+
+
 Tue Jan 17 17:37:32 GMT 2006 dgrisby
 ====================================
 
