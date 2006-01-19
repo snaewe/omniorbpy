@@ -5,8 +5,9 @@ Release:  0.1
 License:  GPL / LGPL
 Group:    System/Libraries
 Source0:  %{name}-%{version}.tar.gz
-Prefix:   /usr
 URL:      http://omniorb.sourceforge.net/
+Prefix:   /usr
+Prereq:   /sbin/ldconfig
 Requires: omniORB = 4.1.0
 BuildRequires: omniORB-devel python
 Buildroot: %{_tmppath}/%{name}-%{version}-root
@@ -68,15 +69,17 @@ make DESTDIR=$RPM_BUILD_ROOT install
 
 # omit omniidl_be/__init__.py because it is a duplicate of the file
 # already provided by omniORB.
-rm -rf $RPM_BUILD_ROOT%{prefix}/lib/python%{py_ver}/site-packages/omniidl_be/__init__.py*
+rm -rf $RPM_BUILD_ROOT%{prefix}/lib*/python%{py_ver}/site-packages/omniidl_be/__init__.py*
 
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%post -n %{name} -p /sbin/ldconfig
+%post
+/sbin/ldconfig
 
-%postun -n %{name} -p /sbin/ldconfig
+%postun
+/sbin/ldconfig
 
 
 # main package includes libraries and servers
@@ -84,28 +87,37 @@ rm -rf $RPM_BUILD_ROOT
 %defattr (-,root,root)
 %doc COPYING.LIB
 %doc bugfixes*
-%prefix/lib/python%{py_ver}/site-packages/_omni*.so*
-%prefix/lib/python%{py_ver}/site-packages/omniORB
+%prefix/lib*/python%{py_ver}/site-packages/_omni*.so*
+%prefix/lib*/python%{py_ver}/site-packages/omniORB
 
 %files -n %{name}-standard
 %defattr(-,root,root)
-%prefix/lib/python%{py_ver}/site-packages/*.py*
-%prefix/lib/python%{py_ver}/site-packages/omniORB.pth
-%prefix/lib/python%{py_ver}/site-packages/CosNaming
-%prefix/lib/python%{py_ver}/site-packages/CosNaming__POA
+%prefix/lib*/python%{py_ver}/site-packages/*.py*
+%prefix/lib*/python%{py_ver}/site-packages/omniORB.pth
+%prefix/lib*/python%{py_ver}/site-packages/CosNaming
+%prefix/lib*/python%{py_ver}/site-packages/CosNaming__POA
 
 %files -n %{name}-devel
 %defattr(-,root,root)
 %doc README* ReleaseNotes* update.log
 %prefix/include/omniORBpy.h
 %prefix/include/omniORB4/pydistdate.hh
-%prefix/lib/python%{py_ver}/site-packages/omniidl_be/python.py*
+%prefix/lib*/python%{py_ver}/site-packages/omniidl_be/python.py*
 
 %files -n %{name}-doc
 %defattr(-,root,root)
 %doc doc/* 
 
 %changelog
+* Fri Dec 16 2005 Thomas Lockhart <lockhart@fourpalms.org> 2.6-3
+- Modified postun syntax to eliminate an error from ldconfig
+
+* Thu Apr 21 2005 Sander Steffann <steffann@nederland.net> 2.6-2
+- Fixed packaging on RHEL and x86_64
+
+* Wed Apr 20 2005 Sander Steffann <steffann@nederland.net> 2.6-1
+- Upgrade to version 2.6
+
 * Mon Jul 26 2004 Duncan Grisby <duncan@grisby.org> 2.4
 - Bump version number to 2.4.
 

@@ -31,6 +31,9 @@
 #define _omnipy_h_
 
 // $Log$
+// Revision 1.3.2.8  2006/01/19 17:28:44  dgrisby
+// Merge from omnipy2_develop.
+//
 // Revision 1.3.2.7  2005/11/09 12:33:32  dgrisby
 // Support POA LocalObjects.
 //
@@ -178,6 +181,7 @@ public:
   static PyObject* pyomniORBtypeMap;   	//  Type map
   static PyObject* pyomniORBvalueMap;  	//  Value factory map
   static PyObject* pyomniORBwordMap;   	//  Reserved word map
+  static PyObject* pyomniORBpoaCache;   //  POA cache
   static PyObject* pyomniORBUnknownValueBase;
                                         //  Base class for unknown valuetypes
   static PyObject* pyPortableServerModule;
@@ -237,6 +241,14 @@ public:
   {
     PyObject* ot = newTwin(twin);
     PyObject_SetAttr(obj, name, ot);
+    Py_DECREF(ot);
+  }
+
+  static
+  inline void
+  setExistingTwin(PyObject* obj, PyObject* ot, PyObject* name)
+  {
+    PyDict_SetItem(((PyInstanceObject*)obj)->in_dict, name, ot);
     Py_DECREF(ot);
   }
 

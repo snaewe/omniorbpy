@@ -1,16 +1,9 @@
-# Version number
-OMNIPY_MAJOR = 2
-OMNIPY_MINOR = 0
-
 DIR_CPPFLAGS += -DOMNIPY_MAJOR=$(OMNIPY_MAJOR) -DOMNIPY_MINOR=$(OMNIPY_MINOR)
 DIR_CPPFLAGS += -DOMNIORB_VERSION_STRING=\"$(OMNIORB_VERSION)\"
-
-OMNIORB_VERSION_NOMICRO := $(OMNIORB_MAJOR_VERSION).$(OMNIORB_MINOR_VERSION)
 
 CXXSRCS = pysslTP.cc
 
 OBJS =    pysslTP.o
-
 
 DIR_CPPFLAGS += $(patsubst %,-I%/include,$(OMNIORB_ROOT))
 DIR_CPPFLAGS += $(patsubst %,-I%/include/omniORB4/internal,$(OMNIORB_ROOT))
@@ -213,6 +206,7 @@ $(lib): $(OBJS)
 	 $(RM) $@; \
 	 libs="$(OMNIORB_SSL_LIB) $(OMNIORB_LIB_NODYN) $(PYLIB)"; \
 	 $(CXXLINK) -out:$@ -DLL $(CXXLINKOPTIONS) $(IMPORT_LIBRARY_FLAGS) $(PYLIBPATH) $(OBJS) $$libs; \
+         $(MANIFESTTOOL) /outputresource:"$@;#2" /manifest $@.manifest; \
 	)
 
 export:: $(lib)

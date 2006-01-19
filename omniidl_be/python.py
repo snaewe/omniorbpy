@@ -28,6 +28,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.33.2.9  2006/01/19 17:28:44  dgrisby
+# Merge from omnipy2_develop.
+#
 # Revision 1.33.2.8  2006/01/18 19:25:13  dgrisby
 # Bug inheriting a valuetype from a typedef.
 #
@@ -238,6 +241,11 @@ from omniORB import CORBA, PortableServer
 _0_CORBA = CORBA
 
 _omnipy.checkVersion(3,0, __file__)
+
+try:
+    _omniORB_StructBase = omniORB.StructBase
+except AttributeError:
+    class _omniORB_StructBase: pass
 """
 
 file_end = """\
@@ -427,8 +435,12 @@ omniORB.typeMapping["@repoId@"] = _d_@sname@"""
 struct_class = """
 # struct @sname@
 _0_@scopedname@ = omniORB.newEmptyClass()
-class @sname@:
+class @sname@ (_omniORB_StructBase):
     _NP_RepositoryId = "@repoId@"
+"""
+
+struct_class_name = """\
+    _NP_ClassName = "@cname@"
 """
 
 struct_class_init = """\
@@ -515,6 +527,10 @@ union_class = """
 _0_@scopedname@ = omniORB.newEmptyClass()
 class @uname@ (omniORB.Union):
     _NP_RepositoryId = "@repoId@"\
+"""
+
+union_class_name = """\
+    _NP_ClassName = "@cname@"
 """
 
 union_descriptor_at_module_scope = """
@@ -1349,6 +1365,9 @@ class PythonVisitor:
                     repoId     = node.repoId(),
                     scopedname = dotName(fscopedName))
 
+        if not self.at_module_scope:
+            self.st.out(struct_class_name, cname = dotName(fscopedName))
+
         mnamel = []
         mdescl = []
         for mem in node.members():
@@ -1443,6 +1462,9 @@ class PythonVisitor:
                     repoId = node.repoId(),
                     scopedname = dotName(fscopedName))
 
+        if not self.at_module_scope:
+            self.st.out(struct_class_name, cname = dotName(fscopedName))
+
         mnamel = []
         mdescl = []
         for mem in node.members():
@@ -1478,10 +1500,13 @@ class PythonVisitor:
 
         if len(mnamel) > 0:
             mnames = ", " + string.join(mnamel, ", ")
-            self.st.out(exception_class_init, mnames = mnames)
+        else:
+            mnames = ""
 
-            for mname in mnamel:
-                self.st.out(exception_init_member, mname = mname)
+        self.st.out(exception_class_init, mnames = mnames)
+
+        for mname in mnamel:
+            self.st.out(exception_init_member, mname = mname)
 
         if len(mdescl) > 0:
             mdescs = ", " + string.join(mdescl, ", ")
@@ -1524,6 +1549,9 @@ class PythonVisitor:
                     uname      = uname,
                     repoId     = node.repoId(),
                     scopedname = dotName(fscopedName))
+
+        if not self.at_module_scope:
+            self.st.out(union_class_name, cname = dotName(fscopedName))
 
         if node.constrType():
             self.st.inc_indent()
@@ -2462,7 +2490,7 @@ def fixupScopedName(scopedName, prefix="_0_"):
         decl = None
 
     if isinstance(decl, idlast.Module):
-        scopedName = [prefix + scopedName[0]] + scopedName[1:]
+        scopedName = [prefix + mangle(scopedName[0])] + scopedName[1:]
     else:
         scopedName = [prefix + global_module] + scopedName
     return scopedName

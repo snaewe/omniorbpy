@@ -1,10 +1,4 @@
-# Version number
-OMNIPY_MAJOR = 3
-OMNIPY_MINOR = 0
-
 DIR_CPPFLAGS += -DOMNIPY_MAJOR=$(OMNIPY_MAJOR) -DOMNIPY_MINOR=$(OMNIPY_MINOR)
-
-OMNIORB_VERSION_NOMICRO := $(OMNIORB_MAJOR_VERSION).$(OMNIORB_MINOR_VERSION)
 
 CXXSRCS = omnipy.cc \
           pyORBFunc.cc \
@@ -262,6 +256,7 @@ $(lib): $(OBJS)
 	 $(RM) $@; \
 	 libs="$(OMNIORB_LIB_NODYN) $(PYLIB)"; \
 	 $(CXXLINK) -out:$@ -DLL $(CXXLINKOPTIONS) $(IMPORT_LIBRARY_FLAGS) $(PYLIBPATH) $(OBJS) $$libs; \
+         $(MANIFESTTOOL) /outputresource:"$@;#2" /manifest $@.manifest; \
 	)
 
 export:: $(lib)

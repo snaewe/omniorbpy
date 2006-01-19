@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.4.12  2006/01/19 17:28:44  dgrisby
+// Merge from omnipy2_develop.
+//
 // Revision 1.1.4.11  2005/11/09 12:33:32  dgrisby
 // Support POA LocalObjects.
 //
@@ -158,6 +161,7 @@ PyObject* omniPy::pyomniORBskeletonMap;	//  The skeleton class map
 PyObject* omniPy::pyomniORBtypeMap;     //  The repoId to descriptor mapping
 PyObject* omniPy::pyomniORBvalueMap;    //  The repoId to value factory mapping
 PyObject* omniPy::pyomniORBwordMap;     //  Reserved word map
+PyObject* omniPy::pyomniORBpoaCache;    //  POA cache
 PyObject* omniPy::pyomniORBUnknownValueBase;
                                         //  Base class for unknown valuetypes
 PyObject* omniPy::pyPortableServerModule;
@@ -381,6 +385,7 @@ extern "C" {
     omniPy::pyomniORBobjrefMap        = OMNIPY_ATTR("objrefMapping");
     omniPy::pyomniORBtypeMap          = OMNIPY_ATTR("typeMapping");
     omniPy::pyomniORBwordMap          = OMNIPY_ATTR("keywordMapping");
+    omniPy::pyomniORBpoaCache         = OMNIPY_ATTR("poaCache");
     omniPy::pyPortableServerModule    = OMNIPY_ATTR("PortableServer");
     omniPy::pyomniORBskeletonMap      = OMNIPY_ATTR("skeletonMapping");
     omniPy::pyomniORBvalueMap         = OMNIPY_ATTR("valueFactoryMapping");
@@ -428,6 +433,8 @@ extern "C" {
     OMNIORB_ASSERT(PyDict_Check(omniPy::pyomniORBwordMap));
     OMNIORB_ASSERT(omniPy::pyomniORBUnknownValueBase);
     OMNIORB_ASSERT(PyClass_Check(omniPy::pyomniORBUnknownValueBase));
+    OMNIORB_ASSERT(omniPy::pyomniORBpoaCache);
+    OMNIORB_ASSERT(PyDict_Check(omniPy::pyomniORBpoaCache));
     OMNIORB_ASSERT(omniPy::pyServantClass);
     OMNIORB_ASSERT(PyClass_Check(omniPy::pyServantClass));
     OMNIORB_ASSERT(omniPy::pyCreateTypeCode);

@@ -30,6 +30,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.9.2.4  2006/01/19 17:28:44  dgrisby
+# Merge from omnipy2_develop.
+#
 # Revision 1.9.2.3  2005/11/09 12:33:31  dgrisby
 # Support POA LocalObjects.
 #
@@ -198,8 +201,8 @@ class POA (CORBA.Object) :
         return _omnipy.poa_func.find_POA(self, adapter_name, activate_it)
 
     def destroy(self, etherialize_objects, wait_for_completion):
-        return _omnipy.poa_func.destroy(self, etherialize_objects,
-                                        wait_for_completion)
+        _omnipy.poa_func.destroy(self, etherialize_objects,wait_for_completion)
+        omniORB.poaCache.clear()
 
     def create_thread_policy(self, value):
         return ThreadPolicy(value)

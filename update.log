@@ -1,3 +1,25 @@
+Thu Jan 19 17:27:28 GMT 2006 dgrisby
+====================================
+
+- Merge from omnipy2_develop.
+
+contrib/RPMs/omniORBpy.spec
+contrib/RPMs/omniORBpy_new.spec  -- new
+mk/beforeauto.mk.in
+mk/version.mk
+modules/dir.mk
+modules/omnipy.cc
+modules/omnipy.h
+modules/pyPOAFunc.cc
+modules/codesets/dir.mk
+modules/sslTP/dir.mk
+omniidl_be/python.py
+python/omniORB/CORBA.py
+python/omniORB/PortableServer.py
+python/omniORB/__init__.py
+python/omniORB/tcInternal.py
+
+
 Thu Jan 19 17:19:44 GMT 2006 dgrisby
 ====================================
 
