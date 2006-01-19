@@ -61,7 +61,7 @@ use variables CC, CXX and PYTHON, e.g.:
 
 If you do not have Autoconf support on your platform, you must install
 the omniORBpy source in the $TOP/src/lib directory of a working
-omniORB 4.0 tree. Then, in the $TOP/src/lib/omniORBpy directory,
+omniORB 4.1 tree. Then, in the $TOP/src/lib/omniORBpy directory,
 simply do a gnumake export.
 
 
@@ -77,7 +77,7 @@ add this path:
   export PYTHONPATH=$PYTHONPATH:$PREFIX/lib/pythonX.Y/site-packages
 
 replacing pythonX.Y with the version of Python you are using,
-e.g. python2.2
+e.g. python2.4
 
 With the non Autoconf build, you must add two directories to
 PYTHONPATH:
@@ -98,16 +98,3 @@ $PREFIX/bin ; otherwise it is in $TOP/bin/$FARCH.
 
 Full documentation, in a variety of formats, can be found in the doc
 directory.
-
-
-Missing features
-----------------
-
-The following features are currently missing from omniORBpy.
-
-
-1. There is no support for DII and DSI. Since you can write IDL and
-   Python code on-the-fly, this is not a significant limitation.
-
-2. Interceptors have only limited functionality, and do not adhere to
-   the portable interceptors API.
