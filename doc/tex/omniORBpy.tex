@@ -188,7 +188,7 @@ Apasphere Ltd.\\}
 
 \vfill
 \vfill
-July 2005
+January 2006
 \vfill
 
 \end{center}
@@ -1657,6 +1657,14 @@ section~\ref{sec:timeoutAPI} for more information about timeouts.
 omniORB 4.0 and later use milliseconds for timeouts.
 
 
+\confopt{clientConnectTimeOutPeriod}{0}
+
+The timeout that is used in the case that a new network connection is
+established to the server. A value of zero means that the normal call
+timeout is used. See section~\ref{sec:timeoutAPI} for more information
+about timeouts.
+
+
 \confopt{supportPerThreadTimeOut}{0}
 
 If this parameter is set true, timeouts can be set on a per thread
@@ -2959,6 +2967,7 @@ Timeouts are set using functions in the \code{omniORB} module:
 omniORB.setClientCallTimeout(millisecs)
 omniORB.setClientCallTimeout(objref, millisecs)
 omniORB.setClientThreadCallTimeout(millisecs)
+omniORB.setClientConnectTimeout(millisecs)
 \end{pylisting}
 
 \op{setClientCallTimeout} sets either the global timeout or the
@@ -2974,6 +2983,53 @@ them.
 To choose the timeout value to use for a call, the ORB first looks to
 see if there is a timeout for the object reference, then to the
 calling thread, and finally to the global timeout.
+
+
+When a client has no existing connection to communicate with a server,
+it must open a new connection before performing the
+call. \op{setClientConnect\dsc{}Timeout} sets an overriding timeout for
+cases where a new connection must be established. The effect of the
+connect timeout depends upon whether the connect timeout is greater
+or less than the timeout that would otherwise be used.
+
+\vspace{\baselineskip}\noindent
+As an example, imagine that the usual call timeout is 10 seconds:
+
+\subsubsection*{Connect timeout > usual timeout}
+
+If the connect timeout is set to 20 seconds, then a call that
+establishes a new connection will be permitted 20 seconds before it
+times out. Subsequent calls using the same connection have the normal
+10 second timeout. If establishing the connection takes 8 seconds,
+then the call itself takes 5 seconds, the call succeeds despite having
+taken 13 seconds in total, longer than the usual timeout.
+
+This kind of configuration is good when connections are slow to be
+established.
+
+\subsubsection*{Connect timeout < usual timeout}
+
+If the connect timeout is set to 2 seconds, the actual network-level
+connect is only permitted to take 2 seconds. As long as the connection
+is established in less than 2 seconds, the call can proceed. The 10
+second call timeout still applies to the time taken for the whole call
+(including the connection establishment). So, if establishing the
+connection takes 1.5 seconds, and the call itself takes 9.5 seconds,
+the call will time out because although it met the connection timeout,
+it exceeded the 10 second total call timeout. On the other hand, if
+establishing the connection takes 3 seconds, the call will fail after
+only 2 seconds, since only 2 seconds are permitted for the connect.
+
+If an object reference has multiple possible endpoints available, the
+client will attempt to connect to them in turn, until one succeeds.
+The connect timeout applies to each connection attempt. So with a
+connect timeout of 2 seconds, the client will spend up to 2 seconds
+attempting to connect to the first address and then, if that fails, up
+to 2 seconds trying the second address, and so on.
+
+This kind of configuration is useful where calls may take a long time
+to complete (so call timeouts are long), but a fast indication of
+connection failure is required.
 
 
 
@@ -3601,7 +3657,7 @@ module ValueTest {
 };
 \end{idllisting}
 
-Now, suppose the client behaves as follows:
+\noindent Now, suppose the client behaves as follows:
 
 \begin{pylisting}
 v = One_impl("hello", 123)
@@ -3609,7 +3665,7 @@ a = CORBA.Any(ValueTest._tc_One, v)
 obj.op1(v, a)
 \end{pylisting}
 
-then on the server side:
+\noindent then on the server side:
 
 \begin{pylisting}
 class AnyTest_impl:
@@ -3619,6 +3675,7 @@ class AnyTest_impl:
         assert v2 == v
 \end{pylisting}
 
+\noindent
 This is all very well in this kind of simple situation, but problems
 can arise if truncatable valuetypes are used. Imagine this derived
 value:
@@ -3631,6 +3688,7 @@ module ValueTest {
 };
 \end{idllisting}
 
+\noindent
 Now, suppose that the client shown above sends an instance of
 valuetype \type{Two} in both parameters, and suppose that the server
 has not seen the definition of valuetype \type{Two}. In this
