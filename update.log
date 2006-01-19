@@ -1,3 +1,11 @@
+Thu Jan 19 22:47:46 GMT 2006 dgrisby
+====================================
+
+- Missing css file in documentation.
+
+doc/omniORBpy/omniORBpy.css  -- new
+
+
 Thu Jan 19 17:27:28 GMT 2006 dgrisby
 ====================================
 
