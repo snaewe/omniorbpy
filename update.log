@@ -1,3 +1,11 @@
+Thu Feb 16 22:55:19 GMT 2006 dgrisby
+====================================
+
+- Remove some tab characters that snuck in from a patch.
+
+python/omniORB/tcInternal.py
+
+
 Mon Jan 23 16:07:42 GMT 2006 dgrisby
 ====================================
 
