@@ -30,6 +30,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.31.2.8  2006/02/22 13:05:15  dgrisby
+# __repr__ and _narrow methods for valuetypes.
+#
 # Revision 1.31.2.7  2006/01/19 17:28:44  dgrisby
 # Merge from omnipy2_develop.
 #
@@ -278,7 +281,7 @@ class UserException (Exception):
         desc = omniORB.findType(self._NP_RepositoryId)
         if desc is None:
             # Type is not properly registered
-            return "<%s instance at 0x%x>" % (cname, long(id(t)) & 0xffffffffL)
+            return "<%s instance at 0x%x>" % (cname, builtin_id(self))
         vals = []
         for i in range(4, len(desc), 2):
             attr = desc[i]
@@ -453,6 +456,8 @@ TC_wstring  = _tc_wstring \
             = tcInternal.createTypeCode((tcInternal.tv_wstring,0))
 
 # id() function returns the repository ID of an object
+builtin_id = id
+
 def id(obj):
     try:
         return obj._NP_RepositoryId
@@ -797,6 +802,8 @@ class ValueBase:
     """ CORBA::ValueBase base class """
 
     _NP_RepositoryId = "IDL:omg.org/CORBA/ValueBase:1.0"
+    _NP_ClassName = None
+    __in_repr = 0
 
     def _get_value_def(self):
         import omniORB
@@ -812,6 +819,58 @@ class ValueBase:
             raise INTF_REPOS(INTF_REPOS_NotAvailable, COMPLETED_NO)
         interf = ir.lookup_id(self._NP_RepositoryId)
         return interf._narrow(ValueDef)
+
+    def __repr__(self):
+        if self.__in_repr:
+            return "..."
+
+        self.__in_repr = 1
+        try:
+            cname = self._NP_ClassName
+            if cname is None:
+                cname = "%s.%s" % (self.__module__, self.__class__.__name__)
+
+            desc = omniORB.findType(self._NP_RepositoryId)
+            if desc is None:
+                # Type is not properly registered
+                return "<%s instance at 0x%x>" % (cname, builtin_id(self))
+
+            descs = []
+            while desc != tcInternal.tv_null:
+                descs.append(desc)
+                desc = desc[6]
+            descs.reverse()
+
+            vals = []
+
+            for desc in descs:
+                for i in range(7, len(desc), 3):
+                    attr = desc[i]
+                    try:
+                        val = getattr(self, attr)
+                        vals.append("%s=%s" % (attr,repr(val)))
+                    except AttributeError:
+                        vals.append("%s=<not set>" % attr)
+
+            return "%s(%s)" % (cname, string.join(vals, ", "))
+        finally:
+            self.__in_repr = 0
+
+
+    def _narrow(self, dest):
+        # Narrow function for abstract interfaces
+        if isinstance(self, dest):
+            return self
+
+        repoId = dest._NP_RepositoryId
+        try:
+            dest_skel = omniORB.skeletonMapping[repoId]
+            if isinstance(self, dest_skel):
+                return self
+        except KeyError:
+            pass
+        return None
+
 
 _d_ValueBase = (omniORB.tcInternal.tv_value, ValueBase,
                 ValueBase._NP_RepositoryId, "ValueBase", VM_NONE, None,

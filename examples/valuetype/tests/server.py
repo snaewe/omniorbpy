@@ -16,18 +16,18 @@ class Test_i (ValueTest__POA.Test):
 
     def op1(self, a):
         if a:
-            print "op1:", a, a.s, a.l
+            print "op1:", id(a), a
         else:
             print "op1:", a
         return a
 
     def op2(self, a, b):
         if a:
-            print "op2: a:", a, a.s, a.l
+            print "op2: a:", id(a), a
         else:
             print "op2: a:", a
         if b:
-            print "op2: b:", b, b.s, b.l
+            print "op2: b:", id(b), b
         else:
             print "op2: b:", b
         if a is b:
@@ -37,7 +37,7 @@ class Test_i (ValueTest__POA.Test):
 
     def op3(self, a):
         if a:
-            print "op3:", a, a.a, a.b
+            print "op3:", id(a), a
         else:
             print "op3:", a
 
@@ -60,7 +60,7 @@ class Test_i (ValueTest__POA.Test):
     def op6(self, a):
         av = a.value()
         if av:
-            print "op6:", av, av.s, av.l
+            print "op6:", id(av), av
             print "op6: keys =", av.__dict__.keys()
             print "op6: derived from One =", isinstance(av, ValueTest.One)
         else:
@@ -71,14 +71,14 @@ class Test_i (ValueTest__POA.Test):
         bv = b.value()
 
         if av:
-            print "op7 a:", av, av.s, av.l
+            print "op7 a:", id(av), av
             print "op7 a: keys =", av.__dict__.keys()
             print "op7 a: derived from One =", isinstance(av, ValueTest.One)
         else:
             print "op7 a:", av
 
         if bv:
-            print "op7 b:", bv, bv.s, bv.l
+            print "op7 b:", id(bv), bv
             print "op7 b: keys =", bv.__dict__.keys()
             print "op7 b: derived from One =", isinstance(bv, ValueTest.One)
         else:
@@ -93,14 +93,14 @@ class Test_i (ValueTest__POA.Test):
         av = a.value()
 
         if av:
-            print "op8 a:", av, av.s, av.l
+            print "op8 a:", id(av), av
             print "op8 a: keys =", av.__dict__.keys()
             print "op8 a: derived from One =", isinstance(av, ValueTest.One)
         else:
             print "op8 a:", av
 
         if bv:
-            print "op8 b:", bv, bv.s, bv.l
+            print "op8 b:", id(bv), bv
             print "op8 b: keys =", bv.__dict__.keys()
             print "op8 b: derived from One =", isinstance(bv, ValueTest.One)
         else:
@@ -115,14 +115,14 @@ class Test_i (ValueTest__POA.Test):
         bv = b.value()
 
         if av:
-            print "op9 a:", av, av.s, av.l
+            print "op9 a:", id(av), av
             print "op9 a: keys =", av.__dict__.keys()
             print "op9 a: derived from One =", isinstance(av, ValueTest.One)
         else:
             print "op9 a:", av
 
         if bv:
-            print "op9 b:", bv, bv.s, bv.l
+            print "op9 b:", id(bv), bv
             print "op9 b: keys =", bv.__dict__.keys()
             print "op9 b: derived from One =", isinstance(bv, ValueTest.One)
         else:

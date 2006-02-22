@@ -7,15 +7,9 @@ class Test_i (ValueTest__POA.Test):
     def op1(self, a, b):
         print
 
-        if a:
-            print "a:", a, a.s, a.l
-        else:
-            print "a:", a
+        print "a:", a
 
-        if b:
-            print "b:", b, b.s, b.l
-        else:
-            print "b:", b
+        print "b:", b
 
         if a is b:
             print "a is b"

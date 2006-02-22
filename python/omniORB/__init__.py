@@ -30,6 +30,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.30.2.16  2006/02/22 13:05:15  dgrisby
+# __repr__ and _narrow methods for valuetypes.
+#
 # Revision 1.30.2.15  2006/01/19 17:28:44  dgrisby
 # Merge from omnipy2_develop.
 #
@@ -656,7 +659,7 @@ class StructBase:
         desc = findType(self._NP_RepositoryId)
         if desc is None:
             # Type is not properly registered
-            return "<%s instance at 0x%x>" % (cname, long(id(t)) & 0xffffffffL)
+            return "<%s instance at 0x%x>" % (cname, id(self))
         vals = []
         for i in range(4, len(desc), 2):
             attr = desc[i]

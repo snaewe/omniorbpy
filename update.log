@@ -1,3 +1,14 @@
+Wed Feb 22 13:04:33 GMT 2006 dgrisby
+====================================
+
+- __repr__ and _narrow methods for valuetypes.
+
+examples/valuetype/simple/server.py
+examples/valuetype/tests/server.py
+python/omniORB/CORBA.py
+python/omniORB/__init__.py
+
+
 Thu Feb 16 22:55:19 GMT 2006 dgrisby
 ====================================
 
