@@ -1,3 +1,12 @@
+Tue Feb 28 12:41:15 GMT 2006 dgrisby
+====================================
+
+- New _NP_postUnmarshal hook on valuetypes.
+
+modules/pyValueType.cc
+python/omniORB/CORBA.py
+
+
 Wed Feb 22 13:04:33 GMT 2006 dgrisby
 ====================================
 

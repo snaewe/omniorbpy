@@ -30,6 +30,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.31.2.9  2006/02/28 12:41:59  dgrisby
+# New _NP_postUnmarshal hook on valuetypes.
+#
 # Revision 1.31.2.8  2006/02/22 13:05:15  dgrisby
 # __repr__ and _narrow methods for valuetypes.
 #
@@ -854,8 +857,10 @@ class ValueBase:
 
             return "%s(%s)" % (cname, string.join(vals, ", "))
         finally:
-            self.__in_repr = 0
-
+            try:
+                del self.__in_repr
+            except AttributeError:
+                pass
 
     def _narrow(self, dest):
         # Narrow function for abstract interfaces
@@ -870,6 +875,17 @@ class ValueBase:
         except KeyError:
             pass
         return None
+
+    def _NP_postUnmarshal(self):
+        """
+        _NP_postUnmarshal(self)
+
+        Called when a value has been completely unmarshalled. May
+        modify the object state. The return value is used as the
+        unmarshalled valuetype, so must return self or a compatible
+        object.
+        """
+        return self
 
 
 _d_ValueBase = (omniORB.tcInternal.tv_value, ValueBase,
