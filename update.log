@@ -1,3 +1,11 @@
+Mon Mar  6 18:29:13 GMT 2006 dgrisby
+====================================
+
+- Missing module name in use of minor code.
+
+python/omniORB/CORBA.py
+
+
 Tue Feb 28 12:41:15 GMT 2006 dgrisby
 ====================================
 
