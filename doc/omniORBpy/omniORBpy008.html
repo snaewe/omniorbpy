@@ -18,7 +18,7 @@ Code set conversion
 <A HREF="omniORBpy009.html"><IMG SRC ="next_motif.gif" ALT="Next"></A>
 <HR>
 
-<H1 CLASS="chapter"><A NAME="htoc95">Chapter&nbsp;8</A>&nbsp;&nbsp;Code set conversion</H1>
+<H1 CLASS="chapter"><A NAME="htoc96">Chapter&nbsp;8</A>&nbsp;&nbsp;Code set conversion</H1>
 <A NAME="chap:codesets"></A>
 omniORB supports full code set negotiation, used to select and
 translate between different character code sets, for the transmission
@@ -29,7 +29,7 @@ some pointers about how to implement your own code sets, in case the
 ones that come with omniORB are not sufficient.<BR>
 <BR>
 <A NAME="toc40"></A>
-<H2 CLASS="section"><A NAME="htoc96">8.1</A>&nbsp;&nbsp;Native code set</H2>
+<H2 CLASS="section"><A NAME="htoc97">8.1</A>&nbsp;&nbsp;Native code set</H2>
 For the ORB to know how to handle strings given to it by the
 application, it must know what code set they are represented with, so
 it can properly translate them if need be. The default is ISO 8859-1
@@ -47,14 +47,14 @@ Unicode type, so there is no need to select a native code set for
 wchar.<BR>
 <BR>
 <A NAME="toc41"></A>
-<H2 CLASS="section"><A NAME="htoc97">8.2</A>&nbsp;&nbsp;Code set library</H2>
+<H2 CLASS="section"><A NAME="htoc98">8.2</A>&nbsp;&nbsp;Code set library</H2>
 To save space in the main ORB core library, most of the code set
 implementations are in a separate library. To load it from Python, you
 must import the <TT>omniORB.codesets</TT> module before calling
 <TT>CORBA.ORB_init()</TT>.<BR>
 <BR>
 <A NAME="toc42"></A>
-<H2 CLASS="section"><A NAME="htoc98">8.3</A>&nbsp;&nbsp;Implementing new code sets</H2>
+<H2 CLASS="section"><A NAME="htoc99">8.3</A>&nbsp;&nbsp;Implementing new code sets</H2>
 Code sets must currently be implemented in C++. See the omniORB for
 C++ documentation for details.<BR>
 <BR>

@@ -44,7 +44,7 @@ User's Guide
 Apasphere Ltd.<BR>
 </FONT><BR>
 <BR>
-January 2006
+April 2006
 </DIV><BR>
 <BR>
 <FONT SIZE=5><B>Changes and Additions, June 2005</B></FONT>
@@ -64,9 +64,9 @@ Per thread timeouts.
 <UL CLASS="itemize"><LI CLASS="li-itemize">
 Updated to omniORBpy 2.
 </UL>
-<FONT SIZE=5><B>Contents</B></FONT>
 
-<BR>
+
+<FONT SIZE=5><B>Contents</B></FONT><BR>
 <BR>
 <!--TOC chapter Introduction-->
 
@@ -124,7 +124,7 @@ clients.<BR>
 
 omniORB has always been designed to be portable. It runs on many
 flavours of Unix, Windows, several embedded operating systems, and
-relatively obscure systems such as OpenVMS, Fujitsu-Siemens BS2000.
+relatively obscure systems such as OpenVMS and Fujitsu-Siemens BS2000.
 It is designed to be easy to port to new platforms. The IDL to C++
 mapping for all target platforms is the same.<BR>
 <BR>
@@ -134,7 +134,7 @@ mapping for all target platforms is the same.<BR>
 
 <A NAME="sec:missing"></A>
 omniORB is not (yet) a complete implementation of the CORBA 2.6 core.
-The following is a list of the missing features.
+The following is a list of the most significant missing features.
 <UL CLASS="itemize"><LI CLASS="li-itemize">omniORB does not have its own Interface Repository. However, it
 can act as a client to an IfR. The omniifr project
 (<A HREF="http://omniifr.sourceforge.net/"><TT>http://omniifr.sourceforge.net/</TT></A>) aims to create an IfR for
@@ -202,7 +202,7 @@ checks the environment variable <TT>OMNIORB_CONFIG</TT> to obtain the
 pathname of the configuration file. If this is not set, it then
 attempts to obtain configuration data in the system registry. It
 searches for the data under the key
-<CODE>HKEY_LOCAL_MACHINE\SOFTWARE\omniORB</CODE>.</UL>
+<TT>HKEY_LOCAL_MACHINE\SOFTWARE\omniORB</TT>.</UL>
 omniORB has a large number of parameters than can be configured. See
 chapter&nbsp;<A HREF="#chap:config">4</A> for full details. The files
 <TT>sample.cfg</TT> and <TT>sample.reg</TT> contain an example
@@ -1419,8 +1419,8 @@ server's address. See section&nbsp;<A HREF="#sec:clientRule">7.7.1</A> for detai
 <BR>
 Call timeout in milliseconds for the client side. If a call takes
 longer than the specified number of milliseconds, the ORB closes the
-connection and raises a <TT>COMM_FAILURE</TT> exception. A value
-of zero means no timeout; calls can block for ever. See
+connection to the server and raises a <TT>TRANSIENT</TT> exception. A
+value of zero means no timeout; calls can block for ever. See
 section&nbsp;<A HREF="#sec:timeoutAPI">7.3.1</A> for more information about timeouts.<BR>
 <BR>
 <B>Note</B>: omniORB 3 had timeouts specified in seconds;
@@ -1527,6 +1527,7 @@ These parameters affect server-side operations.<BR>
 <BR>
 <TT>endPoint&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT> &nbsp;&nbsp; <I>default</I> = <TT>giop:tcp::</TT><BR>
 <TT>endPointNoListen</TT><BR>
+<TT>endPointPublish</TT><BR>
 <TT>endPointNoPublish</TT><BR>
 <TT>endPointPublishAllIFs</TT><BR>
 These options determine the end-points the ORB should listen on, and
@@ -1598,8 +1599,8 @@ should start again.<BR>
 <TT>threadPoolWatchConnection</TT> &nbsp;&nbsp; <I>default</I> =
  <TT>1</TT><BR>
 <BR>
-If true, threads from the pool temporarily behave a bit like thread
-per connection after dispatching a call. See
+If non-zero, threads from the pool temporarily behave a bit like
+thread per connection after dispatching a call. See
 section&nbsp;<A HREF="#sec:watchConn">7.4.2</A> for details.<BR>
 <BR>
 <TT>acceptBiDirectionalGIOP</TT> &nbsp;&nbsp; <I>default</I> =
@@ -1937,7 +1938,8 @@ The structure has this definition:<BR>
 </TT><TT>        CORBA::Boolean hold_lock);</TT><TT>
 </TT><TT>  <I>// Convert a Python object reference to a C++ object reference.</I></TT><TT>
 </TT><TT>  <I>// Raises BAD_PARAM if the Python object is not an object reference.</I></TT><TT>
-</TT><TT>  <I>// If &lt;hold_lock&gt; is true, caller holds the Python interpreter lock.</I></TT></DIV><BR>
+</TT><TT>  <I>// If &lt;hold_lock&gt; is true, caller holds the Python interpreter lock.</I></TT><TT>
+</TT><TT>};</TT></DIV><BR>
 <BR>
 <!--BEGIN NOTES chapter-->
 <HR WIDTH="50%" SIZE=1><DL CLASS="list"><DT CLASS="dt-list"><A NAME="note9" HREF="#text9"><FONT SIZE=5>1</FONT></A><DD CLASS="dd-list">This is a change from omniORB 4.0
@@ -2068,7 +2070,7 @@ If you have an IDL file like:<BR>
 <BR>
 then omniidl will normally issue a warning:
 <PRE CLASS="verbatim">
-  test.idl:1: Warning: Forward declared interface `::I' was never
+  test.idl:1: Warning: Forward declared interface `I' was never
   fully defined
 </PRE>
 It is illegal to declare such IDL in isolation, but it
@@ -2324,7 +2326,7 @@ the location of a naming service.<BR>
 <H2 CLASS="section"><A NAME="htoc69">6.2</A>&nbsp;&nbsp;Configuring resolve_initial_references</H2><!--SEC END -->
 
 <A NAME="sec:insargs"></A>
-The specifies two standard command line arguments which provide a
+The INS specifies two standard command line arguments which provide a
 portable way of configuring <TT>ORB::resolve_initial_references()</TT>:<BR>
 <BR>
 <!--TOC subsection ORBInitRef-->
@@ -2435,10 +2437,8 @@ equivalents of the various bind operations.<BR>
 <H3 CLASS="subsection"><A NAME="htoc74">6.3.2</A>&nbsp;&nbsp;Use with corbaname</H3><!--SEC END -->
 
 To make it easy to use omniNames with <TT>corbaname</TT> URIs, it
-now starts with the default port of 2809, and an object key of
-`<TT>NameService</TT>' for the root naming context. This is only
-possible when it is started `fresh', rather than with a log file from
-an older omniNames version.<BR>
+starts with the default port of 2809, and an object key of
+`<TT>NameService</TT>' for the root naming context.<BR>
 <BR>
 <!--TOC section omniMapper-->
 
@@ -2457,13 +2457,12 @@ started with a command line of:
 <TT>omniMapper [-port </TT>&lt;<I>port</I>&gt;<TT>] [-config </TT>&lt;<I>config file</I>&gt;<TT>] [-v]</TT>
 </BLOCKQUOTE>
 The <TT>-port</TT> option allows you to choose a port other
-than 2809 to listen on<SUP><A NAME="text12" HREF="#note12">2</A></SUP>. The <TT>-config</TT> option specifies a location for the
-configuration file. The default name is <TT>/etc/omniMapper.cfg</TT>, or
-<CODE>C:\omniMapper.cfg</CODE>
-on Windows. omniMapper does not normally print anything; the
-<TT>-v</TT> option makes it verbose so it prints configuration
-information and a record of the redirections it makes, to standard
-output.<BR>
+than 2809 to listen on. The <TT>-config</TT> option specifies a
+location for the configuration file. The default name is
+<TT>/etc/omniMapper.cfg</TT>, or <TT>C:\omniMapper.cfg</TT> on
+Windows. omniMapper does not normally print anything; the <TT>-v</TT>
+option makes it verbose so it prints configuration information and a
+record of the redirections it makes, to standard output.<BR>
 <BR>
 The configuration file is very simple. Each line contains a string to
 be used as an object key, some white space, and an IOR (or any valid
@@ -2516,9 +2515,6 @@ objects in a different POA.<BR>
 <!--BEGIN NOTES chapter-->
 <HR WIDTH="50%" SIZE=1><DL CLASS="list"><DT CLASS="dt-list"><A NAME="note11" HREF="#text11"><FONT SIZE=5>1</FONT></A><DD CLASS="dd-list">Not 2089 as
 printed in [<A HREF="#inschapters"><CITE>OMG00</CITE></A>]!
-<DT CLASS="dt-list"><A NAME="note12" HREF="#text12"><FONT SIZE=5>2</FONT></A><DD CLASS="dd-list">You can also play the
-<TT>-ORBpoa_iiop_port</TT> trick to make it listen on more than one
-port.
 </DL>
 <!--END NOTES-->
 <!--TOC chapter Connection and Thread Management-->
@@ -2547,7 +2543,7 @@ invocations on the implementation object.<BR>
 <BR>
 For the sake of interoperability, CORBA mandates that all ORBs should
 support IIOP as the means to communicate remote invocations over a
-TCP/IP connection. IIOP is usually<SUP><A NAME="text13" HREF="#note13">1</A></SUP>
+TCP/IP connection. IIOP is usually<SUP><A NAME="text12" HREF="#note12">1</A></SUP>
 asymmetric with respect to the roles of the parties at the two ends of
 a connection. At one end is the client which can only initiate remote
 invocations. At the other end is the server which can only receive
@@ -2610,9 +2606,13 @@ themselves.<BR>
 <BR>
 In the default one call per connection mode, there is a limit to the
 number of concurrent connections that are opened, set with the
-<TT>maxGIOPConnectionPerServer</TT> parameter. To tell the ORB to
-multiplex calls on a single connection, set the
-<TT>oneCallPerConnection</TT> parameter to zero.<BR>
+<TT>maxGIOPConnectionPerServer</TT> parameter. To tell the ORB
+that it may multiplex calls on a single connection, set the
+<TT>oneCallPerConnection</TT> parameter to zero. If the
+<TT>oneCallPerConnection</TT> parameter is set to the default
+value of one, and there are more concurrent calls than specified by
+<TT>maxGIOPConnectionPerServer</TT>, calls block waiting for connections
+to become free.<BR>
 <BR>
 Note that some server-side ORBs, including omniORB versions before
 version 4.0, are unable to deal with concurrent calls multiplexed on a
@@ -2737,7 +2737,7 @@ The <TT>maxServerThreadPerConnection</TT> parameter can be set to limit
 the number of threads that can be allocated to a single connection
 containing concurrent calls. Setting the parameter to 1 mimics the
 behaviour of omniORB versions before 4.0, that did not support
-multiplexed calls.<BR>
+calls multiplexed on one connection.<BR>
 <BR>
 <!--TOC subsection Thread pool mode-->
 
@@ -2753,9 +2753,9 @@ therefore at least one thread switch for each call.<BR>
 <BR>
 The thread pool is not pre-initialised. Instead, threads are started
 on demand, and idle threads are stopped after a period of inactivity.
-The maximum number of threads that can be started in the pool is
-selected with the <TT>maxServerThreadPoolSize</TT> parameter. The
-default is 100.<BR>
+The maximum number of threads that can be started in the pool is set
+with the <TT>maxServerThreadPoolSize</TT> parameter. The default
+is 100.<BR>
 <BR>
 A common pattern in CORBA applications is for a client to make several
 calls to a single object in quick succession. To handle this situation
@@ -2878,25 +2878,25 @@ when it is useful to publish different information.<BR>
 <BR>
 Details are selected with the <TT>endPoint</TT> family of parameters.
 The simplest is plain <TT>endPoint</TT>, which chooses a transport and
-interface details, and publishes the information in IORs. End point
+interface details, and publishes the information in IORs. Endpoint
 parameters are in the form of URIs, with a scheme name of
 `<TT>giop:</TT>', followed by the transport name. Different transports
 have different parameters following the transport.<BR>
 <BR>
-TCP end points have the format:
+TCP endpoints have the format:
 <BLOCKQUOTE CLASS="quote">
 <TT>giop:tcp:</TT><I>&lt;host&gt;</I><TT>:</TT><I>&lt;port&gt;</I>
 </BLOCKQUOTE>
-The host must be a valid host name for the server machine.
-It determines the network interface on which the server listens. The
-port selects the TCP port to listen on, which must be unoccupied.
-Either the host or port, or both can be left empty. If the host is
-empty, the ORB published the IP address of the first non-loopback
-network interface it can find (or the loopback if that is the only
-interface), but listens on <EM>all</EM> network interfaces. If the port
-is empty, the operating system chooses a port.<BR>
+The host must be a valid host name or IP address for the
+server machine. It determines the network interface on which the
+server listens. The port selects the TCP port to listen on, which must
+be unoccupied. Either the host or port, or both can be left empty. If
+the host is empty, the ORB publishes the IP address of the first
+non-loopback network interface it can find (or the loopback if that is
+the only interface), but listens on <EM>all</EM> network interfaces. If
+the port is empty, the operating system chooses a port.<BR>
 <BR>
-Multiple TCP end points can be selected, either to specify multiple
+Multiple TCP endpoints can be selected, either to specify multiple
 network interfaces on which to listen, or (less usefully) to select
 multiple TCP ports on which to listen.<BR>
 <BR>
@@ -2905,8 +2905,8 @@ parameter of <TT>giop:tcp::</TT>, meaning IORs contain the address of
 the first non-loopback network interface, the ORB listens on all
 interfaces, and the OS chooses a port number.<BR>
 <BR>
-SSL end points have the same format as TCP ones, except `<TT>tcp</TT>'
-is replaced with `<TT>ssl</TT>'. Unix domain socket end points have the
+SSL endpoints have the same format as TCP ones, except `<TT>tcp</TT>'
+is replaced with `<TT>ssl</TT>'. Unix domain socket endpoints have the
 format:
 <BLOCKQUOTE CLASS="quote">
 <TT>giop:unix:</TT><I>&lt;filename&gt;</I>
@@ -2915,46 +2915,146 @@ where the filename is the name of the socket within the
 filesystem. If the filename is left blank, the ORB chooses a name
 based on the process id and a timestamp.<BR>
 <BR>
-<!--TOC subsection End point publishing-->
-
-<H3 CLASS="subsection"><A NAME="htoc89">7.6.1</A>&nbsp;&nbsp;End point publishing</H3><!--SEC END -->
-
-To publish an end point in IORs, without actually listening on that
-end point, the <TT>endPointNoListen</TT> parameter can be set. This can
-be useful in fault-tolerant applications where replicas of an object
-can be contacted at more than one server. <TT>endPointNoListen</TT> does
-not check that the transport specified is sensible for the current
-machine, so it allows the address of a different machine to be
-specified.<BR>
+To listen on an endpoint without publishing it in IORs, specify it
+with the <TT>endPointNoPublish</TT> configuration parameter. See below
+for more details about endpoint publishing.<BR>
 <BR>
-Similarly, but less likely to be useful, it is possible to ask the
-server to listen on an end point, but not publish the details in IORs,
-using the <TT>endPointNoPublish</TT> parameter. This should <EM>not</EM>
-be used for security by obscurity!<BR>
+<!--TOC subsection IPv6-->
+
+<H3 CLASS="subsection"><A NAME="htoc89">7.6.1</A>&nbsp;&nbsp;IPv6</H3><!--SEC END -->
+
+On platforms where it is available, omniORB supports IPv6. On most
+Unix platforms, IPv6 sockets accept both IPv6 and IPv4 connections, so
+omniORB's default <TT>giop:tcp::</TT> endpoint accepts both IPv4 and
+IPv6 connections. On Windows, each socket type only accepts incoming
+connections of the same type, so an IPv6 socket cannot be used with
+IPv4 clients. For this reason, the default <TT>giop:tcp::</TT> endpoint
+only listens for IPv4 connections. Since endpoints with a specific
+host name or address only listen on a single network interface, they
+are inherently limited to just one protocol family.<BR>
 <BR>
-If a machine has multiple TCP network interfaces, it may be useful to
-publish all interfaces, instead of just the first one. This is
-necessary if different interfaces are on separate non-gatewayed
-subnets, for example. Publishing all addresses could be achieved with
-lots of <TT>endPoint</TT> parameters, but a short-hand is to set the
-<TT>endPointPublishAllIFs</TT> parameter to 1. That (in conjunction with
-a `<TT>giop:tcp::</TT>' transport selection without a specific hostname)
-causes all the machine's non-loopback interfaces to be published in
-IORs.<BR>
+To explicitly ask for just IPv4 or just IPv6, an endpoint with the
+wildcard address for the protocol family should be used. For IPv4, the
+wildcard address is `<TT>0.0.0.0</TT>', and for IPv6 it is `<TT>::</TT>'.
+So, to listen for IPv4 connections on all IPv4 network interfaces, use
+an endpoint of:
+<BLOCKQUOTE CLASS="quote">
+<TT>giop:tcp:0.0.0.0:</TT>
+</BLOCKQUOTE>
+All IPv6 addresses contain colons, so the address portion in
+URIs must be contained within <TT>[]</TT> characters. Therefore, to
+listen just for IPv6 connections on all IPv6 interfaces, use the
+somewhat cryptic:
+<BLOCKQUOTE CLASS="quote">
+<TT>giop:tcp:[::]:</TT>
+</BLOCKQUOTE>
+To listen for both IPv4 and IPv6 connections on Windows,
+both endpoints must be explicitly provided.<BR>
+<BR>
+<!--TOC subsection Endpoint publishing-->
+
+<H3 CLASS="subsection"><A NAME="htoc90">7.6.2</A>&nbsp;&nbsp;Endpoint publishing</H3><!--SEC END -->
+
+For clients to be able to connect to a server, the server publishes
+endpoint information in its IORs (Interoperable Object References).
+Normally, omniORB publishes the first available address for each of
+the endpoints it is listening on.<BR>
+<BR>
+The endpoint information to publish is determined by the
+<TT>endPointPublish</TT> configuration parameter. It contains a
+comma-separated list of publish rules. The rules are applied in turn
+to each of the configured endpoints; if a rule matches an endpoint, it
+causes one or more endpoints to be published.<BR>
+<BR>
+The following core rules are supported:<BR>
+<TABLE CELLSPACING=2 CELLPADDING=0>
+<TR><TD VALIGN=top ALIGN=left><TT>addr</TT></TD>
+<TD VALIGN=top ALIGN=left>the first natural address of the endpoint</TD>
+</TR>
+<TR><TD VALIGN=top ALIGN=left><TT>ipv4</TT></TD>
+<TD VALIGN=top ALIGN=left>the first IPv4 address of a TCP or SSL endpoint</TD>
+</TR>
+<TR><TD VALIGN=top ALIGN=left><TT>ipv6</TT></TD>
+<TD VALIGN=top ALIGN=left>the first IPv6 address of a TCP or SSL endpoint</TD>
+</TR>
+<TR><TD VALIGN=top ALIGN=left><TT>name</TT></TD>
+<TD VALIGN=top ALIGN=left>the first address that can be resolved to a name</TD>
+</TR>
+<TR><TD VALIGN=top ALIGN=left><TT>hostname</TT></TD>
+<TD VALIGN=top ALIGN=left>the result of the gethostname() system call</TD>
+</TR>
+<TR><TD VALIGN=top ALIGN=left><TT>fqdn</TT></TD>
+<TD VALIGN=top ALIGN=left>the fully-qualified domain name</TD>
+</TR></TABLE><BR>
+The core rules can be combined using the vertical bar operator to
+try several rules in turn until one succeeds. e.g:<BR>
+<TABLE CELLSPACING=2 CELLPADDING=0>
+<TR><TD VALIGN=top ALIGN=left><TT>name|ipv6|ipv4</TT></TD>
+<TD VALIGN=top ALIGN=left>the name of the endpoint if it has one;
+ 	failing that, its first IPv6 address;
+ 	failing that, its first IPv4 address.</TD>
+</TR></TABLE><BR>
+Multiple rules can be combined using the comma operator to
+publish more than one endpoint. e.g.<BR>
+<TABLE CELLSPACING=2 CELLPADDING=0>
+<TR><TD VALIGN=top ALIGN=left><TT>name,addr</TT></TD>
+<TD VALIGN=top ALIGN=left>the name of the endpoint (if it has one),
+ followed by its first address.</TD>
+</TR></TABLE><BR>
+For endpoints with multiple addresses (e.g. TCP endpoints on
+multi-homed machines), the <TT>all()</TT> manipulator causes all
+addresses to be published. e.g.:<BR>
+<TABLE CELLSPACING=2 CELLPADDING=0>
+<TR><TD VALIGN=top ALIGN=left><TT>all(addr)</TT></TD>
+<TD VALIGN=top ALIGN=left>all addresses are published</TD>
+</TR>
+<TR><TD VALIGN=top ALIGN=left><TT>all(name)</TT></TD>
+<TD VALIGN=top ALIGN=left>all addresses that resolve to names are published</TD>
+</TR>
+<TR><TD VALIGN=top ALIGN=left><TT>all(name|addr)</TT></TD>
+<TD VALIGN=top ALIGN=left>all addresses are published by name if they have
+ one, address otherwise.</TD>
+</TR>
+<TR><TD VALIGN=top ALIGN=left><TT>all(name,addr)</TT></TD>
+<TD VALIGN=top ALIGN=left>all addresses are published by name (if they
+ have one), and by address.</TD>
+</TR>
+<TR><TD VALIGN=top ALIGN=left><TT>all(name), all(addr)</TT></TD>
+<TD VALIGN=top ALIGN=left>first the names of all addresses are published,
+ followed by all the addresses.</TD>
+</TR></TABLE><BR>
+A specific endpoint can be published by giving its endpoint URI,
+even if the server is not listening on that endpoint. e.g.:<BR>
+<TABLE CELLSPACING=2 CELLPADDING=0>
+<TR><TD VALIGN=top ALIGN=left><TT>giop:tcp:not.my.host:12345</TT></TD>
+</TR>
+<TR><TD VALIGN=top ALIGN=left><TT>giop:unix:/not/my/socket-file</TT></TD>
+</TR></TABLE><BR>
+If the host or port number for a TCP or SSL URI are missed out,
+they are filled in with the details from each listening TCP/SSL
+endpoint. This can be used to publish a different name for a
+TCP/SSL endpoint that is using an ephemeral port, for example.<BR>
+<BR>
+omniORB 4.0 supported two options related to endpoint publishing that
+are superseded by the <TT>endPointPublish</TT> parameter, and so are now
+deprecated. Setting <TT>endPointPublishAllIFs</TT> to 1 is equivalent to
+setting <TT>endPointPublish</TT> to `<TT>all(addr)</TT>'. The
+<TT>endPointNoListen</TT> parameter is equivalent to adding endpoint
+URIs to the <TT>endPointPublish</TT> parameter.<BR>
 <BR>
 <!--TOC section Connection selection and acceptance-->
 
-<H2 CLASS="section"><A NAME="htoc90">7.7</A>&nbsp;&nbsp;Connection selection and acceptance</H2><!--SEC END -->
+<H2 CLASS="section"><A NAME="htoc91">7.7</A>&nbsp;&nbsp;Connection selection and acceptance</H2><!--SEC END -->
 
-In the face of IORs containing details about multiple different end
-points, clients have to know how to choose the one to use to connect a
-server. Similarly, servers may wish to restrict which clients can
-connect to particular transports. This is achieved with
+In the face of IORs containing details about multiple different
+endpoints, clients have to know how to choose the one to use to
+connect a server. Similarly, servers may wish to restrict which
+clients can connect to particular transports. This is achieved with
 <I>transport rules</I>.<BR>
 <BR>
 <!--TOC subsection Client transport rules-->
 
-<H3 CLASS="subsection"><A NAME="htoc91">7.7.1</A>&nbsp;&nbsp;Client transport rules</H3><!--SEC END -->
+<H3 CLASS="subsection"><A NAME="htoc92">7.7.1</A>&nbsp;&nbsp;Client transport rules</H3><!--SEC END -->
 
 <A NAME="sec:clientRule"></A>
 The <TT>clientTransportRule</TT> parameter is used to filter and
@@ -2972,10 +3072,22 @@ The address mask can be one of<BR>
 <TR><TD VALIGN=top ALIGN=left NOWRAP>2.</TD>
 <TD VALIGN=top ALIGN=left NOWRAP><I>w.x.y.z</I><TT>/</TT><I>m1.m2.m3.m4</I></TD>
 <TD VALIGN=top ALIGN=left>An IPv4 address
- with the bits selected by the mask, e.g.
- 172.16.0.0/255.240.0.0.</TD>
+ with bits selected by the mask, e.g.
+ <TT>172.16.0.0/255.240.0.0</TT></TD>
 </TR>
 <TR><TD VALIGN=top ALIGN=left NOWRAP>3.</TD>
+<TD VALIGN=top ALIGN=left NOWRAP><I>w.x.y.z</I><TT>/</TT><I>prefixlen</I></TD>
+<TD VALIGN=top ALIGN=left>An IPv4 address with
+ <I>prefixlen</I> significant bits, e.g.
+ <TT>172.16.2.0/24</TT></TD>
+</TR>
+<TR><TD VALIGN=top ALIGN=left NOWRAP>4.</TD>
+<TD VALIGN=top ALIGN=left NOWRAP><I>a:b:c:d:e:f:g:h</I><TT>/</TT><I>prefixlen</I></TD>
+<TD VALIGN=top ALIGN=left>An IPv6
+ address with <I>prefixlen</I> significant bits, e.g.
+ <TT>3ffe:505:2:1::/64</TT></TD>
+</TR>
+<TR><TD VALIGN=top ALIGN=left NOWRAP>5.</TD>
 <TD VALIGN=top ALIGN=left NOWRAP><TT>*</TT></TD>
 <TD VALIGN=top ALIGN=left>Wildcard that matches any address</TD>
 </TR></TABLE><BR>
@@ -2999,14 +3111,14 @@ The action is one or more of the following:<BR>
 </TR>
 <TR><TD VALIGN=top ALIGN=left NOWRAP>5.</TD>
 <TD VALIGN=top ALIGN=left NOWRAP><TT>bidir</TT></TD>
-<TD VALIGN=top ALIGN=left>Any connection to this address should be used
+<TD VALIGN=top ALIGN=left>Connections to this address can be used
  bidirectionally (see section&nbsp;<A HREF="#sec:bidir">7.8</A>)</TD>
 </TR></TABLE><BR>
 The transport-selecting actions form a prioritised list, so
-an action of `<TT>unix,tcp,ssl</TT>' means to use a Unix transport
-if there is one, failing that a TCP transport, failing <EM>that</EM> an
-SSL transport. In the absence of any explicit rules, the client uses
-the implicit rule of `<TT>* unix,tcp,ssl</TT>'.<BR>
+an action of `<TT>unix,ssl,tcp</TT>' means to use a Unix transport if
+there is one, failing that a SSL transport, failing <EM>that</EM> a TCP
+transport. In the absence of any explicit rules, the client uses the
+implicit rule of `<TT>* unix,ssl,tcp</TT>'.<BR>
 <BR>
 If more than one rule is specified, they are prioritised in the order
 they are specified. For example, the configuration file might contain:
@@ -3020,19 +3132,19 @@ This would be useful if there is a fast network
 (172.16.0.0), and connections to other networks are not permitted at
 all.<BR>
 <BR>
-In general, the result of filtering the end point specifications in an
+In general, the result of filtering the endpoint specifications in an
 IOR with the client transport rule will be a prioritised list of
-transports and networks. (If the transport rules are do not prioritise
-one end point over another, the order the end points are listed in the
-IOR is used.) When trying to contact an object, the ORB tries its
-possible end points in turn, until it finds one with which it can
+transports and networks. (If the transport rules do not prioritise one
+endpoint over another, the order the endpoints are listed in the IOR
+is used.) When trying to contact an object, the ORB tries its
+possible endpoints in turn, until it finds one with which it can
 contact the object. Only after it has unsuccessfully tried all
-permissible transports will it raise a <TT>TRANSIENT</TT> exception to
+permissible endpoints will it raise a <TT>TRANSIENT</TT> exception to
 indicate that the connect failed.<BR>
 <BR>
 <!--TOC subsection Server transport rules-->
 
-<H3 CLASS="subsection"><A NAME="htoc92">7.7.2</A>&nbsp;&nbsp;Server transport rules</H3><!--SEC END -->
+<H3 CLASS="subsection"><A NAME="htoc93">7.7.2</A>&nbsp;&nbsp;Server transport rules</H3><!--SEC END -->
 
 <A NAME="sec:serverRule"></A>
 The server transport rules have the same format as client transport
@@ -3052,9 +3164,13 @@ client is not on the intranet:
                       = 172.16.0.0/255.240.0.0     tcp,ssl
                       = *                          ssl,bidir
 </PRE>
+In the absence of any explicit rules, the server uses the
+implicit rule of `<TT>* unix,ssl,tcp</TT>', meaning any kind of
+connection is accepted from any client.<BR>
+<BR>
 <!--TOC section Bidirectional GIOP-->
 
-<H2 CLASS="section"><A NAME="htoc93">7.8</A>&nbsp;&nbsp;Bidirectional GIOP</H2><!--SEC END -->
+<H2 CLASS="section"><A NAME="htoc94">7.8</A>&nbsp;&nbsp;Bidirectional GIOP</H2><!--SEC END -->
 
 <A NAME="sec:bidir"></A>
 omniORB supports bidirectional GIOP, which allows callbacks to be made
@@ -3081,7 +3197,7 @@ On the server side, these conditions must be met:
  <TT>BOTH</TT>.</UL>
 <!--TOC section SSL transport-->
 
-<H2 CLASS="section"><A NAME="htoc94">7.9</A>&nbsp;&nbsp;SSL transport</H2><!--SEC END -->
+<H2 CLASS="section"><A NAME="htoc95">7.9</A>&nbsp;&nbsp;SSL transport</H2><!--SEC END -->
 
 omniORB supports an SSL transport, using OpenSSL. It is only built if
 OpenSSL is available. On platforms using Autoconf, it is autodetected
@@ -3098,13 +3214,13 @@ parameters in the <TT>omniORB.sslTP</TT> module before calling
 certificate authority and encryption keys, and the key file password.<BR>
 <BR>
 <!--BEGIN NOTES chapter-->
-<HR WIDTH="50%" SIZE=1><DL CLASS="list"><DT CLASS="dt-list"><A NAME="note13" HREF="#text13"><FONT SIZE=5>1</FONT></A><DD CLASS="dd-list">GIOP 1.2 supports
+<HR WIDTH="50%" SIZE=1><DL CLASS="list"><DT CLASS="dt-list"><A NAME="note12" HREF="#text12"><FONT SIZE=5>1</FONT></A><DD CLASS="dd-list">GIOP 1.2 supports
 `bidirectional GIOP', which permits the rôles to be reversed.
 </DL>
 <!--END NOTES-->
 <!--TOC chapter Code set conversion-->
 
-<H1 CLASS="chapter"><A NAME="htoc95">Chapter&nbsp;8</A>&nbsp;&nbsp;Code set conversion</H1><!--SEC END -->
+<H1 CLASS="chapter"><A NAME="htoc96">Chapter&nbsp;8</A>&nbsp;&nbsp;Code set conversion</H1><!--SEC END -->
 
 <A NAME="chap:codesets"></A>
 omniORB supports full code set negotiation, used to select and
@@ -3117,7 +3233,7 @@ ones that come with omniORB are not sufficient.<BR>
 <BR>
 <!--TOC section Native code set-->
 
-<H2 CLASS="section"><A NAME="htoc96">8.1</A>&nbsp;&nbsp;Native code set</H2><!--SEC END -->
+<H2 CLASS="section"><A NAME="htoc97">8.1</A>&nbsp;&nbsp;Native code set</H2><!--SEC END -->
 
 For the ORB to know how to handle strings given to it by the
 application, it must know what code set they are represented with, so
@@ -3137,7 +3253,7 @@ wchar.<BR>
 <BR>
 <!--TOC section Code set library-->
 
-<H2 CLASS="section"><A NAME="htoc97">8.2</A>&nbsp;&nbsp;Code set library</H2><!--SEC END -->
+<H2 CLASS="section"><A NAME="htoc98">8.2</A>&nbsp;&nbsp;Code set library</H2><!--SEC END -->
 
 To save space in the main ORB core library, most of the code set
 implementations are in a separate library. To load it from Python, you
@@ -3146,14 +3262,14 @@ must import the <TT>omniORB.codesets</TT> module before calling
 <BR>
 <!--TOC section Implementing new code sets-->
 
-<H2 CLASS="section"><A NAME="htoc98">8.3</A>&nbsp;&nbsp;Implementing new code sets</H2><!--SEC END -->
+<H2 CLASS="section"><A NAME="htoc99">8.3</A>&nbsp;&nbsp;Implementing new code sets</H2><!--SEC END -->
 
 Code sets must currently be implemented in C++. See the omniORB for
 C++ documentation for details.<BR>
 <BR>
 <!--TOC chapter Interceptors-->
 
-<H1 CLASS="chapter"><A NAME="htoc99">Chapter&nbsp;9</A>&nbsp;&nbsp;Interceptors</H1><!--SEC END -->
+<H1 CLASS="chapter"><A NAME="htoc100">Chapter&nbsp;9</A>&nbsp;&nbsp;Interceptors</H1><!--SEC END -->
 
 <A NAME="chap:interceptors"></A>
 omniORBpy has limited interceptor support. Interceptors permit the
@@ -3198,7 +3314,7 @@ is initialised. Attempting to call them later results in a
 <BR>
 <!--TOC chapter Objects by value-->
 
-<H1 CLASS="chapter"><A NAME="htoc100">Chapter&nbsp;10</A>&nbsp;&nbsp;Objects by value</H1><!--SEC END -->
+<H1 CLASS="chapter"><A NAME="htoc101">Chapter&nbsp;10</A>&nbsp;&nbsp;Objects by value</H1><!--SEC END -->
 
 <A NAME="chap:valuetype"></A>
 omniORBpy 3 supports objects by value, declared with the
@@ -3210,7 +3326,7 @@ language mapping, version 1.2.<BR>
 <BR>
 <!--TOC section Features-->
 
-<H2 CLASS="section"><A NAME="htoc101">10.1</A>&nbsp;&nbsp;Features</H2><!--SEC END -->
+<H2 CLASS="section"><A NAME="htoc102">10.1</A>&nbsp;&nbsp;Features</H2><!--SEC END -->
 
 omniORB supports the complete objects by value specification, with the
 exception of custom valuetypes. All other features including value
@@ -3219,7 +3335,7 @@ interfaces are supported.<BR>
 <BR>
 <!--TOC section Value sharing and local calls-->
 
-<H2 CLASS="section"><A NAME="htoc102">10.2</A>&nbsp;&nbsp;Value sharing and local calls</H2><!--SEC END -->
+<H2 CLASS="section"><A NAME="htoc103">10.2</A>&nbsp;&nbsp;Value sharing and local calls</H2><!--SEC END -->
 
 When valuetypes are passed as parameters in CORBA calls (i.e. calls
 on CORBA objects declared with <TT>interface</TT> in IDL), the structure
@@ -3264,7 +3380,7 @@ configuration parameter to zero.<BR>
 <BR>
 <!--TOC section Value factories-->
 
-<H2 CLASS="section"><A NAME="htoc103">10.3</A>&nbsp;&nbsp;Value factories</H2><!--SEC END -->
+<H2 CLASS="section"><A NAME="htoc104">10.3</A>&nbsp;&nbsp;Value factories</H2><!--SEC END -->
 
 As specified in section 1.3.10 of the Python language mapping (version
 1.2), factories are automatically registered for values with no
@@ -3288,7 +3404,7 @@ class itself.<BR>
 <BR>
 <!--TOC section Standard value boxes-->
 
-<H2 CLASS="section"><A NAME="htoc104">10.4</A>&nbsp;&nbsp;Standard value boxes</H2><!--SEC END -->
+<H2 CLASS="section"><A NAME="htoc105">10.4</A>&nbsp;&nbsp;Standard value boxes</H2><!--SEC END -->
 
 The standard <TT>CORBA.StringValue</TT> and <TT>CORBA.WStringValue</TT>
 value boxes are available to application code. To make the definitions
@@ -3296,7 +3412,7 @@ available in IDL, #include the standard <TT>orb.idl</TT>.<BR>
 <BR>
 <!--TOC section Values inside Anys-->
 
-<H2 CLASS="section"><A NAME="htoc105">10.5</A>&nbsp;&nbsp;Values inside Anys</H2><!--SEC END -->
+<H2 CLASS="section"><A NAME="htoc106">10.5</A>&nbsp;&nbsp;Values inside Anys</H2><!--SEC END -->
 
 Valuetypes inserted into Anys cause a number of interesting issues.
 Even when inside Anys, values are required to support complete sharing

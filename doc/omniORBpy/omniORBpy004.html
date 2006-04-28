@@ -242,8 +242,8 @@ server's address. See section&nbsp;<A HREF="omniORBpy007.html#sec:clientRule">7.
 <BR>
 Call timeout in milliseconds for the client side. If a call takes
 longer than the specified number of milliseconds, the ORB closes the
-connection and raises a <TT>COMM_FAILURE</TT> exception. A value
-of zero means no timeout; calls can block for ever. See
+connection to the server and raises a <TT>TRANSIENT</TT> exception. A
+value of zero means no timeout; calls can block for ever. See
 section&nbsp;<A HREF="omniORBpy007.html#sec:timeoutAPI">7.3.1</A> for more information about timeouts.<BR>
 <BR>
 <B>Note</B>: omniORB 3 had timeouts specified in seconds;
@@ -348,6 +348,7 @@ These parameters affect server-side operations.<BR>
 <BR>
 <TT>endPoint&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TT> &nbsp;&nbsp; <I>default</I> = <TT>giop:tcp::</TT><BR>
 <TT>endPointNoListen</TT><BR>
+<TT>endPointPublish</TT><BR>
 <TT>endPointNoPublish</TT><BR>
 <TT>endPointPublishAllIFs</TT><BR>
 These options determine the end-points the ORB should listen on, and
@@ -419,8 +420,8 @@ should start again.<BR>
 <TT>threadPoolWatchConnection</TT> &nbsp;&nbsp; <I>default</I> =
  <TT>1</TT><BR>
 <BR>
-If true, threads from the pool temporarily behave a bit like thread
-per connection after dispatching a call. See
+If non-zero, threads from the pool temporarily behave a bit like
+thread per connection after dispatching a call. See
 section&nbsp;<A HREF="omniORBpy007.html#sec:watchConn">7.4.2</A> for details.<BR>
 <BR>
 <TT>acceptBiDirectionalGIOP</TT> &nbsp;&nbsp; <I>default</I> =
@@ -742,7 +743,8 @@ The structure has this definition:<BR>
 </TT><TT>        CORBA::Boolean hold_lock);</TT><TT>
 </TT><TT>  <I>// Convert a Python object reference to a C++ object reference.</I></TT><TT>
 </TT><TT>  <I>// Raises BAD_PARAM if the Python object is not an object reference.</I></TT><TT>
-</TT><TT>  <I>// If &lt;hold_lock&gt; is true, caller holds the Python interpreter lock.</I></TT></DIV><BR>
+</TT><TT>  <I>// If &lt;hold_lock&gt; is true, caller holds the Python interpreter lock.</I></TT><TT>
+</TT><TT>};</TT></DIV><BR>
 <BR>
 <HR WIDTH="50%" SIZE=1><DL CLASS="list"><DT CLASS="dt-list"><A NAME="note9" HREF="#text9"><FONT SIZE=5>1</FONT></A><DD CLASS="dd-list">This is a change from omniORB 4.0
 / omniORBpy 2 and earlier, where it was the <TT>TRANSIENT</TT> exception

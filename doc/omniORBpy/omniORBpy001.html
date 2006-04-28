@@ -64,7 +64,7 @@ clients.<BR>
 <H3 CLASS="subsection"><A NAME="htoc4">1.1.2</A>&nbsp;&nbsp;Portability</H3>
 omniORB has always been designed to be portable. It runs on many
 flavours of Unix, Windows, several embedded operating systems, and
-relatively obscure systems such as OpenVMS, Fujitsu-Siemens BS2000.
+relatively obscure systems such as OpenVMS and Fujitsu-Siemens BS2000.
 It is designed to be easy to port to new platforms. The IDL to C++
 mapping for all target platforms is the same.<BR>
 <BR>
@@ -72,7 +72,7 @@ mapping for all target platforms is the same.<BR>
 <H3 CLASS="subsection"><A NAME="htoc5">1.1.3</A>&nbsp;&nbsp;Missing features</H3>
 <A NAME="sec:missing"></A>
 omniORB is not (yet) a complete implementation of the CORBA 2.6 core.
-The following is a list of the missing features.
+The following is a list of the most significant missing features.
 <UL CLASS="itemize"><LI CLASS="li-itemize">omniORB does not have its own Interface Repository. However, it
 can act as a client to an IfR. The omniifr project
 (<A HREF="http://omniifr.sourceforge.net/"><TT>http://omniifr.sourceforge.net/</TT></A>) aims to create an IfR for
@@ -134,7 +134,7 @@ checks the environment variable <TT>OMNIORB_CONFIG</TT> to obtain the
 pathname of the configuration file. If this is not set, it then
 attempts to obtain configuration data in the system registry. It
 searches for the data under the key
-<CODE>HKEY_LOCAL_MACHINE\SOFTWARE\omniORB</CODE>.</UL>
+<TT>HKEY_LOCAL_MACHINE\SOFTWARE\omniORB</TT>.</UL>
 omniORB has a large number of parameters than can be configured. See
 chapter&nbsp;<A HREF="omniORBpy004.html#chap:config">4</A> for full details. The files
 <TT>sample.cfg</TT> and <TT>sample.reg</TT> contain an example

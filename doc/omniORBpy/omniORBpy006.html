@@ -125,7 +125,7 @@ the location of a naming service.<BR>
 <A NAME="toc27"></A>
 <H2 CLASS="section"><A NAME="htoc69">6.2</A>&nbsp;&nbsp;Configuring resolve_initial_references</H2>
 <A NAME="sec:insargs"></A>
-The specifies two standard command line arguments which provide a
+The INS specifies two standard command line arguments which provide a
 portable way of configuring <TT>ORB::resolve_initial_references()</TT>:<BR>
 <BR>
 
@@ -226,10 +226,8 @@ equivalents of the various bind operations.<BR>
 
 <H3 CLASS="subsection"><A NAME="htoc74">6.3.2</A>&nbsp;&nbsp;Use with corbaname</H3>
 To make it easy to use omniNames with <TT>corbaname</TT> URIs, it
-now starts with the default port of 2809, and an object key of
-`<TT>NameService</TT>' for the root naming context. This is only
-possible when it is started `fresh', rather than with a log file from
-an older omniNames version.<BR>
+starts with the default port of 2809, and an object key of
+`<TT>NameService</TT>' for the root naming context.<BR>
 <BR>
 <A NAME="toc29"></A>
 <H2 CLASS="section"><A NAME="htoc75">6.4</A>&nbsp;&nbsp;omniMapper</H2>
@@ -246,13 +244,12 @@ started with a command line of:
 <TT>omniMapper [-port </TT>&lt;<I>port</I>&gt;<TT>] [-config </TT>&lt;<I>config file</I>&gt;<TT>] [-v]</TT>
 </BLOCKQUOTE>
 The <TT>-port</TT> option allows you to choose a port other
-than 2809 to listen on<SUP><A NAME="text12" HREF="#note12">2</A></SUP>. The <TT>-config</TT> option specifies a location for the
-configuration file. The default name is <TT>/etc/omniMapper.cfg</TT>, or
-<CODE>C:\omniMapper.cfg</CODE>
-on Windows. omniMapper does not normally print anything; the
-<TT>-v</TT> option makes it verbose so it prints configuration
-information and a record of the redirections it makes, to standard
-output.<BR>
+than 2809 to listen on. The <TT>-config</TT> option specifies a
+location for the configuration file. The default name is
+<TT>/etc/omniMapper.cfg</TT>, or <TT>C:\omniMapper.cfg</TT> on
+Windows. omniMapper does not normally print anything; the <TT>-v</TT>
+option makes it verbose so it prints configuration information and a
+record of the redirections it makes, to standard output.<BR>
 <BR>
 The configuration file is very simple. Each line contains a string to
 be used as an object key, some white space, and an IOR (or any valid
@@ -302,9 +299,6 @@ objects in a different POA.<BR>
 <BR>
 <HR WIDTH="50%" SIZE=1><DL CLASS="list"><DT CLASS="dt-list"><A NAME="note11" HREF="#text11"><FONT SIZE=5>1</FONT></A><DD CLASS="dd-list">Not 2089 as
 printed in [<A HREF="omniORBpy011.html#inschapters"><CITE>OMG00</CITE></A>]!
-<DT CLASS="dt-list"><A NAME="note12" HREF="#text12"><FONT SIZE=5>2</FONT></A><DD CLASS="dd-list">You can also play the
-<TT>-ORBpoa_iiop_port</TT> trick to make it listen on more than one
-port.
 </DL>
 <HR>
 <A HREF="omniORBpy005.html"><IMG SRC ="previous_motif.gif" ALT="Previous"></A>
