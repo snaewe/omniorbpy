@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.4.13  2006/05/15 10:26:11  dgrisby
+// More relaxation of requirements for old-style classes, for Python 2.5.
+//
 // Revision 1.1.4.12  2006/01/19 17:28:44  dgrisby
 // Merge from omnipy2_develop.
 //
@@ -412,15 +415,11 @@ extern "C" {
     OMNIORB_ASSERT(omniPy::pyCORBAsysExcMap);
     OMNIORB_ASSERT(PyDict_Check(omniPy::pyCORBAsysExcMap));
     OMNIORB_ASSERT(omniPy::pyCORBAAnyClass);
-    OMNIORB_ASSERT(PyClass_Check(omniPy::pyCORBAAnyClass));
     OMNIORB_ASSERT(omniPy::pyCORBATypeCodeClass);
-    OMNIORB_ASSERT(PyClass_Check(omniPy::pyCORBATypeCodeClass));
     OMNIORB_ASSERT(omniPy::pyCORBAContextClass);
-    OMNIORB_ASSERT(PyClass_Check(omniPy::pyCORBAContextClass));
     OMNIORB_ASSERT(omniPy::pyCORBAValueBaseDesc);
     OMNIORB_ASSERT(PyTuple_Check(omniPy::pyCORBAValueBaseDesc));
     OMNIORB_ASSERT(omniPy::pyCORBAValueBase);
-    OMNIORB_ASSERT(PyClass_Check(omniPy::pyCORBAValueBase));
     OMNIORB_ASSERT(omniPy::pyomniORBobjrefMap);
     OMNIORB_ASSERT(PyDict_Check(omniPy::pyomniORBobjrefMap));
     OMNIORB_ASSERT(omniPy::pyomniORBskeletonMap);
@@ -432,11 +431,9 @@ extern "C" {
     OMNIORB_ASSERT(omniPy::pyomniORBwordMap);
     OMNIORB_ASSERT(PyDict_Check(omniPy::pyomniORBwordMap));
     OMNIORB_ASSERT(omniPy::pyomniORBUnknownValueBase);
-    OMNIORB_ASSERT(PyClass_Check(omniPy::pyomniORBUnknownValueBase));
     OMNIORB_ASSERT(omniPy::pyomniORBpoaCache);
     OMNIORB_ASSERT(PyDict_Check(omniPy::pyomniORBpoaCache));
     OMNIORB_ASSERT(omniPy::pyServantClass);
-    OMNIORB_ASSERT(PyClass_Check(omniPy::pyServantClass));
     OMNIORB_ASSERT(omniPy::pyCreateTypeCode);
     OMNIORB_ASSERT(PyFunction_Check(omniPy::pyCreateTypeCode));
     OMNIORB_ASSERT(omniPy::pyWorkerThreadClass);

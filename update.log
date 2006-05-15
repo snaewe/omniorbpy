@@ -1,3 +1,17 @@
+Mon May 15 11:24:55 BST 2006 dgrisby
+====================================
+
+- More relaxation of requirements for old-style classes, for Python 2.5.
+
+modules/omnipy.cc
+modules/omnipy.h
+modules/pyExceptions.cc
+modules/pyMarshal.cc
+modules/pyObjectRef.cc
+modules/pyTypeCode.cc
+modules/pyValueType.cc
+
+
 Fri Apr 28 18:32:31 BST 2006 dgrisby
 ====================================
 

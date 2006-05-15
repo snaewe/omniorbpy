@@ -29,6 +29,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.4.7  2006/05/15 10:26:11  dgrisby
+// More relaxation of requirements for old-style classes, for Python 2.5.
+//
 // Revision 1.1.4.6  2005/06/29 17:31:43  dgrisby
 // Update valuetype examples; fix values in Anys.
 //
@@ -867,7 +870,7 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
 	OMNIORB_ASSERT(t_o && PyFunction_Check(t_o));
 
 	t_o = PyObject_CallFunction(t_o, (char*)"OO", repoId, mems);
-	OMNIORB_ASSERT(t_o && PyClass_Check(t_o));
+	OMNIORB_ASSERT(t_o);
 
 	Py_DECREF(mems);
 
@@ -990,7 +993,7 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
 	OMNIORB_ASSERT(t_o && PyFunction_Check(t_o));
 
 	t_o = PyObject_CallFunction(t_o, (char*)"OiO", repoId, def_used, mems);
-	OMNIORB_ASSERT(t_o && PyClass_Check(t_o));
+	OMNIORB_ASSERT(t_o);
 
 	PyTuple_SET_ITEM(d_o, 1, t_o);
       }
@@ -1031,8 +1034,8 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
 						  (char*)"EnumItem");
 	PyObject* aclass = PyObject_GetAttrString(omniPy::pyomniORBmodule,
 						  (char*)"AnonymousEnumItem");
-	OMNIORB_ASSERT(eclass && PyClass_Check(eclass));
-	OMNIORB_ASSERT(aclass && PyClass_Check(aclass));
+	OMNIORB_ASSERT(eclass);
+	OMNIORB_ASSERT(aclass);
 
 	// members
 	for (CORBA::ULong i=0; i<cnt; i++) {
@@ -1200,7 +1203,7 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
 	OMNIORB_ASSERT(t_o && PyFunction_Check(t_o));
 
 	t_o = PyObject_CallFunction(t_o, (char*)"OO", repoId, mems);
-	OMNIORB_ASSERT(t_o && PyClass_Check(t_o));
+	OMNIORB_ASSERT(t_o);
 
 	Py_DECREF(mems);
 
@@ -1296,7 +1299,7 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
 	OMNIORB_ASSERT(t_o && PyFunction_Check(t_o));
 
 	t_o = PyObject_CallFunction(t_o, (char*)"OO", repoId, base);
-	OMNIORB_ASSERT(t_o && PyClass_Check(t_o));
+	OMNIORB_ASSERT(t_o);
 
 	PyTuple_SET_ITEM(d_o, 1, t_o);
       }

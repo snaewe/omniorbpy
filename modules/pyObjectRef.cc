@@ -30,6 +30,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.4.5  2006/05/15 10:26:11  dgrisby
+// More relaxation of requirements for old-style classes, for Python 2.5.
+//
 // Revision 1.1.4.4  2005/06/24 17:36:01  dgrisby
 // Support for receiving valuetypes inside Anys; relax requirement for
 // old style classes in a lot of places.
@@ -205,7 +208,7 @@ omniPy::createPyCorbaObjRef(const char*             targetRepoId,
       PyObject* targetClass = PyDict_GetItemString(pyomniORBobjrefMap,
 						   (char*)targetRepoId);
 
-      if (!PyClass_IsSubclass(objrefClass, targetClass)) {
+      if (!omniPy::isSubclass(objrefClass, targetClass)) {
 	// Actual type is not derived from the target. Surprisingly
 	// enough, this is valid -- the repoId in an object reference
 	// is not necessarily that of the most derived type for the
