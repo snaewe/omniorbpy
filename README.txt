@@ -1,10 +1,9 @@
-omniORBpy 3 development
-=======================
+omniORBpy 3
+===========
 
-This is a development version of omniORBpy 3, a robust
-high-performance CORBA ORB for Python.
+This is omniORBpy 3.0 beta 2.
 
-It is beta code. Do not use it for production applications.
+omniORBpy is a robust high-performance CORBA ORB for Python.
 
 The bindings adhere to the standard IDL to Python mapping which you
 may find at
