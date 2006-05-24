@@ -31,6 +31,10 @@
 #define _omnipy_h_
 
 // $Log$
+// Revision 1.3.2.10  2006/05/24 18:33:04  dgrisby
+// Unlock interpreter lock before clearing value tracker in cdrMarshal /
+// cdrUnmarshal.
+//
 // Revision 1.3.2.9  2006/05/15 10:26:11  dgrisby
 // More relaxation of requirements for old-style classes, for Python 2.5.
 //
@@ -1019,6 +1023,23 @@ public:
     }
   private:
     PyThreadState* tstate_;
+  };
+
+  ////////////////////////////////////////////////////////////////////////////
+  // ValueTrackerClearer safely clears a ValueTracker                       //
+  ////////////////////////////////////////////////////////////////////////////
+
+  class ValueTrackerClearer {
+  public:
+    inline ValueTrackerClearer(cdrStream& s) : s_(s) {}
+    inline ~ValueTrackerClearer() {
+      if (s_.valueTracker()) {
+        InterpreterUnlocker u;
+        s_.clearValueTracker();
+      }
+    };
+  private:
+    cdrStream& s_;
   };
 
 
