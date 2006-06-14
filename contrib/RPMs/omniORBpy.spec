@@ -86,7 +86,7 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr (-,root,root)
 %doc COPYING.LIB
-%doc bugfixes*
+#%doc bugfixes*
 %prefix/lib*/python%{py_ver}/site-packages/_omni*.so*
 %prefix/lib*/python%{py_ver}/site-packages/omniORB
 

@@ -105,7 +105,7 @@ rm -rf %{buildroot}%{_libdir}/python%{py_ver}/site-packages/omniidl_be/__init__.
 %files -n %{lib_name}
 %defattr (-,root,root)
 %doc COPYING.LIB
-%doc bugfixes*
+#%doc bugfixes*
 %{_libdir}/python%{py_ver}/site-packages/_omni*.so.*
 %{_libdir}/python%{py_ver}/site-packages/omniORB
 
