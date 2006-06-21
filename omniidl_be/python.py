@@ -28,6 +28,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.33.2.10  2006/06/21 14:46:26  dgrisby
+# Invalid generated code for structs nested inside valuetypes.
+#
 # Revision 1.33.2.9  2006/01/19 17:28:44  dgrisby
 # Merge from omnipy2_develop.
 #
@@ -598,6 +601,7 @@ value_class = """
 # valuetype @vname@
 _0_@modname@._d_@vname@ = (omniORB.tcInternal.tv__indirect, ["@repoId@"])
 omniORB.typeMapping["@repoId@"] = _0_@modname@._d_@vname@
+_0_@modname@.@vname@ = omniORB.newEmptyClass()
 
 class @vname@ (@inherits@):
     _NP_RepositoryId = "@repoId@"
