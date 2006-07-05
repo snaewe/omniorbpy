@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.4.8  2006/07/05 10:46:16  dgrisby
+// Dump exception tracebacks with traceExceptions, not traceLevel 10.
+//
 // Revision 1.1.4.7  2006/05/15 10:26:11  dgrisby
 // More relaxation of requirements for old-style classes, for Python 2.5.
 //
@@ -155,7 +158,7 @@ omniPy::produceSystemException(PyObject* eobj, PyObject* erepoId,
 
 #define THROW_SYSTEM_EXCEPTION_IF_MATCH(ex) \
   if (omni::strMatch(repoId, "IDL:omg.org/CORBA/" #ex ":1.0")) { \
-    if (omniORB::trace(10)) { \
+    if (omniORB::traceExceptions) { \
       { \
         omniORB::logger l; \
         l << "Caught a CORBA system exception during up-call: " \
