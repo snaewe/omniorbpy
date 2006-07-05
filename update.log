@@ -1,3 +1,19 @@
+Wed Jul  5 11:44:43 BST 2006 dgrisby
+====================================
+
+- Dump exception tracebacks with traceExceptions, not traceLevel 10.
+
+modules/pyExceptions.cc
+
+- list_initial_services did not catch exceptions.
+
+modules/pyORBFunc.cc
+
+- Propagate exceptions out of _default_POA.
+
+modules/pyServant.cc
+
+
 Wed Jun 21 15:45:37 BST 2006 dgrisby
 ====================================
 
