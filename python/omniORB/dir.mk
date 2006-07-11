@@ -8,7 +8,15 @@ ir_idl.py: ir.idl
         -I$(OMNIORB_ROOT)/idl/omniORB \
         -I$(OMNIORB_ROOT)/share/idl/omniORB \
         -I$(DATADIR)/idl/omniORB \
-        -bpython -Wbinline -Wbno_package $^
+        -bpython -Wbno_package $^
+
+corbaidl_idl.py: corbaidl.idl
+	$(OMNIIDL) -v -p$(BASE_OMNI_TREE)/omniidl_be \
+        -I$(BASE_OMNI_TREE)/idl \
+        -I$(OMNIORB_ROOT)/idl/omniORB \
+        -I$(OMNIORB_ROOT)/share/idl/omniORB \
+        -I$(DATADIR)/idl/omniORB \
+        -bpython -nf -Wbno_package $^
 
 minorfile := $(shell file="$(INCDIR)/omniORB4/minorCode.h"; \
                dirs="$(IMPORT_TREES)"; \
@@ -24,12 +32,12 @@ endif
 minorCodes.py: $(minorfile)
 	$(PYTHON) $(MAKEMINORS) $^ $@
 
-all:: ir_idl.py minorCodes.py
+all:: corbaidl_idl.py ir_idl.py minorCodes.py
 
 
 FILES = __init__.py CORBA.py PortableServer.py PortableServer__POA.py \
         tcInternal.py URI.py codesets.py any.py BiDirPolicy.py \
-        interceptors.py ir_idl.py minorCodes.py
+        interceptors.py corbaidl_idl.py ir_idl.py minorCodes.py
 
 ifdef OPEN_SSL_ROOT
 FILES += sslTP.py

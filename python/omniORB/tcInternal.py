@@ -30,6 +30,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.13.2.9  2006/07/11 13:53:09  dgrisby
+# Implement missing TypeCode creation functions.
+#
 # Revision 1.13.2.8  2006/02/16 22:55:45  dgrisby
 # Remove some tab characters that snuck in from a patch.
 #
@@ -295,6 +298,45 @@ def createRecursiveTC(id):
     class recursivePlaceHolder: pass
     recursivePlaceHolder._d = (tv__indirect, [id])
     return recursivePlaceHolder()
+
+def createValueTC(id, name, modifier, base, members):
+    base_desc = base._d
+
+    if modifier == CORBA.VM_TRUNCATABLE:
+        if base_desc == tv_null:
+            raise CORBA.BAD_PARAM(omniORB.BAD_PARAM_InvalidTypeCode,
+                                  CORBA.COMPLETED_NO)
+        base_ids = base_desc[5]
+        if base_ids is None:
+            base_ids = (id, base_desc[2])
+        else:
+            base_ids = (id,) + base_ids
+    else:
+        base_ids = None
+
+    dlist = [tv_value, omniORB.createUnknownValue(id, base_desc),
+             id, name, modifier, base_ids, base_desc]
+    for m in members:
+        dlist.append(m.name)
+        dlist.append(m.type._d)
+        dlist.append(m.access)
+
+    return createTypeCode(tuple(dlist))
+
+def createValueBoxTC(id, name, boxed_type):
+    d = (tv_value_box, omniORB.createUnknownValue(id, tv_null),
+         id, name, boxed_type._d)
+    return createTypeCode(d)
+
+def createAbstractInterfaceTC(id, name):
+    d = (tv_abstract_interface, id, name)
+    return createTypeCode(d)
+
+def createLocalInterfaceTC(id, name):
+    d = (tv_local_interface, id, name)
+    return createTypeCode(d)
+
+
 
 
 

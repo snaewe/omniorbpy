@@ -1,3 +1,14 @@
+Tue Jul 11 14:52:29 BST 2006 dgrisby
+====================================
+
+- Implement missing TypeCode creation functions.
+
+python/omniORB/CORBA.py
+python/omniORB/__init__.py
+python/omniORB/dir.mk
+python/omniORB/tcInternal.py
+
+
 Wed Jul  5 11:44:43 BST 2006 dgrisby
 ====================================
 

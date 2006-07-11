@@ -30,6 +30,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.30.2.17  2006/07/11 13:53:09  dgrisby
+# Implement missing TypeCode creation functions.
+#
 # Revision 1.30.2.16  2006/02/22 13:05:15  dgrisby
 # __repr__ and _narrow methods for valuetypes.
 #
@@ -1094,6 +1097,9 @@ _NP_RepositoryId = "_NP_RepositoryId"
 # Register this module and the threading module with omnipy:
 import omniORB, omniORB.PortableServer
 _omnipy.registerPyObjects(omniORB)
+
+# Import CORBA module stubs
+import corbaidl_idl
 
 # Import the Interface Repository stubs if necessary
 if os.environ.has_key("OMNIORBPY_IMPORT_IR_STUBS"):
