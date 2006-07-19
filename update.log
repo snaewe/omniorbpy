@@ -1,3 +1,12 @@
+Wed Jul 19 10:36:41 BST 2006 dgrisby
+====================================
+
+- Track ORB core changes.
+
+modules/omnipy.h
+modules/pyObjectRef.cc
+
+
 Tue Jul 11 14:52:29 BST 2006 dgrisby
 ====================================
 

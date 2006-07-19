@@ -30,6 +30,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.4.6  2006/07/19 09:40:39  dgrisby
+// Track ORB core changes.
+//
 // Revision 1.1.4.5  2006/05/15 10:26:11  dgrisby
 // More relaxation of requirements for old-style classes, for Python 2.5.
 //
@@ -384,11 +387,12 @@ omniPy::createObjRef(const char*    	targetRepoId,
 	  omniORB::logs(15, "Re-write local persistent object reference.");
 
 	  omniObjRef* new_objref;
+	  omniIORHints hints(0);
 	  {
 	    omni_optional_lock sync(*internalLock, locked, locked);
 
 	    omniIOR* new_ior = new omniIOR(ior->repositoryID(),
-					   id->key(), id->keysize());
+					   id->key(), id->keysize(), hints);
 
 	    new_objref = createObjRef(targetRepoId, new_ior,
 				      1, 0, type_verified);
@@ -404,10 +408,11 @@ omniPy::createObjRef(const char*    	targetRepoId,
 
 
 omniObjRef*
-omniPy::createLocalObjRef(const char*        mostDerivedRepoId,
-			  const char*        targetRepoId,
-			  omniObjTableEntry* entry,
-			  CORBA::Boolean     type_verified)
+omniPy::createLocalObjRef(const char*         mostDerivedRepoId,
+			  const char*         targetRepoId,
+			  omniObjTableEntry*  entry,
+			  const omniIORHints& hints,
+			  CORBA::Boolean      type_verified)
 {
   ASSERT_OMNI_TRACEDMUTEX_HELD(*omni::internalLock, 1);
   OMNIORB_ASSERT(targetRepoId);
@@ -448,7 +453,7 @@ omniPy::createLocalObjRef(const char*        mostDerivedRepoId,
   }
   // Reach here if we have to create a new objref.
   omniIOR* ior = new omniIOR(mostDerivedRepoId,
-			     entry->key(), entry->keysize());
+			     entry->key(), entry->keysize(), hints);
 
   return omniPy::createObjRef(targetRepoId, ior, 1, entry, type_verified);
 }
@@ -457,6 +462,7 @@ omniObjRef*
 omniPy::createLocalObjRef(const char* mostDerivedRepoId,
 			  const char* targetRepoId,
 			  const _CORBA_Octet* key, int keysize,
+			  const omniIORHints& hints,
 			  CORBA::Boolean type_verified)
 {
   ASSERT_OMNI_TRACEDMUTEX_HELD(*omni::internalLock, 1);
@@ -471,9 +477,9 @@ omniPy::createLocalObjRef(const char* mostDerivedRepoId,
 
   if (entry)
     return createLocalObjRef(mostDerivedRepoId, targetRepoId,
-			     entry, type_verified);
+			     entry, hints, type_verified);
 
-  omniIOR* ior = new omniIOR(mostDerivedRepoId, key, keysize);
+  omniIOR* ior = new omniIOR(mostDerivedRepoId, key, keysize, hints);
 
   return createObjRef(targetRepoId,ior,1,entry,type_verified);
 }
@@ -491,6 +497,8 @@ omniPy::makeLocalObjRef(const char* targetRepoId,
   omniObjRef* newooref;
   omniObjKey  key;
 
+  omniIORHints hints(0); // *** HERE: pass IOR around instead.
+
   {
     omni_tracedmutex_lock sync(*omni::internalLock);
     
@@ -498,12 +506,13 @@ omniPy::makeLocalObjRef(const char* targetRepoId,
 
     if (entry)
       newooref = omniPy::createLocalObjRef(ooref->_mostDerivedRepoId(),
-					   targetRepoId, entry, 1);
+					   targetRepoId, entry, hints, 1);
     else
       newooref = omniPy::createLocalObjRef(ooref->_mostDerivedRepoId(),
 					   targetRepoId,
 					   ooref->_identity()->key(),
-					   ooref->_identity()->keysize(), 1);
+					   ooref->_identity()->keysize(),
+					   hints, 1);
   }
   return (CORBA::Object_ptr)newooref->_ptrToObjRef(CORBA::Object::_PD_repoId);
 }
