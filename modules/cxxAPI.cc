@@ -111,7 +111,7 @@ lockedPyObjRefToCxxObjRef(PyObject* py_obj)
     omniPy::InterpreterUnlocker _u;
     omniObjRef* objref = obj->_PR_getobj();
     omniIOR* ior = objref->_getIOR();
-    objref = omni::createObjRef(ior->repositoryID(), ior, 0);
+    objref = omni::createObjRef(CORBA::Object::_PD_repoId, ior, 0);
     return (CORBA::Object_ptr)objref->_ptrToObjRef(CORBA::Object::_PD_repoId);
   }
 }
@@ -128,10 +128,26 @@ impl_pyObjRefToCxxObjRef(PyObject* py_obj, CORBA::Boolean hold_lock)
   }
 }
 
+static
+PyObject*
+impl_handleCxxSystemException(const CORBA::SystemException& ex)
+{
+  return omniPy::handleSystemException(ex);
+}
+
+static
+void
+impl_handlePythonSystemException()
+{
+  omniPy::handlePythonException();
+}
+
 
 omniORBpyAPI::omniORBpyAPI()
   : cxxObjRefToPyObjRef(impl_cxxObjRefToPyObjRef),
-    pyObjRefToCxxObjRef(impl_pyObjRefToCxxObjRef)
+    pyObjRefToCxxObjRef(impl_pyObjRefToCxxObjRef),
+    handleCxxSystemException(impl_handleCxxSystemException),
+    handlePythonSystemException(impl_handlePythonSystemException)
 {}
 
 

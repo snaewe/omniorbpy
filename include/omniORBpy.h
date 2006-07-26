@@ -64,10 +64,49 @@ struct omniORBpyAPI {
   // Raises BAD_PARAM if the Python object is not an object reference.
   // If <hold_lock> is true, caller holds the Python interpreter lock.
 
+  PyObject* (*handleCxxSystemException)(const CORBA::SystemException& ex);
+  // Sets the Python exception state to reflect the given C++ system
+  // exception. Always returns NULL. The caller must hold the Python
+  // interpreter lock.
+
+  void (*handlePythonSystemException)();
+  // Handles the current Python exception. An exception must have
+  // occurred. Handles all system exceptions and omniORB.
+  // LocationForward; all other exceptions print a traceback and raise
+  // CORBA::UNKNOWN. The caller must hold the Python interpreter lock.
 
   omniORBpyAPI();
   // Constructor for the singleton. Sets up the function pointers.
 };
+
+
+// Macros to catch all C++ system exceptions and convert to Python
+// exceptions. Use like
+//
+// try {
+//   ...
+// }
+// OMNIORBPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
+//
+// The macros assume that api is a pointer to the omniORBpyAPI
+// structure above.
+
+#ifdef HAS_Cplusplus_catch_exception_by_base
+
+#define OMNIORBPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS \
+catch (const CORBA::SystemException& ex) { \
+  return api->handleCxxSystemException(ex); \
+}
+#else
+
+#define OMNIORBPY_CATCH_AND_HANDLE_SPECIFIED_EXCEPTION(exc) \
+catch (const CORBA::exc& ex) { \
+  return api->handleCxxSystemException(ex); \
+}
+#define OMNIORBPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS \
+  OMNIORB_FOR_EACH_SYS_EXCEPTION(OMNIORBPY_CATCH_AND_HANDLE_SPECIFIED_EXCEPTION)
+
+#endif
 
 
 // Extensions to omniORB / omniORBpy may create their own pseudo
@@ -78,7 +117,6 @@ struct omniORBpyAPI {
 // pointers to functions with this signature:
 
 typedef PyObject* (*omniORBpyPseudoFn)(const CORBA::Object_ptr);
-
 
 
 #endif // _omniORBpy_h_
