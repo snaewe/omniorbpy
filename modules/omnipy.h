@@ -31,6 +31,9 @@
 #define _omnipy_h_
 
 // $Log$
+// Revision 1.3.2.12  2006/07/26 17:50:43  dgrisby
+// Reuse existing omniIOR object when converting C++ object reference to Python.
+//
 // Revision 1.3.2.11  2006/07/19 09:40:39  dgrisby
 // Track ORB core changes.
 //
@@ -414,7 +417,7 @@ public:
   omniObjRef* createLocalObjRef(const char*         mostDerivedRepoId,
 				const char*         targetRepoId,
 				omniObjTableEntry*  entry,
-				const omniIORHints& hints,
+				omniObjRef*         orig_ref,
 				CORBA::Boolean      type_verified = 0);
 
   static
@@ -422,7 +425,7 @@ public:
 				const char* 	    targetRepoId,
 				const _CORBA_Octet* key,
 				int                 keysize,
-				const omniIORHints& hints,
+				omniObjRef*         orig_ref,
 				CORBA::Boolean      type_verified = 0);
 
   // When a POA creates a reference to a Python servant, it does not
