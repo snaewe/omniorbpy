@@ -1,67 +1,14 @@
 DIR_CPPFLAGS += -DOMNIPY_MAJOR=$(OMNIPY_MAJOR) -DOMNIPY_MINOR=$(OMNIPY_MINOR)
+DIR_CPPFLAGS += -DOMNIORB_VERSION_STRING=\"$(OMNIORB_VERSION)\"
 
-CXXSRCS = omnipy.cc \
-          pyORBFunc.cc \
-          pyPOAFunc.cc \
-          pyPOAManagerFunc.cc \
-          pyPOACurrentFunc.cc \
-          pyObjectRef.cc \
-          pyCallDescriptor.cc \
-          pyServant.cc \
-          pyLocalObjects.cc \
-          pyExceptions.cc \
-          pyMarshal.cc \
-          pyTypeCode.cc \
-          pyThreadCache.cc \
-          pyomniFunc.cc \
-	  pyFixed.cc \
-          pyContext.cc \
-          pyValueType.cc \
-          pyAbstractIntf.cc \
-          pyInterceptors.cc \
-          cxxAPI.cc
+CXXSRCS = pyConnectionMgmt.cc
 
-OBJS =    omnipy.o \
-          pyORBFunc.o \
-          pyPOAFunc.o \
-          pyPOAManagerFunc.o \
-          pyPOACurrentFunc.o \
-          pyObjectRef.o \
-          pyCallDescriptor.o \
-          pyServant.o \
-          pyLocalObjects.o \
-          pyExceptions.o \
-          pyMarshal.o \
-          pyTypeCode.o \
-          pyThreadCache.o \
-          pyomniFunc.o \
-	  pyFixed.o \
-	  pyContext.o \
-          pyValueType.o \
-          pyAbstractIntf.o \
-          pyInterceptors.o \
-          cxxAPI.o
+OBJS =    pyConnectionMgmt.o
 
 DIR_CPPFLAGS += -I$(BASE_OMNI_TREE)/include -I$(TOP)/include
 DIR_CPPFLAGS += $(patsubst %,-I%/include,$(OMNIORB_ROOT))
 DIR_CPPFLAGS += $(patsubst %,-I%/include/omniORB4/internal,$(OMNIORB_ROOT))
 DIR_CPPFLAGS += $(patsubst %,-I%/include/omniORB4/internal,$(IMPORT_TREES))
-
-
-all:: pydistdate.hh
-
-pydistdate.hh: ../update.log
-	$(PYTHON) $(BASE_OMNI_TREE)/bin/scripts/distdate.py OMNIORBPY <$^ >pydistdate.hh
-
-export:: pydistdate.hh
-	@(file=$^; dir="$(EXPORT_TREE)/$(INCDIR)/omniORB4"; \
-	 $(ExportFileToDir))
-
-ifdef INSTALLTARGET
-install:: pydistdate.hh
-	@(file=$^; dir="$(INSTALLINCDIR)/omniORB4"; \
-	 $(ExportFileToDir))
-endif
 
 
 #############################################################################
@@ -81,6 +28,9 @@ DIR_CPPFLAGS += $(CORBA_CPPFLAGS)
 
 endif
 
+ifdef Cygwin
+extralibs += -lomniORB4 -lomnithread -lpthread
+endif
 
 #############################################################################
 #   Make rules for Autoconf builds                                          #
@@ -88,7 +38,7 @@ endif
 
 ifeq ($(platform),autoconf)
 
-namespec := _omnipymodule _ $(OMNIPY_MAJOR) $(OMNIPY_MINOR)
+namespec := _omniConnMgmtmodule _ $(OMNIPY_MAJOR) $(OMNIPY_MINOR)
 
 ifdef PythonSHAREDLIB_SUFFIX
 SHAREDLIB_SUFFIX = $(PythonSHAREDLIB_SUFFIX)
@@ -107,7 +57,7 @@ shlib := $(shell $(SharedLibraryFullName) $(namespec))
 DIR_CPPFLAGS += $(SHAREDLIB_CPPFLAGS)
 
 $(shlib): $(OBJS)
-	@(namespec="$(namespec)"; extralibs="$(OMNIORB_LIB_NODYN) $(extralibs)";\
+	@(namespec="$(namespec)"; extralibs="$(OMNIORB_CONNECTIONS_LIB) $(extralibs)";\
           $(MakeCXXSharedLibrary))
 
 all:: $(shlib)
@@ -139,7 +89,7 @@ ifdef Linux
 
 CXXOPTIONS += -fpic
 
-libname = _omnipymodule.so
+libname = _omniConnMgmtmodule.so
 soname  = $(libname).$(OMNIPY_MAJOR)
 lib     = $(soname).$(OMNIPY_MINOR)
 
@@ -147,7 +97,7 @@ $(lib): $(OBJS)
 	(set -x; \
 	$(RM) $@; \
 	$(CXXLINK) $(CXXLINKOPTIONS) -shared -o $@ -Wl,-soname,$(soname) $(IMPORT_LIBRARY_FLAGS) \
-	 $(filter-out $(LibSuffixPattern),$^) $(OMNIORB_LIB_NODYN)\
+	 $(filter-out $(LibSuffixPattern),$^) $(OMNIORB_CONNECTIONS_LIB)\
 	)
 
 all:: $(lib)
@@ -173,7 +123,7 @@ endif
 
 ifdef SunOS
 
-libname = _omnipymodule.so
+libname = _omniConnMgmtmodule.so
 soname  = $(libname).$(OMNIPY_MAJOR)
 lib     = $(soname).$(OMNIPY_MINOR)
 
@@ -190,7 +140,7 @@ $(lib): $(OBJS)
         fi; \
         $(CXX) -G -o $@ -h $(soname) $(IMPORT_LIBRARY_FLAGS) \
          $(patsubst %,-R %,$(IMPORT_LIBRARY_DIRS)) \
-         $(filter-out $(LibSuffixPattern),$^) $(OMNIORB_LIB_NODYN) \
+         $(filter-out $(LibSuffixPattern),$^) $(OMNIORB_CONNECTIONS_LIB) \
          $$CXX_RUNTIME \
 	)
 
@@ -204,7 +154,7 @@ $(lib): $(OBJS)
 	(set -x; \
 	$(RM) $@; \
 	$(CXXLINK) $(CXXLINKOPTIONS) -shared -o $@ -Wl-soname,$(soname) $(IMPORT_LIBRARY_FLAGS) \
-	 $(filter-out $(LibSuffixPattern),$^) $(OMNIORB_LIB_NODYN)\
+	 $(filter-out $(LibSuffixPattern),$^) $(OMNIORB_CONNECTIONS_LIB)\
 	)
 
 endif
@@ -245,7 +195,7 @@ DIR_CPPFLAGS += -I$(PYINCDIR) -I$(PYINCDIR)/python$(PYVERSION) \
 
 PYLIBPATH = $(patsubst %,-libpath:%,$(PYLIBDIR))
 
-implib = _omnipy.lib
+implib = _omniConnMgmt.lib
 lib = $(patsubst %.lib,%.pyd,$(implib))
 
 all:: $(lib)
@@ -253,7 +203,7 @@ all:: $(lib)
 $(lib): $(OBJS)
 	(set -x; \
 	 $(RM) $@; \
-	 libs="$(OMNIORB_LIB_NODYN) $(PYLIB)"; \
+	 libs="$(OMNIORB_CONNECTIONS_LIB) $(OMNIORB_LIB_NODYN) $(PYLIB)"; \
 	 $(CXXLINK) -out:$@ -DLL $(CXXLINKOPTIONS) $(IMPORT_LIBRARY_FLAGS) $(PYLIBPATH) $(OBJS) $$libs; \
          $(MANIFESTTOOL) /outputresource:"$@;#2" /manifest $@.manifest; \
 	)
@@ -273,8 +223,8 @@ ifdef AIX
 
 CXXOPTIONS += -I. -I/usr/local/include
 
-lib = _omnipymodule.so
-libinit = init_omnipy
+lib = _omniConnMgmtmodule.so
+libinit = init_omniConnMgmt
 py_exp = $(PYPREFIX)/lib/python$(PYVERSION)/config/python.exp
 
 ifeq ($(notdir $(CXX)),xlC_r)
@@ -287,7 +237,7 @@ $(lib): $(OBJS) $(PYOBJS)
 	     -bI:$(py_exp) \
 	     -n $(libinit) \
 	     $(IMPORT_LIBRARY_FLAGS) \
-	     $(OMNIORB_LIB_NODYN) \
+	     $(OMNIORB_CONNECTIONS_LIB) \
 	     -bhalt:4 -T512 -H512 \
 	     $(filter-out $(LibSuffixPattern),$^) \
 	     -p 40 \
@@ -316,7 +266,7 @@ ifdef FreeBSD
 
 CXXOPTIONS += -fPIC
 
-libname = _omnipymodule.so
+libname = _omniConnMgmtmodule.so
 soname  = $(libname).$(OMNIPY_MAJOR)
 lib     = $(soname).$(OMNIPY_MINOR)
 
@@ -356,12 +306,12 @@ PYPREFIX = $(shell $(PYTHON) -c "import sys;print sys.exec_prefix")
 CXXOPTIONS += -I$(PYPREFIX)/include
 CXXLINKOPTIONS += -nostdlib -r
 SO = .so
-libname = _omnipymodule$(SO)
+libname = _omniConnMgmtmodule$(SO)
 soname  = $(libname).$(OMNIPY_MAJOR)
 lib     = $(soname).$(OMNIPY_MINOR)
 
 $(lib): $(OBJS)
-      $(CXXLINK) $(CXXLINKOPTIONS) $(OBJS) $(OMNIORB_LIB_NODYN) -o $(lib)
+      $(CXXLINK) $(CXXLINKOPTIONS) $(OBJS) $(OMNIORB_CONNECTIONS_LIB) -o $(lib)
 
 all:: $(lib)
 
@@ -392,7 +342,7 @@ ifeq ($(notdir $(CXX)),aCC)
 
 CXXOPTIONS += +Z
 
-libname = _omnipymodule.sl
+libname = _omniConnMgmtmodule.sl
 soname  = $(libname).$(OMNIPY_MAJOR)
 lib     = $(soname).$(OMNIPY_MINOR)
 
@@ -401,7 +351,7 @@ $(lib): $(OBJS)
          $(RM) $@; \
          aCC -b -Wl,+h$(soname) -o $@  $(IMPORT_LIBRARY_FLAGS) \
            $(patsubst %,-L %,$(IMPORT_LIBRARY_DIRS)) \
-           $(filter-out $(LibSuffixPattern),$^) $(OMNIORB_LIB_NODYN); \
+           $(filter-out $(LibSuffixPattern),$^) $(OMNIORB_CONNECTIONS_LIB); \
         )
 
 all:: $(lib)
@@ -438,7 +388,7 @@ ifdef IRIX_64
 ADD_CPPFLAGS = -64
 endif
 
-libname = _omnipymodule.so
+libname = _omniConnMgmtmodule.so
 soname  = $(libname).$(OMNIPY_MAJOR)
 lib     = $(soname).$(OMNIPY_MINOR)
 
@@ -448,7 +398,7 @@ $(lib): $(OBJS)
          $(LINK.cc) -KPIC -shared -Wl,-h,$(libname) \
            -Wl,-set_version,$(soname) -Wl,-rpath,$(LIBDIR) \
            -o $@ $(IMPORT_LIBRARY_FLAGS) \
-           $(filter-out $(LibSuffixPattern),$^) $(OMNIORB_LIB_NODYN)\
+           $(filter-out $(LibSuffixPattern),$^) $(OMNIORB_CONNECTIONS_LIB)\
            $(LDLIBS); \
         )
 
@@ -477,7 +427,7 @@ endif
 ifdef OSF1
 ifeq ($(notdir $(CXX)),cxx)
 
-libname = _omnipymodule.so
+libname = _omniConnMgmtmodule.so
 soname  = $(libname).$(OMNIPY_MAJOR)
 lib     = $(soname).$(OMNIPY_MINOR)
 
@@ -487,7 +437,7 @@ $(lib): $(OBJS)
 	(set -x; \
          $(RM) $@; \
          ld -shared -soname $(soname) -set_version $(soname) -o $@ $(IMPORT_LIBRARY_FLAGS) \
-         $(filter-out $(LibSuffixPattern),$^) $(OMNIORB_LIB_NODYN) -lcxxstd -lcxx -lexc -lots -lc \
+         $(filter-out $(LibSuffixPattern),$^) $(OMNIORB_CONNECTIONS_LIB) -lcxxstd -lcxx -lexc -lots -lc \
         )
 
 
@@ -507,26 +457,4 @@ export:: $(lib)
 endif
 endif
 
-endif
-
-
-#############################################################################
-#   Subdirectories                                                          #
-#############################################################################
-
-SUBDIRS = codesets connections
-
-ifdef OPEN_SSL_ROOT
-SUBDIRS += sslTP
-endif
-
-all::
-	@$(MakeSubdirs)
-
-export::
-	@$(MakeSubdirs)
-
-ifdef INSTALLTARGET
-install::
-	@$(MakeSubdirs)
 endif

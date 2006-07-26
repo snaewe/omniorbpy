@@ -3657,7 +3657,7 @@ PROCESSOR_NAME=$processor_name
                     ac_config_files="$ac_config_files mk/beforeauto.mk mk/afterauto.mk"
 
 
-                                                                                                    ac_config_files="$ac_config_files GNUmakefile examples/embed/GNUmakefile modules/GNUmakefile modules/codesets/GNUmakefile modules/sslTP/GNUmakefile omniidl_be/GNUmakefile python/GNUmakefile python/COS/GNUmakefile python/omniORB/GNUmakefile include/GNUmakefile"
+                                                                                                              ac_config_files="$ac_config_files GNUmakefile examples/embed/GNUmakefile modules/GNUmakefile modules/codesets/GNUmakefile modules/sslTP/GNUmakefile modules/connections/GNUmakefile omniidl_be/GNUmakefile python/GNUmakefile python/COS/GNUmakefile python/omniORB/GNUmakefile include/GNUmakefile"
 
 
 cat >confcache <<\_ACEOF
@@ -4218,6 +4218,7 @@ do
   "modules/GNUmakefile" ) CONFIG_FILES="$CONFIG_FILES modules/GNUmakefile" ;;
   "modules/codesets/GNUmakefile" ) CONFIG_FILES="$CONFIG_FILES modules/codesets/GNUmakefile" ;;
   "modules/sslTP/GNUmakefile" ) CONFIG_FILES="$CONFIG_FILES modules/sslTP/GNUmakefile" ;;
+  "modules/connections/GNUmakefile" ) CONFIG_FILES="$CONFIG_FILES modules/connections/GNUmakefile" ;;
   "omniidl_be/GNUmakefile" ) CONFIG_FILES="$CONFIG_FILES omniidl_be/GNUmakefile" ;;
   "python/GNUmakefile" ) CONFIG_FILES="$CONFIG_FILES python/GNUmakefile" ;;
   "python/COS/GNUmakefile" ) CONFIG_FILES="$CONFIG_FILES python/COS/GNUmakefile" ;;

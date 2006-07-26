@@ -1,3 +1,38 @@
+Wed Jul 26 18:43:08 BST 2006 dgrisby
+====================================
+
+- New exception handling functions in C++ API; fix to pyObjRefToCxxObjRef.
+
+include/omniORBpy.h
+modules/cxxAPI.cc
+
+- Connections library name in make rules.
+
+mk/beforeauto.mk.in
+
+- Support unchecked_narrow.
+
+modules/omnipy.cc
+python/omniORB/CORBA.py
+
+- Reuse existing omniIOR object when converting C++ object reference to Python.
+
+modules/omnipy.h
+modules/pyObjectRef.cc
+
+- Binding to new omniConnectionMgmt extension.
+
+configure
+configure.ac
+modules/dir.mk
+modules/connections/GNUmakefile         -- new
+modules/connections/GNUmakefile.in      -- new
+modules/connections/dir.mk              -- new
+modules/connections/pyConnectionMgmt.cc -- new
+python/omniORB/dir.mk
+python/omniORB/omniConnectionMgmt.py    -- new
+
+
 Wed Jul 19 10:36:41 BST 2006 dgrisby
 ====================================
 

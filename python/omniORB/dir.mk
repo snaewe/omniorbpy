@@ -37,7 +37,8 @@ all:: corbaidl_idl.py ir_idl.py minorCodes.py
 
 FILES = __init__.py CORBA.py PortableServer.py PortableServer__POA.py \
         tcInternal.py URI.py codesets.py any.py BiDirPolicy.py \
-        interceptors.py corbaidl_idl.py ir_idl.py minorCodes.py
+        interceptors.py corbaidl_idl.py ir_idl.py minorCodes.py \
+        omniConnectionMgmt.py
 
 ifdef OPEN_SSL_ROOT
 FILES += sslTP.py

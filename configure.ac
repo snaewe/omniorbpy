@@ -132,6 +132,7 @@ AC_CONFIG_FILES(
                 modules/GNUmakefile
                 modules/codesets/GNUmakefile
                 modules/sslTP/GNUmakefile
+                modules/connections/GNUmakefile
                 omniidl_be/GNUmakefile
                 python/GNUmakefile
                 python/COS/GNUmakefile
