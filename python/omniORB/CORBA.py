@@ -30,6 +30,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.31.2.12  2006/07/26 17:49:59  dgrisby
+# Support unchecked_narrow.
+#
 # Revision 1.31.2.11  2006/07/11 13:53:09  dgrisby
 # Implement missing TypeCode creation functions.
 #
@@ -778,10 +781,20 @@ class Object:
                 return self
         except KeyError:
             pass
-        return _omnipy.narrow(self, repoId)
+        return _omnipy.narrow(self, repoId, 1)
+
+    def _unchecked_narrow(self, dest):
+        repoId = dest._NP_RepositoryId
+        try:
+            dest_objref = omniORB.objrefMapping[repoId]
+            if isinstance(self, dest_objref):
+                return self
+        except KeyError:
+            pass
+        return _omnipy.narrow(self, repoId, 0)
 
     __methods__ = ["_is_a", "_non_existent", "_is_equivalent",
-                   "_get_interface", "_hash", "_narrow"]
+                   "_get_interface", "_hash", "_narrow", "_unchecked_narrow"]
 
 _d_Object  = (omniORB.tcInternal.tv_objref, Object._NP_RepositoryId, "Object")
 TC_Object  = _tc_Object = omniORB.tcInternal.createTypeCode(_d_Object)

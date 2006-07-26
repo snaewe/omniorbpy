@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.4.15  2006/07/26 17:49:59  dgrisby
+// Support unchecked_narrow.
+//
 // Revision 1.1.4.14  2006/05/24 18:33:04  dgrisby
 // Unlock interpreter lock before clearing value tracker in cdrMarshal /
 // cdrUnmarshal.
@@ -910,8 +913,9 @@ OMNIORB_FOR_EACH_SYS_EXCEPTION(DO_CALL_DESC_SYSTEM_EXCEPTON)
   {
     PyObject* pysource;
     char*     repoId;
+    int       checked;
 
-    if (!PyArg_ParseTuple(args, (char*)"Os", &pysource, &repoId))
+    if (!PyArg_ParseTuple(args, (char*)"Osi", &pysource, &repoId, &checked))
       return 0;
 
     CORBA::Object_ptr cxxsource =
@@ -924,7 +928,11 @@ OMNIORB_FOR_EACH_SYS_EXCEPTION(DO_CALL_DESC_SYSTEM_EXCEPTON)
 
     try {
       omniPy::InterpreterUnlocker ul;
-      isa = cxxsource->_is_a(repoId);
+
+      if (checked || cxxsource->_NP_is_pseudo())
+	isa = cxxsource->_is_a(repoId);
+      else
+	isa = 1;
 
       if (isa) {
 	if (!cxxsource->_NP_is_pseudo()) {
