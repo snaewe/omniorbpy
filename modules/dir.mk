@@ -42,7 +42,7 @@ OBJS =    omnipy.o \
           pyInterceptors.o \
           cxxAPI.o
 
-DIR_CPPFLAGS += -I$(BASE_OMNI_TREE)/include -I$(TOP)/include
+DIR_CPPFLAGS += -I$(BASE_OMNI_TREE)/$(CURRENT)/../include -I$(TOP)/include
 DIR_CPPFLAGS += $(patsubst %,-I%/include,$(OMNIORB_ROOT))
 DIR_CPPFLAGS += $(patsubst %,-I%/include/omniORB4/internal,$(OMNIORB_ROOT))
 DIR_CPPFLAGS += $(patsubst %,-I%/include/omniORB4/internal,$(IMPORT_TREES))
