@@ -142,12 +142,41 @@ impl_handlePythonSystemException()
   omniPy::handlePythonException();
 }
 
+static void
+impl_marshalPyObject(cdrStream& stream, PyObject* desc, PyObject* obj,
+		     CORBA::Boolean hold_lock)
+{
+  if (hold_lock) {
+    omniPy::validateType(desc, obj, CORBA::COMPLETED_NO);
+    omniPy::marshalPyObject(stream, desc, obj);
+  }
+  else {
+    omnipyThreadCache::lock _t;
+    omniPy::validateType(desc, obj, CORBA::COMPLETED_NO);
+    omniPy::marshalPyObject(stream, desc, obj);
+  }
+}    
+
+static PyObject*
+impl_unmarshalPyObject(cdrStream& stream, PyObject* desc,
+		       CORBA::Boolean hold_lock)
+{
+  if (hold_lock) {
+    return omniPy::unmarshalPyObject(stream, desc);
+  }
+  else {
+    omnipyThreadCache::lock _t;
+    return omniPy::unmarshalPyObject(stream, desc);
+  }
+}    
 
 omniORBpyAPI::omniORBpyAPI()
   : cxxObjRefToPyObjRef(impl_cxxObjRefToPyObjRef),
     pyObjRefToCxxObjRef(impl_pyObjRefToCxxObjRef),
     handleCxxSystemException(impl_handleCxxSystemException),
-    handlePythonSystemException(impl_handlePythonSystemException)
+    handlePythonSystemException(impl_handlePythonSystemException),
+    marshalPyObject(impl_marshalPyObject),
+    unmarshalPyObject(impl_unmarshalPyObject)
 {}
 
 

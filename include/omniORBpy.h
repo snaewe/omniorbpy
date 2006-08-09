@@ -75,6 +75,17 @@ struct omniORBpyAPI {
   // LocationForward; all other exceptions print a traceback and raise
   // CORBA::UNKNOWN. The caller must hold the Python interpreter lock.
 
+  void (*marshalPyObject)(cdrStream& stream,
+			  PyObject* desc, PyObject* obj,
+			  CORBA::Boolean hold_lock);
+  // Marshal the Python object into the stream, based on the type
+  // descriptor desc.
+
+  PyObject* (*unmarshalPyObject)(cdrStream& stream,
+				 PyObject* desc, CORBA::Boolean hold_lock);
+  // Unmarshal a Python object from the stream, based on type
+  // descriptor desc.
+
   omniORBpyAPI();
   // Constructor for the singleton. Sets up the function pointers.
 };

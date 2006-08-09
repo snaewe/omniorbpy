@@ -1,3 +1,20 @@
+Wed Aug  9 17:30:18 BST 2006 dgrisby
+====================================
+
+- Mention connections library in release notes.
+
+ReleaseNotes.txt
+
+- New marshal / unmarshal functions in C++ API.
+
+include/omniORBpy.h
+modules/cxxAPI.cc
+
+- Properly build C++ stubs.
+
+mk/afterauto.mk.in
+
+
 Tue Aug  8 12:56:13 BST 2006 dgrisby
 ====================================
 
