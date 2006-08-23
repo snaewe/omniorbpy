@@ -170,13 +170,41 @@ impl_unmarshalPyObject(cdrStream& stream, PyObject* desc,
   }
 }    
 
+static void
+impl_marshalTypeDesc(cdrStream& stream, PyObject* desc,
+		     CORBA::Boolean hold_lock)
+{
+  if (hold_lock) {
+    omniPy::marshalTypeCode(stream, desc);
+  }
+  else {
+    omnipyThreadCache::lock _t;
+    omniPy::marshalTypeCode(stream, desc);
+  }
+}
+
+static PyObject*
+impl_unmarshalTypeDesc(cdrStream& stream, CORBA::Boolean hold_lock)
+{
+  if (hold_lock) {
+    return omniPy::unmarshalTypeCode(stream);
+  }
+  else {
+    omnipyThreadCache::lock _t;
+    return omniPy::unmarshalTypeCode(stream);
+  }
+}
+
+
 omniORBpyAPI::omniORBpyAPI()
   : cxxObjRefToPyObjRef(impl_cxxObjRefToPyObjRef),
     pyObjRefToCxxObjRef(impl_pyObjRefToCxxObjRef),
     handleCxxSystemException(impl_handleCxxSystemException),
     handlePythonSystemException(impl_handlePythonSystemException),
     marshalPyObject(impl_marshalPyObject),
-    unmarshalPyObject(impl_unmarshalPyObject)
+    unmarshalPyObject(impl_unmarshalPyObject),
+    marshalTypeDesc(impl_marshalTypeDesc),
+    unmarshalTypeDesc(impl_unmarshalTypeDesc)
 {}
 
 

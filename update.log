@@ -1,3 +1,12 @@
+Wed Aug 23 11:18:14 BST 2006 dgrisby
+====================================
+
+- New C++ api functions to marshal/unmarshal type descriptors.
+
+include/omniORBpy.h
+modules/cxxAPI.cc
+
+
 Wed Aug  9 17:30:18 BST 2006 dgrisby
 ====================================
 

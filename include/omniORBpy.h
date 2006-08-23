@@ -86,6 +86,13 @@ struct omniORBpyAPI {
   // Unmarshal a Python object from the stream, based on type
   // descriptor desc.
 
+  void (*marshalTypeDesc)(cdrStream& stream, PyObject* desc,
+			  CORBA::Boolean hold_lock);
+  // Marshal the type descriptor into the stream as a TypeCode.
+
+  PyObject* (*unmarshalTypeDesc)(cdrStream& stream, CORBA::Boolean hold_lock);
+  // Unmarshal a TypeCode from the stream, giving a type descriptor.
+
   omniORBpyAPI();
   // Constructor for the singleton. Sets up the function pointers.
 };
