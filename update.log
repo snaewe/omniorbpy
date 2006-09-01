@@ -1,3 +1,11 @@
+Fri Sep  1 14:43:29 BST 2006 dgrisby
+====================================
+
+- Hard-code version check rather than using pre-processor defines.
+
+modules/omnipy.cc
+
+
 Wed Aug 23 11:18:14 BST 2006 dgrisby
 ====================================
 

@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.4.16  2006/09/01 13:44:06  dgrisby
+// Hard-code version check rather than using pre-processor defines.
+//
 // Revision 1.1.4.15  2006/07/26 17:49:59  dgrisby
 // Support unchecked_narrow.
 //
@@ -330,7 +333,7 @@ extern "C" {
     if (!PyArg_ParseTuple(args, (char*)"iis", &maj, &min, &mod))
       return 0;
 
-    if (maj > OMNIPY_MAJOR || maj == 0) {
+    if (maj > 3 || maj == 0) {
       if (omniORB::trace(1)) {
 	omniORB::logger l;
 	l << "omniORBpy: ***\n"
