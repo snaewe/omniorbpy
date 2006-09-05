@@ -1,3 +1,11 @@
+Tue Sep  5 12:29:34 BST 2006 dgrisby
+====================================
+
+- Modify stub version check to be more specific.
+
+modules/omnipy.cc
+
+
 Fri Sep  1 14:43:29 BST 2006 dgrisby
 ====================================
 
