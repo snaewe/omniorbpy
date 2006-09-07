@@ -30,6 +30,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.30.2.18  2006/09/07 15:29:57  dgrisby
+# Use boxes.idl to build standard value boxes.
+#
 # Revision 1.30.2.17  2006/07/11 13:53:09  dgrisby
 # Implement missing TypeCode creation functions.
 #
@@ -1100,6 +1103,10 @@ _omnipy.registerPyObjects(omniORB)
 
 # Import CORBA module stubs
 import corbaidl_idl
+import boxes_idl
+
+sys.modules["corbaidl_idl"] = corbaidl_idl
+sys.modules["boxes_idl"]    = boxes_idl
 
 # Import the Interface Repository stubs if necessary
 if os.environ.has_key("OMNIORBPY_IMPORT_IR_STUBS"):

@@ -30,6 +30,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.31.2.13  2006/09/07 15:29:57  dgrisby
+# Use boxes.idl to build standard value boxes.
+#
 # Revision 1.31.2.12  2006/07/26 17:49:59  dgrisby
 # Support unchecked_narrow.
 #
@@ -925,33 +928,6 @@ _d_ValueBase = (omniORB.tcInternal.tv_value, ValueBase,
 TC_ValueBase = _tc_ValueBase = omniORB.tcInternal.createTypeCode(_d_ValueBase)
 omniORB.registerType(ValueBase._NP_RepositoryId, _d_ValueBase, _tc_ValueBase)
 omniORB.registerValueFactory(ValueBase._NP_RepositoryId, ValueBase)
-
-#############################################################################
-#                                                                           #
-# StringValue, WStringValue                                                 #
-#                                                                           #
-#############################################################################
-
-class StringValue:
-    _NP_RepositoryId = "IDL:omg.org/CORBA/StringValue:1.0"
-    def __init__(self, *args, **kw):
-        raise RuntimeError("Cannot construct objects of this type.")
-
-_d_StringValue  = (tcInternal.tv_value_box, StringValue, StringValue._NP_RepositoryId, "StringValue", (tcInternal.tv_string,0))
-_tc_StringValue = tcInternal.createTypeCode(_d_StringValue)
-omniORB.registerType(StringValue._NP_RepositoryId, _d_StringValue, _tc_StringValue)
-omniORB.registerValueFactory(StringValue._NP_RepositoryId, StringValue)
-
-class WStringValue:
-    _NP_RepositoryId = "IDL:omg.org/CORBA/WStringValue:1.0"
-    def __init__(self, *args, **kw):
-        raise RuntimeError("Cannot construct objects of this type.")
-
-_d_WStringValue  = (tcInternal.tv_value_box, WStringValue, WStringValue._NP_RepositoryId, "WStringValue", (tcInternal.tv_wstring,0))
-_tc_WStringValue = tcInternal.createTypeCode(_d_WStringValue)
-omniORB.registerType(WStringValue._NP_RepositoryId, _d_WStringValue, _tc_WStringValue)
-omniORB.registerValueFactory(WStringValue._NP_RepositoryId, WStringValue)
-
 
 #############################################################################
 #                                                                           #

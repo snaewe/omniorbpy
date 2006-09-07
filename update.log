@@ -1,3 +1,17 @@
+Thu Sep  7 16:28:22 BST 2006 dgrisby
+====================================
+
+- Remove obsolete check for presence of omniORB.StructBase.
+
+omniidl_be/python.py
+
+- Use boxes.idl to build standard value boxes.
+
+python/omniORB/CORBA.py
+python/omniORB/__init__.py
+python/omniORB/dir.mk
+
+
 Tue Sep  5 12:29:34 BST 2006 dgrisby
 ====================================
 
