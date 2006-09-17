@@ -94,6 +94,8 @@ case "$host" in
   *-*-freebsd3*) platform_name="FreeBSD";  os_version="3";;
   *-*-freebsd4*) platform_name="FreeBSD";  os_version="4";;
   *-*-freebsd5*) platform_name="FreeBSD";  os_version="5";;
+  *-*-freebsd6*) platform_name="FreeBSD";  os_version="6";;
+  *-*-freebsd7*) platform_name="FreeBSD";  os_version="7";;
   *-*-sco*)      platform_name="OSR5";     os_version="5";;
   *-*-cygwin*)   platform_name="Cygwin";   os_version="2";;
 esac

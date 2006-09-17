@@ -1,6 +1,11 @@
 Mon Sep 18 00:27:53 BST 2006 dgrisby
 ====================================
 
+- Support FreeBSD 6 and 7.
+
+configure
+configure.ac
+
 - Invalid assertion with indirections in counting streams.
 
 modules/pyValueType.cc
