@@ -1,3 +1,11 @@
+Mon Sep 18 00:27:53 BST 2006 dgrisby
+====================================
+
+- Invalid assertion with indirections in counting streams.
+
+modules/pyValueType.cc
+
+
 Thu Sep  7 16:28:22 BST 2006 dgrisby
 ====================================
 
