@@ -28,6 +28,10 @@
 //    ValueType support
 
 // $Log$
+// Revision 1.1.2.14  2006/09/20 14:10:13  dgrisby
+// Indirections could be wrong in valuebox marshalling, because alignment
+// was not set before position calculation.
+//
 // Revision 1.1.2.13  2006/09/17 23:28:34  dgrisby
 // Invalid assertion with indirections in counting streams.
 //
@@ -592,6 +596,8 @@ marshalPyObjectValueBox(cdrStream& stream, PyObject* d_o, PyObject* a_o)
   pyOutputValueTracker* tracker = (pyOutputValueTracker*)stream.valueTracker();
   
   OMNIORB_ASSERT(tracker->valid());
+
+  stream.alignOutput(omni::ALIGN_4);
 
   CORBA::Long pos = tracker->addValue(a_o, stream.currentOutputPtr());
 

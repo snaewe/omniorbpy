@@ -1,3 +1,12 @@
+Wed Sep 20 15:08:58 BST 2006 dgrisby
+====================================
+
+- Indirections could be wrong in valuebox marshalling, because
+  alignment was not set before position calculation.
+
+modules/pyValueType.cc
+
+
 Mon Sep 18 00:27:53 BST 2006 dgrisby
 ====================================
 
