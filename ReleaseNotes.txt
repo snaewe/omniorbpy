@@ -12,6 +12,7 @@ Changes since omniORBpy 3.0 beta 2
 
  - Minor bug fixes.
  - Support for the experimental omniConnectionMgmt extension.
+ - New C++ api functions.
 
 
 Changes since omniORBpy 3.0 beta 1
