@@ -1,3 +1,11 @@
+Fri Sep 29 17:46:41 BST 2006 dgrisby
+====================================
+
+- Stub changes broke use of package prefix. Thanks Teemu Torma.
+
+omniidl_be/python.py
+
+
 Mon Sep 25 11:22:32 BST 2006 dgrisby
 ====================================
 
