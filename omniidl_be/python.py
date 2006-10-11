@@ -28,6 +28,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.33.2.13  2006/10/11 17:44:14  dgrisby
+# None is not a keyword, but it cannot be assigned to.
+#
 # Revision 1.33.2.12  2006/09/29 16:48:03  dgrisby
 # Stub changes broke use of package prefix. Thanks Teemu Torma.
 #
@@ -2484,6 +2487,10 @@ def dotName(scopedName, our_scope=[]):
 
 def mangle(name):
     if keyword.iskeyword(name): return "_" + name
+
+    # None is a pseudo-keyword that cannot be assigned to.
+    if name == "None": return "_None"
+
     return name
 
 def fixupScopedName(scopedName, prefix="_0_"):
