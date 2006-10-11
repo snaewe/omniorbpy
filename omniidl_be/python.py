@@ -28,6 +28,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.29.2.22  2006/10/11 17:48:02  dgrisby
+# None is not a keyword, but it cannot be assigned to.
+#
 # Revision 1.29.2.21  2006/01/01 19:07:51  dgrisby
 # More complete __repr__ support. New _tuple() method on structs.
 #
@@ -2143,6 +2146,10 @@ def dotName(scopedName, our_scope=[]):
 
 def mangle(name):
     if keyword.iskeyword(name): return "_" + name
+
+    # None is a pseudo-keyword that cannot be assigned to.
+    if name == "None": return "_None"
+
     return name
 
 def fixupScopedName(scopedName, prefix="_0_"):

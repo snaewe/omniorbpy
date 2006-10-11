@@ -1,3 +1,11 @@
+Wed Oct 11 18:45:18 BST 2006 dgrisby
+====================================
+
+- None is not a keyword, but it cannot be assigned to.
+
+omniidl_be/python.py
+
+
 Thu Feb 16 22:53:32 GMT 2006 dgrisby
 ====================================
 
