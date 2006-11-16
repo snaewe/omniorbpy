@@ -1033,9 +1033,10 @@ endif
 
 ###################
 ifdef Cygwin
+MKDIRHIER = mkdir -p
 extralibs += -L$(PYPREFIX)/lib/python$(PYVERSION)/config \
  -lpython$(PYVERSION).dll
-IMPORT_CPPFLAGS += -D__linux__ -D__cygwin__
+IMPORT_CPPFLAGS += -D__cygwin__
 SHAREDLIB_CPPFLAGS =
 OMNITHREAD_POSIX_CPPFLAGS = -DNoNanoSleep -DPthreadDraftVersion=10
 OMNITHREAD_CPPFLAGS = -D_REENTRANT

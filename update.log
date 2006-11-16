@@ -1,3 +1,11 @@
+Thu Nov 16 13:52:18 GMT 2006 dgrisby
+====================================
+
+- Tweaks for cygwin.
+
+mk/beforeauto.mk.in
+
+
 Thu Nov  9 16:04:31 GMT 2006 dgrisby
 ====================================
 
