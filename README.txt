@@ -58,10 +58,16 @@ use variables CC, CXX and PYTHON, e.g.:
   ../configure CXX=/usr/bin/platform_c++ PYTHON=/usr/local/bin/python2.3
 
 
-If you do not have Autoconf support on your platform, you must install
-the omniORBpy source in the $TOP/src/lib directory of a working
-omniORB 4.1 tree. Then, in the $TOP/src/lib/omniORBpy directory,
-simply do a gnumake export.
+If you do not have Autoconf support on your platform (e.g. on
+Windows), you must install the omniORBpy source in the $TOP/src/lib
+directory of a working omniORB 4.1 tree. Make sure the directory is
+called omniORBpy -- if you downloaded a release archive you must
+rename the directory to remove the version from the directory name.
+
+Once you have the source in the right place, simply do a make export
+in the $TOP/src/lib/omniORBpy directory.
+
+
 
 
 Using omniORBpy
