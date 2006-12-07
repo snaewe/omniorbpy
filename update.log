@@ -1,3 +1,15 @@
+Thu Dec  7 11:48:01 GMT 2006 dgrisby
+====================================
+
+- Clarify non-autoconf build instructions.
+
+README.txt
+
+- to_any of large integers uses the wrong TypeCode on 64 bit platforms.
+
+python/omniORB/any.py
+
+
 Tue Nov 28 13:28:43 GMT 2006 dgrisby
 ====================================
 

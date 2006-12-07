@@ -99,10 +99,7 @@ def _to_tc_value(data):
     elif isinstance(data, BooleanType):
         return CORBA.TC_boolean, data
 
-    elif isinstance(data, IntType):
-        return CORBA.TC_long, data
-
-    elif isinstance(data, LongType):
+    elif isinstance(data, IntType) or isinstance(data, LongType):
         if -2147483648L <= data <= 2147483647L:
             return CORBA.TC_long, int(data)
         elif 0 <= data <= 4294967295L:
