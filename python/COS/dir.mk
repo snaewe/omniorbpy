@@ -39,29 +39,29 @@ SSLIOP.idl TimeBase.idl
 # Lname-library.idl
 
 IDLFILES = CosCollection.idl \
-	   CosCompoundLifeCycle.idl \
-	   CosContainment.idl CosEventChannelAdmin.idl \
-	   CosEventComm.idl CosExternalizationContainment.idl \
-	   CosExternalization.idl CosExternalizationReference.idl \
-	   CosGraphs.idl \
-	   CosLifeCycleContainment.idl CosLifeCycle.idl \
-	   CosLifeCycleReference.idl CosNaming.idl \
-	   CosNotification.idl CosNotifyChannelAdmin.idl \
-	   CosNotifyComm.idl CosNotifyFilter.idl \
-	   CosObjectIdentity.idl CosPersistenceDDO.idl \
-	   CosPersistenceDS_CLI.idl CosPersistencePDS_DA.idl \
-	   CosPersistencePDS.idl CosPersistencePID.idl \
-	   CosPersistencePO.idl CosPersistencePOM.idl \
-	   CosPropertyService.idl CosQueryCollection.idl \
-	   CosQuery.idl CosReference.idl \
-	   CosRelationships.idl CosStream.idl \
-	   CosTime.idl CosTimerEvent.idl \
-	   CosTradingDynamic.idl CosTrading.idl CosTradingRepos.idl \
-	   CosTypedEventChannelAdmin.idl CosTypedEventComm.idl \
-	   CosTypedNotifyChannelAdmin.idl CosTypedNotifyComm.idl \
-	   LifeCycleService.idl \
-	   RDITestTypes.idl \
-	   TimeBase.idl
+           CosCompoundLifeCycle.idl \
+           CosContainment.idl CosEventChannelAdmin.idl \
+           CosEventComm.idl CosExternalizationContainment.idl \
+           CosExternalization.idl CosExternalizationReference.idl \
+           CosGraphs.idl \
+           CosLifeCycleContainment.idl CosLifeCycle.idl \
+           CosLifeCycleReference.idl CosNaming.idl \
+           CosNotification.idl CosNotifyChannelAdmin.idl \
+           CosNotifyComm.idl CosNotifyFilter.idl \
+           CosObjectIdentity.idl CosPersistenceDDO.idl \
+           CosPersistenceDS_CLI.idl CosPersistencePDS_DA.idl \
+           CosPersistencePDS.idl CosPersistencePID.idl \
+           CosPersistencePO.idl CosPersistencePOM.idl \
+           CosPropertyService.idl CosQueryCollection.idl \
+           CosQuery.idl CosReference.idl \
+           CosRelationships.idl CosStream.idl \
+           CosTime.idl CosTimerEvent.idl \
+           CosTradingDynamic.idl CosTrading.idl CosTradingRepos.idl \
+           CosTypedEventChannelAdmin.idl CosTypedEventComm.idl \
+           CosTypedNotifyChannelAdmin.idl CosTypedNotifyComm.idl \
+           LifeCycleService.idl \
+           RDITestTypes.idl \
+           TimeBase.idl
 
 FILES =
 INSTALLEDFILES =

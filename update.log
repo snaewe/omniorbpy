@@ -1,3 +1,11 @@
+Mon Dec 11 10:32:45 GMT 2006 dgrisby
+====================================
+
+- Tab characters upset old versions of GNU make.
+
+python/COS/dir.mk
+
+
 Thu Dec  7 11:48:01 GMT 2006 dgrisby
 ====================================
 
