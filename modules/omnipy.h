@@ -31,6 +31,10 @@
 #define _omnipy_h_
 
 // $Log$
+// Revision 1.3.2.13  2007/01/19 11:11:09  dgrisby
+// Avoid assertion failure if an unexpected C++ exception occurs during
+// an invocation.
+//
 // Revision 1.3.2.12  2006/07/26 17:50:43  dgrisby
 // Reuse existing omniIOR object when converting C++ object reference to Python.
 //
@@ -756,6 +760,13 @@ public:
       OMNIORB_ASSERT(tstate_);
       PyEval_RestoreThread(tstate_);
       tstate_ = 0;
+    }
+
+    inline void ensureInterpreterLock() {
+      if (tstate_) {
+        PyEval_RestoreThread(tstate_);
+        tstate_ = 0;
+      }
     }
 
     inline PyObject* args() { return args_; }
