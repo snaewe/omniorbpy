@@ -30,6 +30,10 @@
 
 # $Id$
 # $Log$
+# Revision 1.13.2.10  2007/04/26 08:33:38  dgrisby
+# Incorrect kind() return for object reference TypeCodes. Thanks
+# Andrew Edem.
+#
 # Revision 1.13.2.9  2006/07/11 13:53:09  dgrisby
 # Implement missing TypeCode creation functions.
 #
@@ -553,7 +557,7 @@ class TypeCode_objref (TypeCode_base):
                             tv_local_interface ]:
             raise CORBA.INTERNAL()
         self._d = desc
-        self._k = desc[0]
+        self._k = CORBA.TCKind._items[desc[0]]
 
     def id(self):
         if self._d[1] is not None:
