@@ -1,3 +1,12 @@
+Fri May 11 11:25:22 BST 2007 dgrisby
+====================================
+
+- Definitions for kfreebsd. Not tested.
+
+configure
+configure.ac
+
+
 Fri May 11 10:35:23 BST 2007 dgrisby
 ====================================
 
