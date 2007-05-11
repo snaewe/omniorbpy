@@ -30,6 +30,10 @@
 
 # $Id$
 # $Log$
+# Revision 1.30.2.19  2007/05/11 09:37:23  dgrisby
+# Ensure hash value of unpickled enum items is the same as that of the
+# original item.
+#
 # Revision 1.30.2.18  2006/09/07 15:29:57  dgrisby
 # Use boxes.idl to build standard value boxes.
 #
@@ -631,7 +635,7 @@ class EnumItem:
             return cmp(id(self), id(other))
 
     def __hash__(self):
-        return id(self)
+        return hash(self._parent_id + "/" + self._n)
 
 class AnonymousEnumItem (EnumItem):
     def __init__(self, value):
