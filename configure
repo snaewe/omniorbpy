@@ -3604,8 +3604,9 @@ COMPILER_NAME=$compiler_name
 
 
 
-platform_name="Platform_Unknown"
-os_version="0"
+plat_name="Platform_Unknown"
+plat_def="__unknown_platform__"
+os_v="0"
 
 case "$host" in
   *-*-linux-*)   plat_name="Linux";    plat_def="__linux__";    os_v="2";;
