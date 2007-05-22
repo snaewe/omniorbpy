@@ -22,7 +22,7 @@ BLOCKQUOTE{margin-left:4ex;margin-right:4ex;text-align:left;}
 </HEAD>
 
 <BODY >
-<!--HEVEA command line is: hevea omniORBpy -->
+<!--HEVEA command line is: hevea omniORBpy.tex -->
 <!--HTMLHEAD-->
 <!--ENDHTML-->
 <!--PREFIX <ARG ></ARG>-->
@@ -318,30 +318,30 @@ be split between different address spaces.<BR>
 First, the code:<BR>
 <BR>
 
-<DIV CLASS="lstlisting"><TT><I>#!/usr/bin/env python</I></TT><TT>
-</TT><TT>
-</TT><TT><B>import</B> sys</TT><TT>
-</TT><TT><B>from</B> omniORB <B>import</B> CORBA, PortableServer</TT><TT>
-</TT><TT><B>import</B> Example, Example__POA</TT><TT>
-</TT><TT>
-</TT><TT><B>class</B> Echo_i (Example__POA.Echo):</TT><TT>
-</TT><TT>    <B>def</B> echoString(self, mesg):</TT><TT>
-</TT><TT>        <B>print</B> "echoString() called with message:", mesg</TT><TT>
-</TT><TT>        <B>return</B> mesg</TT><TT>
-</TT><TT>
-</TT><TT>orb = CORBA.ORB_init(sys.argv, CORBA.ORB_ID)</TT><TT>
-</TT><TT>poa = orb.resolve_initial_references("RootPOA")</TT><TT>
-</TT><TT>
-</TT><TT>ei = Echo_i()</TT><TT>
-</TT><TT>eo = ei._this()</TT><TT>
-</TT><TT>
-</TT><TT>poaManager = poa._get_the_POAManager()</TT><TT>
-</TT><TT>poaManager.activate()</TT><TT>
-</TT><TT>
-</TT><TT>message = "Hello"</TT><TT>
-</TT><TT>result  = eo.echoString(message)</TT><TT>
-</TT><TT>
-</TT><TT><B>print</B> "I said '%s'. The object said '%s'." % (message,result)</TT></DIV><BR>
+<DIV CLASS="lstlisting"><TT><FONT SIZE=1>   1</FONT> </TT><TT><I>#!/usr/bin/env python</I></TT><TT>
+<FONT SIZE=1>   2</FONT> </TT><TT>
+<FONT SIZE=1>   3</FONT> </TT><TT><B>import</B> sys</TT><TT>
+<FONT SIZE=1>   4</FONT> </TT><TT><B>from</B> omniORB <B>import</B> CORBA, PortableServer</TT><TT>
+<FONT SIZE=1>   5</FONT> </TT><TT><B>import</B> Example, Example__POA</TT><TT>
+<FONT SIZE=1>   6</FONT> </TT><TT>
+<FONT SIZE=1>   7</FONT> </TT><TT><B>class</B> Echo_i (Example__POA.Echo):</TT><TT>
+<FONT SIZE=1>   8</FONT> </TT><TT>    <B>def</B> echoString(self, mesg):</TT><TT>
+<FONT SIZE=1>   9</FONT> </TT><TT>        <B>print</B> "echoString() called with message:", mesg</TT><TT>
+<FONT SIZE=1>  10</FONT> </TT><TT>        <B>return</B> mesg</TT><TT>
+<FONT SIZE=1>  11</FONT> </TT><TT>
+<FONT SIZE=1>  12</FONT> </TT><TT>orb = CORBA.ORB_init(sys.argv, CORBA.ORB_ID)</TT><TT>
+<FONT SIZE=1>  13</FONT> </TT><TT>poa = orb.resolve_initial_references("RootPOA")</TT><TT>
+<FONT SIZE=1>  14</FONT> </TT><TT>
+<FONT SIZE=1>  15</FONT> </TT><TT>ei = Echo_i()</TT><TT>
+<FONT SIZE=1>  16</FONT> </TT><TT>eo = ei._this()</TT><TT>
+<FONT SIZE=1>  17</FONT> </TT><TT>
+<FONT SIZE=1>  18</FONT> </TT><TT>poaManager = poa._get_the_POAManager()</TT><TT>
+<FONT SIZE=1>  19</FONT> </TT><TT>poaManager.activate()</TT><TT>
+<FONT SIZE=1>  20</FONT> </TT><TT>
+<FONT SIZE=1>  21</FONT> </TT><TT>message = "Hello"</TT><TT>
+<FONT SIZE=1>  22</FONT> </TT><TT>result  = eo.echoString(message)</TT><TT>
+<FONT SIZE=1>  23</FONT> </TT><TT>
+<FONT SIZE=1>  24</FONT> </TT><TT><B>print</B> "I said '%s'. The object said '%s'." % (message,result)</TT></DIV><BR>
 <BR>
 The example illustrates several important interactions among the ORB,
 the POA, the servant, and the client. Here are the details:<BR>
@@ -480,29 +480,29 @@ passing the object reference using the CORBA Naming Service.<BR>
 <H3 CLASS="subsection"><A NAME="htoc22">2.5.1</A>&nbsp;&nbsp;Object Implementation: Making a Stringified Object Reference</H3><!--SEC END -->
 
 
-<DIV CLASS="lstlisting"><TT><I>#!/usr/bin/env python</I></TT><TT>
-</TT><TT>
-</TT><TT><B>import</B> sys</TT><TT>
-</TT><TT><B>from</B> omniORB <B>import</B> CORBA, PortableServer</TT><TT>
-</TT><TT><B>import</B> Example, Example__POA</TT><TT>
-</TT><TT>
-</TT><TT><B>class</B> Echo_i (Example__POA.Echo):</TT><TT>
-</TT><TT>    <B>def</B> echoString(self, mesg):</TT><TT>
-</TT><TT>        <B>print</B> "echoString() called with message:", mesg</TT><TT>
-</TT><TT>        <B>return</B> mesg</TT><TT>
-</TT><TT>
-</TT><TT>orb = CORBA.ORB_init(sys.argv, CORBA.ORB_ID)</TT><TT>
-</TT><TT>poa = orb.resolve_initial_references("RootPOA")</TT><TT>
-</TT><TT>
-</TT><TT>ei = Echo_i()</TT><TT>
-</TT><TT>eo = ei._this()</TT><TT>
-</TT><TT>
-</TT><TT><B>print</B> orb.object_to_string(eo)</TT><TT>
-</TT><TT>
-</TT><TT>poaManager = poa._get_the_POAManager()</TT><TT>
-</TT><TT>poaManager.activate()</TT><TT>
-</TT><TT>
-</TT><TT>orb.run()</TT></DIV><BR>
+<DIV CLASS="lstlisting"><TT><FONT SIZE=1>   1</FONT> </TT><TT><I>#!/usr/bin/env python</I></TT><TT>
+<FONT SIZE=1>   2</FONT> </TT><TT>
+<FONT SIZE=1>   3</FONT> </TT><TT><B>import</B> sys</TT><TT>
+<FONT SIZE=1>   4</FONT> </TT><TT><B>from</B> omniORB <B>import</B> CORBA, PortableServer</TT><TT>
+<FONT SIZE=1>   5</FONT> </TT><TT><B>import</B> Example, Example__POA</TT><TT>
+<FONT SIZE=1>   6</FONT> </TT><TT>
+<FONT SIZE=1>   7</FONT> </TT><TT><B>class</B> Echo_i (Example__POA.Echo):</TT><TT>
+<FONT SIZE=1>   8</FONT> </TT><TT>    <B>def</B> echoString(self, mesg):</TT><TT>
+<FONT SIZE=1>   9</FONT> </TT><TT>        <B>print</B> "echoString() called with message:", mesg</TT><TT>
+<FONT SIZE=1>  10</FONT> </TT><TT>        <B>return</B> mesg</TT><TT>
+<FONT SIZE=1>  11</FONT> </TT><TT>
+<FONT SIZE=1>  12</FONT> </TT><TT>orb = CORBA.ORB_init(sys.argv, CORBA.ORB_ID)</TT><TT>
+<FONT SIZE=1>  13</FONT> </TT><TT>poa = orb.resolve_initial_references("RootPOA")</TT><TT>
+<FONT SIZE=1>  14</FONT> </TT><TT>
+<FONT SIZE=1>  15</FONT> </TT><TT>ei = Echo_i()</TT><TT>
+<FONT SIZE=1>  16</FONT> </TT><TT>eo = ei._this()</TT><TT>
+<FONT SIZE=1>  17</FONT> </TT><TT>
+<FONT SIZE=1>  18</FONT> </TT><TT><B>print</B> orb.object_to_string(eo)</TT><TT>
+<FONT SIZE=1>  19</FONT> </TT><TT>
+<FONT SIZE=1>  20</FONT> </TT><TT>poaManager = poa._get_the_POAManager()</TT><TT>
+<FONT SIZE=1>  21</FONT> </TT><TT>poaManager.activate()</TT><TT>
+<FONT SIZE=1>  22</FONT> </TT><TT>
+<FONT SIZE=1>  23</FONT> </TT><TT>orb.run()</TT></DIV><BR>
 <BR>
 Up until line 18, this example is identical to the colocated case. On
 line 18, the ORB's <TT>object_to_string()</TT> operation is called. This
@@ -529,27 +529,27 @@ rather than exiting immediately when the end-of-file is reached.
 
 <A NAME="clnt2"></A>
 
-<DIV CLASS="lstlisting"><TT><I>#!/usr/bin/env python</I></TT><TT>
-</TT><TT>
-</TT><TT><B>import</B> sys</TT><TT>
-</TT><TT><B>from</B> omniORB <B>import</B> CORBA</TT><TT>
-</TT><TT><B>import</B> Example</TT><TT>
-</TT><TT>
-</TT><TT>orb = CORBA.ORB_init(sys.argv, CORBA.ORB_ID)</TT><TT>
-</TT><TT>
-</TT><TT>ior = sys.argv[1]</TT><TT>
-</TT><TT>obj = orb.string_to_object(ior)</TT><TT>
-</TT><TT>
-</TT><TT>eo = obj._narrow(Example.Echo)</TT><TT>
-</TT><TT>
-</TT><TT><B>if</B> eo <B>is</B> None:</TT><TT>
-</TT><TT>    <B>print</B> "Object reference is not an Example::Echo"</TT><TT>
-</TT><TT>    sys.exit(1)</TT><TT>
-</TT><TT>
-</TT><TT>message = "Hello from Python"</TT><TT>
-</TT><TT>result  = eo.echoString(message)</TT><TT>
-</TT><TT>
-</TT><TT><B>print</B> "I said '%s'. The object said '%s'." % (message,result)</TT></DIV><BR>
+<DIV CLASS="lstlisting"><TT><FONT SIZE=1>   1</FONT> </TT><TT><I>#!/usr/bin/env python</I></TT><TT>
+<FONT SIZE=1>   2</FONT> </TT><TT>
+<FONT SIZE=1>   3</FONT> </TT><TT><B>import</B> sys</TT><TT>
+<FONT SIZE=1>   4</FONT> </TT><TT><B>from</B> omniORB <B>import</B> CORBA</TT><TT>
+<FONT SIZE=1>   5</FONT> </TT><TT><B>import</B> Example</TT><TT>
+<FONT SIZE=1>   6</FONT> </TT><TT>
+<FONT SIZE=1>   7</FONT> </TT><TT>orb = CORBA.ORB_init(sys.argv, CORBA.ORB_ID)</TT><TT>
+<FONT SIZE=1>   8</FONT> </TT><TT>
+<FONT SIZE=1>   9</FONT> </TT><TT>ior = sys.argv[1]</TT><TT>
+<FONT SIZE=1>  10</FONT> </TT><TT>obj = orb.string_to_object(ior)</TT><TT>
+<FONT SIZE=1>  11</FONT> </TT><TT>
+<FONT SIZE=1>  12</FONT> </TT><TT>eo = obj._narrow(Example.Echo)</TT><TT>
+<FONT SIZE=1>  13</FONT> </TT><TT>
+<FONT SIZE=1>  14</FONT> </TT><TT><B>if</B> eo <B>is</B> None:</TT><TT>
+<FONT SIZE=1>  15</FONT> </TT><TT>    <B>print</B> "Object reference is not an Example::Echo"</TT><TT>
+<FONT SIZE=1>  16</FONT> </TT><TT>    sys.exit(1)</TT><TT>
+<FONT SIZE=1>  17</FONT> </TT><TT>
+<FONT SIZE=1>  18</FONT> </TT><TT>message = "Hello from Python"</TT><TT>
+<FONT SIZE=1>  19</FONT> </TT><TT>result  = eo.echoString(message)</TT><TT>
+<FONT SIZE=1>  20</FONT> </TT><TT>
+<FONT SIZE=1>  21</FONT> </TT><TT><B>print</B> "I said '%s'. The object said '%s'." % (message,result)</TT></DIV><BR>
 <BR>
 The stringified object reference is passed to the client as a
 command-line argument<SUP><A NAME="text2" HREF="#note2">2</A></SUP>. The client uses the ORB's

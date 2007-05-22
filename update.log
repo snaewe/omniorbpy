@@ -1,3 +1,17 @@
+Tue May 22 18:21:03 BST 2007 dgrisby
+====================================
+
+- At some point the listings package changed, which broke the line
+  numbers in examples.
+
+doc/omniORBpy.pdf
+doc/omniORBpy.ps
+doc/omniORBpy/index.html
+doc/omniORBpy/omniORBpy.html
+doc/omniORBpy/omniORBpy002.html
+doc/tex/omniORBpy.tex
+
+
 Fri May 11 11:25:22 BST 2007 dgrisby
 ====================================
 
