@@ -30,6 +30,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.13.2.11  2007/06/06 17:59:01  dgrisby
+# Allow enums to be used directly in CORBA.TypeCode().
+#
 # Revision 1.13.2.10  2007/04/26 08:33:38  dgrisby
 # Incorrect kind() return for object reference TypeCodes. Thanks
 # Andrew Edem.
@@ -186,11 +189,10 @@ tv__indirect          = -1
 # Create a TypeCode given a class or a repoId
 
 def typeCodeFromClassOrRepoId(t):
-    if type(t) is types.ClassType:
-        try:
-            t = t._NP_RepositoryId
-        except AttributeError:
-            raise TypeError("Class must be a CORBA class.")
+    try:
+        t = t._NP_RepositoryId
+    except AttributeError:
+        pass
 
     if type(t) is not types.StringType:
         raise TypeError("Argument must be CORBA class or repository id.")

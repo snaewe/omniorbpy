@@ -1,3 +1,11 @@
+Wed Jun  6 18:58:06 BST 2007 dgrisby
+====================================
+
+- Allow enums to be used directly in CORBA.TypeCode().
+
+python/omniORB/tcInternal.py
+
+
 Tue May 22 18:21:03 BST 2007 dgrisby
 ====================================
 
