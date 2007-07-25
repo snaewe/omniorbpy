@@ -1,3 +1,12 @@
+Wed Jul 25 15:58:36 BST 2007 dgrisby
+====================================
+
+- Sequence unmarshalling could incorrecly complain about the lack of
+  data left in a sequence of null or void.
+
+modules/pyMarshal.cc
+
+
 Wed Jun  6 18:58:06 BST 2007 dgrisby
 ====================================
 
