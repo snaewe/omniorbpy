@@ -1,10 +1,20 @@
 RELEASE NOTES
 =============
 
-This is omniORBpy 3.0.
+This is omniORBpy 3.1.
 
 See README.txt for building instructions.
 See the documentation in the doc directory for more information.
+
+
+Changes since omniORBpy 3.0
+---------------------------
+
+ - Bug fixes. See bugfixes-30.xml.
+
+ - Minor documentation updates.
+
+ - New configuration parameters: socketSendBuffer, resetTimeOutOnRetries.
 
 
 Changes since omniORBpy 3.0 release candidate 2

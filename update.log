@@ -8,6 +8,8 @@ ReleaseNotes.txt
 bugfixes-30.xml
 configure
 configure.ac
+contrib/RPMs/omniORBpy.spec
+contrib/RPMs/omniORBpy_new.spec
 mk/version.mk
 
 
