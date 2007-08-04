@@ -1,3 +1,16 @@
+Sat Aug  4 16:04:43 BST 2007 dgrisby
+====================================
+
+- Updates for 3.1 release.
+
+README.txt
+ReleaseNotes.txt
+bugfixes-30.xml
+configure
+configure.ac
+mk/version.mk
+
+
 Tue Jul 31 16:18:53 BST 2007 dgrisby
 ====================================
 
