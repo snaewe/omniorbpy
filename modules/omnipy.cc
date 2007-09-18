@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.4.19  2007/09/18 20:03:34  dgrisby
+// Refcount error if cdrUnmarshal raised a Python exception.
+//
 // Revision 1.1.4.18  2007/01/19 11:11:09  dgrisby
 // Avoid assertion failure if an unexpected C++ exception occurs during
 // an invocation.
@@ -637,7 +640,7 @@ extern "C" {
   static inline PyObject* do_cdrUnmarshal(cdrStream& stream, PyObject* desc)
   {
     PyObject* r = omniPy::unmarshalPyObject(stream, desc);
-    if (stream.checkInputOverrun(1, 1)) {
+    if (r && stream.checkInputOverrun(1, 1)) {
       // More data in stream -- must have used the wrong TypeCode
       Py_DECREF(r);
       OMNIORB_THROW(MARSHAL, MARSHAL_MessageTooLong, CORBA::COMPLETED_NO);
