@@ -1,3 +1,15 @@
+Tue Sep 18 21:01:08 BST 2007 dgrisby
+====================================
+
+- Refcount error if cdrUnmarshal raised a Python exception.
+
+modules/omnipy.cc
+
+- Set _parent_id on enums generated from TypeCodes.
+
+modules/pyTypeCode.cc
+
+
 Sat Aug  4 16:04:43 BST 2007 dgrisby
 ====================================
 

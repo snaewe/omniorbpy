@@ -29,6 +29,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.4.9  2007/09/18 20:04:14  dgrisby
+// Set _parent_id on enums generated from TypeCodes.
+//
 // Revision 1.1.4.8  2006/05/24 18:33:42  dgrisby
 // Off by one error in abstract interface typecode marshalling.
 //
@@ -1052,6 +1055,7 @@ r_unmarshalTypeCode(cdrStream& stream, OffsetDescriptorMap& odm)
 	  Py_DECREF(mname);
 
 	  OMNIORB_ASSERT(t_o);
+          PyObject_SetAttrString(t_o, (char*)"_parent_id", repoId);
 	  PyTuple_SET_ITEM(mems, i, t_o);
 	}
       }
