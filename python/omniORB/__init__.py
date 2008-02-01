@@ -30,6 +30,10 @@
 
 # $Id$
 # $Log$
+# Revision 1.30.2.21  2008/02/01 16:29:16  dgrisby
+# Error with implementation of operations with names clashing with
+# Python keywords.
+#
 # Revision 1.30.2.20  2007/10/07 15:30:58  dgrisby
 # Problems with modules inside packages. Thanks Fabian Knittel.
 #
@@ -1050,6 +1054,9 @@ try:
     import keyword
     for word in keyword.kwlist:
         keywordMapping[word] = "_" + word
+
+    keywordMapping["None"] = "_None"
+
     del keyword
 except ImportError:
     pass

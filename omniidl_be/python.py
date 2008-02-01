@@ -28,6 +28,10 @@
 
 # $Id$
 # $Log$
+# Revision 1.33.2.14  2008/02/01 16:29:17  dgrisby
+# Error with implementation of operations with names clashing with
+# Python keywords.
+#
 # Revision 1.33.2.13  2006/10/11 17:44:14  dgrisby
 # None is not a keyword, but it cannot be assigned to.
 #
@@ -1213,10 +1217,11 @@ class PythonVisitor:
                                        ifid + '.' + '_d__set_' + attr)
 
             else: # Operation
-                opname = mangle(c.identifier())
+                opname   = c.identifier()
+                m_opname = mangle(opname)
                 
-                methodl.append('"' + opname + '": ' + '_0_' + self.modname + \
-                               '.' + ifid + '.' + '_d_' + opname)
+                methodl.append('"' + opname + '": ' + '_0_' + self.modname +
+                               '.' + ifid + '.' + '_d_' + m_opname)
 
         methodmap = "{" + string.join(methodl, ", ") + "}"
 
