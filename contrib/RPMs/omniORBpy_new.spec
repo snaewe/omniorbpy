@@ -4,7 +4,7 @@
 
 Summary:   Python Language Mapping for omniORB
 Name:      %{_name}
-Version:   3.1
+Version:   3.2
 Release:   1
 License:   GPL / LGPL
 Group:     System/Libraries

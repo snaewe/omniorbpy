@@ -1,3 +1,17 @@
+Thu Feb 14 13:33:21 GMT 2008 dgrisby
+====================================
+
+- Updates for 3.2 release.
+
+README.txt
+ReleaseNotes.txt
+configure
+configure.ac
+contrib/RPMs/omniORBpy.spec
+contrib/RPMs/omniORBpy_new.spec
+mk/version.mk
+
+
 Fri Feb  1 16:22:20 GMT 2008 dgrisby
 ====================================
 
