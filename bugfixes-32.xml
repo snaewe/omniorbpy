@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+<?xml-stylesheet type="text/xml" href="buglayout.xml"?>
+
+<!-- The following bugs have been fixed since the omniORBpy 3.0     -->
+<!-- release. This file is transformed into html with bugfixes.xsl. -->
+
+<!-- Editors: make sure the content you add is well-formed XML.     -->
+
+<buglist version="3.2">
+
+<bug id="1" date="Mon Mar 24 20:02:14 GMT 2008" user="dgrisby">
+  <summary>Memory leak in minor code stringification.</summary>
+  <text>
+  Failed to release Python references.
+  </text>
+  <listlink href="http://www.omniorb-support.com/pipermail/omniorb-dev/2008-March/000244.html"/>
+</bug>
+
+</buglist>

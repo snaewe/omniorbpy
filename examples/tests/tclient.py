@@ -2,6 +2,7 @@
 
 import sys, time, gc
 from omniORB import CORBA, PortableServer
+import omniORB
 import TypeTest, TypeTest__POA
 
 
@@ -1752,6 +1753,12 @@ def doTests(orb, poa, io):
 
     a = CORBA.Any(CORBA._tc_IMP_LIMIT,
                   CORBA.IMP_LIMIT(12345,CORBA.COMPLETED_YES))
+    r = io.any1(a)
+    tresult(str(r.value()))
+
+    a = CORBA.Any(CORBA._tc_OBJECT_NOT_EXIST,
+                  CORBA.OBJECT_NOT_EXIST(omniORB.OBJECT_NOT_EXIST_NoMatch,
+                                         CORBA.COMPLETED_YES))
     r = io.any1(a)
     tresult(str(r.value()))
 

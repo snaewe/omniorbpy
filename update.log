@@ -1,3 +1,13 @@
+Mon Mar 24 20:02:14 GMT 2008 dgrisby
+====================================
+
+- Memory leak in minor code stringification.
+
+bugfixes-32.xml
+examples/tests/tclient.py
+modules/pyomniFunc.cc
+
+
 Tue Feb 19 16:42:12 GMT 2008 dgrisby
 ====================================
 
