@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.4.2  2008/04/03 09:05:25  dgrisby
+// Leaks of some exception classes. Thanks Luke Deller.
+//
 // Revision 1.1.4.1  2003/03/23 21:51:57  dgrisby
 // New omnipy3_develop branch.
 //
@@ -76,6 +79,7 @@ raiseAdapterInactive(PyObject* pyPM)
   OMNIORB_ASSERT(excc);
   PyObject* exci = PyEval_CallObject(excc, omniPy::pyEmptyTuple);
   PyErr_SetObject(excc, exci);
+  Py_DECREF(exci);
   return 0;
 }
 

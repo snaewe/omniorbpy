@@ -8,6 +8,15 @@
 
 <buglist version="3.2">
 
+<bug id="2" date=""Thu Apr  3 10:03:08 BST 2008 user="dgrisby">
+  <summary>Leaks of some exception classes</summary>
+  <reported>Luke Deller</reported>
+  <text>
+  Failed to release Python references.
+  </text>
+  <listlink href="http://www.omniorb-support.com/pipermail/omniorb-list/2008-April/029346.html"/>
+</bug>
+
 <bug id="1" date="Mon Mar 24 20:02:14 GMT 2008" user="dgrisby">
   <summary>Memory leak in minor code stringification.</summary>
   <text>

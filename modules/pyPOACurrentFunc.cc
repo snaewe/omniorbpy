@@ -29,6 +29,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.4.3  2008/04/03 09:05:26  dgrisby
+// Leaks of some exception classes. Thanks Luke Deller.
+//
 // Revision 1.1.4.2  2005/01/07 00:22:33  dgrisby
 // Big merge from omnipy2_develop.
 //
@@ -72,6 +75,7 @@ raiseNoContext(PyObject* pyPC)
   OMNIORB_ASSERT(excc);
   PyObject* exci = PyEval_CallObject(excc, omniPy::pyEmptyTuple);
   PyErr_SetObject(excc, exci);
+  Py_DECREF(exci);
   return 0;
 }
 

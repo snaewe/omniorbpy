@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.4.4  2008/04/03 09:05:26  dgrisby
+// Leaks of some exception classes. Thanks Luke Deller.
+//
 // Revision 1.1.4.3  2006/07/05 10:46:43  dgrisby
 // list_initial_services did not catch exceptions.
 //
@@ -193,6 +196,7 @@ extern "C" {
       OMNIORB_ASSERT(excc);
       PyObject* exci = PyEval_CallObject(excc, omniPy::pyEmptyTuple);
       PyErr_SetObject(excc, exci);
+      Py_DECREF(exci);
       return 0;
     }
     OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS

@@ -1,3 +1,15 @@
+Thu Apr  3 10:03:08 BST 2008 dgrisby
+====================================
+
+- Leaks of some exception classes. Thanks Luke Deller.
+
+bugfixes-32.xml
+modules/pyORBFunc.cc
+modules/pyPOACurrentFunc.cc
+modules/pyPOAFunc.cc
+modules/pyPOAManagerFunc.cc
+
+
 Mon Mar 24 20:02:14 GMT 2008 dgrisby
 ====================================
 
