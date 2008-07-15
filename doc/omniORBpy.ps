@@ -11,7 +11,7 @@
 %DVIPSWebPage: (www.radicaleye.com)
 %DVIPSCommandLine: dvips omniORBpy
 %DVIPSParameters: dpi=600, compressed
-%DVIPSSource:  TeX output 2007.07.31:1614
+%DVIPSSource:  TeX output 2008.07.15:1219
 %%BeginProcSet: texc.pro
 %!
 /TeXDict 300 dict def TeXDict begin/N{def}def/B{bind def}N/S{exch}N/X{S
@@ -9597,33 +9597,34 @@ i(separate)e(idle)h(timeouts.)25 b(The)16 b(timeouts)g(ar)n(e)i(set)e
 Fh(inConScanPeriod)22 b Fs(parameters)27 b(r)n(espectively)-10
 b(.)44 b(The)28 b(values)h(ar)n(e)f(in)h(sec-)221 4025
 y(onds,)21 b(and)i(must)f(be)g(a)i(multiple)f(of)f(the)g(scan)h
-(granularity)-10 b(.)221 4208 y
+(granularity)-10 b(.)362 4142 y(Bewar)n(e)31 b(that)g(setting)e
+Fh(outConScanPerio)o(d)c Fs(or)31 b Fh(inConScanPerio)o(d)25
+b Fs(to)31 b(be)g(equal)221 4255 y(to)d(\(or)h(less)f(than\))h
+Fh(scanGranularity)22 b Fs(means)29 b(that)g(connections)e(ar)n(e)j
+(consider)n(ed)d(can-)221 4367 y(didates)34 b(for)g(closur)n(e)h
+(immediately)g(after)f(they)g(ar)n(e)h(opened.)61 b(That)35
+b(can)g(mean)g(that)g(the)221 4480 y(connections)29 b(ar)n(e)h(closed)f
+(befor)n(e)g(any)g(calls)i(have)f(been)f(sent)g(thr)n(ough)f(them.)48
+b(If)30 b(oneway)221 4593 y(calls)24 b(ar)n(e)f(used,)e(such)h
+(connection)g(closur)n(e)h(can)g(r)n(esult)f(in)h(silent)g(loss)f(of)g
+(calls.)221 4766 y
 SDict begin H.S end
- 221 4208 a 221 4208 a
+ 221 4766 a 221 4766 a
 SDict begin 13.6 H.A end
-
-221 4208 a 221 4208 a
+ 221 4766 a 221
+4766 a
 SDict begin [ /View [/XYZ H.V] /Dest (subsection.7.5.1) cvn H.B /DEST
 pdfmark end
- 221 4208 a 94 x Fk(7.5.1)99 b(Interoperability)25
-b(Considerations)221 4487 y Fs(The)c(IIOP)g(speci\002cation)h(allows)g
+ 221 4766 a 105 x Fk(7.5.1)99 b(Interoperability)25
+b(Considerations)221 5055 y Fs(The)c(IIOP)g(speci\002cation)h(allows)g
 (both)f(the)g(client)h(and)g(the)f(server)f(to)h(shutdown)f(a)i
-(connec-)221 4600 y(tion)g(unilaterally)-10 b(.)29 b(When)22
+(connec-)221 5168 y(tion)g(unilaterally)-10 b(.)29 b(When)22
 b(one)g(end)g(is)g(about)h(to)f(shutdown)e(a)j(connection,)f(it)h
-(should)e(send)221 4713 y(a)33 b(CloseConnection)f(message)g(to)g(the)g
+(should)e(send)221 5281 y(a)33 b(CloseConnection)f(message)g(to)g(the)g
 (other)f(end.)58 b(It)32 b(should)g(also)h(make)f(sur)n(e)g(that)h(the)
-221 4825 y(message)21 b(will)j(r)n(each)g(the)d(other)h(end)f(befor)n
-(e)i(it)f(pr)n(oceeds)f(to)h(shutdown)f(the)h(connection.)362
-4942 y(The)36 b(client)g(should)g(distinguish)f(between)f(an)j(or)n
-(derly)e(and)i(an)f(abnormal)i(connec-)221 5055 y(tion)22
-b(shutdown.)j(When)d(a)g(client)h(r)n(eceives)f(a)g(CloseConnection)f
-(message)g(befor)n(e)h(the)f(con-)221 5168 y(nection)28
-b(is)h(closed,)f(the)g(condition)g(is)g(an)h(or)n(derly)f(shutdown.)43
-b(If)28 b(the)g(message)f(is)h(not)g(r)n(e-)221 5281
-y(ceived,)35 b(the)c(condition)h(is)g(an)h(abnormal)h(shutdown.)55
-b(In)32 b(an)h(abnormal)g(shutdown,)g(the)221 5394 y(ORB)d(should)g
-(raise)g(a)h Fh(COMM_FAILURE)25 b Fs(exception)30 b(wher)n(eas)f(in)i
-(an)g(or)n(derly)e(shutdown,)p eop end
+221 5394 y(message)21 b(will)j(r)n(each)g(the)d(other)h(end)f(befor)n
+(e)i(it)f(pr)n(oceeds)f(to)h(shutdown)f(the)h(connection.)p
+eop end
 %%Page: 53 59
 TeXDict begin 53 58 bop 0 0 a
 SDict begin /product where{pop product(Distiller)search{pop pop pop
@@ -9639,81 +9640,80 @@ SDict begin H.R end
 SDict begin [ /View [/XYZ H.V] /Dest (page.53) cvn H.B /DEST pdfmark
 end
  63 282 a Fj(7.6.)51 b(TRANSPOR)m(TS)20
-b(AND)j(ENDPOINTS)1612 b Fs(53)63 539 y(the)19 b(ORB)h(should)f
+b(AND)j(ENDPOINTS)1612 b Fs(53)204 539 y(The)35 b(client)i(should)e
+(distinguish)g(between)g(an)i(or)n(derly)e(and)h(an)h(abnormal)g
+(connec-)63 652 y(tion)21 b(shutdown.)26 b(When)21 b(a)i(client)f(r)n
+(eceives)g(a)h(CloseConnection)e(message)f(befor)n(e)i(the)f(con-)63
+764 y(nection)28 b(is)g(closed,)h(the)e(condition)h(is)h(an)g(or)n
+(derly)e(shutdown.)43 b(If)29 b(the)e(message)g(is)i(not)e(r)n(e-)63
+877 y(ceived,)34 b(the)e(condition)g(is)g(an)h(abnormal)h(shutdown.)54
+b(In)32 b(an)h(abnormal)h(shutdown,)e(the)63 990 y(ORB)e(should)f
+(raise)i(a)g Fh(COMM_FAILURE)25 b Fs(exception)k(wher)n(eas)h(in)h(an)f
+(or)n(derly)g(shutdown,)63 1103 y(the)19 b(ORB)h(should)f
 Fr(not)i Fs(raise)f(an)h(exception)e(and)h(should)g(try)f(to)h(r)n
-(e-establish)g(a)h(new)e(connec-)63 652 y(tion)j(transpar)n(ently)-10
-b(.)204 764 y(omniORB)27 b(implements)g(these)e(semantics)i(completely)
--10 b(.)40 b(However)-7 b(,)27 b(it)h(is)f(known)f(that)63
-877 y(some)34 b(ORBs)h(ar)n(e)h(not)f(\(yet\))g(able)i(to)e
+(e-establish)g(a)h(new)e(connec-)63 1216 y(tion)j(transpar)n(ently)-10
+b(.)204 1337 y(omniORB)27 b(implements)g(these)e(semantics)i
+(completely)-10 b(.)40 b(However)-7 b(,)27 b(it)h(is)f(known)f(that)63
+1450 y(some)34 b(ORBs)h(ar)n(e)h(not)f(\(yet\))g(able)i(to)e
 (distinguish)f(between)g(an)i(or)n(derly)f(and)h(an)g(abnor)n(-)63
-990 y(mal)g(shutdown.)63 b(Usually)35 b(this)g(is)g(manifested)g(as)g
-(the)f(client)i(in)f(these)f(ORBs)g(seeing)g(a)63 1103
+1563 y(mal)g(shutdown.)63 b(Usually)35 b(this)g(is)g(manifested)g(as)g
+(the)f(client)i(in)f(these)f(ORBs)g(seeing)g(a)63 1676
 y Fh(COMM_FAILURE)23 b Fs(occasionally)30 b(when)d(connected)g(to)h(an)
-h(omniORB)g(server)-7 b(.)44 b(The)28 b(work-)63 1216
+h(omniORB)g(server)-7 b(.)44 b(The)28 b(work-)63 1789
 y(ar)n(ound)23 b(is)g(either)g(to)f(catch)j(the)d(exception)g(in)i(the)
 f(application)h(code)f(and)g(r)n(etry)-10 b(,)22 b(or)h(to)g(turn)63
-1329 y(of)n(f)g(the)f(idle)g(connection)h(shutdown)d(inside)i(the)g
-(omniORB)h(server)-7 b(.)63 1479 y
+1902 y(of)n(f)g(the)f(idle)g(connection)h(shutdown)d(inside)i(the)g
+(omniORB)h(server)-7 b(.)63 2096 y
 SDict begin H.S end
- 63 1479 a 63 1479
+ 63 2096 a 63 2096
 a
 SDict begin 13.6 H.A end
- 63 1479 a 63 1479 a
+ 63 2096 a 63 2096 a
 SDict begin [ /View [/XYZ H.V] /Dest (section.7.6) cvn H.B /DEST pdfmark
 end
- 63 1479 a 148 x Fp(7.6)119 b(T)-13
-b(ransports)28 b(and)i(endpoints)63 1838 y Fs(omniORB)20
+ 63 2096 a 156 x Fp(7.6)119 b(T)-13
+b(ransports)28 b(and)i(endpoints)63 2480 y Fs(omniORB)20
 b(can)h(support)d(multiple)j(network)d(transports.)25
-b(All)c(platforms)f(\(usually\))h(have)g(a)63 1951 y(TCP)j(transport)f
+b(All)c(platforms)f(\(usually\))h(have)g(a)63 2593 y(TCP)j(transport)f
 (available.)35 b(Unix)25 b(platforms)f(support)e(a)j(Unix)f(domain)h
-(socket)d(transport.)63 2063 y(Platforms)g(with)h(the)f(OpenSSL)f
+(socket)d(transport.)63 2706 y(Platforms)g(with)h(the)f(OpenSSL)f
 (library)j(available)h(can)f(support)c(an)k(SSL)d(transport.)204
-2176 y(Servers)27 b(must)g(be)i(con\002gur)n(ed)e(in)i(two)e(ways)h
+2827 y(Servers)27 b(must)g(be)i(con\002gur)n(ed)e(in)i(two)e(ways)h
 (with)g(r)n(egar)n(d)g(to)g(transports:)37 b(the)28 b(trans-)63
-2289 y(ports)17 b(and)h(interfaces)g(on)h(which)g(they)e(listen,)i(and)
+2940 y(ports)17 b(and)h(interfaces)g(on)h(which)g(they)e(listen,)i(and)
 f(the)g(details)g(that)g(ar)n(e)h(published)f(in)h(IORs)63
-2402 y(for)h(clients)g(to)f(see.)26 b(Usually)20 b(the)f(published)h
+3053 y(for)h(clients)g(to)f(see.)26 b(Usually)20 b(the)f(published)h
 (details)f(will)j(be)e(the)f(same)h(as)g(the)f(listening)h(de-)63
-2515 y(tails,)j(but)f(ther)n(e)g(ar)n(e)h(times)f(when)g(it)h(is)f
+3166 y(tails,)j(but)f(ther)n(e)g(ar)n(e)h(times)f(when)g(it)h(is)f
 (useful)h(to)f(publish)g(dif)n(fer)n(ent)h(information.)204
-2628 y(Details)k(ar)n(e)g(selected)d(with)j(the)e Fh(endPoint)e
+3287 y(Details)k(ar)n(e)g(selected)d(with)j(the)e Fh(endPoint)e
 Fs(family)28 b(of)f(parameters.)38 b(The)26 b(simplest)f(is)63
-2741 y(plain)32 b Fh(endPoint)p Fs(,)d(which)i(chooses)e(a)j(transport)
-d(and)i(interface)g(details,)h(and)f(publishes)63 2854
+3400 y(plain)32 b Fh(endPoint)p Fs(,)d(which)i(chooses)e(a)j(transport)
+d(and)i(interface)g(details,)h(and)f(publishes)63 3513
 y(the)j(information)i(in)f(IORs.)65 b(Endpoint)33 b(parameters)i(ar)n
-(e)g(in)h(the)e(form)h(of)g(URIs,)i(with)e(a)63 2967
+(e)g(in)h(the)e(form)h(of)g(URIs,)i(with)e(a)63 3626
 y(scheme)e(name)h(of)g(`)p Fh(giop:)p Fs(',)g(followed)g(by)f(the)g
 (transport)f(name.)62 b(Dif)n(fer)n(ent)35 b(transports)63
-3080 y(have)23 b(dif)n(fer)n(ent)f(parameters)g(following)h(the)f
-(transport.)204 3193 y(TCP)h(endpoints)d(have)j(the)f(format:)290
-3399 y Fh(giop:tcp:)p Fr(<host>)p Fh(:)p Fr(<port>)63
-3606 y Fs(The)29 b(host)f(must)h(be)h(a)g(valid)i(host)c(name)i(or)g
+3739 y(have)23 b(dif)n(fer)n(ent)f(parameters)g(following)h(the)f
+(transport.)204 3860 y(TCP)h(endpoints)d(have)j(the)f(format:)290
+4115 y Fh(giop:tcp:)p Fr(<host>)p Fh(:)p Fr(<port>)63
+4369 y Fs(The)29 b(host)f(must)h(be)h(a)g(valid)i(host)c(name)i(or)g
 (IP)f(addr)n(ess)f(for)i(the)f(server)g(machine.)50 b(It)29
-b(de-)63 3719 y(termines)i(the)g(network)f(interface)j(on)f(which)h
+b(de-)63 4482 y(termines)i(the)g(network)f(interface)j(on)f(which)h
 (the)e(server)g(listens.)56 b(The)31 b(port)g(selects)g(the)63
-3832 y(TCP)25 b(port)f(to)h(listen)g(on,)g(which)h(must)f(be)g
+4595 y(TCP)25 b(port)f(to)h(listen)g(on,)g(which)h(must)f(be)g
 (unoccupied.)35 b(Either)25 b(the)f(host)g(or)h(port,)g(or)g(both)63
-3945 y(can)32 b(be)g(left)f(empty)-10 b(.)53 b(If)32
+4708 y(can)32 b(be)g(left)f(empty)-10 b(.)53 b(If)32
 b(the)f(host)f(is)i(empty)-10 b(,)32 b(the)f(ORB)g(publishes)g(the)f
-(IP)i(addr)n(ess)e(of)h(the)63 4058 y(\002rst)23 b(non-loopback)h
+(IP)i(addr)n(ess)e(of)h(the)63 4821 y(\002rst)23 b(non-loopback)h
 (network)e(interface)i(it)h(can)g(\002nd)e(\(or)h(the)f(loopback)i(if)g
-(that)e(is)i(the)e(only)63 4171 y(interface\),)j(but)g(listens)f(on)g
+(that)e(is)i(the)e(only)63 4934 y(interface\),)j(but)g(listens)f(on)g
 Fr(all)i Fs(network)c(interfaces.)37 b(If)26 b(the)f(port)f(is)i(empty)
--10 b(,)25 b(the)g(operating)63 4284 y(system)20 b(chooses)h(a)j(port.)
-204 4397 y(Multiple)f(TCP)h(endpoints)d(can)j(be)g(selected,)d(either)i
-(to)g(specify)g(multiple)g(network)f(in-)63 4509 y(terfaces)f(on)h
+-10 b(,)25 b(the)g(operating)63 5047 y(system)20 b(chooses)h(a)j(port.)
+204 5168 y(Multiple)f(TCP)h(endpoints)d(can)j(be)g(selected,)d(either)i
+(to)g(specify)g(multiple)g(network)f(in-)63 5281 y(terfaces)f(on)h
 (which)h(to)f(listen,)g(or)g(\(less)g(usefully\))g(to)f(select)h
-(multiple)h(TCP)f(ports)f(on)h(which)63 4622 y(to)g(listen.)204
-4735 y(If)33 b(no)g Fh(endPoint)d Fs(parameters)j(ar)n(e)h(set,)g(the)f
-(ORB)g(assumes)g(a)h(single)f(parameter)g(of)63 4848
-y Fh(giop:tcp::)p Fs(,)13 b(meaning)18 b(IORs)f(contain)h(the)e(addr)n
-(ess)g(of)i(the)f(\002rst)f(non-loopback)h(network)63
-4961 y(interface,)22 b(the)g(ORB)g(listens)g(on)h(all)h(interfaces,)e
-(and)g(the)g(OS)h(chooses)e(a)i(port)f(number)-7 b(.)204
-5074 y(SSL)19 b(endpoints)f(have)i(the)f(same)h(format)g(as)h(TCP)f
-(ones,)f(except)f(`)p Fh(tcp)p Fs(')i(is)g(r)n(eplaced)g(with)63
-5187 y(`)p Fh(ssl)p Fs('.)27 b(Unix)22 b(domain)h(socket)e(endpoints)g
-(have)i(the)f(format:)290 5394 y Fh(giop:unix:)p Fr(<\002lename>)p
+(multiple)h(TCP)f(ports)f(on)h(which)63 5394 y(to)g(listen.)p
 eop end
 %%Page: 54 60
 TeXDict begin 54 59 bop 0 0 a
@@ -9730,81 +9730,82 @@ SDict begin H.R end
 SDict begin [ /View [/XYZ H.V] /Dest (page.54) cvn H.B /DEST pdfmark
 end
  221 282 a Fs(54)605 b
-Fj(CHAPTER)21 b(7.)51 b(CONNECTION)22 b(AND)h(THREAD)e(MANAGEMENT)221
-539 y Fs(wher)n(e)i(the)g(\002lename)h(is)g(the)f(name)h(of)f(the)g
+Fj(CHAPTER)21 b(7.)51 b(CONNECTION)22 b(AND)h(THREAD)e(MANAGEMENT)362
+539 y Fs(If)34 b(no)f Fh(endPoint)d Fs(parameters)i(ar)n(e)i(set,)h
+(the)d(ORB)i(assumes)e(a)i(single)f(parameter)g(of)221
+652 y Fh(giop:tcp::)p Fs(,)14 b(meaning)k(IORs)e(contain)i(the)f(addr)n
+(ess)f(of)h(the)g(\002rst)g(non-loopback)g(network)221
+764 y(interface,)23 b(the)f(ORB)g(listens)g(on)g(all)i(interfaces,)e
+(and)h(the)f(OS)h(chooses)d(a)k(port)d(number)-7 b(.)362
+877 y(SSL)19 b(endpoints)f(have)j(the)e(same)h(format)g(as)g(TCP)g
+(ones,)f(except)g(`)p Fh(tcp)p Fs(')g(is)h(r)n(eplaced)g(with)221
+990 y(`)p Fh(ssl)p Fs('.)27 b(Unix)c(domain)g(socket)e(endpoints)f
+(have)j(the)f(format:)448 1204 y Fh(giop:unix:)p Fr(<\002lename>)221
+1417 y Fs(wher)n(e)h(the)g(\002lename)h(is)g(the)f(name)h(of)f(the)g
 (socket)f(within)i(the)f(\002lesystem.)29 b(If)24 b(the)f(\002lename)
-221 652 y(is)g(left)g(blank,)g(the)e(ORB)i(chooses)e(a)i(name)g(based)f
-(on)g(the)g(pr)n(ocess)f(id)i(and)g(a)g(timestamp.)362
-772 y(T)-8 b(o)38 b(listen)g(on)g(an)g(endpoint)f(without)g(publishing)
-i(it)f(in)h(IORs,)i(specify)d(it)h(with)f(the)221 885
-y Fh(endPointNoPubli)o(sh)16 b Fs(con\002guration)22
+221 1530 y(is)g(left)g(blank,)g(the)e(ORB)i(chooses)e(a)i(name)g(based)
+f(on)g(the)g(pr)n(ocess)f(id)i(and)g(a)g(timestamp.)362
+1643 y(T)-8 b(o)38 b(listen)g(on)g(an)g(endpoint)f(without)g
+(publishing)i(it)f(in)h(IORs,)i(specify)d(it)h(with)f(the)221
+1756 y Fh(endPointNoPubli)o(sh)16 b Fs(con\002guration)22
 b(parameter)-7 b(.)28 b(See)22 b(below)g(for)h(mor)n(e)g(details)f
-(about)221 998 y(endpoint)f(publishing.)221 1203 y
+(about)221 1869 y(endpoint)f(publishing.)221 2033 y
 SDict begin H.S end
  221
-1203 a 221 1203 a
+2033 a 221 2033 a
 SDict begin 13.6 H.A end
- 221 1203 a 221 1203 a
+ 221 2033 a 221 2033 a
 SDict begin [ /View [/XYZ H.V] /Dest (subsection.7.6.1) cvn H.B /DEST
 pdfmark end
- 221 1203 a 98
-x Fk(7.6.1)99 b(IPv6)221 1494 y Fs(On)29 b(platforms)e(wher)n(e)h(it)g
+ 221 2033 a 91
+x Fk(7.6.1)99 b(IPv6)221 2301 y Fs(On)29 b(platforms)e(wher)n(e)h(it)g
 (is)g(available,)k(omniORB)c(supports)d(IPv6.)45 b(On)28
-b(most)f(Unix)h(plat-)221 1607 y(forms,)c(IPv6)h(sockets)d(accept)j
+b(most)f(Unix)h(plat-)221 2414 y(forms,)c(IPv6)h(sockets)d(accept)j
 (both)e(IPv6)i(and)f(IPv4)h(connections,)e(so)h(omniORB's)g(default)221
-1720 y Fh(giop:tcp::)f Fs(endpoint)18 b(accepts)i(both)g(IPv4)g(and)g
+2527 y Fh(giop:tcp::)f Fs(endpoint)18 b(accepts)i(both)g(IPv4)g(and)g
 (IPv6)h(connections.)26 b(On)20 b(W)-5 b(indows)19 b(ver)n(-)221
-1833 y(sions)27 b(befor)n(e)h(W)-5 b(indows)27 b(V)-5
+2640 y(sions)27 b(befor)n(e)h(W)-5 b(indows)27 b(V)-5
 b(ista,)28 b(each)h(socket)d(type)g(only)i(accepts)f(incoming)i
-(connections)221 1946 y(of)c(the)f(same)h(type,)f(so)g(an)h(IPv6)h
+(connections)221 2753 y(of)c(the)f(same)h(type,)f(so)g(an)h(IPv6)h
 (socket)d(cannot)i(be)g(used)e(with)i(IPv4)g(clients.)35
-b(For)24 b(this)g(r)n(ea-)221 2059 y(son,)33 b(the)e(default)g
+b(For)24 b(this)g(r)n(ea-)221 2866 y(son,)33 b(the)e(default)g
 Fh(giop:tcp::)42 b Fs(endpoint)30 b(only)h(listens)g(for)h(IPv4)g
-(connections.)54 b(Since)221 2172 y(endpoints)32 b(with)i(a)h
+(connections.)54 b(Since)221 2979 y(endpoints)32 b(with)i(a)h
 (speci\002c)f(host)f(name)h(or)g(addr)n(ess)f(only)g(listen)h(on)g(a)g
-(single)g(network)221 2285 y(interface,)23 b(they)e(ar)n(e)i(inher)n
+(single)g(network)221 3092 y(interface,)23 b(they)e(ar)n(e)i(inher)n
 (ently)f(limited)h(to)f(just)g(one)g(pr)n(otocol)g(family)-10
-b(.)362 2406 y(T)i(o)28 b(explicitly)h(ask)f(for)g(just)g(IPv4)h(or)f
+b(.)362 3205 y(T)i(o)28 b(explicitly)h(ask)f(for)g(just)g(IPv4)h(or)f
 (just)g(IPv6,)i(an)f(endpoint)e(with)i(the)e(wildcar)n(d)j(ad-)221
-2518 y(dr)n(ess)h(for)i(the)e(pr)n(otocol)h(family)i(should)e(be)g
+3318 y(dr)n(ess)h(for)i(the)e(pr)n(otocol)h(family)i(should)e(be)g
 (used.)57 b(For)31 b(IPv4,)36 b(the)31 b(wildcar)n(d)j(addr)n(ess)d(is)
-221 2631 y(`)p Fh(0.0.0.0)p Fs(',)g(and)h(for)f(IPv6)h(it)g(is)g(`)p
+221 3431 y(`)p Fh(0.0.0.0)p Fs(',)g(and)h(for)f(IPv6)h(it)g(is)g(`)p
 Fh(::)p Fs('.)54 b(So,)33 b(to)e(listen)g(for)h(IPv4)g(connections)e
-(on)i(all)h(IPv4)221 2744 y(network)21 b(interfaces,)h(use)g(an)h
-(endpoint)e(of:)448 2996 y Fh(giop:tcp:0.0.0.0)o(:)221
-3248 y Fs(All)34 b(IPv6)g(addr)n(esses)d(contain)j(colons,)h(so)e(the)f
+(on)i(all)h(IPv4)221 3544 y(network)21 b(interfaces,)h(use)g(an)h
+(endpoint)e(of:)448 3757 y Fh(giop:tcp:0.0.0.0)o(:)221
+3970 y Fs(All)34 b(IPv6)g(addr)n(esses)d(contain)j(colons,)h(so)e(the)f
 (addr)n(ess)g(portion)g(in)i(URIs)e(must)h(be)g(con-)221
-3361 y(tained)e(within)h Fh([])f Fs(characters.)54 b(Ther)n(efor)n(e,)
+4083 y(tained)e(within)h Fh([])f Fs(characters.)54 b(Ther)n(efor)n(e,)
 32 b(to)f(listen)g(just)g(for)g(IPv6)h(connections)f(on)g(all)221
-3474 y(IPv6)23 b(interfaces,)f(use)g(the)g(somewhat)f(cryptic:)448
-3726 y Fh(giop:tcp:[::]:)221 3978 y Fs(T)-8 b(o)26 b(listen)h(for)f
+4196 y(IPv6)23 b(interfaces,)f(use)g(the)g(somewhat)f(cryptic:)448
+4409 y Fh(giop:tcp:[::]:)221 4622 y Fs(T)-8 b(o)26 b(listen)h(for)f
 (both)h(IPv4)g(and)g(IPv6)h(connections)d(on)i(W)-5 b(indows)26
-b(versions)g(prior)g(to)g(V)-5 b(ista,)221 4091 y(both)22
+b(versions)g(prior)g(to)g(V)-5 b(ista,)221 4735 y(both)22
 b(endpoints)f(must)h(be)g(explicitly)i(pr)n(ovided.)221
-4296 y
+4900 y
 SDict begin H.S end
- 221 4296 a 221 4296 a
+ 221 4900 a 221 4900 a
 SDict begin 13.6 H.A end
- 221 4296 a 221 4296 a
+ 221 4900 a 221 4900 a
 SDict begin [ /View [/XYZ H.V] /Dest (subsection.7.6.2) cvn H.B /DEST
 pdfmark end
  221
-4296 a 99 x Fk(7.6.2)99 b(Endpoint)25 b(publishing)221
-4588 y Fs(For)c(clients)g(to)g(be)g(able)h(to)f(connect)g(to)f(a)i
+4900 a 91 x Fk(7.6.2)99 b(Endpoint)25 b(publishing)221
+5168 y Fs(For)c(clients)g(to)g(be)g(able)h(to)f(connect)g(to)f(a)i
 (server)-7 b(,)21 b(the)f(server)g(publishes)h(endpoint)f(informa-)221
-4700 y(tion)27 b(in)g(its)g(IORs)f(\(Inter)n(operable)f(Object)j(Refer)
+5281 y(tion)27 b(in)g(its)g(IORs)f(\(Inter)n(operable)f(Object)j(Refer)
 n(ences\).)39 b(Normally)-10 b(,)28 b(omniORB)f(publishes)221
-4813 y(the)22 b(\002rst)g(available)j(addr)n(ess)d(for)g(each)h(of)g
-(the)f(endpoints)e(it)j(is)g(listening)f(on.)362 4934
-y(The)f(endpoint)e(information)j(to)e(publish)h(is)h(determined)d(by)i
-(the)f Fh(endPointPublis)o(h)221 5047 y Fs(con\002guration)25
-b(parameter)-7 b(.)36 b(It)24 b(contains)i(a)g(comma-separated)f(list)g
-(of)h(publish)f(r)o(ules.)36 b(The)221 5160 y(r)o(ules)25
-b(ar)n(e)h(applied)g(in)g(turn)e(to)h(each)h(of)g(the)e(con\002gur)n
-(ed)h(endpoints;)f(if)j(a)f(r)o(ule)f(matches)h(an)221
-5273 y(endpoint,)21 b(it)i(causes)f(one)g(or)g(mor)n(e)g(endpoints)f
-(to)h(be)g(published.)362 5394 y(The)g(following)h(cor)n(e)g(r)o(ules)f
-(ar)n(e)h(supported:)p eop end
+5394 y(the)22 b(\002rst)g(available)j(addr)n(ess)d(for)g(each)h(of)g
+(the)f(endpoints)e(it)j(is)g(listening)f(on.)p eop end
 %%Page: 55 61
 TeXDict begin 55 60 bop 0 0 a
 SDict begin /product where{pop product(Distiller)search{pop pop pop
@@ -9820,58 +9821,57 @@ SDict begin H.R end
 SDict begin [ /View [/XYZ H.V] /Dest (page.55) cvn H.B /DEST pdfmark
 end
  63 282 a Fj(7.6.)51 b(TRANSPOR)m(TS)20
-b(AND)j(ENDPOINTS)1612 b Fs(55)254 526 y Fh(addr)701
-b Fs(the)22 b(\002rst)g(natural)h(addr)n(ess)f(of)g(the)g(endpoint)254
-639 y Fh(ipv4)701 b Fs(the)22 b(\002rst)g(IPv4)h(addr)n(ess)e(of)i(a)g
-(TCP)g(or)f(SSL)g(endpoint)254 752 y Fh(ipv6)701 b Fs(the)22
-b(\002rst)g(IPv6)h(addr)n(ess)e(of)i(a)g(TCP)g(or)f(SSL)g(endpoint)254
-865 y Fh(name)701 b Fs(the)22 b(\002rst)g(addr)n(ess)f(that)i(can)g(be)
-g(r)n(esolved)e(to)h(a)h(name)254 978 y Fh(hostname)481
-b Fs(the)22 b(r)n(esult)g(of)h(the)f(gethostname\(\))f(system)f(call)
-254 1091 y Fh(fqdn)701 b Fs(the)22 b(fully-quali\002ed)i(domain)f(name)
-63 1315 y(The)g(cor)n(e)h(r)o(ules)f(can)i(be)f(combined)g(using)f(the)
-g(vertical)i(bar)g(operator)d(to)h(try)g(several)h(r)o(ules)63
-1428 y(in)f(turn)f(until)h(one)f(succeeds.)k(e.g:)254
-1658 y Fh(name|ipv6|ipv4)151 b Fs(the)24 b(name)g(of)g(the)f(endpoint)f
-(if)j(it)f(has)g(one;)g(failing)i(that,)d(its)1175 1771
+b(AND)j(ENDPOINTS)1612 b Fs(55)204 539 y(The)20 b(endpoint)g
+(information)h(to)g(publish)g(is)g(determined)e(by)i(the)f
+Fh(endPointPublish)63 652 y Fs(con\002guration)k(parameter)-7
+b(.)36 b(It)25 b(contains)g(a)h(comma-separated)f(list)h(of)f(publish)h
+(r)o(ules.)35 b(The)63 764 y(r)o(ules)25 b(ar)n(e)h(applied)f(in)h
+(turn)f(to)g(each)h(of)f(the)g(con\002gur)n(ed)f(endpoints;)h(if)h(a)g
+(r)o(ule)g(matches)f(an)63 877 y(endpoint,)20 b(it)j(causes)f(one)g(or)
+g(mor)n(e)h(endpoints)d(to)i(be)h(published.)204 992
+y(The)f(following)h(cor)n(e)f(r)o(ules)g(ar)n(e)h(supported:)254
+1221 y Fh(addr)701 b Fs(the)22 b(\002rst)g(natural)h(addr)n(ess)f(of)g
+(the)g(endpoint)254 1333 y Fh(ipv4)701 b Fs(the)22 b(\002rst)g(IPv4)h
+(addr)n(ess)e(of)i(a)g(TCP)g(or)f(SSL)g(endpoint)254
+1446 y Fh(ipv6)701 b Fs(the)22 b(\002rst)g(IPv6)h(addr)n(ess)e(of)i(a)g
+(TCP)g(or)f(SSL)g(endpoint)254 1559 y Fh(name)701 b Fs(the)22
+b(\002rst)g(addr)n(ess)f(that)i(can)g(be)g(r)n(esolved)e(to)h(a)h(name)
+254 1672 y Fh(hostname)481 b Fs(the)22 b(r)n(esult)g(of)h(the)f
+(gethostname\(\))f(system)f(call)254 1785 y Fh(fqdn)701
+b Fs(the)22 b(fully-quali\002ed)i(domain)f(name)63 2008
+y(The)g(cor)n(e)h(r)o(ules)f(can)i(be)f(combined)g(using)f(the)g
+(vertical)i(bar)g(operator)d(to)h(try)g(several)h(r)o(ules)63
+2121 y(in)f(turn)f(until)h(one)f(succeeds.)k(e.g:)254
+2349 y Fh(name|ipv6|ipv4)151 b Fs(the)24 b(name)g(of)g(the)f(endpoint)f
+(if)j(it)f(has)g(one;)g(failing)i(that,)d(its)1175 2462
 y(\002rst)f(IPv6)h(addr)n(ess;)e(failing)k(that,)d(its)g(\002rst)g
-(IPv4)h(addr)n(ess.)63 1995 y(Multiple)29 b(r)o(ules)f(can)i(be)f
+(IPv4)h(addr)n(ess.)63 2685 y(Multiple)29 b(r)o(ules)f(can)i(be)f
 (combined)g(using)g(the)f(comma)i(operator)d(to)i(publish)g(mor)n(e)g
-(than)63 2108 y(one)21 b(endpoint.)27 b(e.g.)254 2338
+(than)63 2798 y(one)21 b(endpoint.)27 b(e.g.)254 3026
 y Fh(name,addr)426 b Fs(the)27 b(name)i(of)e(the)h(endpoint)e(\(if)j
-(it)f(has)g(one\),)g(followed)f(by)1175 2451 y(its)c(\002rst)f(addr)n
-(ess.)63 2675 y(For)k(endpoints)g(with)h(multiple)h(addr)n(esses)d
+(it)f(has)g(one\),)g(followed)f(by)1175 3139 y(its)c(\002rst)f(addr)n
+(ess.)63 3362 y(For)k(endpoints)g(with)h(multiple)h(addr)n(esses)d
 (\(e.g.)42 b(TCP)27 b(endpoints)f(on)h(multi-homed)g(ma-)63
-2788 y(chines\),)22 b(the)g Fh(all\(\))e Fs(manipulator)k(causes)e(all)
-i(addr)n(esses)c(to)i(be)h(published.)k(e.g.:)254 3018
+3475 y(chines\),)22 b(the)g Fh(all\(\))e Fs(manipulator)k(causes)e(all)
+i(addr)n(esses)c(to)i(be)h(published.)k(e.g.:)254 3703
 y Fh(all\(addr\))426 b Fs(all)25 b(addr)n(esses)20 b(ar)n(e)j
-(published)254 3131 y Fh(all\(name\))426 b Fs(all)25
+(published)254 3816 y Fh(all\(name\))426 b Fs(all)25
 b(addr)n(esses)20 b(that)i(r)n(esolve)g(to)g(names)h(ar)n(e)g
-(published)254 3244 y Fh(all\(name|addr\))151 b Fs(all)24
+(published)254 3929 y Fh(all\(name|addr\))151 b Fs(all)24
 b(addr)n(esses)c(ar)n(e)j(published)e(by)h(name)h(if)g(they)e(have)h
-(one,)1175 3356 y(addr)n(ess)g(otherwise.)254 3469 y
+(one,)1175 4042 y(addr)n(ess)g(otherwise.)254 4155 y
 Fh(all\(name,addr\))151 b Fs(all)44 b(addr)n(esses)c(ar)n(e)j
-(published)e(by)i(name)f(\(if)i(they)d(have)1175 3582
-y(one\),)22 b(and)h(by)f(addr)n(ess.)254 3695 y Fh(all\(name\),)254
-3808 y(all\(addr\))1175 3695 y Fs(\002rst)41 b(the)f(names)h(of)g(all)i
-(addr)n(esses)38 b(ar)n(e)k(published,)i(fol-)1175 3808
-y(lowed)22 b(by)h(all)h(the)e(addr)n(esses.)63 4033 y(A)e(speci\002c)h
+(published)e(by)i(name)f(\(if)i(they)d(have)1175 4268
+y(one\),)22 b(and)h(by)f(addr)n(ess.)254 4381 y Fh(all\(name\),)254
+4494 y(all\(addr\))1175 4381 y Fs(\002rst)41 b(the)f(names)h(of)g(all)i
+(addr)n(esses)38 b(ar)n(e)k(published,)i(fol-)1175 4494
+y(lowed)22 b(by)h(all)h(the)e(addr)n(esses.)63 4717 y(A)e(speci\002c)h
 (endpoint)e(can)j(be)e(published)g(by)h(giving)g(its)f(endpoint)f(URI,)
-h(even)g(if)i(the)e(server)63 4146 y(is)i(not)g(listening)g(on)h(that)f
-(endpoint.)k(e.g.:)254 4375 y Fh(giop:tcp:not.m)o(y.)o(ho)o(st:)o(12)o
-(34)o(5)254 4488 y(giop:unix:/not)o(/m)o(y/)o(soc)o(ke)o(t-)o(fi)o(le)
-63 4713 y Fs(If)32 b(the)f(host)h(or)f(port)h(number)g(for)g(a)h(TCP)f
-(or)g(SSL)g(URI)f(ar)n(e)i(missed)e(out,)j(they)d(ar)n(e)h(\002lled)63
-4825 y(in)h(with)h(the)e(details)h(fr)n(om)h(each)g(listening)f
-(TCP/SSL)f(endpoint.)59 b(This)33 b(can)h(be)f(used)f(to)63
-4938 y(publish)23 b(a)h(dif)n(fer)n(ent)f(name)g(for)g(a)h(TCP/SSL)e
-(endpoint)f(that)i(is)g(using)g(an)g(ephemeral)g(port,)63
-5051 y(for)f(example.)204 5168 y(omniORB)c(4.0)h(supported)c(two)j
-(options)f(r)n(elated)h(to)f(endpoint)g(publishing)h(that)g(ar)n(e)h
-(su-)63 5281 y(perseded)k(by)j(the)g Fh(endPointPublis)o(h)21
-b Fs(parameter)-7 b(,)26 b(and)h(so)e(ar)n(e)i(now)f(depr)n(ecated.)37
-b(Set-)63 5394 y(ting)24 b Fh(endPointPublish)o(Al)o(lIF)o(s)19
-b Fs(to)24 b(1)i(is)f(equivalent)g(to)f(setting)f Fh(endPointPublish)p
+h(even)g(if)i(the)e(server)63 4830 y(is)i(not)g(listening)g(on)h(that)f
+(endpoint.)k(e.g.:)254 5058 y Fh(giop:tcp:not.m)o(y.)o(ho)o(st:)o(12)o
+(34)o(5)254 5171 y(giop:unix:/not)o(/m)o(y/)o(soc)o(ke)o(t-)o(fi)o(le)
+63 5394 y Fs(If)32 b(the)f(host)h(or)f(port)h(number)g(for)g(a)h(TCP)f
+(or)g(SSL)g(URI)f(ar)n(e)i(missed)e(out,)j(they)d(ar)n(e)h(\002lled)p
 eop end
 %%Page: 56 62
 TeXDict begin 56 61 bop 0 0 a
@@ -9889,80 +9889,84 @@ SDict begin [ /View [/XYZ H.V] /Dest (page.56) cvn H.B /DEST pdfmark
 end
  221 282 a Fs(56)605 b
 Fj(CHAPTER)21 b(7.)51 b(CONNECTION)22 b(AND)h(THREAD)e(MANAGEMENT)221
-539 y Fs(to)c(`)p Fh(all\(addr\))p Fs('.)23 b(The)17
-b Fh(endPointNoList)o(en)11 b Fs(parameter)17 b(is)h(equivalent)g(to)f
-(adding)g(end-)221 652 y(point)22 b(URIs)g(to)g(the)f
-Fh(endPointPublish)16 b Fs(parameter)-7 b(.)221 848 y
+539 y Fs(in)34 b(with)f(the)g(details)g(fr)n(om)h(each)f(listening)g
+(TCP/SSL)g(endpoint.)58 b(This)33 b(can)i(be)e(used)f(to)221
+652 y(publish)23 b(a)h(dif)n(fer)n(ent)f(name)g(for)g(a)h(TCP/SSL)e
+(endpoint)g(that)h(is)g(using)f(an)i(ephemeral)e(port,)221
+764 y(for)h(example.)362 877 y(omniORB)c(4.0)g(supported)c(two)i
+(options)g(r)n(elated)h(to)g(endpoint)e(publishing)j(that)f(ar)n(e)g
+(su-)221 990 y(perseded)23 b(by)k(the)e Fh(endPointPublish)20
+b Fs(parameter)-7 b(,)27 b(and)f(so)g(ar)n(e)h(now)e(depr)n(ecated.)38
+b(Set-)221 1103 y(ting)25 b Fh(endPointPublis)o(hA)o(llI)o(Fs)18
+b Fs(to)25 b(1)g(is)g(equivalent)g(to)f(setting)g Fh(endPointPublis)o
+(h)221 1216 y Fs(to)17 b(`)p Fh(all\(addr\))p Fs('.)23
+b(The)17 b Fh(endPointNoList)o(en)11 b Fs(parameter)17
+b(is)h(equivalent)g(to)f(adding)g(end-)221 1329 y(point)22
+b(URIs)g(to)g(the)f Fh(endPointPublish)16 b Fs(parameter)-7
+b(.)221 1497 y
 SDict begin H.S end
-
-221 848 a 221 848 a
+ 221 1497 a 221 1497 a
 SDict begin 13.6 H.A end
- 221 848 a 221 848 a
+ 221 1497 a 221 1497
+a
 SDict begin [ /View [/XYZ H.V] /Dest (section.7.7) cvn H.B /DEST pdfmark
 end
- 221 848 a 129
-x Fp(7.7)119 b(Connection)31 b(selection)e(and)h(acceptance)221
-1196 y Fs(In)h(the)f(face)i(of)f(IORs)f(containing)h(details)g(about)g
-(multiple)g(dif)n(fer)n(ent)g(endpoints,)g(clients)221
-1309 y(have)26 b(to)g(know)e(how)i(to)f(choose)g(the)g(one)g(to)g(use)g
-(to)g(connect)g(a)i(server)-7 b(.)36 b(Similarly)-10
-b(,)29 b(servers)221 1422 y(may)36 b(wish)g(to)f(r)n(estrict)g(which)h
+ 221 1497 a 124 x Fp(7.7)119 b(Connection)31 b(selection)e(and)h
+(acceptance)221 1832 y Fs(In)h(the)f(face)i(of)f(IORs)f(containing)h
+(details)g(about)g(multiple)g(dif)n(fer)n(ent)g(endpoints,)g(clients)
+221 1945 y(have)26 b(to)g(know)e(how)i(to)f(choose)g(the)g(one)g(to)g
+(use)g(to)g(connect)g(a)i(server)-7 b(.)36 b(Similarly)-10
+b(,)29 b(servers)221 2058 y(may)36 b(wish)g(to)f(r)n(estrict)g(which)h
 (clients)g(can)g(connect)f(to)g(particular)i(transports.)65
-b(This)35 b(is)221 1535 y(achieved)23 b(with)g Fr(transport)i(rules)p
-Fs(.)221 1721 y
+b(This)35 b(is)221 2171 y(achieved)23 b(with)g Fr(transport)i(rules)p
+Fs(.)221 2328 y
 SDict begin H.S end
- 221 1721 a 221 1721 a
+ 221 2328 a 221 2328 a
 SDict begin 13.6 H.A end
- 221 1721 a 221
-1721 a
+ 221 2328 a 221
+2328 a
 SDict begin [ /View [/XYZ H.V] /Dest (subsection.7.7.1) cvn H.B /DEST
 pdfmark end
- 221 1721 a 95 x Fk(7.7.1)99 b(Client)25 b(transport)g(rules)221
-2002 y Fs(The)k Fh(clientTranspor)o(tR)o(ul)o(e)23 b
+ 221 2328 a 91 x Fk(7.7.1)99 b(Client)25 b(transport)g(rules)221
+2596 y Fs(The)k Fh(clientTranspor)o(tR)o(ul)o(e)23 b
 Fs(parameter)29 b(is)g(used)f(to)g(\002lter)h(and)g(prioritise)g(the)f
-(or)n(der)221 2115 y(in)23 b(which)g(transports)e(speci\002ed)g(in)i
+(or)n(der)221 2709 y(in)23 b(which)g(transports)e(speci\002ed)g(in)i
 (an)g(IOR)g(ar)n(e)g(tried.)k(Each)c(r)o(ule)g(has)f(the)g(form:)448
-2349 y Fr(<addr)n(ess)k(mask>)e([action]+)221 2583 y
+2882 y Fr(<addr)n(ess)k(mask>)e([action]+)221 3056 y
 Fs(The)e(addr)n(ess)f(mask)i(can)g(be)g(one)f(of)412
-2789 y(1.)100 b Fh(localhost)454 b Fs(The)22 b(addr)n(ess)f(of)i(this)f
-(machine)412 2902 y(2.)100 b Fr(w)-5 b(.x.y)m(.z)p Fh(/)p
+3258 y(1.)100 b Fh(localhost)454 b Fs(The)22 b(addr)n(ess)f(of)i(this)f
+(machine)412 3371 y(2.)100 b Fr(w)-5 b(.x.y)m(.z)p Fh(/)p
 Fr(m1.m2.m3.m4)104 b Fs(An)21 b(IPv4)g(addr)n(ess)f(with)h(bits)g
-(selected)f(by)h(the)1529 3015 y(mask,)h(e.g.)f Fh(172.16.0.0/255.2)o
-(40)o(.0)o(.0)412 3128 y Fs(3.)100 b Fr(w)-5 b(.x.y)m(.z)p
+(selected)f(by)h(the)1529 3484 y(mask,)h(e.g.)f Fh(172.16.0.0/255.2)o
+(40)o(.0)o(.0)412 3597 y Fs(3.)100 b Fr(w)-5 b(.x.y)m(.z)p
 Fh(/)p Fr(pr)n(e\002xlen)320 b Fs(An)20 b(IPv4)i(addr)n(ess)d(with)i
-Fr(pr)n(e\002xlen)i Fs(signi\002cant)1529 3241 y(bits,)f(e.g.)f
-Fh(172.16.2.0/24)412 3354 y Fs(4.)100 b Fr(a:b:c:d:e:f:g:h)p
+Fr(pr)n(e\002xlen)i Fs(signi\002cant)1529 3710 y(bits,)f(e.g.)f
+Fh(172.16.2.0/24)412 3823 y Fs(4.)100 b Fr(a:b:c:d:e:f:g:h)p
 Fh(/)p Fr(pr)n(e\002xlen)i Fs(An)20 b(IPv6)i(addr)n(ess)d(with)i
-Fr(pr)n(e\002xlen)i Fs(signi\002cant)1529 3467 y(bits,)f(e.g.)f
-Fh(3ffe:505:2:1::/6)o(4)412 3580 y Fs(5.)100 b Fh(*)894
+Fr(pr)n(e\002xlen)i Fs(signi\002cant)1529 3936 y(bits,)f(e.g.)f
+Fh(3ffe:505:2:1::/6)o(4)412 4049 y Fs(5.)100 b Fh(*)894
 b Fs(W)-5 b(ildcar)n(d)24 b(that)e(matches)g(any)h(addr)n(ess)221
-3805 y(The)f(action)h(is)g(one)f(or)g(mor)n(e)h(of)f(the)g(following:)
-412 4035 y(1.)100 b Fh(none)152 b Fs(Do)23 b(not)f(use)g(this)g(addr)n
-(ess)412 4148 y(2.)100 b Fh(tcp)207 b Fs(Use)22 b(a)h(TCP)g(transport)
-412 4261 y(3.)100 b Fh(ssl)207 b Fs(Use)22 b(an)h(SSL)f(transport)412
-4374 y(4.)100 b Fh(unix)152 b Fs(Use)22 b(a)h(Unix)g(socket)e
-(transport)412 4487 y(5.)100 b Fh(bidir)d Fs(Connections)29
-b(to)h(this)f(addr)n(ess)g(can)h(be)g(used)952 4600 y(bidir)n
-(ectionally)24 b(\(see)e(section)2042 4602 y
+4270 y(The)f(action)h(is)g(one)f(or)g(mor)n(e)h(of)f(the)g(following:)
+412 4495 y(1.)100 b Fh(none)152 b Fs(Do)23 b(not)f(use)g(this)g(addr)n
+(ess)412 4608 y(2.)100 b Fh(tcp)207 b Fs(Use)22 b(a)h(TCP)g(transport)
+412 4721 y(3.)100 b Fh(ssl)207 b Fs(Use)22 b(an)h(SSL)f(transport)412
+4834 y(4.)100 b Fh(unix)152 b Fs(Use)22 b(a)h(Unix)g(socket)e
+(transport)412 4947 y(5.)100 b Fh(bidir)d Fs(Connections)29
+b(to)h(this)f(addr)n(ess)g(can)h(be)g(used)952 5060 y(bidir)n
+(ectionally)24 b(\(see)e(section)2042 5062 y
 SDict begin H.S end
- 2042 4602
-a -2 x Fs(7.8)2156 4537 y
+ 2042 5062
+a -2 x Fs(7.8)2156 4997 y
 SDict begin H.R end
- 2156 4537 a 2156 4600 a
+ 2156 4997 a 2156 5060 a
 SDict begin [ /Color [1 0 0] /H /I /Border [0 0 12] /Subtype /Link
 /Dest (section.7.8) cvn H.B /ANN pdfmark end
  2156
-4600 a Fs(\))221 4825 y(The)h(transport-selecting)f(actions)i(form)g(a)
+5060 a Fs(\))221 5281 y(The)h(transport-selecting)f(actions)i(form)g(a)
 g(prioritised)f(list,)h(so)f(an)h(action)h(of)f(`)p Fh(unix,ssl,)221
-4938 y(tcp)p Fs(')33 b(means)g(to)g(use)f(a)i(Unix)g(transport)e(if)i
-(ther)n(e)e(is)i(one,)h(failing)g(that)e(a)h(SSL)f(transport,)221
-5051 y(failing)25 b Fr(that)f Fs(a)g(TCP)f(transport.)k(In)c(the)f
-(absence)h(of)g(any)g(explicit)g(r)o(ules,)g(the)f(client)h(uses)f(the)
-221 5164 y(implicit)j(r)o(ule)d(of)h(`)p Fh(*)54 b(unix,ssl,tcp)p
-Fs('.)362 5281 y(If)36 b(mor)n(e)f(than)g(one)g(r)o(ule)g(is)h
-(speci\002ed,)h(they)d(ar)n(e)i(prioritised)e(in)i(the)e(or)n(der)h
-(they)f(ar)n(e)221 5394 y(speci\002ed.)27 b(For)22 b(example,)g(the)g
-(con\002guration)g(\002le)g(might)h(contain:)p eop end
+5394 y(tcp)p Fs(')33 b(means)g(to)g(use)f(a)i(Unix)g(transport)e(if)i
+(ther)n(e)e(is)i(one,)h(failing)g(that)e(a)h(SSL)f(transport,)p
+eop end
 %%Page: 57 63
 TeXDict begin 57 62 bop 0 0 a
 SDict begin /product where{pop product(Distiller)search{pop pop pop
@@ -9978,78 +9982,76 @@ SDict begin H.R end
 SDict begin [ /View [/XYZ H.V] /Dest (page.57) cvn H.B /DEST pdfmark
 end
  63 282 a Fj(7.8.)51 b(BIDIRECTIONAL)20
-b(GIOP)2035 b Fs(57)172 539 y Fh(clientTranspor)o(tR)o(ule)48
-b(=)54 b(192.168.1.0/25)o(5.)o(255)o(.2)o(55)o(.0)102
-b(unix,tcp)172 652 y(clientTranspor)o(tR)o(ule)48 b(=)54
-b(172.16.0.0/255)o(.2)o(40.)o(0.)o(0)266 b(unix,tcp)1263
-764 y(=)381 b(*)1090 b(none)63 980 y Fs(This)24 b(would)h(be)g(useful)g
-(if)g(ther)n(e)g(is)g(a)g(fast)h(network)d(\(192.168.1.0\))28
-b(which)e(should)e(be)h(used)63 1093 y(in)k(pr)n(efer)n(ence)f(to)h
-(another)f(network)f(\(172.16.0.0\),)33 b(and)d(connections)e(to)g
-(other)g(networks)63 1206 y(ar)n(e)23 b(not)f(permitted)e(at)j(all.)204
-1319 y(In)35 b(general,)j(the)d(r)n(esult)g(of)g(\002ltering)g(the)g
+b(GIOP)2035 b Fs(57)63 539 y(failing)24 b Fr(that)h Fs(a)e(TCP)g
+(transport.)28 b(In)22 b(the)h(absence)f(of)h(any)g(explicit)h(r)o
+(ules,)e(the)g(client)i(uses)d(the)63 652 y(implicit)j(r)o(ule)f(of)f
+(`)p Fh(*)55 b(unix,ssl,tcp)p Fs('.)204 765 y(If)35 b(mor)n(e)g(than)h
+(one)e(r)o(ule)i(is)f(speci\002ed,)i(they)d(ar)n(e)i(prioritised)e(in)i
+(the)f(or)n(der)f(they)g(ar)n(e)63 878 y(speci\002ed.)26
+b(For)c(example,)g(the)g(con\002guration)g(\002le)h(might)f(contain:)
+172 1096 y Fh(clientTranspor)o(tR)o(ule)48 b(=)54 b(192.168.1.0/25)o
+(5.)o(255)o(.2)o(55)o(.0)102 b(unix,tcp)172 1208 y(clientTranspor)o(tR)
+o(ule)48 b(=)54 b(172.16.0.0/255)o(.2)o(40.)o(0.)o(0)266
+b(unix,tcp)1263 1321 y(=)381 b(*)1090 b(none)63 1538
+y Fs(This)24 b(would)h(be)g(useful)g(if)g(ther)n(e)g(is)g(a)g(fast)h
+(network)d(\(192.168.1.0\))28 b(which)e(should)e(be)h(used)63
+1651 y(in)k(pr)n(efer)n(ence)f(to)h(another)f(network)f
+(\(172.16.0.0\),)33 b(and)d(connections)e(to)g(other)g(networks)63
+1764 y(ar)n(e)23 b(not)f(permitted)e(at)j(all.)204 1878
+y(In)35 b(general,)j(the)d(r)n(esult)g(of)g(\002ltering)g(the)g
 (endpoint)f(speci\002cations)h(in)h(an)g(IOR)g(with)63
-1432 y(the)31 b(client)h(transport)e(r)o(ule)i(will)h(be)e(a)i
+1990 y(the)31 b(client)h(transport)e(r)o(ule)i(will)h(be)e(a)i
 (prioritised)d(list)i(of)g(transports)e(and)h(networks.)53
-b(\(If)63 1545 y(the)23 b(transport)g(r)o(ules)g(do)h(not)f(prioritise)
+b(\(If)63 2103 y(the)23 b(transport)g(r)o(ules)g(do)h(not)f(prioritise)
 h(one)f(endpoint)g(over)h(another)-7 b(,)23 b(the)h(or)n(der)f(the)g
-(end-)63 1658 y(points)30 b(ar)n(e)h(listed)f(in)i(the)e(IOR)h(is)g
+(end-)63 2216 y(points)30 b(ar)n(e)h(listed)f(in)i(the)e(IOR)h(is)g
 (used.\))52 b(When)31 b(trying)f(to)g(contact)h(an)h(object,)g(the)f
-(ORB)63 1771 y(tries)24 b(its)g(possible)h(endpoints)d(in)k(turn,)e
+(ORB)63 2329 y(tries)24 b(its)g(possible)h(endpoints)d(in)k(turn,)e
 (until)i(it)f(\002nds)f(one)g(with)h(which)g(it)h(can)f(contact)g(the)
-63 1884 y(object.)32 b(Only)25 b(after)f(it)h(has)f(unsuccessfully)g
+63 2442 y(object.)32 b(Only)25 b(after)f(it)h(has)f(unsuccessfully)g
 (tried)f(all)j(permissible)e(endpoints)e(will)k(it)f(raise)63
-1997 y(a)e Fh(TRANSIENT)18 b Fs(exception)k(to)g(indicate)h(that)f(the)
-g(connect)g(failed.)63 2164 y
+2555 y(a)e Fh(TRANSIENT)18 b Fs(exception)k(to)g(indicate)h(that)f(the)
+g(connect)g(failed.)63 2723 y
 SDict begin H.S end
- 63 2164 a 63 2164 a
+ 63 2723 a 63 2723 a
 SDict begin 13.6 H.A end
  63
-2164 a 63 2164 a
+2723 a 63 2723 a
 SDict begin [ /View [/XYZ H.V] /Dest (subsection.7.7.2) cvn H.B /DEST
 pdfmark end
- 63 2164 a 92 x Fk(7.7.2)99 b(Server)24
-b(transport)h(rules)63 2434 y Fs(The)i(server)g(transport)f(r)o(ules)i
+ 63 2723 a 92 x Fk(7.7.2)99 b(Server)24
+b(transport)h(rules)63 2993 y Fs(The)i(server)g(transport)f(r)o(ules)i
 (have)g(the)f(same)h(format)h(as)f(client)g(transport)f(r)o(ules.)43
-b(Rather)63 2547 y(than)20 b(being)g(used)e(to)i(select)f(which)i(of)f
+b(Rather)63 3106 y(than)20 b(being)g(used)e(to)i(select)f(which)i(of)f
 (a)h(set)e(of)h(ways)g(to)f(contact)h(a)h(machine,)h(they)c(ar)n(e)j
-(used)63 2659 y(to)26 b(determine)f(whether)g(or)h(not)g(to)g(accept)h
+(used)63 3219 y(to)26 b(determine)f(whether)g(or)h(not)g(to)g(accept)h
 (connections)f(fr)n(om)h(particular)h(clients.)40 b(In)26
-b(this)63 2772 y(example,)c(we)g(only)g(allow)i(connections)d(fr)n(om)j
-(our)e(intranet:)172 2989 y Fh(serverTranspor)o(tR)o(ule)48
-b(=)54 b(localhost)977 b(unix,tcp,ssl)1263 3102 y(=)54
+b(this)63 3332 y(example,)c(we)g(only)g(allow)i(connections)d(fr)n(om)j
+(our)e(intranet:)172 3549 y Fh(serverTranspor)o(tR)o(ule)48
+b(=)54 b(localhost)977 b(unix,tcp,ssl)1263 3662 y(=)54
 b(172.16.0.0/255)o(.2)o(40.)o(0.)o(0)266 b(tcp,ssl)1263
-3215 y(=)54 b(*)1417 b(none)63 3430 y Fs(And)22 b(in)h(this)f(one,)f
+3775 y(=)54 b(*)1417 b(none)63 3992 y Fs(And)22 b(in)h(this)f(one,)f
 (we)i(accept)f(only)h(SSL)e(connections)h(if)h(the)f(client)h(is)g(not)
-f(on)g(the)g(intranet:)172 3646 y Fh(serverTranspor)o(tR)o(ule)48
-b(=)54 b(localhost)977 b(unix,tcp,ssl)1263 3759 y(=)54
+f(on)g(the)g(intranet:)172 4209 y Fh(serverTranspor)o(tR)o(ule)48
+b(=)54 b(localhost)977 b(unix,tcp,ssl)1263 4322 y(=)54
 b(172.16.0.0/255)o(.2)o(40.)o(0.)o(0)266 b(tcp,ssl)1263
-3872 y(=)54 b(*)1417 b(ssl,bidir)63 4088 y Fs(In)27 b(the)f(absence)h
+4435 y(=)54 b(*)1417 b(ssl,bidir)63 4652 y Fs(In)27 b(the)f(absence)h
 (of)h(any)f(explicit)h(r)o(ules,)g(the)f(server)f(uses)g(the)g
-(implicit)j(r)o(ule)f(of)f(`)p Fh(*)55 b(unix,)63 4201
+(implicit)j(r)o(ule)f(of)f(`)p Fh(*)55 b(unix,)63 4765
 y(ssl,tcp)p Fs(',)19 b(meaning)k(any)g(kind)f(of)g(connection)h(is)f
-(accepted)g(fr)n(om)h(any)g(client.)63 4379 y
+(accepted)g(fr)n(om)h(any)g(client.)63 4944 y
 SDict begin H.S end
- 63 4379
-a 63 4379 a
+ 63 4944
+a 63 4944 a
 SDict begin 13.6 H.A end
- 63 4379 a 63 4379 a
+ 63 4944 a 63 4944 a
 SDict begin [ /View [/XYZ H.V] /Dest (section.7.8) cvn H.B /DEST pdfmark
 end
- 63 4379 a 124 x Fp(7.8)119
-b(Bidirectional)28 b(GIOP)63 4716 y Fs(omniORB)22 b(supports)e(bidir)n
+ 63 4944 a 124 x Fp(7.8)119
+b(Bidirectional)28 b(GIOP)63 5281 y Fs(omniORB)22 b(supports)e(bidir)n
 (ectional)k(GIOP)-12 b(,)23 b(which)h(allows)f(callbacks)h(to)e(be)h
-(made)f(using)g(a)63 4829 y(connection)i(opened)e(by)i(the)g(original)h
-(client,)g(rather)f(than)h(the)e(normal)j(model)e(wher)n(e)f(the)63
-4941 y(server)i(opens)h(a)h(new)f(connection)h(for)g(the)f(callback.)43
-b(This)26 b(is)h(important)g(for)g(negotiating)63 5054
-y(\002r)n(ewalls,)c(since)f(they)g(tend)f(not)h(to)g(allow)h
-(connections)f(back)h(on)g(arbitrary)g(ports.)204 5168
-y(Ther)n(e)e(ar)n(e)i(several)f(steps)e(r)n(equir)n(ed)i(for)g(bidir)n
-(ectional)i(GIOP)f(to)e(be)h(enabled)g(for)h(a)f(call-)63
-5281 y(back.)43 b(Both)26 b(the)h(client)h(and)g(server)e(must)h(be)g
-(con\002gur)n(ed)g(corr)n(ectly)-10 b(.)42 b(On)28 b(the)f(client)h
-(side,)63 5394 y(these)21 b(conditions)g(must)h(be)h(met:)p
+(made)f(using)g(a)63 5394 y(connection)i(opened)e(by)i(the)g(original)h
+(client,)g(rather)f(than)h(the)e(normal)j(model)e(wher)n(e)f(the)p
 eop end
 %%Page: 58 64
 TeXDict begin 58 63 bop 0 0 a
@@ -10066,51 +10068,60 @@ SDict begin H.R end
 SDict begin [ /View [/XYZ H.V] /Dest (page.58) cvn H.B /DEST pdfmark
 end
  221 282 a Fs(58)605 b
-Fj(CHAPTER)21 b(7.)51 b(CONNECTION)22 b(AND)h(THREAD)e(MANAGEMENT)358
-539 y Fo(\017)45 b Fs(The)22 b Fh(offerBiDirection)o(al)o(GI)o(OP)16
+Fj(CHAPTER)21 b(7.)51 b(CONNECTION)22 b(AND)h(THREAD)e(MANAGEMENT)221
+539 y Fs(server)26 b(opens)f(a)j(new)e(connection)g(for)h(the)f
+(callback.)43 b(This)27 b(is)g(important)f(for)h(negotiating)221
+652 y(\002r)n(ewalls,)c(since)g(they)e(tend)g(not)h(to)g(allow)i
+(connections)d(back)j(on)e(arbitrary)h(ports.)362 764
+y(Ther)n(e)f(ar)n(e)g(several)g(steps)f(r)n(equir)n(ed)g(for)i(bidir)n
+(ectional)g(GIOP)g(to)f(be)g(enabled)g(for)g(a)h(call-)221
+877 y(back.)43 b(Both)27 b(the)g(client)h(and)f(server)g(must)f(be)i
+(con\002gur)n(ed)e(corr)n(ectly)-10 b(.)42 b(On)28 b(the)f(client)h
+(side,)221 990 y(these)21 b(conditions)h(must)g(be)g(met:)358
+1203 y Fo(\017)45 b Fs(The)22 b Fh(offerBiDirection)o(al)o(GI)o(OP)16
 b Fs(parameter)22 b(must)g(be)h(set)e(to)h(tr)o(ue.)358
-726 y Fo(\017)45 b Fs(The)22 b(client)h(transport)d(r)o(ule)i(for)g
+1390 y Fo(\017)45 b Fs(The)22 b(client)h(transport)d(r)o(ule)i(for)g
 (the)g(tar)n(get)f(server)g(must)h(contain)g(the)g Fh(bidir)e
-Fs(action.)358 914 y Fo(\017)45 b Fs(The)27 b(POA)g(containing)h(the)e
+Fs(action.)358 1578 y Fo(\017)45 b Fs(The)27 b(POA)g(containing)h(the)e
 (callback)k(object)d(\(or)g(objects\))g(must)f(have)i(been)f(cr)n
-(eated)448 1027 y(with)c(a)g Fh(BidirectionalPo)o(li)o(cy)16
-b Fs(value)24 b(of)e Fh(BOTH)p Fs(.)221 1239 y(On)h(the)f(server)g
-(side,)f(these)g(conditions)h(must)g(be)g(met:)358 1452
+(eated)448 1691 y(with)c(a)g Fh(BidirectionalPo)o(li)o(cy)16
+b Fs(value)24 b(of)e Fh(BOTH)p Fs(.)221 1903 y(On)h(the)f(server)g
+(side,)f(these)g(conditions)h(must)g(be)g(met:)358 2116
 y Fo(\017)45 b Fs(The)22 b Fh(acceptBiDirectio)o(na)o(lG)o(IO)o(P)17
 b Fs(parameter)22 b(must)g(be)g(set)g(to)g(tr)o(ue.)358
-1639 y Fo(\017)45 b Fs(The)31 b(server)f(transport)f(r)o(ule)i(for)g
+2304 y Fo(\017)45 b Fs(The)31 b(server)f(transport)f(r)o(ule)i(for)g
 (the)f(r)n(equesting)g(client)h(must)g(contain)g(the)f
-Fh(bidir)448 1752 y Fs(action.)358 1940 y Fo(\017)45
+Fh(bidir)448 2417 y Fs(action.)358 2604 y Fo(\017)45
 b Fs(The)28 b(POA)g(hosting)f(the)g(object)h(contacted)f(by)h(the)g
-(client)g(must)g(have)g(been)g(cr)n(eated)448 2053 y(with)23
+(client)g(must)g(have)g(been)g(cr)n(eated)448 2717 y(with)23
 b(a)g Fh(BidirectionalPo)o(li)o(cy)16 b Fs(value)24 b(of)e
-Fh(BOTH)p Fs(.)221 2216 y
+Fh(BOTH)p Fs(.)221 2881 y
 SDict begin H.S end
- 221 2216 a 221 2216 a
+ 221 2881 a 221 2881 a
 SDict begin 13.6 H.A end
- 221 2216
-a 221 2216 a
+ 221 2881
+a 221 2881 a
 SDict begin [ /View [/XYZ H.V] /Dest (section.7.9) cvn H.B /DEST pdfmark
 end
- 221 2216 a 136 x Fp(7.9)119 b(SSL)30 b(transport)221
-2563 y Fs(omniORB)22 b(supports)d(an)j(SSL)f(transport,)f(using)h
+ 221 2881 a 135 x Fp(7.9)119 b(SSL)30 b(transport)221
+3227 y Fs(omniORB)22 b(supports)d(an)j(SSL)f(transport,)f(using)h
 (OpenSSL.)f(It)h(is)h(only)g(built)g(if)h(OpenSSL)d(is)221
-2675 y(available.)30 b(On)21 b(platforms)f(using)g(Autoconf,)g(it)g(is)
+3340 y(available.)30 b(On)21 b(platforms)f(using)g(Autoconf,)g(it)g(is)
 h(autodetected)c(in)k(many)g(locations,)f(or)g(its)221
-2788 y(location)27 b(can)g(be)f(given)f(with)h(the)f
+3453 y(location)27 b(can)g(be)f(given)f(with)h(the)f
 Fh(--with-openssl=)20 b Fs(ar)n(gument)25 b(to)h Fh(configure)p
-Fs(.)34 b(On)221 2901 y(other)27 b(platforms,)j(the)e
+Fs(.)34 b(On)221 3565 y(other)27 b(platforms,)j(the)e
 Fh(OPEN_SSL_ROOT)23 b Fs(make)28 b(variable)j(must)d(be)g(set)g(in)h
-(the)f(platform)221 3014 y(\002le.)362 3127 y(T)-8 b(o)26
+(the)f(platform)221 3678 y(\002le.)362 3791 y(T)-8 b(o)26
 b(use)g(the)f(SSL)h(transport)f(fr)n(om)i(Python)e(you)h(must)g(import)
-g(and)h(set)e(parameters)h(in)221 3240 y(the)19 b Fh(omniORB.sslTP)13
+g(and)h(set)e(parameters)h(in)221 3904 y(the)19 b Fh(omniORB.sslTP)13
 b Fs(module)19 b(befor)n(e)f(calling)j Fh(CORBA.ORB_init\(\))o
-Fs(.)g(T)-8 b(o)18 b(initialise)j(the)221 3353 y(module,)41
+Fs(.)g(T)-8 b(o)18 b(initialise)j(the)221 4017 y(module,)41
 b(you)d(must)f(call)j(the)d Fh(certificate_auth)o(or)o(it)o(y_)o(fi)o
-(le\()o(\))p Fs(,)e Fh(key_file\(\))221 3466 y Fs(and)21
+(le\()o(\))p Fs(,)e Fh(key_file\(\))221 4130 y Fs(and)21
 b Fh(key_file_passwo)o(rd)o(\(\))15 b Fs(functions,)20
 b(pr)n(oviding)h(the)g(\002le)g(names)g(of)g(the)f(certi\002cate)221
-3579 y(authority)i(and)h(encryption)e(keys,)f(and)j(the)f(key)f(\002le)
+4243 y(authority)i(and)h(encryption)e(keys,)f(and)j(the)f(key)f(\002le)
 i(passwor)n(d.)p eop end
 %%Page: 59 65
 TeXDict begin 59 64 bop 0 0 a
