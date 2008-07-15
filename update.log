@@ -1,3 +1,18 @@
+Tue Jul 15 12:05:49 BST 2008 dgrisby
+====================================
+
+- Updates for 3.3 release.
+
+README.txt
+ReleaseNotes.txt
+THIS_IS_OMNIORBPY_3_2
+THIS_IS_OMNIORBPY_3_3
+configure
+configure.ac
+doc/tex/omniORBpy.tex
+mk/version.mk
+
+
 Thu Apr  3 10:03:08 BST 2008 dgrisby
 ====================================
 
