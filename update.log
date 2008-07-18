@@ -1,3 +1,12 @@
+Fri Jul 18 18:07:11 BST 2008 dgrisby
+====================================
+
+- Updated spec files. Thanks Dirk Siebnich.
+
+contrib/RPMs/omniORBpy.spec
+contrib/RPMs/omniORBpy_new.spec
+
+
 Tue Jul 15 12:21:12 BST 2008 dgrisby
 ====================================
 

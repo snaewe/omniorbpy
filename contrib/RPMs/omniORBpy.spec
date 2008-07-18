@@ -1,6 +1,6 @@
 Summary:  Python Language Mapping for omniORB
 Name:     omniORBpy
-Version:  3.2
+Version:  3.3
 Release:  1
 License:  GPL / LGPL
 Group:    System/Libraries
@@ -8,7 +8,7 @@ Source0:  %{name}-%{version}.tar.gz
 URL:      http://omniorb.sourceforge.net/
 Prefix:   /usr
 Prereq:   /sbin/ldconfig
-Requires: omniORB = 4.1.0
+Requires: omniORB = 4.1.3
 BuildRequires: omniORB-devel python
 Buildroot: %{_tmppath}/%{name}-%{version}-root
 

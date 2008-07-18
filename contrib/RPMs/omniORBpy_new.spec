@@ -2,16 +2,27 @@
 
 %define lib_name %{?mklibname:%mklibname %{_name} 3}%{!?mklibname:lib%{_name}3}
 
+%if "%{_vendor}" == "mandriva"
+%define py_sitedir %{_prefix}/lib*/python%{py_ver}/site-packages
+%endif
+%if "%{_vendor}" == "redhat"
+%define py_ver     %(python -c 'import sys;print(sys.version[0:3])')
+%define py_sitedir %{_prefix}/lib*/python%{py_ver}/site-packages
+%endif
+
 Summary:   Python Language Mapping for omniORB
 Name:      %{_name}
-Version:   3.2
+Version:   3.3
 Release:   1
 License:   GPL / LGPL
 Group:     System/Libraries
 Source0:   %{_name}-%{version}.tar.gz
 Prefix:    /usr
 URL:       http://omniorb.sourceforge.net/
-BuildRequires: libomniorb-devel python python-devel
+BuildRequires: gcc-c++
+BuildRequires: glibc-devel openssl-devel
+BuildRequires: libomniorb-devel
+BuildRequires: python python-devel
 Buildroot: %{_tmppath}/%{name}-%{version}-root
 
 %description
@@ -67,9 +78,6 @@ Obsoletes: omniORBpy-doc libomniorbpy-doc
 %description doc
 Developer documentation and examples.
 
-
-%define py_ver %(python -c 'import sys;print(sys.version[0:3])')
-
 %prep 
 
 %setup -n %{_name}-%{version}
@@ -90,7 +98,7 @@ Developer documentation and examples.
 
 # omit omniidl_be/__init__.py because it is a duplicate of the file
 # already provided by omniORB.
-rm -rf %{buildroot}%{_libdir}/python%{py_ver}/site-packages/omniidl_be/__init__.py*
+rm -rf %{buildroot}%{py_sitedir}/omniidl_be/__init__.py*
 
 
 %clean
@@ -106,23 +114,23 @@ rm -rf %{buildroot}%{_libdir}/python%{py_ver}/site-packages/omniidl_be/__init__.
 %defattr (-,root,root)
 %doc COPYING.LIB
 #%doc bugfixes*
-%{_libdir}/python%{py_ver}/site-packages/_omni*.so.*
-%{_libdir}/python%{py_ver}/site-packages/omniORB
+%{py_sitedir}/_omni*.so.*
+%{py_sitedir}/omniORB
 
 %files standard
 %defattr(-,root,root)
-%{_libdir}/python%{py_ver}/site-packages/*.py*
-%{_libdir}/python%{py_ver}/site-packages/omniORB.pth
-%{_libdir}/python%{py_ver}/site-packages/CosNaming
-%{_libdir}/python%{py_ver}/site-packages/CosNaming__POA
+%{py_sitedir}/*.py*
+%{py_sitedir}/omniORB.pth
+%{py_sitedir}/CosNaming
+%{py_sitedir}/CosNaming__POA
 
 %files -n %{lib_name}-devel
 %defattr(-,root,root)
 %doc README* update.log
 %{_includedir}/omniORBpy.h
 %{_includedir}/omniORB4/pydistdate.hh
-%{_libdir}/python%{py_ver}/site-packages/_omni*.so
-%{_libdir}/python%{py_ver}/site-packages/omniidl_be/python.py*
+%{py_sitedir}/_omni*.so
+%{py_sitedir}/omniidl_be/python.py*
 
 %files doc
 %defattr(-,root,root)
