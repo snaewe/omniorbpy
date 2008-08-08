@@ -926,17 +926,16 @@ endif
 
 ###################
 ifdef AIX
-ifndef Compiler_GCC
 
 IMPORT_CPPFLAGS += -D__aix__
-
 CMAKEDEPEND     += -D_AIX
 CXXMAKEDEPEND   += -D_AIX
+
+ifndef Compiler_GCC
+
 CDEBUGFLAGS      =
 CXXDEBUGFLAGS    =
-
 CXXOPTIONS	= -qstaticinline -qmaxmem=8192 -qlonglong -qlongdouble
-
 COPTIONS	= -qmaxmem=8192 -qlonglong -qlongdouble
 
 OMNITHREAD_POSIX_CPPFLAGS = -DNoNanoSleep -DPthreadDraftVersion=10
@@ -945,9 +944,42 @@ OMNITHREAD_LIB += -lpthread
 
 #SHAREDLIB_SUFFIX = so
 PythonSHAREDLIB_SUFFIX = so
-
 # (Not used on AIX)
 SharedLibraryPlatformLinkFlagsTemplate :=
+
+LD_SO_AIX_FLAGS := -G
+
+else	# ifndef Compiler_GCC
+
+# Name all static libraries with -ar.a suffix.
+LibPattern = lib%-ar.a
+LibDebugPattern = lib%-ar.a
+LibNoDebugPattern = lib%-ar.a
+LibSuffixPattern = %-ar.a
+LibSearchPattern = -l%-ar
+
+# Name all shared libraries with .a suffix
+LibSharedPattern = lib%.a
+LibSharedSuffixPattern = %.a
+LibSharedSearchPattern = -l%
+
+# OMNI thread stuff
+ThreadSystem = Posix
+OMNITHREAD_POSIX_CPPFLAGS = -DNoNanoSleep -DPthreadDraftVersion=10
+OMNITHREAD_CPPFLAGS = -D_REENTRANT -D_THREAD_SAFE
+OMNITHREAD_PLATFORM_LIB = -lpthreads
+OMNITHREAD_LIB = -lomnithread$(OMNITHREAD_MAJOR_VERSION)$(OMNITHREAD_MINOR_VERSION) $(OMNITHREAD_PLATFORM_LIB)
+
+# Shared library support stuff
+SHAREDLIB_SUFFIX   = a
+PythonSHAREDLIB_SUFFIX = so
+OMNIORB_DLL_NAME = $(patsubst %,$(LibSharedSearchPattern),\
+                   omniORB$(OMNIORB_MAJOR_VERSION)$(OMNIORB_MINOR_VERSION))
+OMNIORB_CODESETS_LIB = $(patsubst %,$(LibSharedSearchPattern),omniCodeSets$(OMNIORB_MAJOR_VERSION)$(OMNIORB_MINOR_VERSION))
+OMNIORB_CONNECTIONS_LIB = $(patsubst %,$(LibSharedSearchPattern),omniConnectionMgmt$(OMNIORB_MAJOR_VERSION)$(OMNIORB_MINOR_VERSION))
+
+
+endif	# ifndef Compiler_GCC ... else ...
 
 # Need to use the script 'ld_so_aix' to make Python modules on AIX.
 # For details see the file Misc/AIX-NOTES that is distributed with the Python
@@ -956,19 +988,18 @@ SharedLibraryPlatformLinkFlagsTemplate :=
 # The pythonX.Y/config directory only exists in Python v2.3+, so this solution
 # doesn't work for earlier versions of Python. (But omniORBpy did't work for
 # earlier versions of Python anyway.)
-PYCONFIGDIR := $(INSTALLPYTHONDIR)/../config
+LD_SO_AIX = $(PYPREFIX)/lib/python$(PYVERSION)/config/ld_so_aix
+PYTHONEXP = $(PYPREFIX)/lib/python$(PYVERSION)/config/python.exp
 
 define MakeCXXSharedLibrary
  $(ParseNameSpec); \
  soname=$(SharedLibrarySoNameTemplate); \
  set -x; \
  $(RM) $@; \
- PATH=$(PYCONFIGDIR):$$PATH \
-   ld_so_aix $(CXX) -bI:$(PYCONFIGDIR)/python.exp -G -o $@ \
+ $(LD_SO_AIX) $(CXX) -bI:$(PYTHONEXP) $(LD_SO_AIX_FLAGS) -o $@ \
    $(IMPORT_LIBRARY_FLAGS) $(filter-out $(LibSuffixPattern),$^) $$extralibs;
 endef
 
-endif	# compiler not gcc
 endif	# AIX
 
 ###################

@@ -32,6 +32,12 @@ ifdef Cygwin
 extralibs += -lomniORB4 -lomnithread -lpthread
 endif
 
+ifdef AIX
+ifdef Compiler_GCC
+extralibs += $(OMNITHREAD_LIB)
+endif
+endif
+
 #############################################################################
 #   Make rules for Autoconf builds                                          #
 #############################################################################

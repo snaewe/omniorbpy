@@ -1,3 +1,12 @@
+Fri Aug  8 14:46:32 BST 2008 dgrisby
+====================================
+
+- Makefile support for gcc on AIX. Thanks Floris Bruynooghe.
+
+mk/beforeauto.mk.in
+modules/connections/dir.mk
+
+
 Fri Jul 18 18:07:11 BST 2008 dgrisby
 ====================================
 
