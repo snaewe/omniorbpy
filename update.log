@@ -1,3 +1,12 @@
+Tue Sep 16 12:17:44 BST 2008 dgrisby
+====================================
+
+- Do not consider a list of ints and bools to be a sequence of
+  integers in to_any.
+
+python/omniORB/any.py
+
+
 Thu Aug 21 11:53:09 BST 2008 dgrisby
 ====================================
 

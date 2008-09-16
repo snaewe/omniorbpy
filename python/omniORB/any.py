@@ -156,7 +156,8 @@ def _to_tc_value(data):
             # Numeric. Try to find a numeric type suitable for the whole list
             min_v = max_v = 0
             for d in data:
-                if not (isinstance(d, IntType) or isinstance(d, LongType)):
+                if (not (isinstance(d, IntType) or isinstance(d, LongType)) or
+                    isinstance(d, BooleanType)):
                     break
                 if d < min_v: min_v = d
                 if d > max_v: max_v = d
