@@ -1,3 +1,11 @@
+Tue Sep 23 10:14:04 BST 2008 dgrisby
+====================================
+
+- Avoid illegal TypeCodes in to_any.
+
+python/omniORB/any.py
+
+
 Tue Sep 16 12:17:44 BST 2008 dgrisby
 ====================================
 

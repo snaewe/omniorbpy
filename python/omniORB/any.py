@@ -43,6 +43,7 @@ from types import *
 import omniORB
 import CORBA, tcInternal
 import random
+import threading
 
 __all__ = ["to_any", "from_any"]
 
@@ -52,6 +53,12 @@ __all__ = ["to_any", "from_any"]
 random.seed()
 _idbase  = "%08x" % random.randrange(0, 0x7fffffff)
 _idcount = 0
+_idlock  = threading.Lock()
+
+# TypeCode kinds that must not be used in struct / sequence members
+INVALID_MEMBER_KINDS = [ tcInternal.tv_null,
+                         tcInternal.tv_void,
+                         tcInternal.tv_except ]
 
 
 # Fudge things for Pythons without unicode / bool
@@ -210,13 +217,16 @@ def _to_tc_value(data):
         any_list = map(to_any, data)
 
         atc = any_list[0]._t
-        for a in any_list:
-            if not a._t.equivalent(atc):
-                break
-        else:
-            tc = tcInternal.createTypeCode((tcInternal.tv_sequence, atc._d, 0))
-            for i in range(len(any_list)):
-                any_list[i] = any_list[i]._v
+
+        if atc._k._v not in INVALID_MEMBER_KINDS:
+            for a in any_list:
+                if not a._t.equivalent(atc):
+                    break
+            else:
+                tc = tcInternal.createTypeCode((tcInternal.tv_sequence,
+                                                atc._d, 0))
+                for i in range(len(any_list)):
+                    any_list[i] = any_list[i]._v
             
         return tc, any_list
 
@@ -226,8 +236,14 @@ def _to_tc_value(data):
     elif isinstance(data, DictType):
         # Represent dictionaries as structs
         global _idcount
-        _idcount = _idcount + 1
-        id = "omni:%s:%08x" % (_idbase, _idcount)
+
+        _idlock.acquire()
+        try:
+            _idcount = _idcount + 1
+            id = "omni:%s:%08x" % (_idbase, _idcount)
+        finally:
+            _idlock.release()
+
         dl = [tcInternal.tv_struct, None, id, ""]
         ms = []
         svals = []
@@ -237,6 +253,11 @@ def _to_tc_value(data):
                 raise CORBA.BAD_PARAM(omniORB.BAD_PARAM_WrongPythonType,
                                       CORBA.COMPLETED_NO)
             t, v = _to_tc_value(v)
+
+            if t._k._v in INVALID_MEMBER_KINDS:
+                v = CORBA.Any(t,v)
+                t = CORBA.TC_any
+            
             ms.append(k)
             dl.append(k)
             dl.append(t._d)
