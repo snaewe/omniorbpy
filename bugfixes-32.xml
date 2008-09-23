@@ -8,7 +8,24 @@
 
 <buglist version="3.2">
 
-<bug id="2" date=""Thu Apr  3 10:03:08 BST 2008 user="dgrisby">
+<bug id="4" date="Tue Sep 23 10:14:04 BST 2008" user="dgrisby">
+  <summary>Invalid TypeCodes created by to_any</summary>
+  <text>
+  to_any would create invalid sequence and struct TypeCodes when
+  encountering Nones.
+  </text>
+  <listlink href="http://www.omniorb-support.com/pipermail/omniorb-list/2008-August/029667.html"/>
+</bug>
+
+<bug id="3" date="Tue Sep 16 12:17:44 BST 2008" user="dgrisby">
+  <summary>List containing mixed integers and bools mishandled in to_any</summary>
+  <text>
+  A list containing integers and bools would be considered a sequence
+  of integers, rather than a sequence of Anys.
+  </text>
+</bug>
+
+<bug id="2" date="Thu Apr  3 10:03:08 BST 2008" user="dgrisby">
   <summary>Leaks of some exception classes</summary>
   <reported>Luke Deller</reported>
   <text>
