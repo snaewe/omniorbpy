@@ -31,6 +31,11 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.2.2  2008/10/09 15:04:36  dgrisby
+// Python exceptions occurring during unmarshalling were not properly
+// handled. Exception state left set when at traceLevel 0 (thanks
+// Morarenko Kirill).
+//
 // Revision 1.1.2.1  2005/11/09 12:33:32  dgrisby
 // Support POA LocalObjects.
 //
@@ -418,6 +423,7 @@ Py_ServantActivator::incarnate(const PortableServer::ObjectId& oid,
       erepoId = PyObject_GetAttrString(evalue, (char*)"_NP_RepositoryId");
 
     if (!(erepoId && PyString_Check(erepoId))) {
+      PyErr_Clear();
       Py_XDECREF(erepoId);
       if (omniORB::trace(1)) {
 	{
@@ -590,6 +596,7 @@ Py_ServantLocator::preinvoke(const PortableServer::ObjectId& oid,
       erepoId = PyObject_GetAttrString(evalue, (char*)"_NP_RepositoryId");
 
     if (!(erepoId && PyString_Check(erepoId))) {
+      PyErr_Clear();
       Py_XDECREF(erepoId);
       if (omniORB::trace(1)) {
 	{

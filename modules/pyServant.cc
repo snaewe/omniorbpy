@@ -30,6 +30,11 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.4.11  2008/10/09 15:04:36  dgrisby
+// Python exceptions occurring during unmarshalling were not properly
+// handled. Exception state left set when at traceLevel 0 (thanks
+// Morarenko Kirill).
+//
 // Revision 1.1.4.10  2008/02/01 16:29:17  dgrisby
 // Error with implementation of operations with names clashing with
 // Python keywords.
@@ -438,8 +443,16 @@ Py_omniServant::_is_a(const char* logical_type_id)
     PyObject* pyisa = PyObject_CallMethod(omniPy::pyomniORBmodule,
 					  (char*)"static_is_a", (char*)"Os",
 					  pyskeleton_, logical_type_id);
-    if (!pyisa) PyErr_Print();
-    OMNIORB_ASSERT(pyisa && PyInt_Check(pyisa));
+    if (!pyisa) {
+      if (omniORB::trace(1))
+        PyErr_Print();
+      else
+        PyErr_Clear();
+
+      OMNIORB_THROW(UNKNOWN, UNKNOWN_PythonException, CORBA::COMPLETED_NO);
+    }
+
+    OMNIORB_ASSERT(PyInt_Check(pyisa));
 
     CORBA::Boolean isa = PyInt_AS_LONG(pyisa);
     Py_DECREF(pyisa);
@@ -583,6 +596,7 @@ Py_omniServant::remote_dispatch(Py_omniCallDescriptor* pycd)
       erepoId = PyObject_GetAttrString(evalue, (char*)"_NP_RepositoryId");
 
     if (!(erepoId && PyString_Check(erepoId))) {
+      PyErr_Clear();
       Py_XDECREF(erepoId);
       if (omniORB::trace(1)) {
 	{
@@ -751,6 +765,7 @@ Py_omniServant::local_dispatch(Py_omniCallDescriptor* pycd)
       erepoId = PyObject_GetAttrString(evalue, (char*)"_NP_RepositoryId");
 
     if (!(erepoId && PyString_Check(erepoId))) {
+      PyErr_Clear();
       Py_XDECREF(erepoId);
       if (omniORB::trace(1)) {
 	{

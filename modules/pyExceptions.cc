@@ -30,6 +30,11 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.4.9  2008/10/09 15:04:36  dgrisby
+// Python exceptions occurring during unmarshalling were not properly
+// handled. Exception state left set when at traceLevel 0 (thanks
+// Morarenko Kirill).
+//
 // Revision 1.1.4.8  2006/07/05 10:46:16  dgrisby
 // Dump exception tracebacks with traceExceptions, not traceLevel 10.
 //
@@ -213,6 +218,7 @@ omniPy::handlePythonException()
     erepoId = PyObject_GetAttrString(evalue, (char*)"_NP_RepositoryId");
 
   if (!(erepoId && PyString_Check(erepoId))) {
+    PyErr_Clear();
     Py_XDECREF(erepoId);
     if (omniORB::trace(1)) {
       {
@@ -438,13 +444,16 @@ PyUserException::operator<<=(cdrStream& stream)
 
   if (!exc_) {
     // Oh dear. Python exception constructor threw an exception.
-    if (omniORB::trace(25)) {
+    if (omniORB::trace(1)) {
       {
 	omniORB::logger l;
 	l << "Caught unexpected error trying to create an exception:\n";
       }
       PyErr_Print();
     }
+    else
+      PyErr_Clear();
+
     OMNIORB_THROW(INTERNAL, 0, CORBA::COMPLETED_MAYBE);
   }
 }

@@ -31,6 +31,11 @@
 #define _omnipy_h_
 
 // $Log$
+// Revision 1.3.2.14  2008/10/09 15:04:36  dgrisby
+// Python exceptions occurring during unmarshalling were not properly
+// handled. Exception state left set when at traceLevel 0 (thanks
+// Morarenko Kirill).
+//
 // Revision 1.3.2.13  2007/01/19 11:11:09  dgrisby
 // Avoid assertion failure if an unexpected C++ exception occurs during
 // an invocation.
@@ -549,7 +554,9 @@ public:
     CORBA::ULong tk = descriptorToTK(d_o);
 
     if (tk <= 33) { // tk_local_interface
-      return unmarshalPyObjectFns[tk](stream, d_o);
+      PyObject* r = unmarshalPyObjectFns[tk](stream, d_o);
+      if (!r) handlePythonException();
+      return r;
     }
     else if (tk == 0xffffffff) { // Indirection
       return unmarshalPyObjectIndirect(stream, d_o);
@@ -580,7 +587,7 @@ public:
 
     if (tk <= 33) { // tk_local_interface
       PyObject* r = copyArgumentFns[tk](d_o, a_o, compstatus);
-      OMNIORB_ASSERT(r);
+      if (!r) handlePythonException();
       return r;
     }
     else if (tk == 0xffffffff) { // Indirection

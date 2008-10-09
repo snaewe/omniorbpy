@@ -29,6 +29,11 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.4.9  2008/10/09 15:04:36  dgrisby
+// Python exceptions occurring during unmarshalling were not properly
+// handled. Exception state left set when at traceLevel 0 (thanks
+// Morarenko Kirill).
+//
 // Revision 1.1.4.8  2008/03/24 20:06:30  dgrisby
 // Memory leak in minor code stringification.
 //
@@ -269,6 +274,7 @@ omniPy::ensureOmniThread()
   if (!current) {
     omniORB::logs(1, "Unexpected exception calling threading.currentThread.");
     if (omniORB::trace(1)) PyErr_Print();
+    PyErr_Clear();
     return 0;
   }
 
@@ -288,6 +294,7 @@ omniPy::ensureOmniThread()
   if (!hook) {
     omniORB::logs(1, "Unexpected exception calling omniThreadHook.");
     if (omniORB::trace(1)) PyErr_Print();
+    PyErr_Clear();
   }
 
   Py_XDECREF(hook);
