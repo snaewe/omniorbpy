@@ -1,3 +1,16 @@
+Fri Mar 13 13:50:02 GMT 2009 dgrisby
+====================================
+
+- omnithread version number was out of sync.
+
+mk/version.mk
+
+- Bind orb.register_initial_reference. Thanks Wei Jiang.
+
+modules/pyORBFunc.cc
+python/omniORB/CORBA.py
+
+
 Thu Oct  9 16:02:23 BST 2008 dgrisby
 ====================================
 

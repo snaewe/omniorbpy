@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.4.5  2009/03/13 13:57:56  dgrisby
+// Bind orb.register_initial_reference. Thanks Wei Jiang.
+//
 // Revision 1.1.4.4  2008/04/03 09:05:26  dgrisby
 // Leaks of some exception classes. Thanks Luke Deller.
 //
@@ -136,6 +139,47 @@ extern "C" {
     }
     OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
     return PyString_FromString((char*)str);
+  }
+
+  static PyObject*
+  pyORB_register_initial_reference(PyObject* self, PyObject* args)
+  {
+    PyObject* pyorb;
+    char* identifier;
+    PyObject* pyobjref;
+
+    if (!PyArg_ParseTuple(args, (char*)"OsO", &pyorb, &identifier, &pyobjref))
+      return NULL;
+
+    CORBA::ORB_ptr orb = (CORBA::ORB_ptr)omniPy::getTwin(pyorb, ORB_TWIN);
+    OMNIORB_ASSERT(orb);
+
+    CORBA::Object_ptr objref;
+
+    if (pyobjref == Py_None) {
+      objref = CORBA::Object::_nil();
+    }
+    else {
+      objref = (CORBA::Object_ptr)omniPy::getTwin(pyobjref, OBJREF_TWIN);
+    }
+    RAISE_PY_BAD_PARAM_IF(!objref, BAD_PARAM_WrongPythonType);
+
+    try {
+      omniPy::InterpreterUnlocker _u;
+      orb->register_initial_reference(identifier, objref);
+    }
+    catch (CORBA::ORB::InvalidName& ex) {
+      PyObject* excc = PyObject_GetAttrString(pyorb, (char*)"InvalidName");
+      OMNIORB_ASSERT(excc);
+      PyObject* exci = PyEval_CallObject(excc, omniPy::pyEmptyTuple);
+      PyErr_SetObject(excc, exci);
+      Py_DECREF(exci);
+      return 0;
+    }
+    OMNIPY_CATCH_AND_HANDLE_SYSTEM_EXCEPTIONS
+
+    Py_INCREF(Py_None);
+    return Py_None;
   }
 
   static PyObject*
@@ -340,6 +384,8 @@ extern "C" {
   static PyMethodDef pyORB_methods[] = {
     {(char*)"string_to_object", pyORB_string_to_object,          METH_VARARGS},
     {(char*)"object_to_string", pyORB_object_to_string,          METH_VARARGS},
+    {(char*)"register_initial_reference",
+                                pyORB_register_initial_reference,METH_VARARGS},
     {(char*)"list_initial_services",
                                 pyORB_list_initial_services,     METH_VARARGS},
     {(char*)"resolve_initial_references",
