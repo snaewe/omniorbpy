@@ -1,3 +1,15 @@
+Tue May  5 15:25:53 BST 2009 dgrisby
+====================================
+
+- Remove unused variable.
+
+modules/omnipy.cc
+
+- Tolerate unpickled enum items.
+
+modules/pyMarshal.cc
+
+
 Fri Mar 13 13:50:02 GMT 2009 dgrisby
 ====================================
 
