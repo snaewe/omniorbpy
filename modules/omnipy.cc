@@ -30,6 +30,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.4.20  2009/05/05 14:26:21  dgrisby
+// Remove unused variable.
+//
 // Revision 1.1.4.19  2007/09/18 20:03:34  dgrisby
 // Refcount error if cdrUnmarshal raised a Python exception.
 //
@@ -717,7 +720,7 @@ extern "C" {
     //  exc_desc is a dictionary containing a mapping from repoIds to
     //  tuples of the form (exception class, marshal desc., param count)
 
-    PyObject *pyobjref, *in_d, *out_d, *exc_d, *ctxt_d, *op_args, *result;
+    PyObject *pyobjref, *in_d, *out_d, *exc_d, *ctxt_d, *op_args;
     char*  op;
     size_t op_len;
 
