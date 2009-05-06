@@ -3,6 +3,7 @@
 // pyTypeCode.cc              Created on: 1999/07/19
 //                            Author    : Duncan Grisby (dpg1)
 //
+//    Copyright (C) 2003-2007 Apasphere Ltd
 //    Copyright (C) 1999 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORBpy library
@@ -29,6 +30,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.4.10  2009/05/06 16:50:27  dgrisby
+// Updated copyright.
+//
 // Revision 1.1.4.9  2007/09/18 20:04:14  dgrisby
 // Set _parent_id on enums generated from TypeCodes.
 //

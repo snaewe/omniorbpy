@@ -3,6 +3,7 @@
 // pyMarshal.cc               Created on: 1999/07/05
 //                            Author    : Duncan Grisby (dpg1)
 //
+//    Copyright (C) 2002-2008 Apasphere Ltd
 //    Copyright (C) 1999 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORBpy library
@@ -29,6 +30,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.4.14  2009/05/06 16:50:30  dgrisby
+// Updated copyright.
+//
 // Revision 1.1.4.13  2009/05/05 14:26:54  dgrisby
 // Tolerate unpickled enum items.
 //

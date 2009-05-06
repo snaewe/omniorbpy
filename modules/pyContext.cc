@@ -3,6 +3,7 @@
 // pyContext.cc               Created on: 2002/01/17
 //                            Author    : Duncan Grisby (dpg1)
 //
+//    Copyright (C) 2003-2005 Apasphere Ltd
 //    Copyright (C) 2002 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORBpy library
@@ -29,6 +30,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.4.4  2009/05/06 16:50:30  dgrisby
+// Updated copyright.
+//
 // Revision 1.1.4.3  2005/06/24 17:36:08  dgrisby
 // Support for receiving valuetypes inside Anys; relax requirement for
 // old style classes in a lot of places.

@@ -3,6 +3,7 @@
 // pyomniFunc.cc              Created on: 2000/06/07
 //                            Author    : Duncan Grisby (dpg1)
 //
+//    Copyright (C) 2002-2008 Apasphere Ltd
 //    Copyright (C) 2000 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORBpy library
@@ -29,6 +30,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.4.10  2009/05/06 16:50:26  dgrisby
+// Updated copyright.
+//
 // Revision 1.1.4.9  2008/10/09 15:04:36  dgrisby
 // Python exceptions occurring during unmarshalling were not properly
 // handled. Exception state left set when at traceLevel 0 (thanks

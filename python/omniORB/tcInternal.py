@@ -3,6 +3,7 @@
 # tcInternal.py              Created on: 1999/06/24
 #                            Author    : Duncan Grisby (dpg1)
 #
+#    Copyright (C) 2002-2007 Apasphere Ltd
 #    Copyright (C) 1999 AT&T Laboratories Cambridge
 #
 #    This file is part of the omniORBpy library
@@ -30,6 +31,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.13.2.12  2009/05/06 16:50:22  dgrisby
+# Updated copyright.
+#
 # Revision 1.13.2.11  2007/06/06 17:59:01  dgrisby
 # Allow enums to be used directly in CORBA.TypeCode().
 #

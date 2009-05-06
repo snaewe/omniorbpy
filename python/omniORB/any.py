@@ -3,7 +3,7 @@
 # any.py                     Created on: 2002/09/16
 #                            Author    : Duncan Grisby (dgrisby)
 #
-#    Copyright (C) 2002 Apasphere Ltd
+#    Copyright (C) 2002-2008 Apasphere Ltd
 #
 #    This file is part of the omniORBpy library
 #

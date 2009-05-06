@@ -3,6 +3,7 @@
 # python.py                 Created on: 1999/10/29
 #			    Author    : Duncan Grisby (dpg1)
 #
+#    Copyright (C) 2002-2008 Apasphere Ltd
 #    Copyright (C) 1999 AT&T Laboratories Cambridge
 #
 #  This file is part of omniidl.
@@ -28,6 +29,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.33.2.15  2009/05/06 16:50:25  dgrisby
+# Updated copyright.
+#
 # Revision 1.33.2.14  2008/02/01 16:29:17  dgrisby
 # Error with implementation of operations with names clashing with
 # Python keywords.

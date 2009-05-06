@@ -3,6 +3,7 @@
 // pyPOAFunc.cc               Created on: 2000/02/04
 //                            Author    : Duncan Grisby (dpg1)
 //
+//    Copyright (C) 2003-2008 Apasphere Ltd
 //    Copyright (C) 1999 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORBpy library
@@ -29,6 +30,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.4.7  2009/05/06 16:50:28  dgrisby
+// Updated copyright.
+//
 // Revision 1.1.4.6  2008/04/03 09:05:26  dgrisby
 // Leaks of some exception classes. Thanks Luke Deller.
 //

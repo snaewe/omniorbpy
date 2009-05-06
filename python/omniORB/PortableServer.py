@@ -3,6 +3,7 @@
 # PortableServer.py          Created on: 1999/09/22
 #                            Author    : Duncan Grisby (dpg1)
 #
+#    Copyright (C) 2005-2006 Apasphere Ltd
 #    Copyright (C) 1999 AT&T Laboratories Cambridge
 #
 #    This file is part of the omniORBpy library
@@ -30,6 +31,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.9.2.5  2009/05/06 16:50:24  dgrisby
+# Updated copyright.
+#
 # Revision 1.9.2.4  2006/01/19 17:28:44  dgrisby
 # Merge from omnipy2_develop.
 #

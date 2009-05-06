@@ -3,7 +3,7 @@
 // pyInterceptors.cc          Created on: 2003/05/27
 //                            Author    : Duncan Grisby (dgrisby)
 //
-//    Copyright (C) 2003 Apasphere Ltd.
+//    Copyright (C) 2003-2006 Apasphere Ltd.
 //
 //    This file is part of the omniORBpy library
 //
@@ -28,6 +28,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.4.4  2009/05/06 16:50:30  dgrisby
+// Updated copyright.
+//
 // Revision 1.1.4.3  2006/06/05 11:51:00  dgrisby
 // Track ORB core interceptor change.
 //

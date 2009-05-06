@@ -3,6 +3,7 @@
 // omnipy.h                   Created on: 2000/02/24
 //                            Author    : Duncan Grisby (dpg1)
 //
+//    Copyright (C) 2002-2008 Apasphere Ltd
 //    Copyright (C) 2000 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORBpy library
@@ -31,6 +32,9 @@
 #define _omnipy_h_
 
 // $Log$
+// Revision 1.3.2.15  2009/05/06 16:50:30  dgrisby
+// Updated copyright.
+//
 // Revision 1.3.2.14  2008/10/09 15:04:36  dgrisby
 // Python exceptions occurring during unmarshalling were not properly
 // handled. Exception state left set when at traceLevel 0 (thanks

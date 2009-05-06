@@ -3,7 +3,7 @@
 # BiDirPolicy.py             Created on: 2003/04/25
 #                            Author    : Duncan Grisby (dgrisby)
 #
-#    Copyright (C) 2003 Apasphere Ltd.
+#    Copyright (C) 2003-2005 Apasphere Ltd.
 #
 #    This file is part of the omniORBpy library
 #
@@ -28,6 +28,9 @@
 #    Definitions for BiDirPolicy module
 
 # $Log$
+# Revision 1.1.4.2  2009/05/06 16:50:25  dgrisby
+# Updated copyright.
+#
 # Revision 1.1.4.1  2005/01/07 00:22:34  dgrisby
 # Big merge from omnipy2_develop.
 #

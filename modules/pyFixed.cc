@@ -3,6 +3,7 @@
 // pyFixed.cc                 Created on: 2001/03/30
 //                            Author    : Duncan Grisby (dpg1)
 //
+//    Copyright (C) 2003-2005 Apasphere Ltd
 //    Copyright (C) 2001 AT&T Laboratories Cambridge
 //
 //    This file is part of the omniORBpy library
@@ -29,6 +30,9 @@
 
 // $Id$
 // $Log$
+// Revision 1.1.4.3  2009/05/06 16:50:30  dgrisby
+// Updated copyright.
+//
 // Revision 1.1.4.2  2005/01/07 00:22:32  dgrisby
 // Big merge from omnipy2_develop.
 //

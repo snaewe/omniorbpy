@@ -3,7 +3,7 @@
 // pyAbstractIntf.cc          Created on: 2003/05/21
 //                            Author    : Duncan Grisby (dgrisby)
 //
-//    Copyright (C) 2003 Apasphere Ltd.
+//    Copyright (C) 2003-2005 Apasphere Ltd.
 //
 //    This file is part of the omniORBpy library
 //
@@ -28,6 +28,9 @@
 //    Abstract interface support
 
 // $Log$
+// Revision 1.1.2.3  2009/05/06 16:50:30  dgrisby
+// Updated copyright.
+//
 // Revision 1.1.2.2  2005/06/24 17:36:08  dgrisby
 // Support for receiving valuetypes inside Anys; relax requirement for
 // old style classes in a lot of places.
