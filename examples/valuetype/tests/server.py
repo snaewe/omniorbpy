@@ -133,6 +133,18 @@ class Test_i (ValueTest__POA.Test):
         else:
             print "op9: av is not bv"
 
+    def op10(self, e):
+        print "op10 e:", e
+
+    def op11(self, e1, e2):
+        print "op11 e1:", e1, id(e1)
+        print "op11 e2:", e2, id(e2)
+
+    def op12(self, c):
+        print "op12 c :", c
+        if c is not None:
+            print "op12 e1:", c.e1, id(c.e1)
+            print "op12 e2:", c.e2, id(c.e2)
 
 
 def main(args):

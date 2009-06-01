@@ -1,3 +1,13 @@
+Mon Jun  1 12:10:39 BST 2009 dgrisby
+====================================
+
+- Add somes tests for empty valuetypes.
+
+examples/valuetype/tests/client.py
+examples/valuetype/tests/server.py
+examples/valuetype/tests/value1.idl
+
+
 Wed May  6 17:49:47 BST 2009 dgrisby
 ====================================
 

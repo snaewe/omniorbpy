@@ -22,6 +22,12 @@ module ValueTest {
 
   interface Four : Abs {};
 
+  valuetype Empty {};
+  valuetype Container {
+    public Empty e1;
+    public Empty e2;
+  };
+  
   interface Test {
     void show(in string s);
 
@@ -41,5 +47,9 @@ module ValueTest {
     void op7(in any a, in any b);
     void op8(in any a, in One b);
     void op9(in One a, in any b);
+
+    void op10(in Empty e);
+    void op11(in Empty e1, in Empty e2);
+    void op12(in Container c);
   };
 };

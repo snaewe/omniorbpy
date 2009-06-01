@@ -155,6 +155,29 @@ def main(args):
     obj.show("Same derived value as value and in any")
     obj.op9(v7, a2)
 
+    obj.show("Empty value")
+    e1 = ValueTest.Empty()
+    e2 = ValueTest.Empty()
+    obj.op10(e1)
+
+    obj.show("Different empty values")
+    obj.op11(e1, e2)
+
+    obj.show("Same empty values")
+    obj.op11(e1, e1)
+
+    obj.show("Empty value, None")
+    obj.op11(e1, None)
+
+    obj.show("None, empty value")
+    obj.op11(None, e1)
+
+    obj.show("None, None")
+    obj.op11(None, None)
+
+    obj.show("Container of empty values")
+    c1 = ValueTest.Container(e1, e2)
+    obj.op12(c1)
 
     orb.destroy()
 
