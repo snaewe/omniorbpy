@@ -31,6 +31,9 @@
 
 # $Id$
 # $Log$
+# Revision 1.30.2.24  2009/06/18 09:13:47  dgrisby
+# Track change in Python 2.6's threading module. Thanks Luke Deller.
+#
 # Revision 1.30.2.23  2009/05/06 16:50:23  dgrisby
 # Updated copyright.
 #
@@ -998,7 +1001,10 @@ class WorkerThread(threading.Thread):
     def __init__(self):
         id = _thr_id()
         _thr_init(self, name="omniORB-%d" % id)
-        self._Thread__started = 1
+        if hasattr(self._Thread__started, 'set'):
+            self._Thread__started.set()
+        else:
+            self._Thread__started = 1
         self.id = id
         _thr_acq()
         if _thr_act.has_key(id):

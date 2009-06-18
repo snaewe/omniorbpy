@@ -1,3 +1,11 @@
+Thu Jun 18 10:12:59 BST 2009 dgrisby
+====================================
+
+- Track change in Python 2.6's threading module. Thanks Luke Deller.
+
+python/omniORB/__init__.py
+
+
 Thu Jun 18 10:04:34 BST 2009 dgrisby
 ====================================
 
