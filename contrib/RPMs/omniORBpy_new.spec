@@ -2,17 +2,13 @@
 
 %define lib_name %{?mklibname:%mklibname %{_name} 3}%{!?mklibname:lib%{_name}3}
 
-%if "%{_vendor}" == "mandriva"
-%define py_sitedir %{_prefix}/lib*/python%{py_ver}/site-packages
-%endif
-%if "%{_vendor}" == "redhat"
-%define py_ver     %(python -c 'import sys;print(sys.version[0:3])')
-%define py_sitedir %{_prefix}/lib*/python%{py_ver}/site-packages
-%endif
+%{!?py_ver: %define py_ver %(python -c "import sys;print(sys.version[0:3])")}
+%{!?py_sitedir: %define py_sitedir %(python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(0,0,'%{_prefix}')")}
+%{!?py_sitearch: %define py_sitearch %(python -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1,0,'%{_prefix}')")}
 
 Summary:   Python Language Mapping for omniORB
 Name:      %{_name}
-Version:   3.3
+Version:   3.4
 Release:   1
 License:   GPL / LGPL
 Group:     System/Libraries
@@ -93,8 +89,13 @@ Developer documentation and examples.
 
 %install
 [ -z %{buildroot} ] || rm -rf %{buildroot}
+mkdir %{buildroot}
 
-%{?makeinstall_std:%makeinstall_std}%{!?makeinstall_std:make DESTDIR=%{buildroot} install}
+%if "%{_vendor}" == "suse"
+%{?makeinstall:%makeinstall}%{!?makeinstall:make DESTDIR=%{buildroot} install}
+%else
+%{?make:%make}%{!?make:make} install DESTDIR=%{buildroot}
+%endif
 
 # omit omniidl_be/__init__.py because it is a duplicate of the file
 # already provided by omniORB.
@@ -104,9 +105,11 @@ rm -rf %{buildroot}%{py_sitedir}/omniidl_be/__init__.py*
 %clean
 [ -z %{buildroot} ] || rm -rf %{buildroot}
 
-%post -n %{lib_name} -p /sbin/ldconfig
+%post -n %{lib_name}
+/sbin/ldconfig
 
-%postun -n %{lib_name} -p /sbin/ldconfig
+%postun -n %{lib_name}
+/sbin/ldconfig
 
 
 # main package includes libraries and servers
@@ -114,7 +117,7 @@ rm -rf %{buildroot}%{py_sitedir}/omniidl_be/__init__.py*
 %defattr (-,root,root)
 %doc COPYING.LIB
 #%doc bugfixes*
-%{py_sitedir}/_omni*.so.*
+%{py_sitearch}/_omni*.so*
 %{py_sitedir}/omniORB
 
 %files standard
@@ -129,7 +132,6 @@ rm -rf %{buildroot}%{py_sitedir}/omniidl_be/__init__.py*
 %doc README* update.log
 %{_includedir}/omniORBpy.h
 %{_includedir}/omniORB4/pydistdate.hh
-%{py_sitedir}/_omni*.so
 %{py_sitedir}/omniidl_be/python.py*
 
 %files doc

@@ -1,3 +1,15 @@
+Thu Jun 18 10:04:34 BST 2009 dgrisby
+====================================
+
+- Suppress a compiler warning.
+
+modules/pyServant.cc
+
+- New spec file from Dirk Siebnich.
+
+contrib/RPMs/omniORBpy_new.spec
+
+
 Thu Jun 18 09:50:48 BST 2009 dgrisby
 ====================================
 
