@@ -1,3 +1,11 @@
+Thu Jun 18 09:50:48 BST 2009 dgrisby
+====================================
+
+- HPUX build change.
+
+mk/beforeauto.mk.in
+
+
 Mon Jun  1 12:10:39 BST 2009 dgrisby
 ====================================
 
