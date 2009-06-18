@@ -31,6 +31,9 @@
 // $Id$
 
 // $Log$
+// Revision 1.1.4.13  2009/06/18 09:05:20  dgrisby
+// Suppress a compiler warning.
+//
 // Revision 1.1.4.12  2009/05/06 16:50:28  dgrisby
 // Updated copyright.
 //
@@ -385,6 +388,7 @@ Py_omniServant::_default_POA()
       omniPy::handlePythonException();
     }
   }
+  return 0;
 }
 
 CORBA::Boolean
