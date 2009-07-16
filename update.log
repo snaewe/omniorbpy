@@ -1,3 +1,20 @@
+Thu Jul 16 14:22:56 BST 2009 dgrisby
+====================================
+
+- Updates for omniORBpy 3.4.
+
+README.txt
+ReleaseNotes.txt
+THIS_IS_OMNIORBPY_3_3
+THIS_IS_OMNIORBPY_3_4
+bugfixes-33.xml
+configure
+configure.ac
+update.log
+contrib/RPMs/omniORBpy.spec
+mk/version.mk
+
+
 Thu Jun 18 10:12:59 BST 2009 dgrisby
 ====================================
 
